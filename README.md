@@ -136,8 +136,6 @@ A typical repository structure might look like this:
 └── README.md
 ```
 
-# ManuscriptPrep
-
 ## Installation
 
 ### 1. Install Ollama
@@ -148,3 +146,147 @@ On Linux, follow the standard Ollama installation instructions. Once installed, 
 
 ```bash
 ollama --version
+```
+
+### 2. Install Python
+
+Python 3.10+ is recommended.
+
+Check your version:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Install the Python dependencies:
+
+```bash
+pip install rich
+```
+
+Depending on which PDF preprocessing path you use, you may also want:
+
+```bash
+pip install pymupdf pdfplumber
+```
+
+If you use only shell tools like pdftotext, then rich may be the only required Python dependency for the orchestrator TUI.
+
+---
+
+### 4. Install PDF extraction tools
+
+*Option A*: `pdftotext`
+
+Recommended for text-based PDFs.
+
+Fedora:
+
+```bash
+sudo dnf install poppler-utils
+```
+
+Ubuntu/Debian:
+
+```bash
+sudo apt install poppler-utils
+```
+
+Verify:
+
+```bash
+pdftotext -v
+```
+
+*OptionB: OCR Tools*
+Only needed if the PDF is image-based or scanned.
+
+Fedora:
+
+```bash
+sudo dnf install tesseract ocrmypdf
+```
+
+Ubuntu/Debian:
+
+```bash
+sudo apt install tesseract-ocr ocrmypdf
+```
+
+---
+
+### 5.  Install Open WebUI (optional)
+
+If you want an interactive browser UI for Ollama:
+
+```bash
+docker run -d \
+  -p 3000:8080 \
+  --add-host=host.docker.internal:host-gateway \
+  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
+  -v open-webui:/app/backend/data \
+  --name open-webui \
+  --restart always \
+  ghcr.io/open-webui/open-webui:main
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+
+If Open WebUI is running on a different machine from Ollama, point OLLAMA_BASE_URL to your Ollama host.
+
+---
+
+## Model Design
+This project uses four separate models, each with a focused responsibility.
+
+---
+
+'manuscriptprep-structure'
+
+Purpose:
+
+- extract chapter titles
+- extract part titles
+- identify real scene breaks
+- ignore page numbers and metadata
+
+Expected output:
+
+```json
+{
+  "chapters": [],
+  "parts": [],
+  "scene_breaks": [],
+  "status": ""
+}
+```
+
+---
+
+'manuscriptprep-dialogue'
+
+Purpose:
+
+- determine POV
+- determine whether dialogue is present
+- determine whether internal thought is present
+- extract explicitly attributed speakers
+- identify whether unattributed dialogue exists
+
+Expected output:
+
+```json
+{
+  "pov": "",
+  "dialogue": false,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [],
+  "unattributed_dialogue_present": false
+}
+```
