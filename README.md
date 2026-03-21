@@ -1,6 +1,6 @@
 # ManuscriptPrep
 
-![Alt text](manuscript_tui.png?raw=true "Orchestrator TUI Screenshot")
+![Alt text](orchestrator_tui.png?raw=true "Orchestrator TUI Screenshot")
 
 A local, multi-pass manuscript analysis stack for fiction manuscripts using Ollama and custom Modelfiles.
 
