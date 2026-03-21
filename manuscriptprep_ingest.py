@@ -24,9 +24,9 @@ Optional:
       --input source/book.pdf \
       --workdir work \
       --title "Treasure Island" \
-      --chunk-words 1800 \
-      --min-chunk-words 1200 \
-      --max-chunk-words 2200 \
+      --chunk-words 1200 \
+      --min-chunk-words 800 \
+      --max-chunk-words 1500 \
       --strip-front-matter \
       --strip-toc
 
@@ -544,6 +544,9 @@ def chunk_clean_text(
         "chunk_count": len(chunks),
         "total_chunk_words": sum(c.word_count for c in chunks),
         "avg_chunk_words": round(sum(c.word_count for c in chunks) / max(len(chunks), 1), 2),
+        "target_chunk_words": target_chunk_words,
+        "min_chunk_words": min_chunk_words,
+        "max_chunk_words": max_chunk_words,
     }
     return chunks, chunk_stats
 
@@ -552,8 +555,13 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="End-to-end ingest pipeline for ManuscriptPrep")
     parser.add_argument("--input", type=Path, required=True, help="Source PDF path")
     parser.add_argument("--workdir", type=Path, required=True, help="Workspace directory")
-    parser.add_argument("--title", required=True, help="Book title, used for chunks/<book_slug>/")
-    parser.add_argument("--chunk-words", type=int, default=1800, help="Target chunk size in words")
+    parser.add_argument("--title", required=True, help="Book title, used for book_slug subdirectories")
+    parser.add_argument(
+        "--chunk-words",
+        type=int,
+        default=1800,
+        help="Target chunk size in words. Reduce this if the orchestrator is timing out.",
+    )
     parser.add_argument("--min-chunk-words", type=int, default=1200, help="Minimum chunk size in words")
     parser.add_argument("--max-chunk-words", type=int, default=2200, help="Maximum chunk size in words")
     parser.add_argument("--force-ocr", action="store_true", help="Force OCR extraction path")
@@ -570,20 +578,29 @@ def main() -> int:
         print(f"Input PDF does not exist: {input_pdf}", file=sys.stderr)
         return 1
 
+    if args.min_chunk_words > args.chunk_words or args.chunk_words > args.max_chunk_words:
+        print(
+            "Chunk sizes must satisfy: min_chunk_words <= chunk_words <= max_chunk_words",
+            file=sys.stderr,
+        )
+        return 1
+
     workdir = args.workdir
+    book_slug = slugify(args.title)
+
     source_dir = workdir / "source"
-    extracted_dir = workdir / "extracted"
-    cleaned_dir = workdir / "cleaned"
+    extracted_dir = workdir / "extracted" / book_slug
+    cleaned_dir = workdir / "cleaned" / book_slug
     chunks_dir = workdir / "chunks"
-    manifests_dir = workdir / "manifests"
+    manifests_dir = workdir / "manifests" / book_slug
     logs_dir = workdir / "logs"
-    tmp_dir = workdir / "tmp"
+    tmp_dir = workdir / "tmp" / book_slug
 
     for d in [source_dir, extracted_dir, cleaned_dir, chunks_dir, manifests_dir, logs_dir, tmp_dir]:
         d.mkdir(parents=True, exist_ok=True)
 
     logger = Logger(logs_dir / "ingest.log")
-    logger.log("Starting ManuscriptPrep ingest")
+    logger.log(f"Starting ManuscriptPrep ingest for title='{args.title}' slug='{book_slug}'")
 
     workspace_pdf = source_dir / input_pdf.name
     if workspace_pdf.resolve() != input_pdf.resolve():
@@ -625,15 +642,19 @@ def main() -> int:
         logger=logger,
     )
 
-    book_slug = slugify(args.title)
-
     chunk_manifest = {
         "source_pdf": str(workspace_pdf),
         "book_title": args.title,
         "book_slug": book_slug,
+        "raw_text": str(raw_txt_path),
         "clean_text": str(clean_txt_path),
         "chunk_dir": str(chunks_dir / book_slug),
         "chunk_count": len(chunks),
+        "chunk_settings": {
+            "target_chunk_words": args.chunk_words,
+            "min_chunk_words": args.min_chunk_words,
+            "max_chunk_words": args.max_chunk_words,
+        },
         "chunks": [asdict(c) for c in chunks],
     }
 
@@ -642,6 +663,12 @@ def main() -> int:
         "source_pdf": str(workspace_pdf),
         "book_title": args.title,
         "book_slug": book_slug,
+        "paths": {
+            "raw_text": str(raw_txt_path),
+            "raw_ocr_text": str(raw_ocr_txt_path) if extraction_info.get("ocr_used") else None,
+            "clean_text": str(clean_txt_path),
+            "chunk_dir": str(chunks_dir / book_slug),
+        },
         "classification": asdict(classification),
         "extraction": extraction_info,
         "cleaning": cleaning_stats,
