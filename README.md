@@ -1,5 +1,7 @@
 # ManuscriptPrep
 
+![Alt text](manuscript_tui.png?raw=true "Orchestrator TUI Screenshot")
+
 A local, multi-pass manuscript analysis stack for fiction manuscripts using Ollama and custom Modelfiles.
 
 This project is designed for **audiobook preparation** and **editorial review**. It processes long-form fiction conservatively and structurally, with a focus on:
@@ -942,7 +944,7 @@ The token speed display helps distinguish between:
 
 ---
 
-### Notes on Token Speed
+#### Notes on Token Speed
 
 Ollama does not reliably expose the true backend evaluation tokens/sec through normal streamed stdout.
 
@@ -961,7 +963,189 @@ So the token speed shown in the TUI should be treated as:
 
 ---
 
-### Recommended Invocation
+### Live TUI Monitoring
+
+The TUI orchestrator provides a live terminal dashboard while the pipeline is running.
+
+The **Pipeline Status** panel shows:
+
+- current chunk
+- current pass
+- current status
+- current step
+- elapsed time
+- overall progress
+- retry count
+- token speed
+- age of last stdout line
+- age of last stderr line
+
+This makes it much easier to tell whether the system is:
+
+- actively generating output
+- waiting for model output
+- parsing JSON
+- writing files
+- retrying after failure
+- stalled long enough to trigger a timeout
+
+---
+
+### Real-Time Per-Pass Status Updates
+
+The orchestrator updates the TUI during active processing, not just between chunks.
+
+Typical steps shown in the UI include:
+
+- loading excerpt
+- launching model
+- sending prompt to model
+- streaming model stdout
+- streaming model stderr
+- waiting for model output
+- writing raw output
+- parsing JSON
+- writing parsed JSON
+- building dossier input
+- completed pass
+
+This gives a live view of what both the orchestrator and the model are doing.
+
+---
+
+### Failure Summary
+
+At the end of a run, the orchestrator records a failure summary.
+
+This includes:
+
+- total chunks discovered
+- chunks completed
+- chunks failed
+- failed chunk names
+- failure messages
+
+This makes it easier to assess the overall health of the run and identify which chunks need to be rerun or inspected.
+
+---
+
+### Idle Timeout Detection
+
+One common problem with local model pipelines is that a subprocess can appear to hang indefinitely without actually exiting.
+
+The updated orchestrator detects this condition using an idle timeout.
+
+If a pass produces no stdout or stderr for a configurable number of seconds, the orchestrator treats the pass as stalled:
+
+- the Ollama subprocess is terminated
+- the event is logged
+- the pass may be retried
+- if retries are exhausted, the chunk is marked failed
+
+Example:
+
+```bash
+python manuscriptprep_orchestrator_tui.py \
+  --input-dir chunks \
+  --output-dir out \
+  --idle-timeout 90
+```
+
+This tells the orchestrator to treat 90 seconds of silence as a stall.
+
+---
+
+### Hard Timeout Detection
+
+In addition to idle timeout detection, the orchestrator also supports a hard timeout for each pass.
+
+If a pass runs longer than the configured maximum wall-clock time, the orchestrator will:
+
+- terminate the subprocess
+- log the timeout
+- retry if configured
+- fail the chunk if retries are exhausted
+
+Example:
+
+```bash
+python manuscriptprep_orchestrator_tui.py \
+  --input-dir chunks \
+  --output-dir out \
+  --hard-timeout 600
+```
+
+This caps any single pass at 10 minutes.
+
+---
+
+### Kill-and-Retry Behavior
+
+When either an idle timeout or hard timeout occurs, the orchestrator does not simply wait forever.
+
+Instead it:
+
+- detects the timeout
+- kills the running Ollama subprocess
+- logs the timeout event
+- retries the pass if retries remain
+- otherwise fails or skips the chunk according to policy
+
+This is a major improvement over earlier versions that could appear to hang indefinitely.
+
+---
+
+### Last Stdout / Stderr Age
+
+The TUI also displays:
+
+- age of `last stdout` output
+- age of `last stderr` output
+
+These fields are especially useful when diagnosing stalls.
+
+For example:
+
+- a growing `Last stdout` age usually means the model has gone silent
+- a very old `Last stderr` age with no progress may indicate a silent hang
+- a constantly resetting `Last stdout` age suggests active streaming
+
+This makes it easier to distinguish between:
+
+- a slow pass
+- a quiet pass
+- a stalled pass
+
+---
+
+### Natural Chunk Sorting
+
+The orchestrator now sorts chunk files in natural numeric order.
+
+That means:
+
+```text
+chunk_1.txt
+chunk_2.txt
+chunk_3.txt
+...
+chunk_10.txt
+```
+
+instead of lexicographic ordering like:
+
+```text
+chunk_1.txt
+chunk_10.txt
+chunk_11.txt
+chunk_2.txt
+```
+
+This makes progress reporting easier to understand and keeps the run aligned with the manuscript’s actual order.
+
+---
+
+## Recommended Invocation
 
 A good default command for production-style runs is:
 
@@ -971,7 +1155,9 @@ python manuscriptprep_orchestrator_tui.py \
   --input-dir chunks \
   --output-dir out \
   --retries 1 \
-  --on-failure skip
+  --on-failure skip \
+  --idle-timeout 90 \
+  --hard-timeout 600
 ```
 
 This gives you:
@@ -979,8 +1165,26 @@ This gives you:
 - live TUI monitoring
 - structured JSONL logs
 - retry protection
-- per-chunk error tracking
+- per-chunk error files
+- idle stall detection
+- hard timeout protection
 - resilient long-run behavior
+
+---
+
+### Why These Features Matter
+
+Local LLM pipelines often fail in subtle ways:
+
+- visible reasoning loops
+- partial JSON output
+- long silent stalls
+- no clear indication of whether the model is still active
+- awkward recovery when one chunk fails partway through a book
+
+The updated orchestrator addresses these practical runtime problems directly.
+
+It turns the pipeline from a basic automation script into something much closer to a production processing tool.
 
 ---
 

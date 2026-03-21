@@ -1,0 +1,136 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Pew",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A blind man leading a group of men, who abandon him in a panic after his outburst. Killed by a horse during a chase.",
+      "personality_traits": [
+        "angry",
+        "impulsive",
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "magistrate",
+      "biography": "A doctor and magistrate involved in the aftermath of the incident. Receives a mysterious item from Jim Hawkins.",
+      "personality_traits": [
+        "calm",
+        "decisive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Dance",
+      "aliases": [],
+      "role": "revenue officer",
+      "biography": "A supervisor who investigates the incident, later joins Dr. Livesey and the squire to address the situation.",
+      "personality_traits": [
+        "determined",
+        "practical"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A tall, rough man with a temper, described as a landowner and companion to Dr. Livesey.",
+      "personality_traits": [
+        "temperamental",
+        "impatient"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Johnny",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A name called by Pew during his search for companions.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "identity uncertain"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A name called by Pew during his search for companions.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "identity uncertain"
+    },
+    {
+      "name": "Dirk",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A name called by Pew during his search for companions.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "identity uncertain"
+    },
+    {
+      "name": "Jim Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A first-person narrator and participant in the events, later entrusted with a mysterious item.",
+      "personality_traits": [
+        "resourceful",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the supervisor",
+      "aliases": [],
+      "role": "revenue officer",
+      "biography": "A figure who investigates the incident and coordinates with Dr. Livesey and the squire.",
+      "personality_traits": [
+        "dutiful",
+        "resolute"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A landowner and companion to Dr. Livesey, described as a tall, rough man with a temper.",
+      "personality_traits": [
+        "impatient",
+        "assertive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

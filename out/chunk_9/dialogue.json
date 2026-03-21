@@ -1,0 +1,16 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Captain Smollett",
+    "the doctor",
+    "the squire",
+    "Long John",
+    "Barbecue",
+    "Mr. Trelawney",
+    "Israel Hands",
+    "the cook"
+  ],
+  "unattributed_dialogue_present": false
+}

@@ -1,0 +1,33 @@
+{
+  "characters": [
+    "the captain",
+    "Black Dog",
+    "the blind beggar",
+    "Doctor Livesey",
+    "my mother",
+    "Jim",
+    "Mrs. Crossley",
+    "the doctor",
+    "Bill"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "Black Hill Cove",
+    "the hamlet",
+    "Kitt’s Hole",
+    "Dr. Livesey’s",
+    "the road"
+  ],
+  "objects": [
+    "cutlass",
+    "sea-chest",
+    "sea-cloak",
+    "stick",
+    "pistol",
+    "bag"
+  ],
+  "identity_notes": [
+    "the captain and Bill refer to the same entity",
+    "Doctor Livesey and the doctor refer to the same entity"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Dr. Livesey",
+    "the squire",
+    "Redruth",
+    "the gamekeeper"
+  ],
+  "unattributed_dialogue_present": false
+}
