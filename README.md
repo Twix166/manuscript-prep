@@ -135,3 +135,15 @@ A typical repository structure might look like this:
 ├── out/
 └── README.md
 
+# ManuscriptPrep
+
+## Installation
+
+### 1. Install Ollama
+
+Install Ollama on your system.
+
+On Linux, follow the standard Ollama installation instructions. Once installed, verify:
+
+```bash
+ollama --version

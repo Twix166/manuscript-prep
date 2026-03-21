@@ -1,9 +1,9 @@
 {
   "pov": "first-person",
   "dialogue": true,
-  "internal_thought": false,
+  "internal_thought": true,
   "explicitly_attributed_speakers": [
-    "the old sea-dog"
+    "captain"
   ],
   "unattributed_dialogue_present": false
 }
