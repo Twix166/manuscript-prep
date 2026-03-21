@@ -26,6 +26,9 @@ Features:
 - Hard timeout watchdog
 - Approximate token speed display
 - Natural sorting of chunk files
+- Per-pass timing
+- Per-chunk timing
+- timing.json output per chunk
 """
 
 from __future__ import annotations
@@ -35,7 +38,6 @@ import json
 import os
 import queue
 import re
-import signal
 import subprocess
 import sys
 import threading
@@ -58,6 +60,12 @@ DIALOGUE_MODEL = "manuscriptprep-dialogue"
 ENTITIES_MODEL = "manuscriptprep-entities"
 DOSSIERS_MODEL = "manuscriptprep-dossiers"
 
+PASS_SEQUENCE = [
+    ("structure", STRUCTURE_MODEL),
+    ("dialogue", DIALOGUE_MODEL),
+    ("entities", ENTITIES_MODEL),
+    ("dossiers", DOSSIERS_MODEL),
+]
 
 TPS_PATTERNS = [
     re.compile(r"(?i)\b(eval(?:uation)?(?:\s+rate)?|tokens?/s|tok/s)\s*[:=]?\s*([0-9]+(?:\.[0-9]+)?)"),
@@ -86,6 +94,8 @@ class TUIState:
     current_pass: str = "-"
     pass_status: str = "idle"
     current_step: str = "-"
+
+    chunk_started_at: Optional[float] = None
     pass_started_at: Optional[float] = None
 
     chunks_total: int = 0
@@ -100,6 +110,9 @@ class TUIState:
 
     last_stdout_at: Optional[float] = None
     last_stderr_at: Optional[float] = None
+
+    current_pass_duration: Optional[float] = None
+    current_chunk_duration: Optional[float] = None
 
     orchestrator_log: List[str] = field(default_factory=list)
     model_stdout_lines: List[str] = field(default_factory=list)
@@ -166,7 +179,7 @@ class PassTimeoutError(RuntimeError):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run a 4-pass manuscript pipeline with a live terminal UI and timeouts."
+        description="Run a 4-pass manuscript pipeline with a live terminal UI and timing."
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--input", type=Path, help="Single chunk text file")
@@ -288,6 +301,12 @@ def fmt_age(ts: Optional[float]) -> str:
     return f"{max(0.0, time.time() - ts):.1f}s"
 
 
+def fmt_duration(seconds: Optional[float]) -> str:
+    if seconds is None:
+        return "-"
+    return f"{seconds:.1f}s"
+
+
 def kill_process_tree(proc: subprocess.Popen) -> None:
     try:
         if proc.poll() is None:
@@ -305,9 +324,17 @@ def kill_process_tree(proc: subprocess.Popen) -> None:
 
 
 def render_tui(state: TUIState):
-    elapsed = "-"
-    if state.pass_started_at is not None:
-        elapsed = f"{time.time() - state.pass_started_at:.1f}s"
+    now = time.time()
+
+    pass_elapsed = state.current_pass_duration
+    if state.pass_started_at is not None and state.pass_status == "running":
+        pass_elapsed = now - state.pass_started_at
+
+    chunk_elapsed = state.current_chunk_duration
+    if state.chunk_started_at is not None and state.current_chunk not in ("-", ""):
+        # keep showing growing chunk timer while chunk is active
+        if state.pass_status not in ("chunk complete", "failed"):
+            chunk_elapsed = now - state.chunk_started_at
 
     progress = "-"
     if state.chunks_total > 0:
@@ -327,7 +354,8 @@ def render_tui(state: TUIState):
     status_table.add_row("Pass", state.current_pass)
     status_table.add_row("Status", state.pass_status)
     status_table.add_row("Step", state.current_step)
-    status_table.add_row("Elapsed", elapsed)
+    status_table.add_row("Pass elapsed", fmt_duration(pass_elapsed))
+    status_table.add_row("Chunk elapsed", fmt_duration(chunk_elapsed))
     status_table.add_row("Progress", progress)
     status_table.add_row("Retries", str(state.retries_used))
     status_table.add_row("Token speed", tps_display)
@@ -514,6 +542,8 @@ def run_ollama_streaming(
         if maybe_real_tps is not None:
             state.real_tps = maybe_real_tps
 
+    model_elapsed = time.time() - started_at
+
     if return_code != 0:
         logger.emit(
             level="ERROR",
@@ -524,7 +554,7 @@ def run_ollama_streaming(
             step=state.current_step,
             model=model,
             attempt=attempt,
-            extra={"return_code": return_code},
+            extra={"return_code": return_code, "duration_seconds": model_elapsed},
         )
         raise RuntimeError(
             f"Ollama failed for model '{model}'.\nSTDOUT:\n{stdout_text}\n\nSTDERR:\n{stderr_text}"
@@ -540,6 +570,7 @@ def run_ollama_streaming(
             step=state.current_step,
             model=model,
             attempt=attempt,
+            extra={"duration_seconds": model_elapsed},
         )
         raise RuntimeError(f"Empty output from model '{model}'")
 
@@ -557,7 +588,7 @@ def run_ollama_streaming(
             "reported_tps": state.real_tps,
             "stdout_chars": len(stdout_text),
             "stderr_chars": len(stderr_text),
-            "elapsed_s": time.time() - started_at,
+            "duration_seconds": model_elapsed,
         },
     )
 
@@ -579,11 +610,12 @@ def process_pass_once(
     attempt: int,
     idle_timeout: int,
     hard_timeout: int,
-) -> Dict[str, Any]:
+) -> Tuple[Dict[str, Any], float]:
     state.current_pass = pass_name
     state.pass_status = "running"
     state.current_step = f"starting {pass_name}"
     state.pass_started_at = time.time()
+    state.current_pass_duration = None
     state.retries_used = max(0, attempt - 1)
 
     state.log(f"Starting pass: {pass_name} ({model}) attempt={attempt}")
@@ -657,9 +689,12 @@ def process_pass_once(
         extra={"path": str(json_output_path)},
     )
 
+    duration = time.time() - state.pass_started_at
+    state.current_pass_duration = duration
+
     state.current_step = f"completed {pass_name}"
     state.pass_status = "done"
-    state.log(f"Completed pass: {pass_name}")
+    state.log(f"Completed pass: {pass_name} ({duration:.1f}s)")
     logger.emit(
         level="INFO",
         event_type="pass_success",
@@ -669,13 +704,17 @@ def process_pass_once(
         step=state.current_step,
         model=model,
         attempt=attempt,
-        extra={"estimated_tps": state.estimated_tps, "reported_tps": state.real_tps},
+        extra={
+            "estimated_tps": state.estimated_tps,
+            "reported_tps": state.real_tps,
+            "duration_seconds": duration,
+        },
     )
 
     if live is not None:
         live.update(render_tui(state), refresh=True)
 
-    return parsed
+    return parsed, duration
 
 
 def process_pass_with_retries(
@@ -693,7 +732,7 @@ def process_pass_with_retries(
     retries: int,
     idle_timeout: int,
     hard_timeout: int,
-) -> Dict[str, Any]:
+) -> Tuple[Dict[str, Any], float]:
     last_exc: Optional[Exception] = None
 
     for attempt in range(1, retries + 2):
@@ -769,12 +808,17 @@ def process_chunk(
     state.current_pass = "-"
     state.pass_status = "starting"
     state.current_step = "loading excerpt"
+    state.chunk_started_at = time.time()
+    state.current_chunk_duration = None
     state.pass_started_at = None
+    state.current_pass_duration = None
     state.retries_used = 0
     state.estimated_tps = None
     state.real_tps = None
     state.last_stdout_at = None
     state.last_stderr_at = None
+
+    pass_timings: Dict[str, float] = {}
 
     state.log(f"Processing chunk: {chunk_path}")
     logger.emit(
@@ -804,7 +848,7 @@ def process_chunk(
     if live is not None:
         live.update(render_tui(state), refresh=True)
 
-    structure_json = process_pass_with_retries(
+    structure_json, structure_duration = process_pass_with_retries(
         ollama_bin=ollama_bin,
         model=STRUCTURE_MODEL,
         pass_name="structure",
@@ -819,8 +863,9 @@ def process_chunk(
         idle_timeout=idle_timeout,
         hard_timeout=hard_timeout,
     )
+    pass_timings["structure"] = structure_duration
 
-    dialogue_json = process_pass_with_retries(
+    dialogue_json, dialogue_duration = process_pass_with_retries(
         ollama_bin=ollama_bin,
         model=DIALOGUE_MODEL,
         pass_name="dialogue",
@@ -835,8 +880,9 @@ def process_chunk(
         idle_timeout=idle_timeout,
         hard_timeout=hard_timeout,
     )
+    pass_timings["dialogue"] = dialogue_duration
 
-    entities_json = process_pass_with_retries(
+    entities_json, entities_duration = process_pass_with_retries(
         ollama_bin=ollama_bin,
         model=ENTITIES_MODEL,
         pass_name="entities",
@@ -851,6 +897,7 @@ def process_chunk(
         idle_timeout=idle_timeout,
         hard_timeout=hard_timeout,
     )
+    pass_timings["entities"] = entities_duration
 
     state.current_step = "building dossier input"
     if live is not None:
@@ -873,7 +920,7 @@ def process_chunk(
 
     _ = structure_json
 
-    process_pass_with_retries(
+    dossiers_json, dossiers_duration = process_pass_with_retries(
         ollama_bin=ollama_bin,
         model=DOSSIERS_MODEL,
         pass_name="dossiers",
@@ -888,11 +935,25 @@ def process_chunk(
         idle_timeout=idle_timeout,
         hard_timeout=hard_timeout,
     )
+    pass_timings["dossiers"] = dossiers_duration
+
+    _ = dossiers_json
+
+    chunk_duration = time.time() - state.chunk_started_at
+    state.current_chunk_duration = chunk_duration
+
+    timing_json = {
+        "chunk": chunk_name,
+        "total_duration_seconds": chunk_duration,
+        "passes": pass_timings,
+    }
+    write_json(chunk_dir / "timing.json", timing_json)
 
     state.pass_status = "chunk complete"
     state.current_step = "finished chunk"
     state.pass_started_at = None
-    state.log(f"Finished chunk: {chunk_name}")
+    state.current_pass_duration = None
+    state.log(f"Finished chunk: {chunk_name} ({chunk_duration:.1f}s)")
     state.chunks_completed += 1
 
     logger.emit(
@@ -901,6 +962,11 @@ def process_chunk(
         message="Chunk completed successfully",
         chunk=chunk_name,
         step=state.current_step,
+        extra={
+            "duration_seconds": chunk_duration,
+            "pass_durations": pass_timings,
+            "timing_json_path": str(chunk_dir / "timing.json"),
+        },
     )
 
     if live is not None:
@@ -1049,6 +1115,9 @@ def main() -> int:
                     chunk_dir.mkdir(parents=True, exist_ok=True)
                     write_chunk_error(chunk_dir, chunk_path.stem, exc)
 
+                    if state.chunk_started_at is not None:
+                        state.current_chunk_duration = time.time() - state.chunk_started_at
+
                     state.pass_status = "failed"
                     state.current_step = "error"
                     state.log(f"ERROR: {chunk_path.name}: {exc}")
@@ -1059,6 +1128,7 @@ def main() -> int:
                         message=str(exc),
                         chunk=chunk_path.stem,
                         step="chunk failed",
+                        extra={"chunk_duration_seconds": state.current_chunk_duration},
                     )
 
                     live.update(render_tui(state), refresh=True)
