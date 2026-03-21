@@ -134,7 +134,7 @@ A typical repository structure might look like this:
 │   └── chunks/
 ├── out/
 └── README.md
-'''
+```
 
 # ManuscriptPrep
 
