@@ -1,0 +1,22 @@
+{
+  "characters": [
+    "Dr. Livesey",
+    "the captain",
+    "old Taylor",
+    "Black Dog"
+  ],
+  "places": [
+    "Admiral Benbow inn"
+  ],
+  "objects": [
+    "sea-chest",
+    "cutlass",
+    "clasp-knife",
+    "spy-glass",
+    "bottle of rum"
+  ],
+  "identity_notes": [
+    "The doctor and Dr. Livesey refer to the same character.",
+    "The stranger and Black Dog refer to the same character."
+  ]
+}

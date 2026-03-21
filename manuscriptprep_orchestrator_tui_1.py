@@ -1,30 +1,4 @@
 #!/usr/bin/env python3
-"""
-manuscriptprep_orchestrator_tui.py
-
-A live TUI orchestrator for a 4-pass Ollama manuscript pipeline.
-
-Passes:
-1. structure
-2. dialogue
-3. entities
-4. dossiers
-
-Expected Ollama models:
-- manuscriptprep-structure
-- manuscriptprep-dialogue
-- manuscriptprep-entities
-- manuscriptprep-dossiers
-
-Usage:
-    python manuscriptprep_orchestrator_tui.py --input chunk_0.txt --output-dir out
-    python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out
-
-Optional:
-    python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out --ollama-bin /usr/local/bin/ollama
-    python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out --no-tui
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -56,40 +30,32 @@ class TUIState:
     current_chunk: str = "-"
     current_pass: str = "-"
     pass_status: str = "idle"
-    current_step: str = "-"
-    pass_started_at: Optional[float] = None
-    chunks_total: int = 0
-    chunks_completed: int = 0
     orchestrator_log: List[str] = field(default_factory=list)
     model_stdout_lines: List[str] = field(default_factory=list)
     model_stderr_lines: List[str] = field(default_factory=list)
 
     def log(self, msg: str) -> None:
-        timestamp = time.strftime("%H:%M:%S")
-        self.orchestrator_log.append(f"[{timestamp}] {msg}")
-        self.orchestrator_log = self.orchestrator_log[-300:]
+        self.orchestrator_log.append(msg)
+        self.orchestrator_log = self.orchestrator_log[-200:]
 
     def append_stdout(self, line: str) -> None:
         self.model_stdout_lines.append(line.rstrip("\n"))
-        self.model_stdout_lines = self.model_stdout_lines[-500:]
+        self.model_stdout_lines = self.model_stdout_lines[-400:]
 
     def append_stderr(self, line: str) -> None:
         self.model_stderr_lines.append(line.rstrip("\n"))
-        self.model_stderr_lines = self.model_stderr_lines[-250:]
+        self.model_stderr_lines = self.model_stderr_lines[-200:]
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Run a 4-pass manuscript pipeline with a live terminal UI."
-    )
+    parser = argparse.ArgumentParser(description="Run multi-pass manuscript analysis with a live TUI.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--input", type=Path, help="Single chunk text file")
     group.add_argument("--input-dir", type=Path, help="Directory containing chunk text files")
-
-    parser.add_argument("--output-dir", type=Path, required=True, help="Directory for outputs")
+    parser.add_argument("--output-dir", type=Path, required=True, help="Directory where outputs will be written")
     parser.add_argument("--ollama-bin", default="ollama", help="Path to ollama binary")
     parser.add_argument("--glob", default="*.txt", help="Glob for input-dir mode")
-    parser.add_argument("--no-tui", action="store_true", help="Disable TUI and use plain logging")
+    parser.add_argument("--no-tui", action="store_true", help="Fallback to plain logging")
     return parser.parse_args()
 
 
@@ -115,11 +81,8 @@ def extract_json(text: str) -> Dict[str, Any]:
         end = text.rfind("}")
         if start == -1 or end == -1 or end <= start:
             raise RuntimeError(f"Model output is not valid JSON:\n{text}")
-        snippet = text[start : end + 1]
-        try:
-            return json.loads(snippet)
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(f"Model output is not valid JSON:\n{text}") from exc
+        snippet = text[start:end + 1]
+        return json.loads(snippet)
 
 
 def collect_inputs(args: argparse.Namespace) -> List[Path]:
@@ -150,36 +113,17 @@ def build_dossier_input(excerpt_text: str, entities_json: Dict[str, Any], dialog
     )
 
 
-def stream_reader(pipe, target_queue: queue.Queue, stream_name: str) -> None:
-    try:
-        for line in iter(pipe.readline, ""):
-            target_queue.put((stream_name, line))
-    finally:
-        pipe.close()
-
-
 def render_tui(state: TUIState):
-    elapsed = "-"
-    if state.pass_started_at is not None:
-        elapsed = f"{time.time() - state.pass_started_at:.1f}s"
-
-    progress = "-"
-    if state.chunks_total > 0:
-        progress = f"{state.chunks_completed}/{state.chunks_total}"
-
     status_table = Table.grid(expand=True)
     status_table.add_column(ratio=1)
     status_table.add_column(ratio=3)
     status_table.add_row("Chunk", state.current_chunk)
     status_table.add_row("Pass", state.current_pass)
     status_table.add_row("Status", state.pass_status)
-    status_table.add_row("Step", state.current_step)
-    status_table.add_row("Elapsed", elapsed)
-    status_table.add_row("Progress", progress)
 
     orchestrator_text = Text("\n".join(state.orchestrator_log[-30:]) or "(no log yet)")
     stdout_text = Text("\n".join(state.model_stdout_lines[-40:]) or "(no model stdout yet)")
-    stderr_text = Text("\n".join(state.model_stderr_lines[-18:]) or "(no model stderr yet)")
+    stderr_text = Text("\n".join(state.model_stderr_lines[-20:]) or "(no model stderr yet)")
 
     top = Panel(status_table, title="Pipeline Status", border_style="cyan")
     left = Panel(orchestrator_text, title="Orchestrator Log", border_style="green")
@@ -195,20 +139,25 @@ def render_tui(state: TUIState):
     return Group(top, lower)
 
 
+def stream_reader(pipe, target_queue: queue.Queue, stream_name: str):
+    try:
+        for line in iter(pipe.readline, ""):
+            target_queue.put((stream_name, line))
+    finally:
+        pipe.close()
+
+
 def run_ollama_streaming(
     *,
     ollama_bin: str,
     model: str,
     prompt_text: str,
     state: TUIState,
-    live: Optional[Live],
+    live: Live,
 ) -> str:
     state.model_stdout_lines.clear()
     state.model_stderr_lines.clear()
-    state.current_step = "launching model"
-
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
+    live.update(render_tui(state), refresh=True)
 
     proc = subprocess.Popen(
         [ollama_bin, "run", model],
@@ -230,10 +179,6 @@ def run_ollama_streaming(
     t_out.start()
     t_err.start()
 
-    state.current_step = "sending prompt to model"
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
-
     proc.stdin.write(prompt_text)
     proc.stdin.close()
 
@@ -246,19 +191,14 @@ def run_ollama_streaming(
             if stream_name == "stdout":
                 collected_stdout.append(line)
                 state.append_stdout(line)
-                state.current_step = "streaming model stdout"
             else:
                 collected_stderr.append(line)
                 state.append_stderr(line)
-                state.current_step = "streaming model stderr"
 
-            if live is not None:
-                live.update(render_tui(state), refresh=True)
+            live.update(render_tui(state), refresh=True)
 
         except queue.Empty:
-            state.current_step = "waiting for model output"
-            if live is not None:
-                live.update(render_tui(state), refresh=True)
+            live.update(render_tui(state), refresh=True)
             if proc.poll() is not None and q.empty():
                 break
 
@@ -286,15 +226,12 @@ def process_pass(
     raw_output_path: Path,
     json_output_path: Path,
     state: TUIState,
-    live: Optional[Live],
+    live: Live,
 ) -> Dict[str, Any]:
     state.current_pass = pass_name
     state.pass_status = "running"
-    state.current_step = f"starting {pass_name}"
-    state.pass_started_at = time.time()
     state.log(f"Starting pass: {pass_name} ({model})")
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
+    live.update(render_tui(state), refresh=True)
 
     raw = run_ollama_streaming(
         ollama_bin=ollama_bin,
@@ -304,58 +241,34 @@ def process_pass(
         live=live,
     )
 
-    state.current_step = "writing raw output"
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
     write_text(raw_output_path, raw + "\n")
     state.log(f"Wrote raw output: {raw_output_path}")
+    live.update(render_tui(state), refresh=True)
 
-    state.current_step = "parsing JSON"
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
     parsed = extract_json(raw)
-
-    state.current_step = "writing parsed JSON"
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
     write_json(json_output_path, parsed)
     state.log(f"Wrote parsed JSON: {json_output_path}")
 
-    state.current_step = f"completed {pass_name}"
     state.pass_status = "done"
     state.log(f"Completed pass: {pass_name}")
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
+    live.update(render_tui(state), refresh=True)
 
     return parsed
 
 
-def process_chunk(
-    chunk_path: Path,
-    output_dir: Path,
-    ollama_bin: str,
-    state: TUIState,
-    live: Optional[Live],
-) -> None:
+def process_chunk(chunk_path: Path, output_dir: Path, ollama_bin: str, state: TUIState, live: Live) -> None:
     chunk_name = chunk_path.stem
     state.current_chunk = chunk_name
     state.current_pass = "-"
     state.pass_status = "starting"
-    state.current_step = "loading excerpt"
-    state.pass_started_at = None
     state.log(f"Processing chunk: {chunk_path}")
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
+    live.update(render_tui(state), refresh=True)
 
     excerpt_text = read_text(chunk_path)
-
     chunk_dir = output_dir / chunk_name
     chunk_dir.mkdir(parents=True, exist_ok=True)
-    state.log(f"Created output directory: {chunk_dir}")
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
 
-    _structure_json = process_pass(
+    structure_json = process_pass(
         ollama_bin=ollama_bin,
         model=STRUCTURE_MODEL,
         pass_name="structure",
@@ -388,16 +301,12 @@ def process_chunk(
         live=live,
     )
 
-    state.current_step = "building dossier input"
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
-
     dossier_input = build_dossier_input(excerpt_text, entities_json, dialogue_json)
-    dossier_input_path = chunk_dir / "dossier_input.txt"
-    write_text(dossier_input_path, dossier_input)
-    state.log(f"Wrote dossier input: {dossier_input_path}")
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
+    write_text(chunk_dir / "dossier_input.txt", dossier_input)
+    state.log(f"Wrote dossier input: {chunk_dir / 'dossier_input.txt'}")
+    live.update(render_tui(state), refresh=True)
+
+    _ = structure_json
 
     process_pass(
         ollama_bin=ollama_bin,
@@ -411,33 +320,19 @@ def process_chunk(
     )
 
     state.pass_status = "chunk complete"
-    state.current_step = "finished chunk"
-    state.pass_started_at = None
     state.log(f"Finished chunk: {chunk_name}")
-    state.chunks_completed += 1
-    if live is not None:
-        live.update(render_tui(state), refresh=True)
+    live.update(render_tui(state), refresh=True)
 
 
 def run_plain(args: argparse.Namespace) -> int:
     state = TUIState()
     try:
         chunk_files = collect_inputs(args)
-        state.chunks_total = len(chunk_files)
         args.output_dir.mkdir(parents=True, exist_ok=True)
-
         for chunk_path in chunk_files:
-            process_chunk(
-                chunk_path=chunk_path,
-                output_dir=args.output_dir,
-                ollama_bin=args.ollama_bin,
-                state=state,
-                live=None,
-            )
-
+            process_chunk(chunk_path, args.output_dir, args.ollama_bin, state)
         print("[DONE] All chunks processed successfully.")
         return 0
-
     except Exception as exc:
         print(f"[ERROR] {exc}", file=sys.stderr)
         return 1
@@ -453,7 +348,6 @@ def main() -> int:
 
     try:
         chunk_files = collect_inputs(args)
-        state.chunks_total = len(chunk_files)
         args.output_dir.mkdir(parents=True, exist_ok=True)
     except Exception as exc:
         print(f"[ERROR] {exc}", file=sys.stderr)
@@ -465,13 +359,7 @@ def main() -> int:
         try:
             for chunk_path in chunk_files:
                 try:
-                    process_chunk(
-                        chunk_path=chunk_path,
-                        output_dir=args.output_dir,
-                        ollama_bin=args.ollama_bin,
-                        state=state,
-                        live=live,
-                    )
+                    process_chunk(chunk_path, args.output_dir, args.ollama_bin, state, live)
                 except Exception as exc:
                     err = f"{chunk_path.name}: {exc}"
                     failures.append(err)
@@ -479,12 +367,11 @@ def main() -> int:
                     chunk_dir.mkdir(parents=True, exist_ok=True)
                     write_text(chunk_dir / "error.txt", err + "\n")
                     state.pass_status = "failed"
-                    state.current_step = "error"
                     state.log(f"ERROR: {err}")
-                    live.update(render_tui(state), refresh=True)
+                live.update(render_tui(state))
                 time.sleep(0.2)
         finally:
-            live.update(render_tui(state), refresh=True)
+            live.update(render_tui(state))
 
     if failures:
         print("[SUMMARY] Some chunks failed:", file=sys.stderr)

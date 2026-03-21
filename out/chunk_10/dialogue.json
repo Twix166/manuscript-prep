@@ -1,0 +1,12 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Silver",
+    "the young seaman",
+    "Barbecue",
+    "Israel Hands"
+  ],
+  "unattributed_dialogue_present": false
+}
