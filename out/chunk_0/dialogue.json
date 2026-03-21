@@ -3,7 +3,8 @@
   "dialogue": true,
   "internal_thought": true,
   "explicitly_attributed_speakers": [
-    "captain"
+    "the captain",
+    "my father"
   ],
   "unattributed_dialogue_present": false
 }

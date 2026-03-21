@@ -10,11 +10,11 @@
   ],
   "objects": [
     "sea-chest",
-    "cutlass",
     "brass telescope",
-    "handspike"
+    "handspike",
+    "fourpenny piece"
   ],
   "identity_notes": [
-    "the old sea-dog and the captain may refer to the same entity"
+    "the captain and the old sea-dog may refer to the same entity"
   ]
 }
