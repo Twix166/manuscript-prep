@@ -1,0 +1,38 @@
+{
+  "characters": [
+    "Squire Trelawney",
+    "Dr. Livesey",
+    "the captain",
+    "Jim Hawkins",
+    "my father",
+    "my mother",
+    "the man who trundled the barrow",
+    "the man who came with the barrow"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "the cove",
+    "the cliffs",
+    "the Royal George"
+  ],
+  "objects": [
+    "sea-chest",
+    "brass telescope",
+    "handspike",
+    "fourpenny piece",
+    "gold pieces",
+    "table",
+    "glasses",
+    "door",
+    "window",
+    "stockade",
+    "Coracle",
+    "Jolly Roger",
+    "plank",
+    "signboard"
+  ],
+  "identity_notes": [
+    "The captain and the old sea-dog may refer to the same individual",
+    "The man who trundled the barrow and the man who came with the barrow may refer to the same individual"
+  ]
+}
