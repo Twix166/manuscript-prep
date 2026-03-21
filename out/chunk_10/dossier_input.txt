@@ -4,20 +4,25 @@ John would touch his forelock with a solemn way he had that made me think he was
 EXTRACTION_DATA:
 {
   "characters": [
-    "John Doe",
-    "Jane Smith",
-    "Alice Johnson",
-    "Bob Brown"
+    "John",
+    "the squire",
+    "Captain Smollett",
+    "Dr. Livesey",
+    "Silver",
+    "the youngest hand",
+    "Israel Hands",
+    "the cook"
   ],
   "dialogue_info": {
-    "pov": "first-person",
+    "pov": "third-person",
     "dialogue": true,
-    "internal_thought": false,
+    "internal_thought": true,
     "explicitly_attributed_speakers": [
       "Silver",
       "the young seaman",
-      "Barbecue",
-      "Israel Hands"
+      "the cook",
+      "Israel Hands",
+      "the coxswain"
     ],
     "unattributed_dialogue_present": false
   }

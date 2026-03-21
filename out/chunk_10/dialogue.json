@@ -1,12 +1,13 @@
 {
-  "pov": "first-person",
+  "pov": "third-person",
   "dialogue": true,
-  "internal_thought": false,
+  "internal_thought": true,
   "explicitly_attributed_speakers": [
     "Silver",
     "the young seaman",
-    "Barbecue",
-    "Israel Hands"
+    "the cook",
+    "Israel Hands",
+    "the coxswain"
   ],
   "unattributed_dialogue_present": false
 }

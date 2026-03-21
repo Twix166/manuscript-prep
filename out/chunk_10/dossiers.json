@@ -1,0 +1,104 @@
+{
+  "character_dossiers": [
+    {
+      "name": "John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He is the narrator who overhears a secret conversation in the apple barrel.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He despises Captain Smollett and speaks sharply when addressed.",
+      "personality_traits": [
+        "hot-tempered"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He is a captain who speaks sharply and admits to being wrong about his crew.",
+      "personality_traits": [
+        "reserved"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He is a doctor mentioned in dialogue about spoilage of the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He is a former quartermaster who discusses his past with the cook.",
+      "personality_traits": [
+        "charismatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the youngest hand",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He admires Silver and engages in dialogue about becoming a 'gentleman of fortune'.",
+      "personality_traits": [
+        "admiring"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Israel Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He is a coxswain who speaks gruffly and submits to Silver's authority.",
+      "personality_traits": [
+        "gruff"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the cook",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He discusses his past with Silver and mentions his wife's possession of his money.",
+      "personality_traits": [
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

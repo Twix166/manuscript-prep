@@ -1,165 +1,75 @@
 Thinking...
 Okay, let's tackle this. The user wants me to create conservative character dossiers based on the provided excerpt and extraction data. First, I need to make sure I only use the information given and not any prior knowledge.
 
-Looking at the characters list: Squire Trelawney, Dr. Livesey, the captain, Jim Hawkins, my father, my mother, the man who trundled the barrow, and the man who came with the barrow. Wait, the extraction data mentions "the man who trundled the barrow" and "the man who came with the barrow" as separate entries. But in the excerpt, it's mentioned that the man who trundled the barrow is the one who brought the sea chest. Then later, when the captain arrives, the man who came with the barrow is mentioned. Wait, maybe there's a confusion here. Let me check the excerpt again.
+Looking at the characters list: Squire Trelawney, Dr. Livesey, the captain, and the old sea-dog. Wait, the old sea-dog is probably the same as the captain mentioned later. The extraction data mentions the old sea-dog as a character, so I need to include all four names as separate entries? Wait, no. Wait, the characters list includes "the captain" and "the old sea-dog" as separate entries. But in the excerpt, they might be the same person. Let me check the excerpt again.
 
-In the excerpt, the captain arrives and the man who trundled the barrow brings the sea chest. Then later, when the captain is described, it's mentioned that the man who came with the barrow (maybe the same person?) is part of the story. Wait, the extraction data lists them as separate, but in the text, it's possible that the man who trundled the barrow is the same as the one who came with the barrow. Wait, the text says: "the man who trundled the barrow told us the mail had set him down..." and then later, when the captain is described, it's mentioned that "the man who came with the barrow" is part of the story. Wait, maybe the man who trundled the barrow is the same as the one who came with the barrow? Or are they different? The text says: "the man who trundled the barrow told us..." and then later, when the captain is described, it's mentioned that "the man who came with the barrow" is part of the story. Wait, perhaps the man who trundled the barrow is the same as the one who came with the barrow? Or maybe they are two different people? The text is a bit unclear here. But according to the extraction data, they are separate entries. So I need to treat them as separate characters.
+In the excerpt, the old sea-dog is introduced as the man who stays at the inn. Later, when the captain is mentioned, it's the same person. For example, the old sea-dog is referred to as the captain when he arrives. So maybe "the old sea-dog" and "the captain" are the same character. But the extraction data lists them as separate. Wait, the extraction data's characters list includes both "the captain" and "the old sea-dog" as separate entries. So I need to create dossiers for all four names? Wait, no. Wait, the characters list is ["Squire Trelawney", "Dr. Livesey", "the captain", "the old sea-dog"]. So four characters. But in the text, "the old sea-dog" and "the captain" are the same person. But the extraction data treats them as separate. Wait, maybe the extraction data is incorrect? Or perhaps the user wants to treat them as separate. Wait, the user says to use only the provided data. So according to the extraction data, they are separate. But in the text, they are the same. Hmm. This is a bit confusing. But the user says to use only the provided data. So I have to treat them as separate. Wait, but the text says "the old sea-dog" is the same as "the captain". Let me check the text again.
 
-Now, for each character, I need to create a dossier. Let's start with Squire Trelawney. The excerpt mentions him as part of the group that asked the narrator to write down the story. He's referred to as "Squire Trelawney" and is part of the group with Dr. Livesey. The role is unknown unless stated. The biography should be based on what's in the excerpt. The narrator mentions that Squire Trelawney and Dr. Livesey asked him to write the story. So his biography would be that he is part of the group that requested the narrator to document the events. No other details are given.
+In the excerpt, the first mention is "the old sea-dog at the 'Admiral Benbow'". Then later, when the captain is mentioned, it's the same person. For example, the old sea-dog is referred to as the captain when he arrives. So they are the same character. But the extraction data lists them as separate. Wait, maybe the extraction data is wrong? Or perhaps the user made a mistake. But according to the instructions, I must use the provided extraction data. So I have to include all four characters as separate entries. Wait, but the characters list includes "the captain" and "the old sea-dog" as separate. So I need to create dossiers for all four. But in reality, they are the same person. However, the user's extraction data says they are separate. So I have to follow that. Wait, but the user's extraction data might have a mistake. But I can't assume that. I have to go with the data provided. So I need to create dossiers for all four names as separate characters. Wait, but the user's extraction data might have a mistake. Let me check again.
 
-Dr. Livesey is mentioned as part of the same group. He comes to visit the patient (my father) and has a conversation with him. His role is unknown. Biography: part of the group that asked the narrator to write the story, and he visits the patient.
+Looking at the extraction data's characters list: ["Squire Trelawney", "Dr. Livesey", "the captain", "the old sea-dog"]. So four characters. But in the text, "the old sea-dog" and "the captain" are the same person. However, the extraction data treats them as separate. So perhaps the user wants to treat them as separate. But that's conflicting with the text. However, the user says to use only the provided data. Therefore, I have to create dossiers for all four. Wait, but the user's extraction data might have a mistake. Alternatively, maybe "the old sea-dog" is a different character. But in the text, the old sea-dog is the same as the captain. So this is confusing. But according to the extraction data, they are separate. Therefore, I have to proceed with that. So I need to create dossiers for all four names. Wait, but the user's extraction data might have a mistake. But I can't assume that. So I have to proceed with the given data.
 
-The captain is a key character. The narrator describes him as the old sea-dog, with a sabre cut, etc. His role is unknown. Biography: he stays at the inn, has a sea chest, interacts with the narrator, etc. Personality traits: maybe fierce, commanding, as per his actions. Spoken dialogue includes his sea songs and interactions with the narrator.
+Now, for each character in the characters list, I need to create a dossier. Let's start with Squire Trelawney. The excerpt mentions him as part of the group that asked the narrator to write down the story. He's mentioned in the first paragraph. His role is not explicitly stated, so role is "unknown". Biography: He's part of the group that asked the narrator to write the story. Personality traits: Not mentioned. Spoken dialogue: The narrator mentions that the old sea-dog spoke, but Squire Trelawney's dialogue isn't explicitly mentioned. Wait, the dialogue info says that the old sea-dog is explicitly attributed, but others may not be. So for Squire Trelawney, spoken_dialogue is false. Similarly for Dr. Livesey. The captain and the old sea-dog have spoken dialogue. Wait, the dialogue_info says that explicitly_attributed_speakers is ["the old sea-dog"], so only the old sea-dog's dialogue is explicitly mentioned. So for the captain, since he's the same as the old sea-dog, but the extraction data treats them as separate, perhaps the captain's dialogue is not explicitly mentioned. Wait, but in the text, the old sea-dog is the same as the captain. So if the old sea-dog is the speaker, then the captain would also have spoken dialogue. But according to the extraction data, the old sea-dog is explicitly attributed. So for the captain, since he's a different entry, but the same person, perhaps the spoken_dialogue is false. But this is conflicting. However, the user's extraction data says that the old sea-dog is the only explicitly attributed speaker. Therefore, for the captain, spoken_dialogue is false. But this is confusing. However, the user's data says that. So I have to follow that.
 
-Jim Hawkins is the narrator, as the story is told in first-person. The role is unknown. Biography: the narrator, who works at the inn, interacts with the captain, etc. Spoken dialogue includes his internal thoughts and interactions.
+So for each character:
 
-My father is the innkeeper. His role is unknown. Biography: runs the Admiral Benbow inn, interacts with the captain, etc. Spoken dialogue includes his interactions with the captain.
+Squire Trelawney: role unknown, biography as per the text. The text says he's part of the group that asked the narrator to write the story. So biography: "Part of the group that asked the narrator to write the story." Personality traits: none. Spoken_dialogue: false. Identity status: confirmed.
 
-My mother is mentioned in the context of Dr. Livesey visiting. Her role is unknown. Biography: part of the family, possibly the wife of my father. No dialogue mentioned.
+Dr. Livesey: mentioned in the text as visiting the patient. Biography: "Visited the patient (my father) and had dinner with the family." Spoken_dialogue: false. Role: unknown. Identity status: confirmed.
 
-The man who trundled the barrow is the one who brings the sea chest. His role is unknown. Biography: brings the sea chest, interacts with the captain. Spoken dialogue: mentions the mail setting him down at the Royal George.
+The captain: mentioned as the old sea-dog. The text says he's the one who stays at the inn, has the sabre cut, etc. Biography: "Stayed at the Admiral Benbow inn, had a sabre cut, drank rum, and was feared by others." Spoken_dialogue: true (since the old sea-dog is the same as the captain, but according to the extraction data, only the old sea-dog is explicitly attributed. Wait, the extraction data says that the old sea-dog is the only explicitly attributed speaker. So for the captain, spoken_dialogue is false. But this is conflicting. However, the user's data says that. So I have to follow that. Therefore, spoken_dialogue for the captain is false. But this is incorrect based on the text. But the user's data says that only the old sea-dog is explicitly attributed. Therefore, the captain's spoken_dialogue is false. But this is a problem. However, the user's data is the source of truth here.
 
-The man who came with the barrow is mentioned in the context of the captain's arrival. Wait, in the text, when the captain arrives, it's mentioned that "the man who came with the barrow" is part of the story. Wait, the text says: "the man who trundled the barrow told us the mail had set him down..." and then later, when the captain is described, it's mentioned that "the man who came with the barrow" is part of the story. Wait, perhaps the man who trundled the barrow is the same as the one who came with the barrow? Or are they different? The extraction data lists them as separate, so I need to treat them as separate. However, in the text, it's possible that the man who trundled the barrow is the same as the one who came with the barrow. Wait, the text says: "the man who trundled the barrow told us the mail had set him down..." and then later, when the captain is described, it's mentioned that "the man who came with the barrow" is part of the story. Wait, maybe the man who trundled the barrow is the same as the one who came with the barrow. But the extraction data lists them as separate. Hmm. Maybe the extraction data is correct, and they are separate. But the text might not clarify. Since the user says to use only the provided data, I'll follow the extraction data.
+The old sea-dog: same as the captain. But according to the extraction data, they are separate. So for the old sea-dog, spoken_dialogue is true. But the text says that the old sea-dog is the same as the captain. But the user's data treats them as separate. Therefore, I have to create separate dossiers for each. So the old sea-dog's spoken_dialogue is true, and the captain's is false. But this is conflicting with the text. However, the user's data says that only the old sea-dog is explicitly attributed. Therefore, the captain's spoken_dialogue is false. But this is confusing. However, the user's data is the source of truth. So I have to proceed.
 
-So, for each character, I need to create the dossier. Let's go step by step.
+So, for the old sea-dog: spoken_dialogue is true. For the captain: spoken_dialogue is false. But this is conflicting with the text. However, the user's data says that only the old sea-dog is explicitly attributed. Therefore, the captain's spoken_dialogue is false. But this is incorrect. However, the user's data is the source. Therefore, I have to proceed.
 
-For Squire Trelawney: role unknown. Biography: part of the group that asked the narrator to write the story. No other details. Spoken dialogue: not mentioned. Identity status confirmed.
+Now, for each character:
 
-Dr. Livesey: same as above. Biography: part of the group, visits the patient. Spoken dialogue: interacts with the narrator.
-
-The captain: role unknown. Biography: stays at the inn, has a sea chest, interacts with the narrator. Spoken dialogue includes his sea songs and interactions. Personality traits: fierce, commanding.
-
-Jim Hawkins: narrator, first-person. Role unknown. Biography: works at the inn, interacts with the captain. Spoken dialogue: internal thoughts and interactions.
-
-My father: innkeeper. Role unknown. Biography: runs the inn, interacts with the captain. Spoken dialogue: interacts with the captain.
-
-My mother: part of the family. Role unknown. Biography: mentioned in the context of Dr. Livesey's visit. No dialogue.
-
-The man who trundled the barrow: brings the sea chest. Role unknown. Biography: brings the chest, interacts with the captain. Spoken dialogue: mentions the mail.
-
-The man who came with the barrow: perhaps a different person? Or same as the trundler? The text isn't clear, but according to the extraction data, they are separate. So, the man who came with the barrow is another character. But in the text, when the captain arrives, it's mentioned that the man who came with the barrow is part of the story. Wait, the text says: "the man who trundled the barrow told us the mail had set him down..." and then later, when the captain is described, it's mentioned that "the man who came with the barrow" is part of the story. Wait, maybe the man who came with the barrow is the same as the trundler? Or is there a mistake in the extraction data? Since the user provided the extraction data, I have to go with that. So, the man who trundled the barrow and the man who came with the barrow are separate. But in the text, it's possible that the man who came with the barrow is the same as the trundler. However, the extraction data lists them as separate, so I'll treat them as such.
-
-So, for the man who trundled the barrow: brings the sea chest, interacts with the captain. Spoken dialogue: mentions the mail.
-
-For the man who came with the barrow: perhaps he is the one who accompanied the trundler? Or another person? The text isn't clear, but according to the extraction data, they are separate. So, I'll create dossiers for both.
-
-Now, for each character, I need to fill in the JSON fields. Let's start with Squire Trelawney.
-
-{
-  "name": "Squire Trelawney",
-  "aliases": [],
-  "role": "unknown",
-  "biography": "Part of the group that asked the narrator to write down the story.",
-  "personality_traits": [],
-  "vocal_notes": "unknown",
-  "accent": "not specified in excerpt",
-  "spoken_dialogue": false,
-  "identity_status": "confirmed"
-}
+Squire Trelawney:
+- name: "Squire Trelawney"
+- aliases: []
+- role: "unknown"
+- biography: "Part of the group that asked the narrator to write the story."
+- personality_traits: []
+- vocal_notes: "unknown"
+- accent: "not specified in excerpt"
+- spoken_dialogue: false
+- identity_status: "confirmed"
 
 Dr. Livesey:
-
-{
-  "name": "Dr. Livesey",
-  "aliases": [],
-  "role": "unknown",
-  "biography": "Part of the group that asked the narrator to write down the story and visits the patient.",
-  "personality_traits": [],
-  "vocal_notes": "unknown",
-  "accent": "not specified in excerpt",
-  "spoken_dialogue": false,
-  "identity_status": "confirmed"
-}
+- name: "Dr. Livesey"
+- aliases: []
+- role: "unknown"
+- biography: "Visited the patient (my father) and had dinner with the family."
+- personality_traits: []
+- vocal_notes: "unknown"
+- accent: "not specified in excerpt"
+- spoken_dialogue: false
+- identity_status: "confirmed"
 
 The captain:
+- name: "the captain"
+- aliases: []
+- role: "unknown"
+- biography: "Stayed at the Admiral Benbow inn, had a sabre cut, drank rum, and was feared by others."
+- personality_traits: []
+- vocal_notes: "unknown"
+- accent: "not specified in excerpt"
+- spoken_dialogue: false
+- identity_status: "confirmed"
 
-{
-  "name": "the captain",
-  "aliases": [],
-  "role": "unknown",
-  "biography": "Stays at the Admiral Benbow inn, has a sea chest, interacts with the narrator and others.",
-  "personality_traits": ["fierce", "commanding"],
-  "vocal_notes": "unknown",
-  "accent": "not specified in excerpt",
-  "spoken_dialogue": true,
-  "identity_status": "confirmed"
-}
+The old sea-dog:
+- name: "the old sea-dog"
+- aliases: []
+- role: "unknown"
+- biography: "Stayed at the Admiral Benbow inn, had a sabre cut, drank rum, and was feared by others."
+- personality_traits: []
+- vocal_notes: "unknown"
+- accent: "not specified in excerpt"
+- spoken_dialogue: true
+- identity_status: "confirmed"
 
-Jim Hawkins:
-
-{
-  "name": "Jim Hawkins",
-  "aliases": [],
-  "role": "unknown",
-  "biography": "Narrator of the story, works at the Admiral Benbow inn, interacts with the captain.",
-  "personality_traits": [],
-  "vocal_notes": "unknown",
-  "accent": "not specified in excerpt",
-  "spoken_dialogue": true,
-  "identity_status": "confirmed"
-}
-
-My father:
-
-{
-  "name": "my father",
-  "aliases": [],
-  "role": "unknown",
-  "biography": "Runs the Admiral Benbow inn, interacts with the captain.",
-  "personality_traits": [],
-  "vocal_notes": "unknown",
-  "accent": "not specified in excerpt",
-  "spoken_dialogue": true,
-  "identity_status": "confirmed"
-}
-
-My mother:
-
-{
-  "name": "my mother",
-  "aliases": [],
-  "role": "unknown",
-  "biography": "Part of the family, mentioned in the context of Dr. Livesey's visit.",
-  "personality_traits": [],
-  "vocal_notes": "unknown",
-  "accent": "not specified in excerpt",
-  "spoken_dialogue": false,
-  "identity_status": "confirmed"
-}
-
-The man who trundled the barrow:
-
-{
-  "name": "the man who trundled the barrow",
-  "aliases": [],
-  "role": "unknown",
-  "biography": "Brings the sea chest to the inn, interacts with the captain.",
-  "personality_traits": [],
-  "vocal_notes": "unknown",
-  "accent": "not specified in excerpt",
-  "spoken_dialogue": true,
-  "identity_status": "confirmed"
-}
-
-The man who came with the barrow:
-
-{
-  "name": "the man who came with the barrow",
-  "aliases": [],
-  "role": "unknown",
-  "biography": "Accompanies the trundler, mentioned in the context of the captain's arrival.",
-  "personality_traits": [],
-  "vocal_notes": "unknown",
-  "accent": "not specified in excerpt",
-  "spoken_dialogue": false,
-  "identity_status": "confirmed"
-}
-
-Wait, but the extraction data lists "the man who trundled the barrow" and "the man who came with the barrow" as separate entries. However, in the text, when the captain arrives, it's mentioned that the man who came with the barrow is part of the story. But the text says: "the man who trundled the barrow told us the mail had set him down..." and then later, when the captain is described, it's mentioned that "the man who came with the barrow" is part of the story. Wait, perhaps the man who came with the barrow is the same as the trundler? Or is there a mistake in the extraction data? Since the user provided the extraction data, I have to follow it. So, the man who came with the barrow is a separate character. However, in the text, it's possible that the man who came with the barrow is the same as the trundler. But the extraction data lists them as separate, so I'll proceed with that.
-
-Now, checking the dialogue info. The extraction data says that dialogue is present, with explicitly attributed speakers like "the old sea-dog" and "my father". The narrator (Jim Hawkins) has internal thoughts. So for the captain, spoken_dialogue is true because he has dialogue. For Jim Hawkins, spoken_dialogue is true because he's the narrator and has internal thoughts. For my father, spoken_dialogue is true because he interacts with the captain. For the man who trundled the barrow, spoken_dialogue is true because he mentions the mail. For the others, like Dr. Livesey, maybe he has dialogue when he visits the patient. The extraction data says explicitly_attributed_speakers include "the old sea-dog" and "my father". So the captain's dialogue is attributed, so spoken_dialogue is true. Jim Hawkins' internal thoughts are part of the narrative, but the dialogue_info says that explicitly_attributed_speakers are present, but the narrator's thoughts are internal. So for spoken_dialogue, the narrator's internal thoughts may not count as spoken dialogue. Wait, the dialogue_info says "dialogue": true, "internal_thought": true. So the narrator has internal thoughts, but spoken_dialogue is about actual spoken words. So for the narrator (Jim Hawkins), spoken_dialogue would be false unless he has direct dialogue. But in the text, the narrator is the one telling the story, so his spoken_dialogue would be the actual words he says, which may not be present. Wait, the extraction data says "explicitly_attributed_speakers" includes "the old sea-dog" and "my father". So the narrator's internal thoughts are not considered spoken dialogue. Therefore, for the narrator (Jim Hawkins), spoken_dialogue is false. Wait, but the user's instruction says that spoken_dialogue must be based on the provided dialogue information and the excerpt. The narrator's internal thoughts are not spoken dialogue. So for Jim Hawkins, spoken_dialogue is false. But the extraction data says that the narrator is the first-person, so maybe the narrator's dialogue is included. Wait, the extraction data says "dialogue": true, "internal_thought": true. So the narrator has internal thoughts, but spoken_dialogue refers to actual spoken words. Therefore, for the narrator, spoken_dialogue would be false unless he has direct dialogue. But in the text, the narrator is the one recounting events, so his spoken_dialogue would be the actual words he says, which may not be present. Wait, the text is a first-person narrative, so the narrator's spoken dialogue would be the words he says, but in the excerpt, the narrator is describing events, not speaking. Therefore, spoken_dialogue for the narrator would be false. However, the extraction data says "spoken_dialogue": true for the narrator? Wait, the extraction data's dialogue_info says "spoken_dialogue": true, but that's part of the data provided. Wait, the user's input includes the extraction_data, which has "dialogue_info": { "pov": "first-person", "dialogue": true, "internal_thought": true, ... }, so the dialogue is present, but the spoken_dialogue for each character depends on whether they have spoken words. For example, the captain has spoken dialogue, as he sings and speaks. My father has spoken dialogue when he interacts with the captain. The man who trundled the barrow has spoken dialogue when he tells about the mail. Dr. Livesey has spoken dialogue when he visits the patient. The narrator (Jim Hawkins) has internal thoughts but may not have spoken dialogue unless he speaks. Since the text is a first-person narrative, the narrator's spoken dialogue would be the words he says, but in the excerpt, he's recounting events, so his spoken dialogue would be the actual words he uses in the story. Wait, but the narrator is the one telling the story, so his spoken dialogue would be the words he uses to tell the story. However, the user's instruction says to base spoken_dialogue on the provided dialogue information and the excerpt. The extraction data says that "explicitly_attributed_speakers" includes "the old sea-dog" and "my father", so the narrator's spoken dialogue may not be explicitly attributed. Therefore, for the narrator (Jim Hawkins), spoken_dialogue would be false unless he has direct dialogue. But in the text, the narrator is the one recounting events, so his spoken dialogue would be the actual words he uses, which are part of the narrative. However, the user's instruction says to use only the provided data. Since the extraction data includes "dialogue": true, but the explicitly_attributed_speakers are limited, perhaps the narrator's spoken dialogue is considered as part of the dialogue. But this is getting complicated. The user's instruction says to use only the provided data. The extraction data's dialogue_info includes "spoken_dialogue": true, but the explicitly_attributed_speakers are "the old sea-dog" and "my father". Therefore, for the other characters, including the narrator, spoken_dialogue may not be present unless they are explicitly mentioned. Therefore, for the narrator (Jim Hawkins), spoken_dialogue is false. For the captain, spoken_dialogue is true. For my father, spoken_dialogue is true. For Dr. Livesey, spoken_dialogue is true when he visits the patient. For the man who trundled the barrow, spoken_dialogue is true. For the man who came with the barrow, spoken_dialogue is false unless he has dialogue. The text doesn't mention him speaking, so spoken_dialogue is false. My mother has no dialogue mentioned, so spoken_dialogue is false. 
-
-Putting it all together, the JSON should have each character's details as per the above.
+Wait, but the old sea-dog and the captain are the same person. But according to the extraction data, they are separate. So the dossiers for both are created. However, the user's data may have an error. But I have to follow the data. Therefore, the dossiers are created for all four characters as per the extraction data.
 ...done thinking.
 
 {
@@ -168,7 +78,7 @@ Putting it all together, the JSON should have each character's details as per th
       "name": "Squire Trelawney",
       "aliases": [],
       "role": "unknown",
-      "biography": "Part of the group that asked the narrator to write down the story.",
+      "biography": "Part of the group that asked the narrator to write the story.",
       "personality_traits": [],
       "vocal_notes": "unknown",
       "accent": "not specified in excerpt",
@@ -179,29 +89,18 @@ Putting it all together, the JSON should have each character's details as per th
       "name": "Dr. Livesey",
       "aliases": [],
       "role": "unknown",
-      "biography": "Part of the group that asked the narrator to write down the story and visits the patient.",
+      "biography": "Visited the patient (my father) and had dinner with the family.",
       "personality_traits": [],
       "vocal_notes": "unknown",
       "accent": "not specified in excerpt",
-      "spoken_dialogue": true,
+      "spoken_dialogue": false,
       "identity_status": "confirmed"
     },
     {
       "name": "the captain",
       "aliases": [],
       "role": "unknown",
-      "biography": "Stays at the Admiral Benbow inn, has a sea chest, interacts with the narrator and others.",
-      "personality_traits": ["fierce", "commanding"],
-      "vocal_notes": "unknown",
-      "accent": "not specified in excerpt",
-      "spoken_dialogue": true,
-      "identity_status": "confirmed"
-    },
-    {
-      "name": "Jim Hawkins",
-      "aliases": [],
-      "role": "unknown",
-      "biography": "Narrator of the story, works at the Admiral Benbow inn, interacts with the captain.",
+      "biography": "Stayed at the Admiral Benbow inn, had a sabre cut, drank rum, and was feared by others.",
       "personality_traits": [],
       "vocal_notes": "unknown",
       "accent": "not specified in excerpt",
@@ -209,47 +108,14 @@ Putting it all together, the JSON should have each character's details as per th
       "identity_status": "confirmed"
     },
     {
-      "name": "my father",
+      "name": "the old sea-dog",
       "aliases": [],
       "role": "unknown",
-      "biography": "Runs the Admiral Benbow inn, interacts with the captain.",
+      "biography": "Stayed at the Admiral Benbow inn, had a sabre cut, drank rum, and was feared by others.",
       "personality_traits": [],
       "vocal_notes": "unknown",
       "accent": "not specified in excerpt",
       "spoken_dialogue": true,
-      "identity_status": "confirmed"
-    },
-    {
-      "name": "my mother",
-      "aliases": [],
-      "role": "unknown",
-      "biography": "Part of the family, mentioned in the context of Dr. Livesey's visit.",
-      "personality_traits": [],
-      "vocal_notes": "unknown",
-      "accent": "not specified in excerpt",
-      "spoken_dialogue": false,
-      "identity_status": "confirmed"
-    },
-    {
-      "name": "the man who trundled the barrow",
-      "aliases": [],
-      "role": "unknown",
-      "biography": "Brings the sea chest to the inn, interacts with the captain.",
-      "personality_traits": [],
-      "vocal_notes": "unknown",
-      "accent": "not specified in excerpt",
-      "spoken_dialogue": true,
-      "identity_status": "confirmed"
-    },
-    {
-      "name": "the man who came with the barrow",
-      "aliases": [],
-      "role": "unknown",
-      "biography": "Accompanies the trundler, mentioned in the context of the captain's arrival.",
-      "personality_traits": [],
-      "vocal_notes": "unknown",
-      "accent": "not specified in excerpt",
-      "spoken_dialogue": false,
       "identity_status": "confirmed"
     }
   ]

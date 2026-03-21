@@ -2,21 +2,30 @@
   "characters": [
     "Dr. Livesey",
     "the captain",
-    "old Taylor",
-    "Black Dog"
+    "Black Dog",
+    "old Taylor"
   ],
   "places": [
-    "Admiral Benbow inn"
+    "Admiral Benbow inn",
+    "cove",
+    "beach",
+    "road",
+    "parlour",
+    "bar",
+    "front room",
+    "stones",
+    "hilltops",
+    "sea"
   ],
   "objects": [
     "sea-chest",
     "cutlass",
-    "clasp-knife",
+    "pipe",
+    "sailor's clasp-knife",
     "spy-glass",
-    "bottle of rum"
+    "breakfast-table",
+    "napkin",
+    "keyhole"
   ],
-  "identity_notes": [
-    "The doctor and Dr. Livesey refer to the same character.",
-    "The stranger and Black Dog refer to the same character."
-  ]
+  "identity_notes": []
 }

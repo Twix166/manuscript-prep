@@ -1,23 +1,25 @@
 {
   "characters": [
-    "John Doe",
-    "Jane Smith",
-    "Alice Johnson",
-    "Bob Brown"
+    "John",
+    "the squire",
+    "Captain Smollett",
+    "Dr. Livesey",
+    "Silver",
+    "the youngest hand",
+    "Israel Hands",
+    "the cook"
   ],
   "places": [
-    "New York City",
-    "Los Angeles",
-    "Chicago"
+    "Treasure Island",
+    "Malabar",
+    "Corso Castle",
+    "Bristol"
   ],
   "objects": [
-    "Smartphone",
-    "Laptop",
-    "Car"
+    "HISPANIOLA",
+    "apple barrel"
   ],
-  "events": [
-    "Conference",
-    "Meeting",
-    "Workshop"
+  "identity_notes": [
+    "the coxswain and Israel Hands refer to the same entity"
   ]
 }

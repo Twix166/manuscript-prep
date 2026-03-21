@@ -1,10 +1,10 @@
 {
   "character_dossiers": [
     {
-      "name": "Jim",
+      "name": "Squire Trelawney",
       "aliases": [],
       "role": "unknown",
-      "biography": "Crew member who slips ashore and evades detection.",
+      "biography": "Part of the group that asked the narrator to write the story.",
       "personality_traits": [],
       "vocal_notes": "unknown",
       "accent": "not specified in excerpt",
@@ -12,51 +12,36 @@
       "identity_status": "confirmed"
     },
     {
-      "name": "Silver",
+      "name": "Dr. Livesey",
       "aliases": [],
       "role": "unknown",
-      "biography": "Crew member who leads the mutiny and orchestrates the crew's actions.",
-      "personality_traits": [
-        "cunning"
-      ],
+      "biography": "Visited the patient (my father) and had dinner with the family.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Stayed at the Admiral Benbow inn, had a sabre cut, drank rum, and was feared by others.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the old sea-dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Stayed at the Admiral Benbow inn, had a sabre cut, drank rum, and was feared by others.",
+      "personality_traits": [],
       "vocal_notes": "unknown",
       "accent": "not specified in excerpt",
       "spoken_dialogue": true,
-      "identity_status": "confirmed"
-    },
-    {
-      "name": "Long John Silver",
-      "aliases": [],
-      "role": "unknown",
-      "biography": "Crew member referred to by his full name.",
-      "personality_traits": [],
-      "vocal_notes": "unknown",
-      "accent": "not specified in excerpt",
-      "spoken_dialogue": false,
-      "identity_status": "confirmed"
-    },
-    {
-      "name": "Tom",
-      "aliases": [],
-      "role": "unknown",
-      "biography": "Crew member who confronts Silver and is killed.",
-      "personality_traits": [
-        "brave"
-      ],
-      "vocal_notes": "unknown",
-      "accent": "not specified in excerpt",
-      "spoken_dialogue": true,
-      "identity_status": "confirmed"
-    },
-    {
-      "name": "Alan",
-      "aliases": [],
-      "role": "unknown",
-      "biography": "Crew member killed by Silver.",
-      "personality_traits": [],
-      "vocal_notes": "unknown",
-      "accent": "not specified in excerpt",
-      "spoken_dialogue": false,
       "identity_status": "confirmed"
     }
   ]

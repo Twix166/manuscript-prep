@@ -7,19 +7,14 @@ EXTRACTION_DATA:
     "Squire Trelawney",
     "Dr. Livesey",
     "the captain",
-    "Jim Hawkins",
-    "my father",
-    "my mother",
-    "the man who trundled the barrow",
-    "the man who came with the barrow"
+    "the old sea-dog"
   ],
   "dialogue_info": {
     "pov": "first-person",
     "dialogue": true,
-    "internal_thought": true,
+    "internal_thought": false,
     "explicitly_attributed_speakers": [
-      "the old sea-dog",
-      "my father"
+      "the old sea-dog"
     ],
     "unattributed_dialogue_present": false
   }

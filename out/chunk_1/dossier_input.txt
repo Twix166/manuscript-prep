@@ -6,8 +6,8 @@ EXTRACTION_DATA:
   "characters": [
     "Dr. Livesey",
     "the captain",
-    "old Taylor",
-    "Black Dog"
+    "Black Dog",
+    "old Taylor"
   ],
   "dialogue_info": {
     "pov": "first-person",
