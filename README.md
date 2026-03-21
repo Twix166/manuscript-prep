@@ -257,7 +257,7 @@ This project uses four separate models, each with a focused responsibility.
 
 ---
 
-'manuscriptprep-structure'
+`manuscriptprep-structure`
 
 Purpose:
 
@@ -279,7 +279,7 @@ Expected output:
 
 ---
 
-'manuscriptprep-dialogue'
+`manuscriptprep-dialogue`
 
 Purpose:
 
@@ -303,7 +303,7 @@ Expected output:
 
 ---
 
-'manuscriptprep-entities'
+`manuscriptprep-entities`
 
 Purpose:
 
@@ -488,6 +488,10 @@ Example goals of the cleaner:
 - preserve chapter titles
 - preserve dialogue punctuation
 - preserve paragraph breaks where possible
+
+``bash
+python ManuscriptTXTCleaner.py input/raw.txt input/clean.txt
+```
 
 Typical output:
 
