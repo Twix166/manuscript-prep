@@ -760,6 +760,230 @@ It is not intended as a creative writing assistant. It is intended as a forensic
 
 ---
 
+## Updated TUI Orchestrator Features
+
+The latest version of the ManuscriptPrep TUI orchestrator adds several operational and observability features that make long manuscript runs much easier to monitor and troubleshoot.
+
+### Live TUI
+The orchestrator includes a live terminal UI that shows the current state of the pipeline while it runs.
+
+It displays:
+
+- current chunk
+- current pass
+- current status
+- current step
+- elapsed time
+- progress across all chunks
+
+This gives you a live view of what the pipeline is doing without needing to inspect the output directory constantly.
+
+---
+
+### Per-Pass Status Updates During Processing
+The TUI updates not only between chunks, but also during active pass execution.
+
+Typical live states include:
+
+- starting structure
+- streaming model stdout
+- waiting for model output
+- writing raw output
+- parsing JSON
+- writing parsed JSON
+- completed pass
+
+This makes it much easier to understand whether the system is actively generating output, waiting on Ollama, parsing JSON, or writing files.
+
+---
+
+### Global Structured Log File
+The orchestrator writes a global structured log in **JSON Lines** format.
+
+Default location:
+
+```text
+out/orchestrator.log.jsonl
+```
+
+Each log line is a valid JSON object, which makes it suitable for ingestion into observability and log analysis tools such as:
+
+- Loki
+- Elasticsearch
+- Splunk
+- Datadog
+- Vector
+- Fluent Bit
+
+Typical events include:
+
+- run start
+- chunk start
+- pass start
+- raw output written
+- parsed JSON written
+- pass success
+- pass retry
+- pass failure
+- chunk failure
+- run complete
+
+Example log line:
+
+```json
+{
+  "timestamp": "2026-03-21T12:34:56.789012+00:00",
+  "level": "INFO",
+  "event_type": "pass_start",
+  "message": "Starting pass",
+  "run_id": "uuid-here",
+  "chunk": "chunk_0",
+  "pass": "dialogue",
+  "step": "starting dialogue",
+  "model": "manuscriptprep-dialogue",
+  "attempt": 1,
+  "pid": 12345
+}
+```
+
+---
+
+### Per-Chunk `error.txt`
+
+If a chunk fails, the orchestrator writes a plain-text error file inside that chunk’s output directory.
+
+Example:
+
+```text
+out/chunk_7/error.txt
+```
+
+This gives you a simple human-readable record of what failed without needing to inspect the global log.
+
+---
+
+### Retry Support
+
+The orchestrator supports automatic retries for failed passes.
+
+For example, if the dialogue pass returns invalid JSON or Ollama exits with an error, the orchestrator can retry the pass before declaring the chunk failed.
+
+This is useful for transient problems such as:
+
+- malformed model output
+- temporary Ollama failures
+- empty stdout
+- JSON extraction problems
+
+Recommended usage:
+
+```bash
+python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out --retries 1
+```
+
+---
+
+### Skip-or-Stop Failure Behavior
+
+When a chunk fails after retries, the orchestrator can be configured to either:
+
+- skip the failed chunk and continue with the rest of the manuscript
+s- top the entire run immediately
+
+Default behavior is usually best set to skip, which is more practical for long manuscripts.
+
+Examples:
+
+Skip failed chunks:
+
+```bash
+python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out --on-failure skip
+```
+
+Stop on first failed chunk:
+
+```bash
+python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out --on-failure stop
+```
+
+---
+
+Failure Summary
+
+At the end of the run, the orchestrator produces a summary of failures.
+
+This includes:
+
+- number of chunks completed
+- number of chunks failed
+- list of failed chunks
+- error messages for each failed chunk
+
+This makes it easier to see whether the run was mostly successful or whether specific chunks need to be rerun.
+
+---
+
+### Approximate Token Speed in the TUI
+
+The TUI Pipeline Status window includes a token speed field.
+
+This is useful for getting a rough sense of model throughput during processing.
+
+The orchestrator can show:
+
+- reported token speed, if Ollama or the model emits a real token/sec value
+- estimated token speed, based on visible streamed stdout
+
+The token speed display helps distinguish between:
+
+- a model that is actively producing output
+- a model that is generating slowly
+- a pass that may be stalled or looping
+
+---
+
+### Notes on Token Speed
+
+Ollama does not reliably expose the true backend evaluation tokens/sec through normal streamed stdout.
+
+Because of that, the orchestrator uses the following logic:
+
+- if a real token/sec value appears in model stdout or stderr, the TUI will display that
+- otherwise, it shows a live estimated output token speed based on visible streamed stdout
+
+This means the displayed value is operationally useful, but it may not exactly match the model’s true backend eval rate.
+
+So the token speed shown in the TUI should be treated as:
+
+- good for monitoring
+- good for spotting stalls or regressions
+- not guaranteed to be a precise benchmark
+
+---
+
+### Recommended Invocation
+
+A good default command for production-style runs is:
+
+
+```bash
+python manuscriptprep_orchestrator_tui.py \
+  --input-dir chunks \
+  --output-dir out \
+  --retries 1 \
+  --on-failure skip
+```
+
+This gives you:
+
+- live TUI monitoring
+- structured JSONL logs
+- retry protection
+- per-chunk error tracking
+- resilient long-run behavior
+
+---
+
 ## Recommended Next Steps
 
 Once per-chunk outputs are stable, the next major improvement is a book-level merger that can:
