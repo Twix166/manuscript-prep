@@ -1,0 +1,6 @@
+{
+  "characters": ["Dr. Livesey", "the squire", "Jim", "Hawkins", "Redruth", "Long John Silver"],
+  "places": ["Bristol", "Admiral Benbow inn", "Old Anchor Inn"],
+  "objects": ["medical scissors", "instrument case", "book", "sealed paper", "thimble", "map", "latitude and longitude", "soundings", "hill", "bay", "inlet", "crag", "sand-hill", "black crag", "east hummock", "north inlet cape", "HISPANIOLA"],
+  "identity_notes": []
+}

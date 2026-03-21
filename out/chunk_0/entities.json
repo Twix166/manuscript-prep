@@ -1,0 +1,29 @@
+{
+  "characters": [
+    "Squire Trelawney",
+    "Dr. Livesey",
+    "the captain"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "Royal George",
+    "the cove",
+    "the cliffs",
+    "the stockade"
+  ],
+  "objects": [
+    "sea-chest",
+    "cutlass",
+    "brass telescope",
+    "handspike",
+    "rum",
+    "bacon and eggs",
+    "fourpenny piece",
+    "gold pieces",
+    "silver fourpenny",
+    "rum and water"
+  ],
+  "identity_notes": [
+    "the old sea-dog and the captain refer to the same individual"
+  ]
+}

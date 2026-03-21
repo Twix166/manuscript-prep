@@ -1,0 +1,6 @@
+{
+  "chapters": ["Chapter VI - The Captainʼs Papers"],
+  "parts": [],
+  "scene_breaks": [],
+  "status": ""
+}

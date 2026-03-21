@@ -1,0 +1,45 @@
+[2026-03-21T21:08:27.058546+00:00] Starting ManuscriptPrep ingest
+[2026-03-21T21:08:27.058888+00:00] Copied source PDF to workspace: work/source/TREASURE-ISLAND-by-Robert-Louis-Stevenson.pdf
+[2026-03-21T21:08:27.340772+00:00] PDF classification: pdf_type=text, needs_ocr=False, native_sample_chars=375645, page_count=142
+[2026-03-21T21:08:27.629561+00:00] Wrote raw text to work/extracted/raw.txt
+[2026-03-21T21:08:27.717805+00:00] Cleaned text: removed_page_markers=0, removed_repeated_headers=34, clean_word_count=70113
+[2026-03-21T21:08:27.718817+00:00] Wrote cleaned text to work/cleaned/clean.txt
+[2026-03-21T21:08:27.720941+00:00] Wrote chunk_000 -> work/chunks/treasure_island/chunk_000.txt (2126 words)
+[2026-03-21T21:08:27.722198+00:00] Wrote chunk_001 -> work/chunks/treasure_island/chunk_001.txt (2106 words)
+[2026-03-21T21:08:27.723359+00:00] Wrote chunk_002 -> work/chunks/treasure_island/chunk_002.txt (2137 words)
+[2026-03-21T21:08:27.724524+00:00] Wrote chunk_003 -> work/chunks/treasure_island/chunk_003.txt (2128 words)
+[2026-03-21T21:08:27.725643+00:00] Wrote chunk_004 -> work/chunks/treasure_island/chunk_004.txt (1985 words)
+[2026-03-21T21:08:27.726601+00:00] Wrote chunk_005 -> work/chunks/treasure_island/chunk_005.txt (1863 words)
+[2026-03-21T21:08:27.727834+00:00] Wrote chunk_006 -> work/chunks/treasure_island/chunk_006.txt (1937 words)
+[2026-03-21T21:08:27.728968+00:00] Wrote chunk_007 -> work/chunks/treasure_island/chunk_007.txt (1916 words)
+[2026-03-21T21:08:27.730007+00:00] Wrote chunk_008 -> work/chunks/treasure_island/chunk_008.txt (1780 words)
+[2026-03-21T21:08:27.731117+00:00] Wrote chunk_009 -> work/chunks/treasure_island/chunk_009.txt (1999 words)
+[2026-03-21T21:08:27.732274+00:00] Wrote chunk_010 -> work/chunks/treasure_island/chunk_010.txt (2094 words)
+[2026-03-21T21:08:27.733377+00:00] Wrote chunk_011 -> work/chunks/treasure_island/chunk_011.txt (1978 words)
+[2026-03-21T21:08:27.734478+00:00] Wrote chunk_012 -> work/chunks/treasure_island/chunk_012.txt (1884 words)
+[2026-03-21T21:08:27.735571+00:00] Wrote chunk_013 -> work/chunks/treasure_island/chunk_013.txt (2020 words)
+[2026-03-21T21:08:27.736539+00:00] Wrote chunk_014 -> work/chunks/treasure_island/chunk_014.txt (2016 words)
+[2026-03-21T21:08:27.737626+00:00] Wrote chunk_015 -> work/chunks/treasure_island/chunk_015.txt (1991 words)
+[2026-03-21T21:08:27.738726+00:00] Wrote chunk_016 -> work/chunks/treasure_island/chunk_016.txt (2074 words)
+[2026-03-21T21:08:27.739602+00:00] Wrote chunk_017 -> work/chunks/treasure_island/chunk_017.txt (1520 words)
+[2026-03-21T21:08:27.740762+00:00] Wrote chunk_018 -> work/chunks/treasure_island/chunk_018.txt (2068 words)
+[2026-03-21T21:08:27.741854+00:00] Wrote chunk_019 -> work/chunks/treasure_island/chunk_019.txt (1936 words)
+[2026-03-21T21:08:27.742873+00:00] Wrote chunk_020 -> work/chunks/treasure_island/chunk_020.txt (1993 words)
+[2026-03-21T21:08:27.743913+00:00] Wrote chunk_021 -> work/chunks/treasure_island/chunk_021.txt (2052 words)
+[2026-03-21T21:08:27.744795+00:00] Wrote chunk_022 -> work/chunks/treasure_island/chunk_022.txt (1773 words)
+[2026-03-21T21:08:27.745822+00:00] Wrote chunk_023 -> work/chunks/treasure_island/chunk_023.txt (2025 words)
+[2026-03-21T21:08:27.746713+00:00] Wrote chunk_024 -> work/chunks/treasure_island/chunk_024.txt (1751 words)
+[2026-03-21T21:08:27.747853+00:00] Wrote chunk_025 -> work/chunks/treasure_island/chunk_025.txt (2129 words)
+[2026-03-21T21:08:27.748899+00:00] Wrote chunk_026 -> work/chunks/treasure_island/chunk_026.txt (2141 words)
+[2026-03-21T21:08:27.749810+00:00] Wrote chunk_027 -> work/chunks/treasure_island/chunk_027.txt (1943 words)
+[2026-03-21T21:08:27.750740+00:00] Wrote chunk_028 -> work/chunks/treasure_island/chunk_028.txt (1816 words)
+[2026-03-21T21:08:27.751839+00:00] Wrote chunk_029 -> work/chunks/treasure_island/chunk_029.txt (2191 words)
+[2026-03-21T21:08:27.752799+00:00] Wrote chunk_030 -> work/chunks/treasure_island/chunk_030.txt (1852 words)
+[2026-03-21T21:08:27.753876+00:00] Wrote chunk_031 -> work/chunks/treasure_island/chunk_031.txt (2110 words)
+[2026-03-21T21:08:27.754840+00:00] Wrote chunk_032 -> work/chunks/treasure_island/chunk_032.txt (1841 words)
+[2026-03-21T21:08:27.755876+00:00] Wrote chunk_033 -> work/chunks/treasure_island/chunk_033.txt (1883 words)
+[2026-03-21T21:08:27.757002+00:00] Wrote chunk_034 -> work/chunks/treasure_island/chunk_034.txt (2015 words)
+[2026-03-21T21:08:27.757497+00:00] Wrote chunk_035 -> work/chunks/treasure_island/chunk_035.txt (1040 words)
+[2026-03-21T21:08:27.758241+00:00] Wrote chunk manifest to work/manifests/chunk_manifest.json
+[2026-03-21T21:08:27.758285+00:00] Wrote ingest manifest to work/manifests/ingest_manifest.json
+[2026-03-21T21:08:27.758314+00:00] Ingest complete

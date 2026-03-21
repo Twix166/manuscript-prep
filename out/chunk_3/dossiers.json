@@ -1,0 +1,104 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A weak, drunken man with a cutlass, frequently seen in the bar and parlour. He is described as physically declining, prone to fits of temper, and occasionally sings a sea-song.",
+      "personality_traits": [
+        "volatile",
+        "impulsive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A figure seen by the narrator on the road, associated with the captain's crew. No further description is provided.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the blind beggar",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A blind, elderly man dressed in a tattered sea-cloak. He uses a stick and speaks in a sing-song tone, demanding assistance to find the captain.",
+      "personality_traits": [
+        "intimidating",
+        "harsh"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Doctor Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A physician mentioned as being away from the house after the narrator's father's death. No further details are provided.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "my mother",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The narrator's mother, who accompanies him in seeking help after the captain's death. She displays determination and resolve.",
+      "personality_traits": [
+        "resolute",
+        "protective"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The first-person narrator, who interacts with the blind beggar and the captain. Described as terrified and obedient to the blind man's commands.",
+      "personality_traits": [
+        "fearful",
+        "dutiful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mrs. Crossley",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A local woman who provides a loaded pistol and promises assistance to the narrator and his mother.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A physician who was suddenly occupied with a case and did not return to the house after the narrator's father's death.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

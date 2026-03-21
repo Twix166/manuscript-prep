@@ -1,0 +1,103 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the captain",
+      "aliases": [
+        "Billy Bones"
+      ],
+      "role": "unknown",
+      "biography": "Injured in a fight with Black Dog, later suffers a stroke after drinking rum. Refers to himself as Billy Bones.",
+      "personality_traits": [
+        "impulsive",
+        "erratic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "identity uncertain"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Assists the captain, fetches rum, and interacts with Doctor Livesey. Witnesses the captain's condition.",
+      "personality_traits": [
+        "cautious",
+        "obedient"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Doctor Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Treats the captain for a stroke, draws blood, and warns him about rum.",
+      "personality_traits": [
+        "authoritative",
+        "professional"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "my mother",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Helps the captain after the fight and expresses distress over the situation.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "my father",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Sick and involved in the aftermath of the captain's incident.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Fugitive pursued by the captain, injured in a fight with the captain.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "old Flint",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned by the captain as a seafaring man and a former captain.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "identity uncertain"
+    },
+    {
+      "name": "Billy Bones",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Alias used by the captain, referenced in the doctor's dialogue.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "identity uncertain"
+    }
+  ]
+}
