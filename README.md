@@ -760,7 +760,7 @@ It is not intended as a creative writing assistant. It is intended as a forensic
 
 ---
 
-## Updated TUI Orchestrator Features
+## TUI Orchestrator Features
 
 The latest version of the ManuscriptPrep TUI orchestrator adds several operational and observability features that make long manuscript runs much easier to monitor and troubleshoot.
 

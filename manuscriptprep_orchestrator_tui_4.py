@@ -18,14 +18,22 @@ Expected Ollama models:
 
 Features:
 - Rich TUI with live pass/chunk status
-- Structured JSONL log for observability
+- Global structured JSONL log for observability
 - Per-chunk error files
 - Retry support per pass
 - Skip or fail-fast behavior
-- Idle timeout watchdog
-- Hard timeout watchdog
 - Approximate token speed display
-- Natural sorting of chunk files
+- Raw output capture and parsed JSON output
+
+Usage:
+    python manuscriptprep_orchestrator_tui.py --input chunk_0.txt --output-dir out
+    python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out
+
+Examples:
+    python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out
+    python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out --retries 1 --on-failure skip
+    python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out --on-failure stop
+    python manuscriptprep_orchestrator_tui.py --input-dir chunks --output-dir out --no-tui
 """
 
 from __future__ import annotations
@@ -35,7 +43,6 @@ import json
 import os
 import queue
 import re
-import signal
 import subprocess
 import sys
 import threading
@@ -58,7 +65,14 @@ DIALOGUE_MODEL = "manuscriptprep-dialogue"
 ENTITIES_MODEL = "manuscriptprep-entities"
 DOSSIERS_MODEL = "manuscriptprep-dossiers"
 
+PASS_SEQUENCE = [
+    ("structure", STRUCTURE_MODEL),
+    ("dialogue", DIALOGUE_MODEL),
+    ("entities", ENTITIES_MODEL),
+    ("dossiers", DOSSIERS_MODEL),
+]
 
+# Regexes for a possible real token/s number in output, if present.
 TPS_PATTERNS = [
     re.compile(r"(?i)\b(eval(?:uation)?(?:\s+rate)?|tokens?/s|tok/s)\s*[:=]?\s*([0-9]+(?:\.[0-9]+)?)"),
     re.compile(r"(?i)\b([0-9]+(?:\.[0-9]+)?)\s*(?:tokens?/s|tok/s)\b"),
@@ -69,17 +83,6 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def natural_key(path: Path) -> List[Any]:
-    parts = re.split(r"(\d+)", path.name)
-    key: List[Any] = []
-    for p in parts:
-        if p.isdigit():
-            key.append(int(p))
-        else:
-            key.append(p.lower())
-    return key
-
-
 @dataclass
 class TUIState:
     current_chunk: str = "-"
@@ -87,20 +90,13 @@ class TUIState:
     pass_status: str = "idle"
     current_step: str = "-"
     pass_started_at: Optional[float] = None
-
     chunks_total: int = 0
     chunks_completed: int = 0
     chunks_failed: int = 0
-
     retries_used: int = 0
-
     estimated_tps: Optional[float] = None
     real_tps: Optional[float] = None
     stdout_token_count: int = 0
-
-    last_stdout_at: Optional[float] = None
-    last_stderr_at: Optional[float] = None
-
     orchestrator_log: List[str] = field(default_factory=list)
     model_stdout_lines: List[str] = field(default_factory=list)
     model_stderr_lines: List[str] = field(default_factory=list)
@@ -113,12 +109,10 @@ class TUIState:
     def append_stdout(self, line: str) -> None:
         self.model_stdout_lines.append(line.rstrip("\n"))
         self.model_stdout_lines = self.model_stdout_lines[-500:]
-        self.last_stdout_at = time.time()
 
     def append_stderr(self, line: str) -> None:
         self.model_stderr_lines.append(line.rstrip("\n"))
         self.model_stderr_lines = self.model_stderr_lines[-250:]
-        self.last_stderr_at = time.time()
 
 
 class JsonlLogger:
@@ -160,13 +154,9 @@ class JsonlLogger:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
-class PassTimeoutError(RuntimeError):
-    pass
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run a 4-pass manuscript pipeline with a live terminal UI and timeouts."
+        description="Run a 4-pass manuscript pipeline with a live terminal UI and structured logging."
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--input", type=Path, help="Single chunk text file")
@@ -188,18 +178,6 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=None,
         help="Structured JSONL log file path. Defaults to <output-dir>/orchestrator.log.jsonl",
-    )
-    parser.add_argument(
-        "--idle-timeout",
-        type=int,
-        default=120,
-        help="Seconds with no stdout/stderr before pass is treated as stalled",
-    )
-    parser.add_argument(
-        "--hard-timeout",
-        type=int,
-        default=900,
-        help="Maximum total seconds allowed for a single pass",
     )
     return parser.parse_args()
 
@@ -239,7 +217,7 @@ def collect_inputs(args: argparse.Namespace) -> List[Path]:
     if not args.input_dir.is_dir():
         raise RuntimeError(f"Input directory does not exist: {args.input_dir}")
 
-    files = sorted(args.input_dir.glob(args.glob), key=natural_key)
+    files = sorted(args.input_dir.glob(args.glob))
     if not files:
         raise RuntimeError(f"No files matched {args.glob} in {args.input_dir}")
     return files
@@ -267,6 +245,8 @@ def stream_reader(pipe, target_queue: queue.Queue, stream_name: str) -> None:
 
 
 def approx_token_count(text: str) -> int:
+    # Very rough token estimate for live UI only.
+    # Good enough operationally; not an exact model token count.
     return len(re.findall(r"\S+", text))
 
 
@@ -274,34 +254,13 @@ def extract_tps_from_text(text: str) -> Optional[float]:
     for pattern in TPS_PATTERNS:
         m = pattern.search(text)
         if m:
+            # Some regexes have 2 groups, some 1.
             for g in reversed(m.groups()):
                 try:
                     return float(g)
                 except (TypeError, ValueError):
                     continue
     return None
-
-
-def fmt_age(ts: Optional[float]) -> str:
-    if ts is None:
-        return "-"
-    return f"{max(0.0, time.time() - ts):.1f}s"
-
-
-def kill_process_tree(proc: subprocess.Popen) -> None:
-    try:
-        if proc.poll() is None:
-            proc.terminate()
-            try:
-                proc.wait(timeout=3)
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                proc.wait(timeout=3)
-    except Exception:
-        try:
-            proc.kill()
-        except Exception:
-            pass
 
 
 def render_tui(state: TUIState):
@@ -331,8 +290,6 @@ def render_tui(state: TUIState):
     status_table.add_row("Progress", progress)
     status_table.add_row("Retries", str(state.retries_used))
     status_table.add_row("Token speed", tps_display)
-    status_table.add_row("Last stdout", fmt_age(state.last_stdout_at))
-    status_table.add_row("Last stderr", fmt_age(state.last_stderr_at))
 
     orchestrator_text = Text("\n".join(state.orchestrator_log[-30:]) or "(no log yet)")
     stdout_text = Text("\n".join(state.model_stdout_lines[-40:]) or "(no model stdout yet)")
@@ -363,16 +320,12 @@ def run_ollama_streaming(
     chunk_name: str,
     pass_name: str,
     attempt: int,
-    idle_timeout: int,
-    hard_timeout: int,
 ) -> str:
     state.model_stdout_lines.clear()
     state.model_stderr_lines.clear()
     state.stdout_token_count = 0
     state.estimated_tps = None
     state.real_tps = None
-    state.last_stdout_at = None
-    state.last_stderr_at = None
     state.current_step = "launching model"
 
     logger.emit(
@@ -384,7 +337,6 @@ def run_ollama_streaming(
         step=state.current_step,
         model=model,
         attempt=attempt,
-        extra={"idle_timeout_s": idle_timeout, "hard_timeout_s": hard_timeout},
     )
 
     if live is not None:
@@ -417,60 +369,18 @@ def run_ollama_streaming(
     proc.stdin.write(prompt_text)
     proc.stdin.close()
 
-    started_at = time.time()
-    last_activity_at = started_at
-
     collected_stdout: List[str] = []
     collected_stderr: List[str] = []
 
     while True:
-        now = time.time()
-
-        if hard_timeout > 0 and (now - started_at) > hard_timeout:
-            state.current_step = "hard timeout reached"
-            logger.emit(
-                level="ERROR",
-                event_type="pass_hard_timeout",
-                message="Hard timeout reached; killing process",
-                chunk=chunk_name,
-                pass_name=pass_name,
-                step=state.current_step,
-                model=model,
-                attempt=attempt,
-                extra={"elapsed_s": now - started_at},
-            )
-            kill_process_tree(proc)
-            raise PassTimeoutError(
-                f"Hard timeout exceeded for {pass_name} on {chunk_name} after {hard_timeout}s"
-            )
-
-        if idle_timeout > 0 and (now - last_activity_at) > idle_timeout:
-            state.current_step = "idle timeout reached"
-            logger.emit(
-                level="ERROR",
-                event_type="pass_idle_timeout",
-                message="Idle timeout reached; killing process",
-                chunk=chunk_name,
-                pass_name=pass_name,
-                step=state.current_step,
-                model=model,
-                attempt=attempt,
-                extra={"idle_s": now - last_activity_at, "elapsed_s": now - started_at},
-            )
-            kill_process_tree(proc)
-            raise PassTimeoutError(
-                f"Idle timeout exceeded for {pass_name} on {chunk_name} after {idle_timeout}s with no output"
-            )
-
         try:
-            stream_name, line = q.get(timeout=0.2)
-            last_activity_at = time.time()
+            stream_name, line = q.get(timeout=0.1)
 
             if stream_name == "stdout":
                 collected_stdout.append(line)
                 state.append_stdout(line)
-                state.current_step = "streaming model stdout"
                 state.stdout_token_count += approx_token_count(line)
+                state.current_step = "streaming model stdout"
 
                 maybe_real_tps = extract_tps_from_text(line)
                 if maybe_real_tps is not None:
@@ -509,6 +419,7 @@ def run_ollama_streaming(
     stdout_text = "".join(collected_stdout).strip()
     stderr_text = "".join(collected_stderr).strip()
 
+    # One last chance to detect a real tok/s line from full output.
     if state.real_tps is None:
         maybe_real_tps = extract_tps_from_text(stdout_text + "\n" + stderr_text)
         if maybe_real_tps is not None:
@@ -557,7 +468,6 @@ def run_ollama_streaming(
             "reported_tps": state.real_tps,
             "stdout_chars": len(stdout_text),
             "stderr_chars": len(stderr_text),
-            "elapsed_s": time.time() - started_at,
         },
     )
 
@@ -577,8 +487,6 @@ def process_pass_once(
     logger: JsonlLogger,
     chunk_name: str,
     attempt: int,
-    idle_timeout: int,
-    hard_timeout: int,
 ) -> Dict[str, Any]:
     state.current_pass = pass_name
     state.pass_status = "running"
@@ -611,8 +519,6 @@ def process_pass_once(
         chunk_name=chunk_name,
         pass_name=pass_name,
         attempt=attempt,
-        idle_timeout=idle_timeout,
-        hard_timeout=hard_timeout,
     )
 
     state.current_step = "writing raw output"
@@ -691,8 +597,6 @@ def process_pass_with_retries(
     logger: JsonlLogger,
     chunk_name: str,
     retries: int,
-    idle_timeout: int,
-    hard_timeout: int,
 ) -> Dict[str, Any]:
     last_exc: Optional[Exception] = None
 
@@ -710,15 +614,12 @@ def process_pass_with_retries(
                 logger=logger,
                 chunk_name=chunk_name,
                 attempt=attempt,
-                idle_timeout=idle_timeout,
-                hard_timeout=hard_timeout,
             )
         except Exception as exc:
             last_exc = exc
             state.pass_status = "retrying" if attempt <= retries else "failed"
             state.current_step = "handling error"
             state.log(f"ERROR in pass {pass_name} attempt={attempt}: {exc}")
-
             logger.emit(
                 level="ERROR",
                 event_type="pass_error",
@@ -729,7 +630,6 @@ def process_pass_with_retries(
                 model=model,
                 attempt=attempt,
             )
-
             if live is not None:
                 live.update(render_tui(state), refresh=True)
 
@@ -761,8 +661,6 @@ def process_chunk(
     live: Optional[Live],
     logger: JsonlLogger,
     retries: int,
-    idle_timeout: int,
-    hard_timeout: int,
 ) -> None:
     chunk_name = chunk_path.stem
     state.current_chunk = chunk_name
@@ -773,8 +671,6 @@ def process_chunk(
     state.retries_used = 0
     state.estimated_tps = None
     state.real_tps = None
-    state.last_stdout_at = None
-    state.last_stderr_at = None
 
     state.log(f"Processing chunk: {chunk_path}")
     logger.emit(
@@ -816,8 +712,6 @@ def process_chunk(
         logger=logger,
         chunk_name=chunk_name,
         retries=retries,
-        idle_timeout=idle_timeout,
-        hard_timeout=hard_timeout,
     )
 
     dialogue_json = process_pass_with_retries(
@@ -832,8 +726,6 @@ def process_chunk(
         logger=logger,
         chunk_name=chunk_name,
         retries=retries,
-        idle_timeout=idle_timeout,
-        hard_timeout=hard_timeout,
     )
 
     entities_json = process_pass_with_retries(
@@ -848,8 +740,6 @@ def process_chunk(
         logger=logger,
         chunk_name=chunk_name,
         retries=retries,
-        idle_timeout=idle_timeout,
-        hard_timeout=hard_timeout,
     )
 
     state.current_step = "building dossier input"
@@ -871,7 +761,7 @@ def process_chunk(
         extra={"path": str(dossier_input_path)},
     )
 
-    _ = structure_json
+    _ = structure_json  # reserved for future use
 
     process_pass_with_retries(
         ollama_bin=ollama_bin,
@@ -885,8 +775,6 @@ def process_chunk(
         logger=logger,
         chunk_name=chunk_name,
         retries=retries,
-        idle_timeout=idle_timeout,
-        hard_timeout=hard_timeout,
     )
 
     state.pass_status = "chunk complete"
@@ -912,7 +800,10 @@ def write_chunk_error(chunk_dir: Path, chunk_name: str, exc: Exception) -> None:
     write_text(error_path, f"[{utc_now_iso()}] {chunk_name}: {exc}\n")
 
 
-def run_plain(args: argparse.Namespace, logger: JsonlLogger) -> int:
+def run_plain(
+    args: argparse.Namespace,
+    logger: JsonlLogger,
+) -> int:
     state = TUIState()
     try:
         chunk_files = collect_inputs(args)
@@ -928,8 +819,6 @@ def run_plain(args: argparse.Namespace, logger: JsonlLogger) -> int:
                 "output_dir": str(args.output_dir),
                 "retries": args.retries,
                 "on_failure": args.on_failure,
-                "idle_timeout_s": args.idle_timeout,
-                "hard_timeout_s": args.hard_timeout,
             },
         )
 
@@ -943,8 +832,6 @@ def run_plain(args: argparse.Namespace, logger: JsonlLogger) -> int:
                     live=None,
                     logger=logger,
                     retries=args.retries,
-                    idle_timeout=args.idle_timeout,
-                    hard_timeout=args.hard_timeout,
                 )
             except Exception as exc:
                 state.chunks_failed += 1
@@ -1022,8 +909,6 @@ def main() -> int:
             "retries": args.retries,
             "on_failure": args.on_failure,
             "log_file": str(log_path),
-            "idle_timeout_s": args.idle_timeout,
-            "hard_timeout_s": args.hard_timeout,
         },
     )
 
@@ -1039,8 +924,6 @@ def main() -> int:
                         live=live,
                         logger=logger,
                         retries=args.retries,
-                        idle_timeout=args.idle_timeout,
-                        hard_timeout=args.hard_timeout,
                     )
                 except Exception as exc:
                     failures.append(f"{chunk_path.name}: {exc}")
