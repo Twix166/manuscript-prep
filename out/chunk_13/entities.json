@@ -1,0 +1,29 @@
+{
+  "characters": [
+    "Jim",
+    "Silver",
+    "Long John Silver",
+    "Tom",
+    "Alan"
+  ],
+  "places": [
+    "the Spy-glass",
+    "the island",
+    "the anchorage",
+    "the marsh",
+    "the fen",
+    "the thicket"
+  ],
+  "objects": [
+    "the boat",
+    "the bow oar",
+    "the crutch",
+    "the knife",
+    "the hat",
+    "the branch",
+    "the gun"
+  ],
+  "identity_notes": [
+    "Silver and Long John Silver refer to the same character"
+  ]
+}

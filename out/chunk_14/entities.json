@@ -1,0 +1,40 @@
+{
+  "characters": [
+    "Jim",
+    "Ben Gunn",
+    "Silver",
+    "Long John",
+    "Flint",
+    "the squire",
+    "the doctor"
+  ],
+  "places": [
+    "Treasure Island",
+    "the marsh",
+    "the hill with the two peaks"
+  ],
+  "objects": [
+    "pistol",
+    "cheese",
+    "brass buttons",
+    "bits of stick",
+    "loops of tarry gaskin",
+    "brass-buckled leather belt",
+    "goats",
+    "berries",
+    "oysters",
+    "powder and shot",
+    "cutlass",
+    "sea-chest",
+    "whistle",
+    "knife",
+    "wisp of grass",
+    "jacket",
+    "boots",
+    "torn ship’s canvas",
+    "sea-cloth"
+  ],
+  "identity_notes": [
+    "Long John and Silver refer to the same character"
+  ]
+}

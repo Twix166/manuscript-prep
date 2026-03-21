@@ -1,0 +1,15 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Dick",
+    "Silver",
+    "Israel",
+    "cook",
+    "coxswain",
+    "Dr. Livesey",
+    "Captain Smollett"
+  ],
+  "unattributed_dialogue_present": false
+}

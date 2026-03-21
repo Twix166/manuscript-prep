@@ -1,0 +1,17 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Long John",
+    "the squire",
+    "Dr. Livesey",
+    "the captain",
+    "Mr. Trelawney",
+    "the doctor",
+    "Silver",
+    "Anderson",
+    "Jim Hawkins"
+  ],
+  "unattributed_dialogue_present": false
+}

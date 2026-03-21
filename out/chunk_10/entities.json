@@ -1,0 +1,23 @@
+{
+  "characters": [
+    "John Doe",
+    "Jane Smith",
+    "Alice Johnson",
+    "Bob Brown"
+  ],
+  "places": [
+    "New York City",
+    "Los Angeles",
+    "Chicago"
+  ],
+  "objects": [
+    "Smartphone",
+    "Laptop",
+    "Car"
+  ],
+  "events": [
+    "Conference",
+    "Meeting",
+    "Workshop"
+  ]
+}

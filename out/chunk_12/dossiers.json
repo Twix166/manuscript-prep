@@ -1,0 +1,140 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member who navigates the ship and oversees the passage to the island.",
+      "personality_traits": [
+        "leadership",
+        "caution"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A narrator and cabin party member who reports Silver's conversation.",
+      "personality_traits": [
+        "courage"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A cabin party member who smokes and expresses concern about fever.",
+      "personality_traits": [
+        "agitation"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A cabin party member who acknowledges his men and expresses distrust.",
+      "personality_traits": [
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A cabin party member who strategizes and addresses mutiny.",
+      "personality_traits": [
+        "strategic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member suspected of mutiny and described as a remarkable man.",
+      "personality_traits": [
+        "ambiguity"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member trusted by the squire but suspected of mutiny.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Anderson",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A boat commander who grumbles about the island's effects on discipline.",
+      "personality_traits": [
+        "grumpiness"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A cabin party member armed with a pistol for mutiny prevention.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Joyce",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A cabin party member armed with a pistol for mutiny prevention.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A cabin party member armed with a pistol for mutiny prevention.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

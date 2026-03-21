@@ -1,0 +1,46 @@
+{
+  "characters": [
+    "Jim Hawkins",
+    "the squire",
+    "Captain Smollett",
+    "Mr. Hands",
+    "Redruth",
+    "Hunter",
+    "Joyce",
+    "Long John",
+    "Billy Bones",
+    "Benjamin Gunn"
+  ],
+  "places": [
+    "the island",
+    "the anchorage",
+    "the stockade",
+    "the knoll",
+    "the spring",
+    "the cemetery"
+  ],
+  "objects": [
+    "cutlass",
+    "sea-chest",
+    "musket",
+    "spade",
+    "pick-axe",
+    "cannon",
+    "small arms",
+    "Union Jack",
+    "HISPANIOLA",
+    "WALRUS",
+    "medicine chest",
+    "powder tins",
+    "bags of biscuits",
+    "kegs of pork",
+    "cask of cognac",
+    "silk handkerchief",
+    "pistols",
+    "mattress",
+    "brace of pistols"
+  ],
+  "identity_notes": [
+    "the marooned man and Benjamin Gunn refer to the same entity"
+  ]
+}
