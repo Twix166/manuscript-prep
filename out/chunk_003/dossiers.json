@@ -1,0 +1,71 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the stranger",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A man who lingers near the inn door, interacts with the narrator, and confronts the captain. Described as having a tallowy face and a cutlass.",
+      "personality_traits": [
+        "intimidating",
+        "manipulative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A man with two missing talons who arrives at the inn and engages in a confrontation with the captain. Refers to himself as Black Dog.",
+      "personality_traits": [
+        "confrontational",
+        "assertive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A man who fights with Black Dog, sustains a wound, and later reeling from alcohol. Referred to as 'Bill' by Black Dog.",
+      "personality_traits": [
+        "aggressive",
+        "impulsive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Bill",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The captain's name, referred to by Black Dog. Identified as the same individual as the captain.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The first-person narrator who observes interactions at the inn, fetches rum, and witnesses the captain's altercation.",
+      "personality_traits": [
+        "observant",
+        "nervous"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

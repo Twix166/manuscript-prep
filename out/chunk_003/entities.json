@@ -1,0 +1,24 @@
+{
+  "characters": [
+    "the stranger",
+    "Black Dog",
+    "the captain",
+    "Bill",
+    "Jim"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "parlour",
+    "bar"
+  ],
+  "objects": [
+    "cutlass",
+    "signboard",
+    "glass",
+    "tap"
+  ],
+  "identity_notes": [
+    "the stranger and Black Dog are the same entity",
+    "the captain and Bill are the same entity"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Squire Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the group that asked the narrator to write about Treasure Island.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the group that asked the narrator to write about Treasure Island.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "my father",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Owner of the Admiral Benbow inn.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the old sea-dog",
+      "aliases": [
+        "Captain"
+      ],
+      "role": "unknown",
+      "biography": "Tall, strong, heavy, nut-brown man with a sabre cut. Sings a sea-song, drinks rum, and stays at the inn.",
+      "personality_traits": [
+        "reserved",
+        "practical"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the brown old seaman",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Described as the same as the old sea-dog, with a sabre cut.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Refers to himself as Captain. Speaks to the narrator about lodging and rum.",
+      "personality_traits": [
+        "commanding"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

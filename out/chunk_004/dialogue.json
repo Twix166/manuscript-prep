@@ -1,0 +1,12 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Doctor Livesey",
+    "my mother",
+    "the captain",
+    "Jim"
+  ],
+  "unattributed_dialogue_present": false
+}
