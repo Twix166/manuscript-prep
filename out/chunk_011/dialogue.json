@@ -1,0 +1,10 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "squire",
+    "doctor"
+  ],
+  "unattributed_dialogue_present": false
+}

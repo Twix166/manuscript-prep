@@ -1,0 +1,65 @@
+{
+  "character_dossiers": [
+    {
+      "name": "my mother",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A woman who retrieves a bundle of papers and a canvas bag containing gold from a chest, engages in a count of coins, and argues over the amount owed to her.",
+      "personality_traits": [
+        "determined",
+        "honest"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "I",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A first-person narrator who assists their mother in counting coins, intervenes during a tense moment with the blind man, and helps their mother escape.",
+      "personality_traits": [
+        "resourceful",
+        "impulsive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the blind man",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A figure whose tapping stick and attempts to enter an inn create tension during the scene.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mrs. Crossley",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A woman whose bag is counted by the narrator's mother as part of the coin distribution.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A figure associated with the gold and coins counted by the narrator's mother.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

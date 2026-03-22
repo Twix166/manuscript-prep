@@ -1,0 +1,11 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "the blind man",
+    "the man from the window",
+    "the fellow who had remained below"
+  ],
+  "unattributed_dialogue_present": false
+}
