@@ -1,0 +1,27 @@
+{
+  "characters": [
+    "the blind man",
+    "Bill",
+    "Doctor Livesey",
+    "my mother",
+    "Black Dog",
+    "the blind beggar"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "Black Hill Cove",
+    "the hamlet",
+    "the next cove"
+  ],
+  "objects": [
+    "cutlass",
+    "sea-chest",
+    "stick",
+    "rum",
+    "coals",
+    "clock"
+  ],
+  "identity_notes": [
+    "the blind man and the blind beggar may refer to the same entity"
+  ]
+}

@@ -1145,20 +1145,128 @@ This makes progress reporting easier to understand and keeps the run aligned wit
 
 ---
 
-## Recommended Invocation
+## Adaptive Idle Timeout Backoff
 
-A good default command for production-style runs is:
+The orchestrator now supports **adaptive idle-timeout backoff** for retries.
 
+This feature is designed to reduce failures on chunks or passes that are slow to begin emitting visible output but are not truly broken.
+
+### Why this is needed
+
+Some local model passes can be slow to produce their first visible stdout, especially when:
+
+- the chunk is large or noisy
+- the dossier pass is especially heavy
+- the model spends time in visible reasoning before returning JSON
+- system load varies between chunks
+
+A fixed idle timeout can therefore be too strict.  
+If the timeout is too low, the orchestrator may kill a pass that would have succeeded if given a little more time.
+
+---
+
+### How adaptive idle-timeout backoff works
+
+The orchestrator starts each pass with a base idle timeout.
+
+If a pass fails specifically because of an **idle timeout**, the next retry increases the idle timeout by a configurable multiplier.
+
+For example, with:
+
+- base idle timeout = `180`
+- backoff multiplier = `1.5`
+- retries = `2`
+
+the retry sequence becomes:
+
+- attempt 1 → `180s`
+- attempt 2 → `270s`
+- attempt 3 → `405s`
+
+This gives slow-starting passes a better chance of succeeding without forcing every pass to use an excessively large timeout from the beginning.
+
+---
+
+### Important behavior
+
+Idle-timeout backoff is applied **only** when the previous failure was caused by an **idle timeout**.
+
+It is **not** applied for other failure types such as:
+
+- invalid JSON
+- empty model output
+- non-zero Ollama exit
+- hard timeout
+- parsing failure
+
+This keeps retries targeted and avoids unnecessarily extending timeouts for unrelated problems.
+
+---
+
+### Maximum idle-timeout cap
+
+To prevent the idle timeout from growing without bound, the orchestrator also supports a maximum cap.
+
+For example:
+
+- base idle timeout = `180`
+- backoff multiplier = `1.5`
+- max idle timeout = `600`
+
+This ensures that retries remain reasonable even if a pass stalls multiple times.
+
+---
+
+### TUI support
+
+The TUI now shows the current idle-timeout state for the active pass.
+
+The **Pipeline Status** panel includes:
+
+- current effective idle timeout
+- number of idle-timeout backoffs applied for the current pass
+
+This makes it easier to see whether a retry is simply being rerun with the same configuration or whether the timeout has been expanded because of a previous idle-timeout failure.
+
+---
+
+### Structured logging support
+
+The structured JSONL log also records the effective idle timeout used for each attempt.
+
+This makes it possible to trace:
+
+- which retry used which timeout
+- whether a retry was triggered by an idle-timeout failure
+- whether the timeout increased between attempts
+
+Example fields written into the log include:
+
+- `idle_timeout_s`
+- `idle_timeout_failures_for_pass`
+- `previous_idle_timeout_s`
+- `next_idle_timeout_s`
+
+This is useful for observability and later tuning.
+
+---
+
+### Recommended invocation
+
+A good default configuration for long manuscript runs is:
 
 ```bash
 python manuscriptprep_orchestrator_tui.py \
-  --input-dir chunks \
-  --output-dir out \
-  --retries 1 \
+  --input-dir chunks/treasure_island \
+  --output-dir out/treasure_island \
+  --retries 2 \
   --on-failure skip \
-  --idle-timeout 90 \
-  --hard-timeout 600
+  --idle-timeout 180 \
+  --idle-timeout-backoff 1.5 \
+  --max-idle-timeout 600 \
+  --hard-timeout 900
 ```
+
 
 This gives you:
 
@@ -1169,6 +1277,7 @@ This gives you:
 - idle stall detection
 - hard timeout protection
 - resilient long-run behavior
+- idle-timeout-backoff
 
 ---
 
