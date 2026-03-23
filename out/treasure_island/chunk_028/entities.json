@@ -1,0 +1,43 @@
+{
+  "characters": [
+    "the captain",
+    "the squire",
+    "Hunter",
+    "Jim Hawkins",
+    "Silver",
+    "Redruth",
+    "Joyce",
+    "Mr. Hands"
+  ],
+  "places": [
+    "the HISPANIOLA",
+    "stockade",
+    "knoll",
+    "spring",
+    "log-house",
+    "forecastle",
+    "cabin",
+    "stern-port",
+    "fore companion",
+    "anchorage",
+    "river"
+  ],
+  "objects": [
+    "jolly-boat",
+    "medicine chest",
+    "powder tins",
+    "muskets",
+    "biscuits",
+    "pork",
+    "cognac",
+    "silk handkerchief",
+    "pistols",
+    "mattress",
+    "oars",
+    "sail",
+    "paling"
+  ],
+  "identity_notes": [
+    "HISPANIOLA and schooner may refer to the same ship"
+  ]
+}

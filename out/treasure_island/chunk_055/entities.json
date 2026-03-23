@@ -1,0 +1,43 @@
+{
+  "characters": [
+    "Dr. Livesey",
+    "Silver",
+    "Captain Flint",
+    "the doctor",
+    "Long John",
+    "old Morgan",
+    "George Merry",
+    "Tom Morgan",
+    "Allardyce",
+    "the sea-cook"
+  ],
+  "places": [
+    "Skeleton Island",
+    "Spy-glass",
+    "Mizzen-mast Hill",
+    "the anchorage",
+    "the second river",
+    "the plateau"
+  ],
+  "objects": [
+    "cutlass",
+    "guns",
+    "pistol",
+    "rope",
+    "line",
+    "picks and shovels",
+    "pork",
+    "bread",
+    "brandy",
+    "chart",
+    "compass",
+    "bones",
+    "creeper",
+    "knife",
+    "gigs",
+    "thwart"
+  ],
+  "identity_notes": [
+    "doctor and Dr. Livesey may refer to the same entity"
+  ]
+}

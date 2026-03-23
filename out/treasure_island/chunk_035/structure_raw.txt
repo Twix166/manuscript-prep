@@ -1,0 +1,22 @@
+Thinking...
+Okay, let's tackle this. The user wants me to analyze the provided excerpt and extract the document structure as per the given rules. Let me start by reading through the excerpt carefully.
+
+First, the excerpt starts with "Chapter XXI - The Attack". That seems like a chapter title. I need to check if chapters are explicitly mentioned. Since it's labeled as Chapter XXI, that's a clear chapter heading. So I'll add that to the chapters array.
+
+Next, looking for parts. The excerpt doesn't mention any parts, so parts array remains empty.
+
+Now, scene breaks. The user mentioned to look for real textual scene breaks. The excerpt is a continuous narrative without clear scene breaks indicated by formatting or markers. There's no indication of a new scene, so scene_breaks array stays empty.
+
+Checking the status: Since there's a chapter explicitly mentioned, the structure isn't incomplete. So status is "structure complete".
+
+Wait, but the user said if no chapters, parts, or scene breaks are present, return empty arrays. But here, there is a chapter. So chapters should have "Chapter XXI - The Attack".
+
+I need to make sure there are no other chapters or parts. The rest of the text is part of the same chapter, so no other chapters. Parts aren't mentioned. Scene breaks aren't present. So the JSON should have chapters with the chapter title, parts and scene_breaks as empty arrays, and status as "structure complete".
+...done thinking.
+
+{
+  "chapters": ["Chapter XXI - The Attack"],
+  "parts": [],
+  "scene_breaks": [],
+  "status": "structure complete"
+}

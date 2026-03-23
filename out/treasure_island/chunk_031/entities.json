@@ -1,0 +1,37 @@
+{
+  "characters": [
+    "Dr. Livesey",
+    "the captain",
+    "the squire",
+    "Alexander Smollett",
+    "David Livesey",
+    "Abraham Gray",
+    "John Trelawney",
+    "John Hunter",
+    "Richard Joyce",
+    "Thomas Redruth",
+    "James Hawkins",
+    "Ben Gunn"
+  ],
+  "places": [
+    "Treasure Island",
+    "log-house",
+    "stockade",
+    "anchorage"
+  ],
+  "objects": [
+    "flag",
+    "musket",
+    "powder",
+    "shot",
+    "pork",
+    "gig",
+    "oar",
+    "cannonball",
+    "ball",
+    "jacket"
+  ],
+  "identity_notes": [
+    "Dr. Livesey and David Livesey may refer to the same entity"
+  ]
+}

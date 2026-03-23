@@ -1,0 +1,135 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Received a pistol from Silver, observed Silver's actions, and engaged in dialogue about Silver's changing sides.",
+      "personality_traits": [
+        "distrustful",
+        "rebellious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Directed others during conflict, gave Jim a pistol, and strategized with the group.",
+      "personality_traits": [
+        "calm",
+        "manipulative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Led the group after the attack, coordinated movement to the boats, and shared information about the treasure.",
+      "personality_traits": [
+        "strategic",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Held a gold piece, participated in the excavation, and engaged in verbal conflict with Silver.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Merry",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Attempted to lead a charge, accused Silver of betrayal, and was killed by musket fire.",
+      "personality_traits": [
+        "aggressive",
+        "accusatory"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Fired musket shots, killed Merry, and joined the group after the attack.",
+      "personality_traits": [
+        "violent",
+        "impulsive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participated in the attack, joined the group after the battle, and helped retrieve the treasure.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Discovered the treasure, stored it in a cave, and aided the group in retrieving it.",
+      "personality_traits": [
+        "resourceful",
+        "embarrassed"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Organized the group's movement, used a pick-axe to destroy a boat, and coordinated the escape.",
+      "personality_traits": [
+        "commanding",
+        "practical"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Guarded the captain while Ben Gunn retrieved the treasure.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

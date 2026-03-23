@@ -1,0 +1,41 @@
+{
+  "characters": [
+    "Dr. Livesey",
+    "the captain",
+    "Squire",
+    "Hunter",
+    "Captain Smollett",
+    "Anderson",
+    "Job",
+    "Gray",
+    "Ben Gunn",
+    "Silver",
+    "the red cap man"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "block house",
+    "sandy spit",
+    "anchorage",
+    "Skeleton Island",
+    "sea",
+    "Treasure Island",
+    "palisade",
+    "white rock"
+  ],
+  "objects": [
+    "cutlass",
+    "musket",
+    "pistols",
+    "powderhorn",
+    "bullets",
+    "biscuit",
+    "bread-bag",
+    "plaster",
+    "red cap",
+    "chart",
+    "Jolly Roger",
+    "HISPANIOLA"
+  ],
+  "identity_notes": []
+}

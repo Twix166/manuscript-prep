@@ -1,0 +1,107 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Witnessed the death of Master Pew, aided in rescuing his mother, and possessed an oilskin packet containing an item of interest.",
+      "personality_traits": [
+        "resourceful",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "magistrate",
+      "biography": "Assisted in resolving the incident, received the oilskin packet, and hosted Jim Hawkins for supper.",
+      "personality_traits": [
+        "calm",
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Dance",
+      "aliases": [],
+      "role": "supervisor",
+      "biography": "Led a pursuit to apprehend the thieves, saved Jim Hawkins' mother, and coordinated with Dr. Livesey.",
+      "personality_traits": [
+        "resolute",
+        "dutiful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Hosted Dr. Livesey and Jim Hawkins, expressed approval of Jim's actions, and engaged in discussions about the incident.",
+      "personality_traits": [
+        "imperious",
+        "curious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Master Pew",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Attempted to pursue the thieves but was killed by a horse during the chase.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "my mother",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Was rescued from danger and briefly incapacitated by fear but recovered.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Engaged in conversation with Dr. Livesey and expressed opinions on the events.",
+      "personality_traits": [
+        "assertive",
+        "inquisitive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in context of the stolen money-bag and the plot involving the lugger.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

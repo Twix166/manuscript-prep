@@ -1,0 +1,73 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Mr. Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Injured seaman with a wound in his thigh, part of a mutiny, and involved in negotiating control of a ship.",
+      "personality_traits": [
+        "pragmatic",
+        "resilient"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Killed in a mutiny, referenced as a former captain.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Aboard the ship, with a medical book that has been gutted.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "O'Brien",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Dead seaman killed during a mutiny, described as an Irishman.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the coxswain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member with a suspicious demeanor, observed watching the narrator.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the man with the red cap",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Dead seaman killed during a mutiny, described as not a seaman.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

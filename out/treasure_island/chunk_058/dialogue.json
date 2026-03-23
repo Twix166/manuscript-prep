@@ -1,0 +1,15 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Silver",
+    "Jim",
+    "Merry",
+    "Long John",
+    "the doctor",
+    "Gray",
+    "Ben Gunn"
+  ],
+  "unattributed_dialogue_present": false
+}

@@ -1,0 +1,135 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "confirmed",
+      "biography": "Led the boat crew during a perilous landing, ordered actions to avoid gunfire, and retrieved supplies from the wrecked boat.",
+      "personality_traits": [
+        "decisive",
+        "strategic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "confirmed",
+      "biography": "Assisted in coordinating the boat's defense, handed over a gun to Trelawney, and comforted the dying Tom Redruth.",
+      "personality_traits": [
+        "compassionate",
+        "loyal"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Hear the gunshot but did not participate in the immediate action, observed the boat's sinking.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the boat crew, survived the sinking, and was later found dead after being carried to the log-house.",
+      "personality_traits": [
+        "loyal"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Trelawney",
+      "aliases": [],
+      "role": "confirmed",
+      "biography": "Identified as the dead shot, exchanged guns with the captain, and remained calm during the conflict.",
+      "personality_traits": [
+        "calm",
+        "skilled"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Received a cutlass from the squire, demonstrated combat readiness, and fought alongside the group.",
+      "personality_traits": [
+        "brave"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Job Anderson",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Led the mutineers attacking the stockade, was shot and killed during the confrontation.",
+      "personality_traits": [
+        "aggressive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the boatswain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the mutineers, participated in the attack on the stockade, and was among those killed.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Tom Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Died after being carried to the log-house, remained silent and stoic until his death.",
+      "personality_traits": [
+        "stoic",
+        "obedient"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the old gamekeeper",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Carried to the log-house after being wounded, died without protest, and was described as a silent, loyal servant.",
+      "personality_traits": [
+        "obedient",
+        "silent"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "character_dossiers": [
+    {
+      "name": "George",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mutineer who accuses John Silver of bungling the cruise and conspiring with others to undermine him.",
+      "personality_traits": [
+        "confrontational",
+        "accusatory"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Claims to be the captain, defends his actions, and presents a chart as evidence of his leadership.",
+      "personality_traits": [
+        "defensive",
+        "passionate"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mutineer who intervenes in the argument between George and Silver.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Anderson",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned as one of the conspirators who undermined Silver's authority.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned as a conspirator who undermined Silver's authority.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Possessed a chest containing a chart, which was later given to John Silver by the doctor.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Gave the chart from the captain's chest to John Silver.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

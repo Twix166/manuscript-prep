@@ -1,0 +1,44 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "pirate",
+      "biography": "A seafaring man who frequents the Admiral Benbow Inn, avoids other seafarers, and is feared for his stories and drunken outbursts. He wears patched clothing and keeps a sea-chest.",
+      "personality_traits": [
+        "intimidating",
+        "superstitious",
+        "alcoholic"
+      ],
+      "vocal_notes": "blows through nose like fog-horn",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "doctor",
+      "biography": "A physician who visits the inn to see my father, described as neat and polite.",
+      "personality_traits": [
+        "polite",
+        "professional"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "my father",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Owner of the Admiral Benbow Inn, troubled by the captain's presence and eventually succumbing to illness.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

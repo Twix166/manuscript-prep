@@ -1,0 +1,94 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Abraham Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member involved in loading supplies and defending the block house.",
+      "personality_traits": [
+        "loyal",
+        "obedient"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Commander of the ship, orders crew to follow him during critical moments.",
+      "personality_traits": [
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member assisting in loading supplies and rowing the jolly-boat.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member skilled in marksmanship and strategic planning.",
+      "personality_traits": [
+        "calm",
+        "composed"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Israel Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member involved in handling the ship's gun and engaging in conflict.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member participating in defensive preparations and loading supplies.",
+      "personality_traits": [
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member steering the jolly-boat and coordinating defensive efforts.",
+      "personality_traits": [
+        "calm",
+        "polite"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

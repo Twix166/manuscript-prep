@@ -1,0 +1,25 @@
+{
+  "characters": [
+    "Squire Trelawney",
+    "Dr. Livesey",
+    "my father",
+    "the captain",
+    "the old sea-dog",
+    "the brown old seaman"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "the cove",
+    "the cliffs"
+  ],
+  "objects": [
+    "sea-chest",
+    "cutlass",
+    "brass telescope",
+    "handspike"
+  ],
+  "identity_notes": [
+    "the old sea-dog and the captain may refer to the same entity",
+    "the brown old seaman and the captain may refer to the same entity"
+  ]
+}

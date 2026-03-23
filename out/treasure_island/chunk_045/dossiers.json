@@ -1,0 +1,43 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Engaged in a physical confrontation with Israel Hands on a ship's deck, climbed rigging to evade attack, and reloaded pistols during the struggle.",
+      "personality_traits": [
+        "courageous",
+        "resourceful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Israel Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Attempted to ambush Jim with a dirk, climbed rigging after being thrown overboard, and engaged in verbal confrontation with Jim.",
+      "personality_traits": [
+        "determined",
+        "desperate"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the coxswain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Suffered a blow from Israel Hands, lost grip on rigging, and fell overboard into the water.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

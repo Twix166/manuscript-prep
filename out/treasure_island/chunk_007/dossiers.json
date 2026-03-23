@@ -1,0 +1,65 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Assists his mother in retrieving a chest from the Admiral Benbow inn, retrieves a key from Captain Flint's body, and participates in securing the chest's contents.",
+      "personality_traits": [
+        "brave",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "my mother",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Leads efforts to secure the chest, delivers a speech to locals, and coordinates the retrieval mission with Jim.",
+      "personality_traits": [
+        "resolute",
+        "protective"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A physician mentioned as a destination for the group's request for assistance.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "identity uncertain"
+    },
+    {
+      "name": "Mrs. Crossley",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A local woman thanked by the narrator's mother for her support.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "identity uncertain"
+    },
+    {
+      "name": "Captain Flint",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A deceased pirate whose body is found in the inn, with a key and the Black Spot discovered on his person.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

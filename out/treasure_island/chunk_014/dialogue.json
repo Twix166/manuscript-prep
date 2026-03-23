@@ -1,0 +1,13 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Long John Silver",
+    "Harry",
+    "Ben",
+    "Morgan",
+    "Silver"
+  ],
+  "unattributed_dialogue_present": false
+}

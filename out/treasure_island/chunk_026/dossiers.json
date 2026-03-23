@@ -1,0 +1,34 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A marooned sailor stranded for three years, surviving on goats, berries, and oysters. Wears tattered clothing fastened with odd materials and carries a brass-buckled belt. Claims to be rich and intends to help Jim.",
+      "personality_traits": [
+        "resilient",
+        "resourceful",
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A sailor who encounters Ben Gunn, shares his voyage story, and seeks assistance. Expresses trust in Ben Gunn's ability to help.",
+      "personality_traits": [
+        "honest",
+        "trustworthy",
+        "curious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

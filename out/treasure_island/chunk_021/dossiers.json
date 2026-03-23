@@ -1,0 +1,122 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A naval officer leading a ship's crew, involved in planning and decision-making with Dr. Livesey and the squire.",
+      "personality_traits": [
+        "strategic",
+        "cautious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A physician who smokes a pipe and participates in crew discussions, communicates plans to others.",
+      "personality_traits": [
+        "calm",
+        "strategic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A landowner who admits fault and collaborates with the captain and doctor on crew strategy.",
+      "personality_traits": [
+        "humble",
+        "responsible"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A wealthy gentleman described as openhanded, involved in crew decisions.",
+      "personality_traits": [
+        "generous"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member who leads cheers and engages in dialogue with the captain.",
+      "personality_traits": [
+        "confident",
+        "loyal"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A young narrator who reports Silver's conversation and seeks to inform the crew.",
+      "personality_traits": [
+        "determined",
+        "courageous"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Job Anderson",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member ordered by the captain to execute a task.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member described as part of the loyal group, mentioned in strategic discussions.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A man described as remarkable, central to the crew's mutiny plot.",
+      "personality_traits": [
+        "calculating"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

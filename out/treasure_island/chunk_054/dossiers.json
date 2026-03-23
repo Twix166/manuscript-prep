@@ -1,0 +1,104 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Jim is involved in the plot, found the ship, and is part of the group.",
+      "personality_traits": [
+        "determined",
+        "loyal"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Dr. Livesey is a doctor involved in the plot, gives advice, and is part of the group.",
+      "personality_traits": [
+        "strategic",
+        "wise"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Silver is part of the group, involved in the plot, and has a plan.",
+      "personality_traits": [
+        "cunning",
+        "ambitious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The doctor is involved in the plot, gives advice, and is part of the group.",
+      "personality_traits": [
+        "strategic",
+        "wise"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Flint",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Captain Flint is part of the group, mentioned in the plot.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Barbecue",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Barbecue is part of the group, mentioned in the plot.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mr. Hawkins is part of the group, mentioned in the plot.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Ben Gunn is part of the group, mentioned in the plot.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

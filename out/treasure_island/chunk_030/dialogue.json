@@ -1,0 +1,14 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "I",
+    "the captain",
+    "the squire",
+    "Gray",
+    "Job Anderson",
+    "Tom Redruth"
+  ],
+  "unattributed_dialogue_present": false
+}

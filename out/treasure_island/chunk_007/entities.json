@@ -1,0 +1,40 @@
+{
+  "characters": [
+    "Jim",
+    "my mother",
+    "Dr. Livesey",
+    "Mrs. Crossley",
+    "Captain Flint"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "Kitt's Hole",
+    "Dr. Livesey's"
+  ],
+  "objects": [
+    "sea-chest",
+    "cutlass",
+    "tinder box",
+    "gully",
+    "pistol",
+    "quadrant",
+    "tin canikin",
+    "brace of pistols",
+    "bar silver",
+    "Spanish watch",
+    "compasses",
+    "thimble",
+    "thread",
+    "needles",
+    "pigtail tobacco",
+    "tarry string",
+    "black spot",
+    "key",
+    "candle",
+    "bag",
+    "horses"
+  ],
+  "identity_notes": [
+    "Admiral Benbow and Admiral Benbow inn refer to the same place."
+  ]
+}

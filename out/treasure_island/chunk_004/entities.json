@@ -1,0 +1,24 @@
+{
+  "characters": [
+    "my mother",
+    "Doctor Livesey",
+    "the captain",
+    "Jim",
+    "Billy Bones"
+  ],
+  "places": [
+    "my father's house",
+    "the captain's door"
+  ],
+  "objects": [
+    "rum",
+    "basin",
+    "lancet",
+    "noggin",
+    "silver fourpenny",
+    "golden guinea"
+  ],
+  "identity_notes": [
+    "Billy Bones and the captain may refer to the same entity"
+  ]
+}

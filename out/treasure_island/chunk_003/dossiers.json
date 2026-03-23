@@ -1,0 +1,68 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the stranger",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A man waiting at the inn, interacting with the narrator, described as having a tallowy face and a cutlass. He attempts to manipulate the narrator and later shows fear.",
+      "personality_traits": [
+        "manipulative",
+        "frightened"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A man at the inn with a blue nose, startled by Black Dog, and later reeling from rum. He is described as having a commanding presence.",
+      "personality_traits": [
+        "startled"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A former pirate with a mutilated hand, described as confrontational and aggressive. He engages in a fight with the captain.",
+      "personality_traits": [
+        "aggressive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The narrator, interacting with the stranger and witnessing the confrontation. He is described as uneasy and alarmed.",
+      "personality_traits": [
+        "anxious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Bill",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned as the captain's name in the text, but treated as a separate character in the extraction data. His role is not explicitly defined.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

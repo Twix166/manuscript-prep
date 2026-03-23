@@ -1,0 +1,39 @@
+{
+  "characters": [
+    "the captain",
+    "the squire",
+    "Jim",
+    "Redruth",
+    "Trelawney",
+    "Gray",
+    "Job Anderson",
+    "the boatswain",
+    "Tom Redruth",
+    "the old gamekeeper"
+  ],
+  "places": [
+    "the stockade",
+    "the log-house",
+    "the woods",
+    "the enclosure",
+    "the palisade",
+    "the strip of wood",
+    "the shore"
+  ],
+  "objects": [
+    "the boat",
+    "the gig",
+    "the cutlass",
+    "the gun",
+    "the British colours",
+    "the Bible",
+    "the rope",
+    "the pen",
+    "the ink",
+    "the log-book",
+    "the tobacco",
+    "the fir-tree",
+    "the mattress"
+  ],
+  "identity_notes": []
+}

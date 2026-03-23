@@ -1,0 +1,15 @@
+{
+  "pov": "third-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Captain Smollett",
+    "Dr. Livesey",
+    "Joyce",
+    "Mr. Trelawney",
+    "Gray",
+    "Hawkins",
+    "Hunter"
+  ],
+  "unattributed_dialogue_present": false
+}

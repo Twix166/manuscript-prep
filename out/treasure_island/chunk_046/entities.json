@@ -1,0 +1,31 @@
+{
+  "characters": [
+    "Hands",
+    "Israel",
+    "O'Brien",
+    "Ben Gunn"
+  ],
+  "places": [
+    "anchorage",
+    "western shore",
+    "eastern hill",
+    "stockade",
+    "block house",
+    "river",
+    "two-peaked hill",
+    "wood"
+  ],
+  "objects": [
+    "dirk",
+    "hawser",
+    "main-sail",
+    "jibs",
+    "halyards",
+    "cut hawser",
+    "HISPANIOLA"
+  ],
+  "identity_notes": [
+    "O'Brien and the coxswain may refer to the same entity",
+    "the dead man refers to O'Brien"
+  ]
+}

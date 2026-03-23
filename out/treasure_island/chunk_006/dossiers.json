@@ -1,0 +1,79 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the blind man",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A blind beggar who interacts with the narrator and the captain, described as a 'horrible, soft-spoken, eyeless creature'.",
+      "personality_traits": [
+        "threatening",
+        "domineering"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A sick old buccaneer who sits with a drawn cutlass and dies from apoplexy.",
+      "personality_traits": [
+        "ill",
+        "hostile"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Doctor Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A doctor mentioned in the captain's order to be called.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "my mother",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The narrator's mother, who is left unprotected after the captain's death.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A shipmate mentioned as one of the captain's men.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the blind beggar",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A blind beggar who interacts with the narrator and the captain, described as a 'horrible, soft-spoken, eyeless creature'.",
+      "personality_traits": [
+        "threatening",
+        "domineering"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

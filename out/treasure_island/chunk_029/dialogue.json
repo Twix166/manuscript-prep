@@ -1,0 +1,15 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Mr. Smollett",
+    "Gray",
+    "the captain",
+    "I",
+    "Mr. Trelawney",
+    "the squire",
+    "Israel Hands"
+  ],
+  "unattributed_dialogue_present": false
+}

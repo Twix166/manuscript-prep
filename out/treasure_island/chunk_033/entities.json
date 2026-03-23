@@ -1,0 +1,26 @@
+{
+  "characters": [
+    "the captain",
+    "Dr. Livesey",
+    "Jim",
+    "Gray",
+    "Long John",
+    "Ben Gunn",
+    "Captain Smollett"
+  ],
+  "places": [
+    "stockade",
+    "morass",
+    "island",
+    "knoll"
+  ],
+  "objects": [
+    "white cloth",
+    "crutch",
+    "muskets",
+    "iron kettle"
+  ],
+  "identity_notes": [
+    "the captain and Captain Smollett may refer to the same entity"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "captain",
+      "biography": "Led a group under his command, responsible for guarding a stockade. His men were ordered to be niggardly with firewood, and he was involved in a failed watch duty that left the camp vulnerable.",
+      "personality_traits": [
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "identity uncertain"
+    }
+  ]
+}

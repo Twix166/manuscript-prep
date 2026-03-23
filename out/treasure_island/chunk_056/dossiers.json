@@ -1,0 +1,79 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A pirate leader attempting to locate treasure, referencing Flint's death and the supernatural.",
+      "personality_traits": [
+        "determined",
+        "courageous"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A pirate who claims to have seen Flint dead, expressing fear of the dead buccaneer.",
+      "personality_traits": [
+        "superstitious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Merry",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A pirate who reacts with fear to the supernatural occurrences and Flint's ghost.",
+      "personality_traits": [
+        "superstitious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dick",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A pirate who prays and is described as having been well brought up before falling in with bad company.",
+      "personality_traits": [
+        "religious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A pirate whose voice is mistaken for Flint's, referenced in the group's supernatural encounter.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Flint",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A deceased pirate whose ghost is believed to haunt the group, referenced in their discussions.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+EXCERPT:
+Treasure Island Robert Louis Stevenson Page 33/142 would have convinced an Old Bailey judge or a Bow Street runner. My suspicions had been thoroughly reawakened on finding Black Dog at the Spy- glass, and I watched the cook narrowly. But he was too deep, and too ready, and too clever for me, and by the time the two men had come back out of breath and confessed that they had lost the track in a crowd, and been scolded like thieves, I would have gone bail for the innocence of Long John Silver. "See here, now, Hawkins," said he, "here's a blessed hard thing on a man like me, now, ain't it? There's Cap'n Trelawney — what's he to think? Here I have this confounded son of a Dutchman sitting in my own house drinking of my own rum! Here you comes and tells me of it plain; and here I let him give us all the slip before my blessed deadlights! Now, Hawkins, you do me justice with the cap'n. You're a lad, you are, but you're as smart as paint. I see that when you first come in. Now, here it is: What could I do, with this old timber I hobble on? When I was an A B master mariner I'd have come up alongside of him, hand over hand, and broached him to in a brace of old shakes, I would; but now —" And then, all of a sudden, he stopped, and his jaw dropped as though he had remembered something. "The score!" he burst out. "Three goes o' rum! Why, shiver my timbers, if I hadn't forgotten my score!" And falling on a bench, he laughed until the tears ran down his cheeks. I could not help joining, and we laughed together, peal after peal, until the tavern rang again. "Why, what a precious old sea-calf I am!" he said at last, wiping his cheeks. "You and me should get on well, Hawkins, for I'll take my davy I should be rated ship's boy. But come now, stand by to go about. This won't do. Dooty is dooty, messmates. I'll put on my old cockerel hat, and step along of you to Cap'n Trelawney, and report this here affair. For mind you, it's serious, young Hawkins; and neither you nor me's come out of it with what I should make so bold as to call credit. Nor you neither, says you; not smart — none of the pair of us smart. But dash my buttons! That was a good un about my score." And he began to laugh again, and that so heartily, that though I did not see the joke as he did, I was again obliged to join him in his mirth. On our little walk along the quays, he made himself the most interesting companion, telling me about the different ships that we passed by, their rig, tonnage, and nationality, explaining the work that was going forward — how one was discharging, another taking in cargo, and a third making ready for sea — and every now and then telling me some little anecdote of ships or seamen or repeating
+
+Treasure Island Robert Louis Stevenson Page 34/142 a nautical phrase till I had learned it perfectly. I began to see that here was one of the best of possible shipmates. When we got to the inn, the squire and Dr. Livesey were seated together, finishing a quart of ale with a toast in it, before they should go aboard the schooner on a visit of inspection. Long John told the story from first to last, with a great deal of spirit and the most perfect truth. "That was how it were, now, weren't it, Hawkins?" he would say, now and again, and I could always bear him entirely out. The two gentlemen regretted that Black Dog had got away, but we all agreed there was nothing to be done, and after he had been complimented, Long John took up his crutch and departed. "All hands aboard by four this afternoon," shouted the squire after him. "Aye, aye, sir," cried the cook, in the passage. "Well, squire," said Dr. Livesey, "I don't put much faith in your discoveries, as a general thing; but I will say this, John Silver suits me." "The man's a perfect trump," declared the squire. "And now," added the doctor, "Jim may come on board with us, may he not?" "To be sure he may," says squire. "Take your hat, Hawkins, and we'll see the ship."
+
+Chapter IX - Powder and Arms
+
+The HISPANIOLA lay some way out, and we went under the figureheads and round the sterns of many other ships, and their cables sometimes grated underneath our keel, and sometimes swung above us. At last, however, we got alongside, and were met and saluted as we stepped aboard by the mate, Mr. Arrow, a brown old sailor with earrings in his ears and a squint. He and the squire were very thick and friendly, but I soon observed that things were not the same between Mr. Trelawney and the captain. This last was a sharp-looking man who seemed angry with everything on board and was soon to tell us why, for we had hardly got down into the cabin when a sailor followed us. "Captain Smollett, sir, axing to speak with you," said he. "I am always at the captain's orders. Show him in," said the squire. The captain, who was close behind his messenger, entered at once and shut the door behind him. "Well, Captain Smollett, what have you to say? All well, I hope; all shipshape and
+
+Treasure Island Robert Louis Stevenson Page 35/142 seaworthy?" "Well, sir," said the captain, "better speak plain, I believe, even at the risk of offence. I don't like this cruise; I don't like the men; and I don't like my officer. That's short and sweet." "Perhaps, sir, you don't like the ship?" inquired the squire, very angry, as I could see. "I can't speak as to that, sir, not having seen her tried," said the captain. "She seems a clever craft; more I can't say." "Possibly, sir, you may not like your employer, either?" says the squire. But here Dr. Livesey cut in. "Stay a bit," said he, "stay a bit. No use of such questions as that but to produce ill feeling. The captain has said too much or he has said too little, and I'm bound to say that I require an explanation of his words. You don't, you say, like this cruise. Now, why?" "I was engaged, sir, on what we call sealed orders, to sail this ship for that gentleman where he should bid me," said the captain. "So far so good. But now I find that every man before the mast knows more than I do. I don't call that fair, now, do you?" "No," said Dr. Livesey, "I don't." "Next," said the captain, "I learn we are going after treasure — hear it from my own hands, mind you. Now, treasure is ticklish work; I don't like treasure voyages on any account, and I don't like them, above all, when they are secret and when (begging your pardon, Mr. Trelawney) the secret has been told to the parrot." "Silver's parrot?" asked the squire. "It's a way of speaking," said the captain. "Blabbed, I mean. It's my belief neither of you gentlemen know what you are about, but I'll tell you my way of it — life or death, and a close run." "That is all clear, and, I dare say, true enough," replied Dr. Livesey. "We take the risk, but we are not so ignorant as you believe us. Next, you say you don't like the crew. Are they not good seamen?" "I don't like them, sir," returned Captain Smollett. "And I think I should have had the choosing of my own hands, if you go to that."
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "Dr. Livesey",
+    "Long John Silver",
+    "Captain Trelawney",
+    "Hawkins",
+    "the squire",
+    "Mr. Arrow",
+    "Captain Smollett",
+    "Black Dog"
+  ],
+  "dialogue_info": {
+    "pov": "first-person",
+    "dialogue": true,
+    "internal_thought": false,
+    "explicitly_attributed_speakers": [
+      "Long John Silver",
+      "Hawkins",
+      "squire",
+      "Dr. Livesey",
+      "Captain Smollett"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "the captain",
+    "bow oar",
+    "Silver"
+  ],
+  "unattributed_dialogue_present": true
+}

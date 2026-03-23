@@ -1,0 +1,71 @@
+{
+  "character_dossiers": [
+    {
+      "name": "my mother",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Assisted in rescuing the captain from a severe injury, expressed concern for her son and the captain's condition.",
+      "personality_traits": [
+        "concerned",
+        "anxious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Doctor Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Arrived to treat the captain, diagnosed him with a stroke, and administered medical care.",
+      "personality_traits": [
+        "authoritative",
+        "practical"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Suffered a severe injury and stroke, demanded rum, and referenced a mysterious 'Black Dog'.",
+      "personality_traits": [
+        "desperate",
+        "stubborn"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Narrator and participant in the events, assisted in treating the captain and obeyed the doctor's instructions.",
+      "personality_traits": [
+        "obedient",
+        "helpful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Billy Bones",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Referred to by the doctor as a buccaneer, denied being the captain's name.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "the captain",
+    "Job Anderson",
+    "the doctor",
+    "Gray",
+    "Mr. Trelawney",
+    "Mr. Smollett"
+  ],
+  "unattributed_dialogue_present": false
+}

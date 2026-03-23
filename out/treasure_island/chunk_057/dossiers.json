@@ -1,0 +1,68 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dick",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A young man carrying a Bible, visibly distressed by fears and heat, observed by the narrator.",
+      "personality_traits": [
+        "fearful",
+        "religious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Merry",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A member of the group who dismisses Ben Gunn's significance and leads the search for treasure.",
+      "personality_traits": [
+        "dismissive",
+        "eager"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A leader of the group using a crutch, driven by greed and hostile toward others.",
+      "personality_traits": [
+        "ambitious",
+        "hostile"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A doctor mentioned in the context of a prior warning about fever and health.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A deceased individual referenced as a former crewmate, disregarded by the group.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

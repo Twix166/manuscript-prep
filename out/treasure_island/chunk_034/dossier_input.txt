@@ -1,0 +1,28 @@
+EXCERPT:
+Treasure Island Robert Louis Stevenson Page 79/142 "Well, here it is," said Silver. "We want that treasure, and we'll have it — that's our point! You would just as soon save your lives, I reckon; and that's yours. You have a chart, haven't you?" "That's as may be," replied the captain. "Oh, well, you have, I know that," returned Long John. "You needn't be so husky with a man; there ain't a particle of service in that, and you may lay to it. What I mean is, we want your chart. Now, I never meant you no harm, myself." "That won't do with me, my man," interrupted the captain. "We know exactly what you meant to do, and we don't care, for now, you see, you can't do it." And the captain looked at him calmly and proceeded to fill a pipe. "If Abe Gray —" Silver broke out. "Avast there!" cried Mr. Smollett. "Gray told me nothing, and I asked him nothing; and what's more, I would see you and him and this whole island blown clean out of the water into blazes first. So there's my mind for you, my man, on that." This little whiff of temper seemed to cool Silver down. He had been growing nettled before, but now he pulled himself together. "Like enough," said he. "I would set no limits to what gentlemen might consider shipshape, or might not, as the case were. And seein' as how you are about to take a pipe, cap'n, I'll make so free as do likewise." And he filled a pipe and lighted it; and the two men sat silently smoking for quite a while, now looking each other in the face, now stopping their tobacco, now leaning forward to spit. It was as good as the play to see them. "Now," resumed Silver, "here it is. You give us the chart to get the treasure by, and drop shooting poor seamen and stoving of their heads in while asleep. You do that, and we'll offer you a choice. Either you come aboard along of us, once the treasure shipped, and then I'll give you my affy-davy, upon my word of honour, to clap you somewhere safe ashore. Or if that ain't to your fancy, some of my hands being rough and having old scores on account of hazing, then you can stay here, you can. We'll divide stores with you, man for man; and I'll give my affy-davy, as before to speak the first ship I sight, and send 'em here to pick you up. Now, you'll own that's talking. Handsomer you couldn't look to get, now you. And I hope"— raising his voice — "that all hands in this here block house will overhaul my words, for what is spoke to one is spoke to all." Captain Smollett rose from his seat and knocked out the ashes of his pipe in the palm of
+
+Treasure Island Robert Louis Stevenson Page 80/142 his left hand. "Is that all?" he asked. "Every last word, by thunder!" answered John. "Refuse that, and you've seen the last of me but musket-balls." "Very good," said the captain. "Now you'll hear me. If you'll come up one by one, unarmed, I'll engage to clap you all in irons and take you home to a fair trial in England. If you won't, my name is Alexander Smollett, I've flown my sovereign's colours, and I'll see you all to Davy Jones. You can't find the treasure. You can't sail the ship — there's not a man among you fit to sail the ship. You can't fight us — Gray, there, got away from five of you. Your ship's in irons, Master Silver; you're on a lee shore, and so you'll find. I stand here and tell you so; and they're the last good words you'll get from me, for in the name of heaven, I'll put a bullet in your back when next I meet you. Tramp, my lad. Bundle out of this, please, hand over hand, and double quick." Silver's face was a picture; his eyes started in his head with wrath. He shook the fire out of his pipe. "Give me a hand up!" he cried. "Not I," returned the captain. "Who'll give me a hand up?" he roared. Not a man among us moved. Growling the foulest imprecations, he crawled along the sand till he got hold of the porch and could hoist himself again upon his crutch. Then he spat into the spring. "There!" he cried. "That's what I think of ye. Before an hour's out, I'll stove in your old block house like a rum puncheon. Laugh, by thunder, laugh! Before an hour's out, ye'll laugh upon the other side. Them that die'll be the lucky ones." And with a dreadful oath he stumbled off, ploughed down the sand, was helped across the stockade, after four or five failures, by the man with the flag of truce, and disappeared in an instant afterwards among the trees.
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "Silver",
+    "the captain",
+    "Long John",
+    "Mr. Smollett",
+    "Abe Gray",
+    "Alexander Smollett"
+  ],
+  "dialogue_info": {
+    "pov": "third-person",
+    "dialogue": true,
+    "internal_thought": false,
+    "explicitly_attributed_speakers": [
+      "Silver",
+      "Long John",
+      "Captain Smollett",
+      "Mr. Smollett"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

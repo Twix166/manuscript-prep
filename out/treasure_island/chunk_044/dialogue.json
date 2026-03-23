@@ -1,0 +1,12 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Hands",
+    "Mr. Hands",
+    "Cap'n Hawkins",
+    "I"
+  ],
+  "unattributed_dialogue_present": false
+}

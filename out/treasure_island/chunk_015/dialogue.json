@@ -1,0 +1,13 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Long John Silver",
+    "Hawkins",
+    "squire",
+    "Dr. Livesey",
+    "Captain Smollett"
+  ],
+  "unattributed_dialogue_present": false
+}

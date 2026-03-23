@@ -1,0 +1,31 @@
+{
+  "characters": [
+    "the squire",
+    "John Silver",
+    "Captain Smollett",
+    "Ben Gunn",
+    "Gray",
+    "the doctor"
+  ],
+  "places": [
+    "Ben Gunn's cave",
+    "North Inlet",
+    "Rum Cove",
+    "the island",
+    "the shoulder of the hill",
+    "the lowlands of the isle"
+  ],
+  "objects": [
+    "musket",
+    "HISPANIOLA",
+    "bars of gold",
+    "bread-bags",
+    "goat",
+    "wine",
+    "anchor",
+    "boat",
+    "gig",
+    "main-sail"
+  ],
+  "identity_notes": []
+}

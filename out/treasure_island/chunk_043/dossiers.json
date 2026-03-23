@@ -1,0 +1,57 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A sailor navigating a ship, coordinating with the coxswain and Mr. Hands, and engaging in strategic planning to anchor the HISPANIOLA.",
+      "personality_traits": [
+        "cautious",
+        "strategic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the coxswain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A ship's officer overseeing navigation, involved in a covert scheme with Mr. Hands, and displaying suspicious behavior regarding O'Brien's death.",
+      "personality_traits": [
+        "deceptive",
+        "calculating"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A shipmate with a history of conflict with O'Brien, attempting to conceal his intentions by requesting wine and displaying erratic behavior.",
+      "personality_traits": [
+        "guilty",
+        "paranoid"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "O'Brien",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A deceased seaman killed aboard the HISPANIOLA, referenced in discussions about death and spirits.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

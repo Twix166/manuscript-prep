@@ -1,0 +1,13 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Dr. Livesey",
+    "Mr. Dance",
+    "the squire",
+    "Mr. Trelawney",
+    "the doctor"
+  ],
+  "unattributed_dialogue_present": false
+}

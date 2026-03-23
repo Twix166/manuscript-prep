@@ -1,0 +1,25 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "the doctor",
+    "the squire",
+    "the captain",
+    "Mr. Trelawney",
+    "Captain Smollett",
+    "the doctor",
+    "the squire",
+    "the doctor",
+    "the captain",
+    "the doctor",
+    "the squire",
+    "the doctor",
+    "the captain",
+    "the doctor",
+    "the squire",
+    "the doctor",
+    "the captain"
+  ],
+  "unattributed_dialogue_present": false
+}

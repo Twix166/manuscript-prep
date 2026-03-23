@@ -1,0 +1,31 @@
+{
+  "characters": [
+    "Jim",
+    "Dr. Livesey",
+    "Silver",
+    "the doctor",
+    "Captain Flint",
+    "Barbecue",
+    "Mr. Hawkins",
+    "Ben Gunn"
+  ],
+  "places": [
+    "North Inlet",
+    "the southern beach",
+    "the wood",
+    "stockade"
+  ],
+  "objects": [
+    "ship",
+    "treasure",
+    "boats",
+    "chart",
+    "biscuit",
+    "fried junk",
+    "bacon",
+    "fire"
+  ],
+  "identity_notes": [
+    "the doctor and Dr. Livesey refer to the same entity"
+  ]
+}

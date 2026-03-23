@@ -1,0 +1,38 @@
+{
+  "characters": [
+    "my mother",
+    "I",
+    "the blind man",
+    "Mrs. Crossley",
+    "the captain"
+  ],
+  "places": [
+    "the inn",
+    "the tavern",
+    "the bottom of the dell",
+    "the hill",
+    "the hamlet",
+    "the bridge",
+    "the bank",
+    "the arch"
+  ],
+  "objects": [
+    "West Indian shells",
+    "silver",
+    "trinkets",
+    "boat-cloak",
+    "oilcloth",
+    "canvas bag",
+    "gold",
+    "doubloons",
+    "louis d'ors",
+    "guineas",
+    "pieces of eight",
+    "oilskin packet",
+    "candle",
+    "chest"
+  ],
+  "identity_notes": [
+    "the inn and the tavern may refer to the same place"
+  ]
+}

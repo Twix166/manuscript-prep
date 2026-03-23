@@ -1,0 +1,103 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Involved in ship preparations and medical practice. Received a letter regarding the ship's readiness.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Working in Bristol, involved in ship-related plans. Mentioned in correspondence.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "old Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Gamekeeper at the hall, responsible for reading letters. Described as a poor reader.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Tom Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Linked to the letter's delivery. Possibly a relative of old Redruth.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "young Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Under the charge of old Redruth. Tasked with visiting his mother.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Ship's cook, former sailor with a lost leg. Described as a man of substance.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Blandly",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Friend who secured the ship HISPANIOLA. Subject of local rumors.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Author of the letter regarding the ship's preparation and crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Arrow",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Sailing mate selected by Long John Silver. Described as competent.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

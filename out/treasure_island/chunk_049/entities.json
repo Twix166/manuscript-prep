@@ -1,0 +1,36 @@
+{
+  "characters": [
+    "Silver",
+    "John Silver",
+    "Morgan",
+    "Tom Morgan",
+    "Jim Hawkins",
+    "Long John",
+    "Black Dog"
+  ],
+  "places": [
+    "Bristol",
+    "block house"
+  ],
+  "objects": [
+    "pipe",
+    "cutlass",
+    "sea-chest",
+    "schooner",
+    "chart",
+    "apple barrel",
+    "cable",
+    "knife",
+    "sledge-hammer",
+    "hawse",
+    "yard-arm",
+    "board",
+    "gallows",
+    "treasure",
+    "ship"
+  ],
+  "identity_notes": [
+    "Silver and John Silver refer to the same character",
+    "Morgan and Tom Morgan refer to the same character"
+  ]
+}

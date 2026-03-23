@@ -1,0 +1,12 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "the blind man",
+    "Pew",
+    "the man in the window",
+    "the fellow from the door"
+  ],
+  "unattributed_dialogue_present": false
+}

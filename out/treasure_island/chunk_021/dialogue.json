@@ -1,0 +1,14 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "Jim Hawkins",
+    "Dr. Livesey",
+    "Captain Smollett",
+    "the squire",
+    "Long John",
+    "Mr. Trelawney"
+  ],
+  "unattributed_dialogue_present": false
+}

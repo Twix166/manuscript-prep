@@ -1,0 +1,109 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dick",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the crew involved in obtaining rum.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Israel",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the crew who interacts with the cook.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the crew who knows details about the island.",
+      "personality_traits": [
+        "composed"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "captain",
+      "biography": "Leader of the crew who navigates the ship.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the crew present during the council of war.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member feared by the narrator for his cruelty and power.",
+      "personality_traits": [
+        "cruel",
+        "duplicity",
+        "powerful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Arrow",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in the context of dying from strong waters.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Billy Bones",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in relation to the map found in his chest.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the crew who interacts with the narrator.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "characters": [
+    "Captain Smollett",
+    "Mr. Trelawney",
+    "Dr. Livesey",
+    "Gray",
+    "Joyce",
+    "Hawkins",
+    "Hunter"
+  ],
+  "places": [
+    "block house",
+    "stockade",
+    "porch"
+  ],
+  "objects": [
+    "cutlasses",
+    "muskets",
+    "loaded muskets",
+    "fire-basket",
+    "sand",
+    "tables",
+    "ammunition",
+    "firewood"
+  ],
+  "identity_notes": [
+    "the doctor and Dr. Livesey refer to the same character",
+    "the captain and Captain Smollett refer to the same character"
+  ]
+}

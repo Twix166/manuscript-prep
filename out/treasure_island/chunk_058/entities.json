@@ -1,0 +1,36 @@
+{
+  "characters": [
+    "Jim",
+    "Silver",
+    "Dr. Livesey",
+    "Morgan",
+    "Merry",
+    "Long John",
+    "Gray",
+    "Ben Gunn",
+    "the doctor",
+    "the squire"
+  ],
+  "places": [
+    "Mizzen-mast Hill",
+    "North Inlet",
+    "the island",
+    "the cave",
+    "the stockade",
+    "the anchorage",
+    "the twopointed hill"
+  ],
+  "objects": [
+    "double-barrelled pistol",
+    "pick-axe",
+    "musket",
+    "gigs",
+    "boats",
+    "HISPANIOLA",
+    "chest"
+  ],
+  "identity_notes": [
+    "Dr. Livesey and the doctor may refer to the same entity",
+    "Long John and Silver may refer to the same entity"
+  ]
+}

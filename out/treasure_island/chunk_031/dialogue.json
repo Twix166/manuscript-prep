@@ -1,0 +1,13 @@
+{
+  "pov": "third-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "the captain",
+    "Dr. Livesey",
+    "the squire",
+    "Hunter",
+    "Ben Gunn"
+  ],
+  "unattributed_dialogue_present": false
+}

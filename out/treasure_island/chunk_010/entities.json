@@ -1,0 +1,27 @@
+{
+  "characters": [
+    "Dr. Livesey",
+    "the captain",
+    "Mr. Dance",
+    "the squire",
+    "Master Pew",
+    "my mother",
+    "Jim Hawkins",
+    "Mr. Trelawney"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "Kitt's Hole",
+    "Dr. Livesey's house",
+    "the hamlet"
+  ],
+  "objects": [
+    "money-bag",
+    "silver from the till",
+    "oilskin packet",
+    "powdered wig"
+  ],
+  "identity_notes": [
+    "the squire and Mr. Trelawney may refer to the same entity"
+  ]
+}

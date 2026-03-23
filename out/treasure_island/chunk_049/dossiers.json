@@ -1,0 +1,106 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Silver",
+      "aliases": [
+        "John Silver"
+      ],
+      "role": "captain",
+      "biography": "Leader of a group, speaks about a treaty and mutiny, holds authority over others.",
+      "personality_traits": [
+        "manipulative",
+        "confident",
+        "calm"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John Silver",
+      "aliases": [
+        "Silver"
+      ],
+      "role": "captain",
+      "biography": "Leader of a group, speaks about a treaty and mutiny, holds authority over others.",
+      "personality_traits": [
+        "manipulative",
+        "confident",
+        "calm"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Morgan",
+      "aliases": [
+        "Tom Morgan"
+      ],
+      "role": "unknown",
+      "biography": "Sea-cook who challenges Silver's authority, accused of past misconduct.",
+      "personality_traits": [
+        "defiant",
+        "aggressive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Tom Morgan",
+      "aliases": [
+        "Morgan"
+      ],
+      "role": "unknown",
+      "biography": "Sea-cook who challenges Silver's authority, accused of past misconduct.",
+      "personality_traits": [
+        "defiant",
+        "aggressive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Narrator who reveals knowledge of the plot and confronts Silver.",
+      "personality_traits": [
+        "determined",
+        "courageous"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Owner of a public-house mentioned in the narrative.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Nickname associated with a character involved in a chart incident.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

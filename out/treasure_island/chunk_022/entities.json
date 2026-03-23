@@ -1,0 +1,28 @@
+{
+  "characters": [
+    "the captain",
+    "the doctor",
+    "Long John",
+    "Anderson",
+    "the squire",
+    "Silver"
+  ],
+  "places": [
+    "Treasure Island",
+    "Skeleton Island",
+    "the mainland",
+    "the haven behind Skeleton Island",
+    "the anchorage"
+  ],
+  "objects": [
+    "the Spy-glass",
+    "the HISPANIOLA",
+    "the booms",
+    "the rudder",
+    "the backstay",
+    "the anchor",
+    "the chains",
+    "the chart"
+  ],
+  "identity_notes": []
+}

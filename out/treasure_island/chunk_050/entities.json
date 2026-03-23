@@ -1,0 +1,33 @@
+{
+  "characters": [
+    "Silver",
+    "Long John",
+    "Jim Hawkins",
+    "Morgan",
+    "George",
+    "Dick",
+    "the captain",
+    "the sea-cook",
+    "the doctor"
+  ],
+  "places": [
+    "stockade"
+  ],
+  "objects": [
+    "torch",
+    "pipe",
+    "cannikin",
+    "cask",
+    "Bible",
+    "black spot",
+    "book",
+    "knife",
+    "brandy",
+    "cognac",
+    "cutlass"
+  ],
+  "identity_notes": [
+    "Silver and the captain refer to the same entity",
+    "Silver and the sea-cook refer to the same entity"
+  ]
+}

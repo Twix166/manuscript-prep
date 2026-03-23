@@ -1,0 +1,12 @@
+{
+  "pov": "third-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Silver",
+    "Long John",
+    "Captain Smollett",
+    "Mr. Smollett"
+  ],
+  "unattributed_dialogue_present": false
+}

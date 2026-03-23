@@ -1,0 +1,73 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A boy involved in a treasure hunt, interacting with a marooned sailor.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Benjamin Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A marooned sailor who has been on the island for three years, possessing a boat and knowledge of the island's secrets.",
+      "personality_traits": [
+        "confident",
+        "resourceful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialog,ue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A gentleman associated with the treasure hunt, referenced in dialogue.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the cap'n",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A ship captain who was displeased with his crew's decision to land on the island.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Billy Bones",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A mate on Flint's ship, referenced in the story of the treasure burial.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A quartermaster on Flint's ship, referenced in the story of the treasure burial.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "characters": [
+    "Pew",
+    "the man with the lantern",
+    "the captain",
+    "Dirk",
+    "Johnny",
+    "Black Dog",
+    "the boy",
+    "the man who searched the captain's body"
+  ],
+  "places": [
+    "Admiral Benbow",
+    "the hamlet",
+    "the hillside",
+    "the cove",
+    "the road"
+  ],
+  "objects": [
+    "sea-chest",
+    "lantern"
+  ],
+  "identity_notes": [
+    "the blind beggar and Pew refer to the same entity"
+  ]
+}

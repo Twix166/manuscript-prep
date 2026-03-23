@@ -1,0 +1,11 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "captain",
+    "Black Dog",
+    "I"
+  ],
+  "unattributed_dialogue_present": false
+}

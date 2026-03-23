@@ -1,0 +1,121 @@
+{
+  "character_dossiers": [
+    {
+      "name": "doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participated in combat at the log-house, defended against pirates, and incapacitated an attacker with a cutlass.",
+      "personality_traits": [
+        "calm under pressure",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Led defensive efforts at the log-house, sustained injuries, and issued orders during the battle.",
+      "personality_traits": [
+        "authoritative",
+        "resolute"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Supported the captain during the battle, appeared pale after the conflict.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Fired at attackers during the battle and assisted in defending the log-house.",
+      "personality_traits": [
+        "aggressive",
+        "disciplined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Knocked unconscious by a pirate during the attack, later found incapacitated at a loophole.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Joyce",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Shot through the head during the battle and died shortly after.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Provided medical care, assessed casualties, and communicated with the group post-battle.",
+      "personality_traits": [
+        "practical",
+        "composed"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Engaged in combat, assisted in defending the log-house, and participated in post-battle discussions.",
+      "personality_traits": [
+        "alert",
+        "diligent"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Anderson",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Led the pirate attack, ordered combatants, and was killed by Gray during the battle.",
+      "personality_traits": [
+        "commanding",
+        "aggressive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "chunk": "chunk_050",
+  "total_duration_seconds": 143.1535587310791,
+  "passes": {
+    "structure": 8.85903000831604,
+    "dialogue": 16.20837378501892,
+    "entities": 58.64106488227844,
+    "dossiers": 59.38565921783447
+  }
+}

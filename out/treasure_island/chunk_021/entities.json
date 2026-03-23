@@ -1,0 +1,31 @@
+{
+  "characters": [
+    "Captain Smollett",
+    "Dr. Livesey",
+    "the squire",
+    "Mr. Trelawney",
+    "Long John",
+    "Jim Hawkins",
+    "Job Anderson",
+    "Hands",
+    "Silver"
+  ],
+  "places": [
+    "the cabin",
+    "the quarterdeck",
+    "the deck",
+    "the stern window",
+    "the ship",
+    "the sea"
+  ],
+  "objects": [
+    "sea-chest",
+    "cutlass",
+    "pipe",
+    "bottle of Spanish wine",
+    "raisins",
+    "glass of wine",
+    "wig"
+  ],
+  "identity_notes": []
+}

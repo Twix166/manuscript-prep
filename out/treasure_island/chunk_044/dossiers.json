@@ -1,0 +1,61 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He is the narrator and participant in the events described.",
+      "personality_traits": [
+        "conflicted",
+        "angry",
+        "fearful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hands",
+      "aliases": [
+        "Mr. Hands"
+      ],
+      "role": "pilot",
+      "biography": "He is a sailor and navigator involved in the ship's operations.",
+      "personality_traits": [
+        "pragmatic",
+        "cynical",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "He is a character involved in the ship's navigation and conflict.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Cap'n Hawkins",
+      "aliases": [],
+      "role": "Cap'n",
+      "biography": "He is the captain of the ship and gives navigational orders.",
+      "personality_traits": [
+        "authoritative",
+        "calm under pressure"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Long John",
+    "the captain",
+    "Mr. Trelawney",
+    "Israel Hands",
+    "the coxswain",
+    "Barbecue"
+  ],
+  "unattributed_dialogue_present": true
+}

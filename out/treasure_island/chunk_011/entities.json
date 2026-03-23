@@ -1,0 +1,32 @@
+{
+  "characters": [
+    "squire",
+    "Dr. Livesey",
+    "captain",
+    "Hawkins",
+    "Joyce",
+    "Hunter",
+    "Redruth",
+    "Trelawney",
+    "Jim"
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "Trinidad",
+    "Port of Spain",
+    "Bristol",
+    "Skeleton Island",
+    "the island"
+  ],
+  "objects": [
+    "bundle",
+    "book",
+    "sealed paper",
+    "map",
+    "thimble",
+    "medical scissors"
+  ],
+  "identity_notes": [
+    "squire and Trelawney may refer to the same entity"
+  ]
+}

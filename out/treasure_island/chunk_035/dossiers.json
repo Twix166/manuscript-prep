@@ -1,0 +1,90 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "captain",
+      "biography": "Directed defense preparations, reprimanded Gray for negligence, assigned positions to crew members, and strategized against the attack.",
+      "personality_traits": [
+        "authoritative",
+        "strategic",
+        "angry"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Assigned to the north side with Gray, acknowledged as the best shot, and participated in defensive coordination.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "doctor",
+      "biography": "Assigned to defend the door, fired through the porch, and accurately counted enemy shots.",
+      "personality_traits": [
+        "precise"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Fired the first shot, received reprimand from the captain for failing to warn of the attack.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Joyce",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Fired the first shot, responded calmly to the captain's orders, and remained alert during the attack.",
+      "personality_traits": [
+        "calm",
+        "civil"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Assigned to load muskets and assist in defense, received breakfast from the captain.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Distributed brandy to the crew and participated in defensive preparations.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}
