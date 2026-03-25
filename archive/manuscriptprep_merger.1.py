@@ -2,8 +2,7 @@
 """
 manuscriptprep_merger.py
 
-Merge per-chunk ManuscriptPrep outputs into book-level JSON artifacts,
-with upgraded resolver logic for character/entity normalization.
+Merge per-chunk ManuscriptPrep outputs into book-level JSON artifacts.
 
 Typical usage:
     python manuscriptprep_merger.py \
@@ -46,71 +45,6 @@ PASS_FILES = {
 
 ENTITY_KEYS = ["characters", "places", "objects", "identity_notes"]
 
-TITLE_EQUIVS = {
-    "dr": "doctor",
-    "dr.": "doctor",
-    "doctor": "doctor",
-    "mr": "mr",
-    "mr.": "mr",
-    "mister": "mr",
-    "mrs": "mrs",
-    "mrs.": "mrs",
-    "missus": "mrs",
-    "miss": "miss",
-    "ms": "ms",
-    "ms.": "ms",
-    "capt": "captain",
-    "capt.": "captain",
-    "capn": "captain",
-    "captain": "captain",
-    "sir": "sir",
-    "lady": "lady",
-    "lord": "lord",
-    "prof": "professor",
-    "prof.": "professor",
-    "professor": "professor",
-    "rev": "reverend",
-    "rev.": "reverend",
-    "reverend": "reverend",
-}
-
-GENERIC_CHARACTER_WORDS = {
-    "doctor",
-    "captain",
-    "mr",
-    "mrs",
-    "miss",
-    "ms",
-    "professor",
-    "reverend",
-    "sir",
-    "lady",
-    "lord",
-    "narrator",
-    "mother",
-    "father",
-    "boy",
-    "girl",
-    "man",
-    "woman",
-    "stranger",
-    "innkeeper",
-    "captain",
-}
-
-GENERIC_PREFIXES = {"the"}
-
-ROLE_HINTS = {
-    "doctor": {"doctor", "physician", "surgeon", "magistrate"},
-    "captain": {"captain", "sailor", "seaman", "pirate", "buccaneer"},
-    "mr": set(),
-    "mrs": set(),
-    "miss": set(),
-    "ms": set(),
-    "professor": {"professor", "teacher"},
-    "reverend": {"priest", "clergyman", "reverend"},
-}
-
 
 def read_json(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
@@ -135,59 +69,12 @@ def natural_key(name: str) -> List[Any]:
     return out
 
 
-def normalize_whitespace(s: str) -> str:
-    return re.sub(r"\s+", " ", s).strip()
-
-
 def norm_text(s: str) -> str:
     s = s.strip().lower()
-    s = s.replace("’", "'").replace("‘", "'").replace("`", "'")
-    s = re.sub(r"[\"']", "", s)
-    s = re.sub(r"[^a-z0-9\s_.-]", "", s)
+    s = re.sub(r"[\"'`]", "", s)
+    s = re.sub(r"[^a-z0-9\s_-]", "", s)
     s = re.sub(r"[\s_-]+", " ", s)
     return s.strip()
-
-
-def canonicalize_title_token(token: str) -> str:
-    return TITLE_EQUIVS.get(token.lower(), token.lower())
-
-
-def tokenize_name(name: str) -> List[str]:
-    text = norm_text(name)
-    tokens = [t for t in re.split(r"\s+", text) if t]
-    return [canonicalize_title_token(t) for t in tokens]
-
-
-def strip_leading_generics(tokens: List[str]) -> List[str]:
-    out = list(tokens)
-    while out and out[0] in GENERIC_PREFIXES:
-        out = out[1:]
-    return out
-
-
-def parse_name_form(name: str) -> Dict[str, Any]:
-    tokens = strip_leading_generics(tokenize_name(name))
-    title = None
-    base_tokens = list(tokens)
-    if base_tokens and base_tokens[0] in TITLE_EQUIVS.values():
-        title = base_tokens[0]
-        base_tokens = base_tokens[1:]
-
-    surname = base_tokens[-1] if base_tokens else None
-    given = base_tokens[0] if len(base_tokens) >= 2 else None
-
-    return {
-        "original": name,
-        "normalized": " ".join(tokens),
-        "tokens": tokens,
-        "title": title,
-        "base_tokens": base_tokens,
-        "surname": surname,
-        "given": given,
-        "is_generic": (not base_tokens and title is not None)
-        or (" ".join(tokens) in GENERIC_CHARACTER_WORDS)
-        or (len(tokens) == 1 and tokens[0] in GENERIC_CHARACTER_WORDS),
-    }
 
 
 def unique_preserve_order(values: Iterable[Any]) -> List[Any]:
@@ -421,245 +308,89 @@ def extract_dossier_list(dossier_json: Dict[str, Any]) -> List[Dict[str, Any]]:
     return []
 
 
-def roles_compatible(title: Optional[str], roles: List[str]) -> bool:
-    if not title:
-        return True
-    hints = ROLE_HINTS.get(title, set())
-    if not hints:
-        return True
-    joined = " ".join(r.lower() for r in roles)
-    return any(h in joined for h in hints) or not roles
-
-
-def build_dossier_candidates(chunks: List[ChunkData]) -> List[Dict[str, Any]]:
-    candidates: List[Dict[str, Any]] = []
-    for chunk in chunks:
-        djson = chunk.dossiers or {}
-        dossiers = extract_dossier_list(djson)
-        for dossier in dossiers:
-            name = dossier.get("name")
-            if not isinstance(name, str) or not name.strip():
-                continue
-            parsed = parse_name_form(name)
-            aliases = nonempty_unique_strs(dossier.get("aliases", []))
-            roles = [r for r in [dossier.get("role")] if isinstance(r, str)] + nonempty_unique_strs(dossier.get("roles", []))
-            candidates.append(
-                {
-                    "chunk_id": chunk.chunk_id,
-                    "dossier": dossier,
-                    "name": name,
-                    "parsed": parsed,
-                    "aliases": aliases,
-                    "roles": nonempty_unique_strs(roles),
-                }
-            )
-    return candidates
-
-
-def can_merge_name_forms(a: Dict[str, Any], b: Dict[str, Any], a_roles: List[str], b_roles: List[str]) -> Tuple[bool, str, str, int]:
-    pa = a
-    pb = b
-
-    # Exact normalized match
-    if pa["normalized"] == pb["normalized"]:
-        return True, "safe", "exact_normalized_match", 100
-
-    # Title-normalized same base tokens
-    if pa["base_tokens"] and pa["base_tokens"] == pb["base_tokens"] and pa["title"] == pb["title"]:
-        return True, "safe", "same_base_tokens_and_title", 98
-
-    # Same surname and compatible titled variants
-    if pa["surname"] and pa["surname"] == pb["surname"]:
-        if pa["title"] == pb["title"] and pa["title"] is not None:
-            return True, "safe", "same_title_same_surname", 96
-        if pa["title"] is None and pb["title"] and pa["base_tokens"] == pb["base_tokens"]:
-            return True, "probable", "bare_name_matches_titled_full_name", 88
-        if pb["title"] is None and pa["title"] and pa["base_tokens"] == pb["base_tokens"]:
-            return True, "probable", "bare_name_matches_titled_full_name", 88
-        if len(pa["base_tokens"]) == 1 and len(pb["base_tokens"]) >= 1 and pa["surname"] == pb["surname"]:
-            if pa["title"] == pb["title"] and pa["title"] is not None:
-                return True, "probable", "surname_only_variant_same_title", 85
-
-    # Generic title-only to titled full name, but only when roles look compatible
-    if pa["is_generic"] and pa["title"] and pb["title"] == pa["title"] and pb["surname"]:
-        if roles_compatible(pa["title"], a_roles + b_roles):
-            return True, "probable", "generic_title_to_single_titled_name_candidate", 78
-
-    if pb["is_generic"] and pb["title"] and pa["title"] == pb["title"] and pa["surname"]:
-        if roles_compatible(pb["title"], a_roles + b_roles):
-            return True, "probable", "generic_title_to_single_titled_name_candidate", 78
-
-    return False, "review", "no_safe_merge_rule", 0
-
-
-def choose_group_label(group_items: List[Dict[str, Any]]) -> str:
-    # Prefer longest titled full name, otherwise longest name
-    def score(item: Dict[str, Any]) -> Tuple[int, int]:
-        parsed = item["parsed"]
-        titled = 1 if parsed["title"] else 0
-        base_len = len(parsed["base_tokens"])
-        return (titled + base_len, len(item["name"]))
-
-    best = max(group_items, key=score)
-    return best["name"]
-
-
-def resolve_character_candidates(candidates: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    groups: List[List[Dict[str, Any]]] = []
-    resolution_notes: List[Dict[str, Any]] = []
-
-    for cand in candidates:
-        placed = False
-        for group in groups:
-            matched = False
-            for existing in group:
-                ok, confidence, reason, score = can_merge_name_forms(
-                    cand["parsed"],
-                    existing["parsed"],
-                    cand["roles"],
-                    existing["roles"],
-                )
-                if ok:
-                    group.append(cand)
-                    resolution_notes.append(
-                        {
-                            "source_name": cand["name"],
-                            "target_name": existing["name"],
-                            "confidence": confidence,
-                            "reason": reason,
-                            "score": score,
-                            "chunk_id": cand["chunk_id"],
-                        }
-                    )
-                    matched = True
-                    placed = True
-                    break
-            if matched:
-                break
-        if not placed:
-            groups.append([cand])
-
-    resolved_groups: List[Dict[str, Any]] = []
-    for group in groups:
-        canonical_name = choose_group_label(group)
-        surface_variants = unique_preserve_order([g["name"] for g in group] + [a for g in group for a in g["aliases"]])
-        confidences = []
-        reasons = []
-        chunks = []
-        for g in group:
-            if g["chunk_id"] not in chunks:
-                chunks.append(g["chunk_id"])
-        for note in resolution_notes:
-            if note["source_name"] in surface_variants and note["target_name"] in surface_variants:
-                confidences.append(note["confidence"])
-                reasons.append(note["reason"])
-        merge_confidence = "single"
-        if "safe" in confidences:
-            merge_confidence = "safe"
-        elif "probable" in confidences:
-            merge_confidence = "probable"
-
-        resolved_groups.append(
-            {
-                "canonical_name": canonical_name,
-                "surface_variants": unique_preserve_order(surface_variants),
-                "merge_confidence": merge_confidence,
-                "merge_reasons": unique_preserve_order(reasons),
-                "chunks": chunks,
-                "members": group,
-            }
-        )
-
-    resolved_groups = sorted(resolved_groups, key=lambda x: natural_key(x["canonical_name"]))
-    return resolved_groups, resolution_notes
-
-
 def merge_dossiers(chunks: List[ChunkData]) -> Dict[str, Any]:
-    candidates = build_dossier_candidates(chunks)
-    resolved_groups, resolution_notes = resolve_character_candidates(candidates)
-
+    merged_map: Dict[str, Dict[str, Any]] = {}
     per_chunk: List[Dict[str, Any]] = []
+
     for chunk in chunks:
         djson = chunk.dossiers or {}
         dossiers = extract_dossier_list(djson)
         per_chunk.append({"chunk_id": chunk.chunk_id, "character_dossiers": dossiers})
 
-    merged_list: List[Dict[str, Any]] = []
-
-    for group in resolved_groups:
-        merged = {
-            "name": group["canonical_name"],
-            "canonical_name": group["canonical_name"],
-            "variants": [],
-            "surface_variants": group["surface_variants"],
-            "aliases": [],
-            "roles": [],
-            "biographies": [],
-            "personality_traits": [],
-            "vocal_notes": [],
-            "accents": [],
-            "spoken_dialogue_values": [],
-            "identity_status_values": [],
-            "chunks": group["chunks"],
-            "merge_confidence": group["merge_confidence"],
-            "merge_reason": unique_preserve_order(group["merge_reasons"]),
-            "source_dossiers": [],
-        }
-
-        for member in group["members"]:
-            dossier = member["dossier"]
+        for dossier in dossiers:
             name = dossier.get("name")
-            if isinstance(name, str) and name not in merged["variants"]:
-                merged["variants"].append(name)
+            if not isinstance(name, str) or not name.strip():
+                continue
+            key = norm_text(name)
+            if not key:
+                continue
+
+            rec = merged_map.setdefault(
+                key,
+                {
+                    "name": name,
+                    "variants": [],
+                    "aliases": [],
+                    "roles": [],
+                    "biographies": [],
+                    "personality_traits": [],
+                    "vocal_notes": [],
+                    "accents": [],
+                    "spoken_dialogue_values": [],
+                    "identity_status_values": [],
+                    "chunks": [],
+                    "source_dossiers": [],
+                },
+            )
+
+            if name not in rec["variants"]:
+                rec["variants"].append(name)
 
             aliases = dossier.get("aliases", [])
             if isinstance(aliases, list):
-                merged["aliases"] = unique_preserve_order(merged["aliases"] + [a for a in aliases if isinstance(a, str)])
+                rec["aliases"] = unique_preserve_order(rec["aliases"] + [a for a in aliases if isinstance(a, str)])
 
             role = dossier.get("role")
             if isinstance(role, str) and role:
-                merged["roles"] = unique_preserve_order(merged["roles"] + [role])
-
-            more_roles = dossier.get("roles", [])
-            if isinstance(more_roles, list):
-                merged["roles"] = unique_preserve_order(merged["roles"] + [r for r in more_roles if isinstance(r, str)])
+                rec["roles"] = unique_preserve_order(rec["roles"] + [role])
 
             biography = dossier.get("biography")
             if isinstance(biography, str) and biography:
-                merged["biographies"] = unique_preserve_order(merged["biographies"] + [biography])
+                rec["biographies"] = unique_preserve_order(rec["biographies"] + [biography])
 
             traits = dossier.get("personality_traits", [])
             if isinstance(traits, list):
-                merged["personality_traits"] = unique_preserve_order(
-                    merged["personality_traits"] + [t for t in traits if isinstance(t, str)]
+                rec["personality_traits"] = unique_preserve_order(
+                    rec["personality_traits"] + [t for t in traits if isinstance(t, str)]
                 )
 
             vocal_notes = dossier.get("vocal_notes")
             if isinstance(vocal_notes, str) and vocal_notes:
-                merged["vocal_notes"] = unique_preserve_order(merged["vocal_notes"] + [vocal_notes])
+                rec["vocal_notes"] = unique_preserve_order(rec["vocal_notes"] + [vocal_notes])
 
             accent = dossier.get("accent")
             if isinstance(accent, str) and accent:
-                merged["accents"] = unique_preserve_order(merged["accents"] + [accent])
+                rec["accents"] = unique_preserve_order(rec["accents"] + [accent])
 
             spoken_dialogue = dossier.get("spoken_dialogue")
             if spoken_dialogue is not None:
-                merged["spoken_dialogue_values"] = unique_preserve_order(merged["spoken_dialogue_values"] + [spoken_dialogue])
+                rec["spoken_dialogue_values"] = unique_preserve_order(rec["spoken_dialogue_values"] + [spoken_dialogue])
 
             identity_status = dossier.get("identity_status")
             if isinstance(identity_status, str) and identity_status:
-                merged["identity_status_values"] = unique_preserve_order(
-                    merged["identity_status_values"] + [identity_status]
+                rec["identity_status_values"] = unique_preserve_order(
+                    rec["identity_status_values"] + [identity_status]
                 )
 
-            merged["source_dossiers"].append({"chunk_id": member["chunk_id"], "dossier": dossier})
+            if chunk.chunk_id not in rec["chunks"]:
+                rec["chunks"].append(chunk.chunk_id)
 
-        merged_list.append(merged)
+            rec["source_dossiers"].append({"chunk_id": chunk.chunk_id, "dossier": dossier})
 
+    merged_list = sorted(merged_map.values(), key=lambda x: natural_key(x["name"]))
     return {
         "character_dossiers": merged_list,
         "per_chunk": per_chunk,
-        "resolver_notes": resolution_notes,
     }
 
 
@@ -695,7 +426,7 @@ def summarize_timings(chunks: List[ChunkData]) -> Dict[str, Any]:
     }
 
 
-def build_report(chunks: List[ChunkData], dossiers_merged: Dict[str, Any]) -> Dict[str, Any]:
+def build_report(chunks: List[ChunkData]) -> Dict[str, Any]:
     missing: Dict[str, List[str]] = defaultdict(list)
     present_counts: Dict[str, int] = defaultdict(int)
 
@@ -710,7 +441,6 @@ def build_report(chunks: List[ChunkData], dossiers_merged: Dict[str, Any]) -> Di
         "chunk_count": len(chunks),
         "present_counts": dict(present_counts),
         "missing": dict(missing),
-        "resolver_merge_count": sum(1 for d in dossiers_merged.get("character_dossiers", []) if len(d.get("surface_variants", [])) > 1),
     }
 
 
@@ -797,9 +527,7 @@ def build_conflict_report(
                 {
                     "name": name,
                     "variants": dossier.get("variants", []),
-                    "surface_variants": dossier.get("surface_variants", []),
                     "chunks": dossier.get("chunks", []),
-                    "merge_confidence": dossier.get("merge_confidence"),
                     "conflicts": conflicts,
                 }
             )
@@ -863,7 +591,6 @@ def build_conflict_report(
         "character_conflicts": character_conflicts,
         "entity_variant_notes": entity_variant_notes,
         "global_conflicts": global_conflicts,
-        "resolver_notes": dossiers_merged.get("resolver_notes", []),
     }
 
 
@@ -897,7 +624,7 @@ def main() -> int:
     entities_merged = merge_entities(chunks)
     dossiers_merged = merge_dossiers(chunks)
     timing_summary = summarize_timings(chunks)
-    report = build_report(chunks, dossiers_merged)
+    report = build_report(chunks)
     conflict_report = build_conflict_report(
         structure_merged=structure_merged,
         dialogue_merged=dialogue_merged,
