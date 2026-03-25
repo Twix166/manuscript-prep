@@ -1,0 +1,1185 @@
+{
+  "summary": {
+    "character_conflict_count": 40,
+    "entity_variant_note_count": 3,
+    "global_conflict_count": 2
+  },
+  "character_conflicts": [
+    {
+      "name": "Abraham Gray",
+      "variants": [
+        "Abraham Gray"
+      ],
+      "chunks": [
+        "chunk_029",
+        "chunk_031"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Abraham Gray."
+        }
+      ]
+    },
+    {
+      "name": "Alexander Smollett",
+      "variants": [
+        "Alexander Smollett"
+      ],
+      "chunks": [
+        "chunk_031",
+        "chunk_034"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Alexander Smollett."
+        }
+      ]
+    },
+    {
+      "name": "Anderson",
+      "variants": [
+        "Anderson"
+      ],
+      "chunks": [
+        "chunk_022",
+        "chunk_036",
+        "chunk_037",
+        "chunk_051"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "pirate"
+          ],
+          "message": "Multiple roles observed for Anderson."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Anderson."
+        }
+      ]
+    },
+    {
+      "name": "Ben Gunn",
+      "variants": [
+        "Ben Gunn"
+      ],
+      "chunks": [
+        "chunk_025",
+        "chunk_026",
+        "chunk_031",
+        "chunk_033",
+        "chunk_037",
+        "chunk_038",
+        "chunk_046",
+        "chunk_054",
+        "chunk_056",
+        "chunk_057",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060",
+        "chunk_061"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Ben Gunn."
+        }
+      ]
+    },
+    {
+      "name": "Black Dog",
+      "variants": [
+        "Black Dog"
+      ],
+      "chunks": [
+        "chunk_003",
+        "chunk_005",
+        "chunk_006",
+        "chunk_009",
+        "chunk_014",
+        "chunk_015",
+        "chunk_049"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Black Dog."
+        }
+      ]
+    },
+    {
+      "name": "captain",
+      "variants": [
+        "captain"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_036"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for captain."
+        }
+      ]
+    },
+    {
+      "name": "Captain Silver",
+      "variants": [
+        "Captain Silver"
+      ],
+      "chunks": [
+        "chunk_042",
+        "chunk_047"
+      ],
+      "conflicts": [
+        {
+          "type": "identity_status_conflict",
+          "severity": "medium",
+          "values": [
+            "confirmed",
+            "identity uncertain"
+          ],
+          "message": "Multiple identity_status values observed for Captain Silver."
+        }
+      ]
+    },
+    {
+      "name": "Captain Smollett",
+      "variants": [
+        "Captain Smollett"
+      ],
+      "chunks": [
+        "chunk_015",
+        "chunk_018",
+        "chunk_020",
+        "chunk_021",
+        "chunk_029",
+        "chunk_033",
+        "chunk_035",
+        "chunk_037",
+        "chunk_038",
+        "chunk_040",
+        "chunk_053",
+        "chunk_059",
+        "chunk_061"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "captain"
+          ],
+          "message": "Multiple roles observed for Captain Smollett."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Captain Smollett."
+        }
+      ]
+    },
+    {
+      "name": "Doctor Livesey",
+      "variants": [
+        "Doctor Livesey"
+      ],
+      "chunks": [
+        "chunk_004",
+        "chunk_006"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Doctor Livesey."
+        }
+      ]
+    },
+    {
+      "name": "Dr. Livesey",
+      "variants": [
+        "Dr. Livesey"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_001",
+        "chunk_007",
+        "chunk_010",
+        "chunk_011",
+        "chunk_012",
+        "chunk_015",
+        "chunk_018",
+        "chunk_020",
+        "chunk_021",
+        "chunk_031",
+        "chunk_033",
+        "chunk_035",
+        "chunk_037",
+        "chunk_053",
+        "chunk_054",
+        "chunk_055",
+        "chunk_057",
+        "chunk_058"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "doctor",
+            "magistrate"
+          ],
+          "message": "Multiple roles observed for Dr. Livesey."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Dr. Livesey."
+        },
+        {
+          "type": "identity_status_conflict",
+          "severity": "medium",
+          "values": [
+            "confirmed",
+            "identity uncertain"
+          ],
+          "message": "Multiple identity_status values observed for Dr. Livesey."
+        }
+      ]
+    },
+    {
+      "name": "Gray",
+      "variants": [
+        "Gray"
+      ],
+      "chunks": [
+        "chunk_030",
+        "chunk_033",
+        "chunk_035",
+        "chunk_036",
+        "chunk_037",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060",
+        "chunk_061"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Gray."
+        }
+      ]
+    },
+    {
+      "name": "Hands",
+      "variants": [
+        "Hands"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_021",
+        "chunk_044",
+        "chunk_046",
+        "chunk_051"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "pilot"
+          ],
+          "message": "Multiple roles observed for Hands."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Hands."
+        }
+      ]
+    },
+    {
+      "name": "Hawkins",
+      "variants": [
+        "Hawkins"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_015",
+        "chunk_017",
+        "chunk_035"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Hawkins."
+        }
+      ]
+    },
+    {
+      "name": "Hunter",
+      "variants": [
+        "Hunter"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_023",
+        "chunk_028",
+        "chunk_035",
+        "chunk_036",
+        "chunk_037"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "pirate"
+          ],
+          "message": "Multiple roles observed for Hunter."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Hunter."
+        }
+      ]
+    },
+    {
+      "name": "Israel",
+      "variants": [
+        "Israel"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_046"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Israel."
+        }
+      ]
+    },
+    {
+      "name": "Jim",
+      "variants": [
+        "Jim"
+      ],
+      "chunks": [
+        "chunk_003",
+        "chunk_004",
+        "chunk_005",
+        "chunk_007",
+        "chunk_011",
+        "chunk_023",
+        "chunk_026",
+        "chunk_027",
+        "chunk_030",
+        "chunk_033",
+        "chunk_043",
+        "chunk_044",
+        "chunk_045",
+        "chunk_053",
+        "chunk_054",
+        "chunk_058"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Jim."
+        }
+      ]
+    },
+    {
+      "name": "Jim Hawkins",
+      "variants": [
+        "Jim Hawkins"
+      ],
+      "chunks": [
+        "chunk_010",
+        "chunk_021",
+        "chunk_028",
+        "chunk_049",
+        "chunk_050"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Jim Hawkins."
+        }
+      ]
+    },
+    {
+      "name": "Job Anderson",
+      "variants": [
+        "Job Anderson"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_021",
+        "chunk_030"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Job Anderson."
+        }
+      ]
+    },
+    {
+      "name": "John Silver",
+      "variants": [
+        "John Silver"
+      ],
+      "chunks": [
+        "chunk_049",
+        "chunk_051",
+        "chunk_059"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "captain",
+            "unknown"
+          ],
+          "message": "Multiple roles observed for John Silver."
+        }
+      ]
+    },
+    {
+      "name": "John Trelawney",
+      "variants": [
+        "John Trelawney"
+      ],
+      "chunks": [
+        "chunk_012",
+        "chunk_031"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for John Trelawney."
+        }
+      ]
+    },
+    {
+      "name": "Joyce",
+      "variants": [
+        "Joyce"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_023",
+        "chunk_028",
+        "chunk_035",
+        "chunk_036"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Joyce."
+        }
+      ]
+    },
+    {
+      "name": "Long John",
+      "variants": [
+        "Long John"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_021",
+        "chunk_022",
+        "chunk_023",
+        "chunk_027",
+        "chunk_033",
+        "chunk_034",
+        "chunk_049",
+        "chunk_050",
+        "chunk_055",
+        "chunk_058"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Long John."
+        }
+      ]
+    },
+    {
+      "name": "Long John Silver",
+      "variants": [
+        "Long John Silver"
+      ],
+      "chunks": [
+        "chunk_012",
+        "chunk_014",
+        "chunk_015",
+        "chunk_024"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Long John Silver."
+        }
+      ]
+    },
+    {
+      "name": "Mr. Hands",
+      "variants": [
+        "Mr. Hands"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_042",
+        "chunk_043",
+        "chunk_044"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Mr. Hands."
+        }
+      ]
+    },
+    {
+      "name": "Mrs. Crossley",
+      "variants": [
+        "Mrs. Crossley"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_008"
+      ],
+      "conflicts": [
+        {
+          "type": "identity_status_conflict",
+          "severity": "medium",
+          "values": [
+            "identity uncertain",
+            "confirmed"
+          ],
+          "message": "Multiple identity_status values observed for Mrs. Crossley."
+        }
+      ]
+    },
+    {
+      "name": "my mother",
+      "variants": [
+        "my mother"
+      ],
+      "chunks": [
+        "chunk_004",
+        "chunk_006",
+        "chunk_007",
+        "chunk_008",
+        "chunk_010",
+        "chunk_013"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for my mother."
+        }
+      ]
+    },
+    {
+      "name": "Pew",
+      "variants": [
+        "Pew"
+      ],
+      "chunks": [
+        "chunk_009",
+        "chunk_014"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Pew."
+        }
+      ]
+    },
+    {
+      "name": "Redruth",
+      "variants": [
+        "Redruth"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_023",
+        "chunk_028",
+        "chunk_029",
+        "chunk_030"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Redruth."
+        }
+      ]
+    },
+    {
+      "name": "Silver",
+      "variants": [
+        "Silver"
+      ],
+      "chunks": [
+        "chunk_018",
+        "chunk_020",
+        "chunk_021",
+        "chunk_022",
+        "chunk_023",
+        "chunk_025",
+        "chunk_028",
+        "chunk_034",
+        "chunk_037",
+        "chunk_040",
+        "chunk_047",
+        "chunk_049",
+        "chunk_050",
+        "chunk_053",
+        "chunk_054",
+        "chunk_055",
+        "chunk_056",
+        "chunk_057",
+        "chunk_058",
+        "chunk_060",
+        "chunk_061"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "captain",
+            "pirate"
+          ],
+          "message": "Multiple roles observed for Silver."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Silver."
+        }
+      ]
+    },
+    {
+      "name": "squire",
+      "variants": [
+        "squire",
+        "Squire"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_036",
+        "chunk_037"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "squire"
+          ],
+          "message": "Multiple roles observed for squire."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for squire."
+        }
+      ]
+    },
+    {
+      "name": "the blind man",
+      "variants": [
+        "the blind man"
+      ],
+      "chunks": [
+        "chunk_006",
+        "chunk_008"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for the blind man."
+        }
+      ]
+    },
+    {
+      "name": "the captain",
+      "variants": [
+        "the captain"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_001",
+        "chunk_003",
+        "chunk_004",
+        "chunk_005",
+        "chunk_006",
+        "chunk_008",
+        "chunk_009",
+        "chunk_010",
+        "chunk_013",
+        "chunk_017",
+        "chunk_022",
+        "chunk_023",
+        "chunk_028",
+        "chunk_030",
+        "chunk_031",
+        "chunk_033",
+        "chunk_034",
+        "chunk_037",
+        "chunk_050",
+        "chunk_051",
+        "chunk_060"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "pirate",
+            "confirmed",
+            "captain"
+          ],
+          "message": "Multiple roles observed for the captain."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for the captain."
+        }
+      ]
+    },
+    {
+      "name": "the coxswain",
+      "variants": [
+        "the coxswain"
+      ],
+      "chunks": [
+        "chunk_042",
+        "chunk_043",
+        "chunk_045"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for the coxswain."
+        }
+      ]
+    },
+    {
+      "name": "the doctor",
+      "variants": [
+        "the doctor"
+      ],
+      "chunks": [
+        "chunk_005",
+        "chunk_013",
+        "chunk_022",
+        "chunk_029",
+        "chunk_042",
+        "chunk_050",
+        "chunk_051",
+        "chunk_054",
+        "chunk_055",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for the doctor."
+        }
+      ]
+    },
+    {
+      "name": "the sea-cook",
+      "variants": [
+        "the sea-cook"
+      ],
+      "chunks": [
+        "chunk_050",
+        "chunk_055",
+        "chunk_061"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for the sea-cook."
+        }
+      ]
+    },
+    {
+      "name": "the squire",
+      "variants": [
+        "the squire"
+      ],
+      "chunks": [
+        "chunk_010",
+        "chunk_012",
+        "chunk_013",
+        "chunk_015",
+        "chunk_018",
+        "chunk_021",
+        "chunk_022",
+        "chunk_027",
+        "chunk_028",
+        "chunk_029",
+        "chunk_030",
+        "chunk_031",
+        "chunk_053",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "confirmed"
+          ],
+          "message": "Multiple roles observed for the squire."
+        },
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for the squire."
+        }
+      ]
+    },
+    {
+      "name": "Tom",
+      "variants": [
+        "Tom"
+      ],
+      "chunks": [
+        "chunk_024",
+        "chunk_025"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Tom."
+        }
+      ]
+    },
+    {
+      "name": "Tom Morgan",
+      "variants": [
+        "Tom Morgan"
+      ],
+      "chunks": [
+        "chunk_014",
+        "chunk_049",
+        "chunk_055"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            true,
+            false
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Tom Morgan."
+        }
+      ]
+    },
+    {
+      "name": "Tom Redruth",
+      "variants": [
+        "Tom Redruth"
+      ],
+      "chunks": [
+        "chunk_012",
+        "chunk_030"
+      ],
+      "conflicts": [
+        {
+          "type": "spoken_dialogue_conflict",
+          "severity": "high",
+          "values": [
+            false,
+            true
+          ],
+          "message": "Conflicting spoken_dialogue values observed for Tom Redruth."
+        }
+      ]
+    },
+    {
+      "name": "Trelawney",
+      "variants": [
+        "Trelawney"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_029",
+        "chunk_030"
+      ],
+      "conflicts": [
+        {
+          "type": "role_conflict",
+          "severity": "medium",
+          "values": [
+            "unknown",
+            "confirmed"
+          ],
+          "message": "Multiple roles observed for Trelawney."
+        }
+      ]
+    }
+  ],
+  "entity_variant_notes": {
+    "characters_normalized": [
+      {
+        "canonical": "squire",
+        "variants": [
+          "squire",
+          "Squire"
+        ],
+        "chunks": [
+          "chunk_011",
+          "chunk_036",
+          "chunk_037"
+        ],
+        "message": "Multiple surface variants map to squire."
+      }
+    ],
+    "places_normalized": [
+      {
+        "canonical": "the Spy-Glass",
+        "variants": [
+          "the Spy-Glass",
+          "the Spy-glass"
+        ],
+        "chunks": [
+          "chunk_014",
+          "chunk_023",
+          "chunk_047"
+        ],
+        "message": "Multiple surface variants map to the Spy-Glass."
+      }
+    ],
+    "objects_normalized": [
+      {
+        "canonical": "jolly-boat",
+        "variants": [
+          "jolly-boat",
+          "Jolly-boat"
+        ],
+        "chunks": [
+          "chunk_028",
+          "chunk_029"
+        ],
+        "message": "Multiple surface variants map to jolly-boat."
+      }
+    ],
+    "identity_notes_normalized": []
+  },
+  "global_conflicts": [
+    {
+      "type": "multiple_pov_values",
+      "severity": "medium",
+      "values": [
+        "first-person",
+        "third-person"
+      ],
+      "message": "Multiple POV values were observed across chunks."
+    },
+    {
+      "type": "structure_status_variation",
+      "severity": "low",
+      "values": [
+        "structure complete",
+        "structure incomplete in excerpt",
+        "structure complete in excerpt"
+      ],
+      "message": "Multiple structure status values were observed across chunks."
+    }
+  ]
+}
