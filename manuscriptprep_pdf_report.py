@@ -2,19 +2,14 @@
 """
 manuscriptprep_pdf_report.py
 
-Create a nicely formatted PDF report from merged ManuscriptPrep outputs.
+Create a formatted PDF report from merged ManuscriptPrep outputs.
 
 Typical usage:
     python manuscriptprep_pdf_report.py \
       --input-dir merged/treasure_island \
-      --output manuscriptprep_report_treasure_island.pdf
-
-Optional:
-    python manuscriptprep_pdf_report.py \
-      --input-dir merged/treasure_island \
-      --output manuscriptprep_report_treasure_island.pdf \
+      --output reports/treasure_island_report.pdf \
       --title "Treasure Island" \
-      --subtitle "ManuscriptPrep Book Report"
+      --subtitle "Merged ManuscriptPrep Analysis Report"
 
 Expected input files in --input-dir:
 - book_merged.json
@@ -33,7 +28,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -45,15 +39,14 @@ from reportlab.lib.units import mm
 from reportlab.platypus import (
     BaseDocTemplate,
     Frame,
+    ListFlowable,
+    ListItem,
     PageBreak,
     PageTemplate,
     Paragraph,
     Spacer,
     Table,
     TableStyle,
-    KeepTogether,
-    ListFlowable,
-    ListItem,
 )
 from reportlab.platypus.tableofcontents import TableOfContents
 
@@ -72,32 +65,16 @@ def maybe_read_json(path: Path) -> Optional[Dict[str, Any]]:
     return None
 
 
-def pretty_bool(value: Any) -> str:
-    if value is True:
-        return "Yes"
-    if value is False:
-        return "No"
-    return "Unknown"
-
-
-def truncate(text: str, n: int = 160) -> str:
+def truncate(text: Any, n: int = 160) -> str:
     text = " ".join(str(text).split())
     if len(text) <= n:
         return text
     return text[: n - 1].rstrip() + "…"
 
 
-def bullet_list(items: List[str], styles) -> ListFlowable:
-    flow = []
-    for item in items:
-        flow.append(ListItem(Paragraph(item, styles["BodyText"]), leftIndent=8))
-    return ListFlowable(flow, bulletType="bullet", leftIndent=12)
-
-
 class ReportDocTemplate(BaseDocTemplate):
     def __init__(self, filename: str, **kwargs):
         super().__init__(filename, **kwargs)
-        self._headings: List[tuple[int, str, int]] = []
         frame = Frame(
             18 * mm,
             18 * mm,
@@ -191,18 +168,6 @@ def make_styles():
             spaceAfter=4,
         )
     )
-    styles.add(
-        ParagraphStyle(
-            name="TOCHeading",
-            parent=styles["Heading1"],
-            fontName="Helvetica-Bold",
-            fontSize=18,
-            leading=22,
-            textColor=colors.HexColor("#243B63"),
-            alignment=TA_LEFT,
-            spaceAfter=10,
-        )
-    )
     return styles
 
 
@@ -215,7 +180,7 @@ def add_heading(story, text: str, styles, level: int = 0):
 
 
 def info_table(rows: List[List[Any]], col_widths=None, compact=False):
-    table = Table(rows, colWidths=col_widths, hAlign="LEFT")
+    table = Table(rows, colWidths=col_widths, hAlign="LEFT", repeatRows=1)
     body_font = 8.8 if compact else 9.5
     header_font = 9.2 if compact else 9.8
     table.setStyle(
@@ -230,7 +195,7 @@ def info_table(rows: List[List[Any]], col_widths=None, compact=False):
                 ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
                 ("FONTSIZE", (0, 1), (-1, -1), body_font),
                 ("TEXTCOLOR", (0, 1), (-1, -1), colors.black),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("LEFTPADDING", (0, 0), (-1, -1), 8),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 8),
                 ("TOPPADDING", (0, 1), (-1, -1), 6),
@@ -282,7 +247,7 @@ def add_summary_cards(story, styles, summary_items: List[tuple[str, str]]):
     story.append(Spacer(1, 8))
 
 
-def build_toc(styles):
+def build_toc():
     toc = TableOfContents()
     toc.levelStyles = [
         ParagraphStyle(
@@ -373,8 +338,6 @@ def add_dossiers_section(story, styles, dossiers: Dict[str, Any]):
 
     for dossier in dossier_list:
         name = dossier.get("name", "Unknown")
-        block = []
-        block.append(Paragraph(f"<b>{name}</b>", styles["SubHeading"]))
         variants = ", ".join(dossier.get("variants", [])) or "—"
         aliases = ", ".join(dossier.get("aliases", [])) or "—"
         roles = ", ".join(dossier.get("roles", [])) or "—"
@@ -383,31 +346,31 @@ def add_dossiers_section(story, styles, dossiers: Dict[str, Any]):
         traits = ", ".join(dossier.get("personality_traits", [])) or "—"
         bios = dossier.get("biographies", [])
         vocal_notes = ", ".join(dossier.get("vocal_notes", [])) or "—"
+        spoken = ", ".join(str(x) for x in dossier.get("spoken_dialogue_values", [])) or "—"
+        identity_status = ", ".join(dossier.get("identity_status_values", [])) or "—"
 
-        block.append(Paragraph(f"<b>Variants:</b> {variants}", styles["BodySmall"]))
-        block.append(Paragraph(f"<b>Aliases:</b> {aliases}", styles["BodySmall"]))
-        block.append(Paragraph(f"<b>Roles:</b> {roles}", styles["BodySmall"]))
-        block.append(Paragraph(f"<b>Traits:</b> {traits}", styles["BodySmall"]))
-        block.append(Paragraph(f"<b>Accents:</b> {accents}", styles["BodySmall"]))
-        block.append(Paragraph(f"<b>Vocal notes:</b> {vocal_notes}", styles["BodySmall"]))
-        block.append(Paragraph(f"<b>Chunks:</b> {chunks}", styles["BodySmall"]))
+        add_heading(story, name, styles, 1)
+        rows = [
+            ["Field", "Value"],
+            ["Variants", truncate(variants, 200)],
+            ["Aliases", truncate(aliases, 200)],
+            ["Roles", truncate(roles, 200)],
+            ["Traits", truncate(traits, 200)],
+            ["Accents", truncate(accents, 200)],
+            ["Vocal notes", truncate(vocal_notes, 200)],
+            ["Spoken dialogue values", truncate(spoken, 200)],
+            ["Identity status values", truncate(identity_status, 200)],
+            ["Chunks", truncate(chunks, 200)],
+        ]
+        story.append(info_table(rows, col_widths=[42 * mm, 134 * mm], compact=True))
+        story.append(Spacer(1, 4))
+
         if bios:
-            block.append(Paragraph(f"<b>Biography evidence:</b> {truncate(' | '.join(bios), 400)}", styles["BodySmall"]))
+            story.append(Paragraph("<b>Biography evidence</b>", styles["BodySmall"]))
+            for bio in bios:
+                story.append(Paragraph(truncate(bio, 800), styles["BodySmall"]))
+                story.append(Spacer(1, 2))
 
-        panel = Table([[KeepTogether(block)]], colWidths=[176 * mm], hAlign="LEFT")
-        panel.setStyle(
-            TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#FBFCFE")),
-                    ("BOX", (0, 0), (-1, -1), 0.7, colors.HexColor("#CDD9E8")),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                    ("TOPPADDING", (0, 0), (-1, -1), 6),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                ]
-            )
-        )
-        story.append(panel)
         story.append(Spacer(1, 8))
 
 
@@ -508,16 +471,18 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
     ]
     add_summary_cards(story, styles, summary_items)
 
-    story.append(Paragraph(
-        "This report consolidates the merged ManuscriptPrep outputs for a single manuscript. "
-        "It includes document structure, dialogue summary, entity extraction, merged character dossiers, "
-        "and conflict/merge diagnostics.",
-        styles["BodyText"],
-    ))
+    story.append(
+        Paragraph(
+            "This report consolidates the merged ManuscriptPrep outputs for a single manuscript. "
+            "It includes document structure, dialogue summary, entity extraction, merged character dossiers, "
+            "and conflict and merge diagnostics.",
+            styles["BodyText"],
+        )
+    )
     story.append(Spacer(1, 12))
 
     add_heading(story, "Contents", styles, 0)
-    story.append(build_toc(styles))
+    story.append(build_toc())
     story.append(PageBreak())
 
     add_heading(story, "Executive Summary", styles, 0)
@@ -564,7 +529,7 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
 
     if structure.get("chapters"):
         add_heading(story, "Chapter List", styles, 1)
-        chapter_rows = [["#","Chapter"]]
+        chapter_rows = [["#", "Chapter"]]
         for idx, ch in enumerate(structure.get("chapters", []), start=1):
             chapter_rows.append([str(idx), truncate(ch, 120)])
         story.append(info_table(chapter_rows, col_widths=[12 * mm, 163 * mm], compact=True))
@@ -572,7 +537,7 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
 
     if structure.get("parts"):
         add_heading(story, "Part List", styles, 1)
-        part_rows = [["#","Part"]]
+        part_rows = [["#", "Part"]]
         for idx, p in enumerate(structure.get("parts", []), start=1):
             part_rows.append([str(idx), truncate(p, 120)])
         story.append(info_table(part_rows, col_widths=[12 * mm, 163 * mm], compact=True))
@@ -644,7 +609,11 @@ def main():
 
     book_title = args.title
     if not book_title:
-        book_title = (data.get("book_merged") or {}).get("book_title") or (data.get("book_merged") or {}).get("book_slug") or "ManuscriptPrep Book Report"
+        book_title = (
+            (data.get("book_merged") or {}).get("book_title")
+            or (data.get("book_merged") or {}).get("book_slug")
+            or "ManuscriptPrep Book Report"
+        )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
