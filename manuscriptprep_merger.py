@@ -14,6 +14,15 @@ Optional:
       --input-dir out/treasure_island \
       --output-dir merged/treasure_island \
       --chunk-manifest work/manifests/treasure_island/chunk_manifest.json
+
+Outputs:
+- structure_merged.json
+- dialogue_merged.json
+- entities_merged.json
+- dossiers_merged.json
+- conflict_report.json
+- merge_report.json
+- book_merged.json
 """
 
 from __future__ import annotations
@@ -24,7 +33,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 PASS_FILES = {
     "structure": "structure.json",
@@ -76,6 +85,18 @@ def unique_preserve_order(values: Iterable[Any]) -> List[Any]:
         if key not in seen:
             seen.add(key)
             out.append(v)
+    return out
+
+
+def nonempty_unique_strs(values: List[Any]) -> List[str]:
+    out: List[str] = []
+    seen: Set[str] = set()
+    for v in values:
+        if isinstance(v, str):
+            s = v.strip()
+            if s and s not in seen:
+                seen.add(s)
+                out.append(s)
     return out
 
 
@@ -423,6 +444,156 @@ def build_report(chunks: List[ChunkData]) -> Dict[str, Any]:
     }
 
 
+def build_conflict_report(
+    structure_merged: Dict[str, Any],
+    dialogue_merged: Dict[str, Any],
+    entities_merged: Dict[str, Any],
+    dossiers_merged: Dict[str, Any],
+) -> Dict[str, Any]:
+    character_conflicts: List[Dict[str, Any]] = []
+    entity_variant_notes: Dict[str, List[Dict[str, Any]]] = {}
+    global_conflicts: List[Dict[str, Any]] = []
+
+    for dossier in dossiers_merged.get("character_dossiers", []):
+        if not isinstance(dossier, dict):
+            continue
+
+        name = dossier.get("name", "unknown")
+        roles = nonempty_unique_strs(dossier.get("roles", []))
+        accents = nonempty_unique_strs(dossier.get("accents", []))
+        vocal_notes = nonempty_unique_strs(dossier.get("vocal_notes", []))
+        identity_status_values = nonempty_unique_strs(dossier.get("identity_status_values", []))
+
+        spoken_dialogue_values = dossier.get("spoken_dialogue_values", [])
+        spoken_dialogue_unique = []
+        for v in spoken_dialogue_values:
+            if v not in spoken_dialogue_unique:
+                spoken_dialogue_unique.append(v)
+
+        conflicts: List[Dict[str, Any]] = []
+
+        if len(roles) > 1:
+            conflicts.append(
+                {
+                    "type": "role_conflict",
+                    "severity": "medium",
+                    "values": roles,
+                    "message": f"Multiple roles observed for {name}.",
+                }
+            )
+
+        if len(accents) > 1:
+            conflicts.append(
+                {
+                    "type": "accent_conflict",
+                    "severity": "high",
+                    "values": accents,
+                    "message": f"Multiple accent recommendations observed for {name}.",
+                }
+            )
+
+        if len(spoken_dialogue_unique) > 1:
+            conflicts.append(
+                {
+                    "type": "spoken_dialogue_conflict",
+                    "severity": "high",
+                    "values": spoken_dialogue_unique,
+                    "message": f"Conflicting spoken_dialogue values observed for {name}.",
+                }
+            )
+
+        if len(identity_status_values) > 1:
+            conflicts.append(
+                {
+                    "type": "identity_status_conflict",
+                    "severity": "medium",
+                    "values": identity_status_values,
+                    "message": f"Multiple identity_status values observed for {name}.",
+                }
+            )
+
+        if len(vocal_notes) > 2:
+            conflicts.append(
+                {
+                    "type": "vocal_notes_drift",
+                    "severity": "low",
+                    "values": vocal_notes,
+                    "message": f"Many vocal note variants observed for {name}.",
+                }
+            )
+
+        if conflicts:
+            character_conflicts.append(
+                {
+                    "name": name,
+                    "variants": dossier.get("variants", []),
+                    "chunks": dossier.get("chunks", []),
+                    "conflicts": conflicts,
+                }
+            )
+
+    for key in ["characters_normalized", "places_normalized", "objects_normalized", "identity_notes_normalized"]:
+        items = entities_merged.get(key, [])
+        notes: List[Dict[str, Any]] = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            variants = item.get("variants", [])
+            if isinstance(variants, list) and len(variants) > 1:
+                notes.append(
+                    {
+                        "canonical": item.get("canonical"),
+                        "variants": variants,
+                        "chunks": item.get("chunks", []),
+                        "message": f"Multiple surface variants map to {item.get('canonical')}.",
+                    }
+                )
+        entity_variant_notes[key] = notes
+
+    pov_values = dialogue_merged.get("observed_pov_values", [])
+    if isinstance(pov_values, list) and len(pov_values) > 1:
+        global_conflicts.append(
+            {
+                "type": "multiple_pov_values",
+                "severity": "medium",
+                "values": pov_values,
+                "message": "Multiple POV values were observed across chunks.",
+            }
+        )
+
+    statuses = structure_merged.get("statuses", [])
+    nonempty_statuses = []
+    for s in statuses:
+        if isinstance(s, dict):
+            val = s.get("status")
+            if isinstance(val, str) and val.strip():
+                nonempty_statuses.append(val.strip())
+
+    unique_statuses = nonempty_unique_strs(nonempty_statuses)
+    if len(unique_statuses) > 1:
+        global_conflicts.append(
+            {
+                "type": "structure_status_variation",
+                "severity": "low",
+                "values": unique_statuses,
+                "message": "Multiple structure status values were observed across chunks.",
+            }
+        )
+
+    total_entity_variant_notes = sum(len(v) for v in entity_variant_notes.values())
+
+    return {
+        "summary": {
+            "character_conflict_count": len(character_conflicts),
+            "entity_variant_note_count": total_entity_variant_notes,
+            "global_conflict_count": len(global_conflicts),
+        },
+        "character_conflicts": character_conflicts,
+        "entity_variant_notes": entity_variant_notes,
+        "global_conflicts": global_conflicts,
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Merge ManuscriptPrep per-chunk outputs into book-level JSON.")
     parser.add_argument("--input-dir", type=Path, required=True, help="Chunk output directory, e.g. out/treasure_island")
@@ -454,6 +625,12 @@ def main() -> int:
     dossiers_merged = merge_dossiers(chunks)
     timing_summary = summarize_timings(chunks)
     report = build_report(chunks)
+    conflict_report = build_conflict_report(
+        structure_merged=structure_merged,
+        dialogue_merged=dialogue_merged,
+        entities_merged=entities_merged,
+        dossiers_merged=dossiers_merged,
+    )
 
     book_slug = args.input_dir.name
     book_title = manifest.get("book_title") if manifest else None
@@ -464,6 +641,7 @@ def main() -> int:
         "source_chunk_manifest": str(args.chunk_manifest) if args.chunk_manifest else None,
         "merge_report": report,
         "timing_summary": timing_summary,
+        "conflict_report": conflict_report,
         "structure": structure_merged,
         "dialogue": dialogue_merged,
         "entities": entities_merged,
@@ -475,6 +653,7 @@ def main() -> int:
     write_json(args.output_dir / "dialogue_merged.json", dialogue_merged)
     write_json(args.output_dir / "entities_merged.json", entities_merged)
     write_json(args.output_dir / "dossiers_merged.json", dossiers_merged)
+    write_json(args.output_dir / "conflict_report.json", conflict_report)
     write_json(args.output_dir / "merge_report.json", report)
     write_json(args.output_dir / "book_merged.json", book_merged)
 

@@ -1,0 +1,45 @@
+{
+  "chunk_count": 62,
+  "present_counts": {
+    "structure": 62,
+    "dialogue": 61,
+    "entities": 54,
+    "dossiers": 54,
+    "timing": 54
+  },
+  "missing": {
+    "dialogue": [
+      "chunk_002"
+    ],
+    "entities": [
+      "chunk_002",
+      "chunk_016",
+      "chunk_019",
+      "chunk_032",
+      "chunk_039",
+      "chunk_041",
+      "chunk_048",
+      "chunk_052"
+    ],
+    "dossiers": [
+      "chunk_002",
+      "chunk_016",
+      "chunk_019",
+      "chunk_032",
+      "chunk_039",
+      "chunk_041",
+      "chunk_048",
+      "chunk_052"
+    ],
+    "timing": [
+      "chunk_002",
+      "chunk_016",
+      "chunk_019",
+      "chunk_032",
+      "chunk_039",
+      "chunk_041",
+      "chunk_048",
+      "chunk_052"
+    ]
+  }
+}

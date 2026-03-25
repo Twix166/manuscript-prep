@@ -1,0 +1,7187 @@
+{
+  "per_chunk": [
+    {
+      "chunk_id": "chunk_000",
+      "characters": [
+        "Squire Trelawney",
+        "Dr. Livesey",
+        "my father",
+        "the captain",
+        "the old sea-dog",
+        "the brown old seaman"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "the cove",
+        "the cliffs"
+      ],
+      "objects": [
+        "sea-chest",
+        "cutlass",
+        "brass telescope",
+        "handspike"
+      ],
+      "identity_notes": [
+        "the old sea-dog and the captain may refer to the same entity",
+        "the brown old seaman and the captain may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_001",
+      "characters": [
+        "the captain",
+        "Dr. Livesey",
+        "my father"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "cove",
+        "cliffs",
+        "hamlet"
+      ],
+      "objects": [
+        "sea-chest",
+        "fourpenny piece"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_002",
+      "characters": [],
+      "places": [],
+      "objects": [],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_003",
+      "characters": [
+        "the stranger",
+        "the captain",
+        "Black Dog",
+        "Jim",
+        "Bill"
+      ],
+      "places": [
+        "Admiral Benbow inn"
+      ],
+      "objects": [
+        "cutlass",
+        "signboard",
+        "rum"
+      ],
+      "identity_notes": [
+        "Black Dog and the stranger may refer to the same entity",
+        "Bill and the captain may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_004",
+      "characters": [
+        "my mother",
+        "Doctor Livesey",
+        "the captain",
+        "Jim",
+        "Billy Bones"
+      ],
+      "places": [
+        "my father's house",
+        "the captain's door"
+      ],
+      "objects": [
+        "rum",
+        "basin",
+        "lancet",
+        "noggin",
+        "silver fourpenny",
+        "golden guinea"
+      ],
+      "identity_notes": [
+        "Billy Bones and the captain may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_005",
+      "characters": [
+        "the captain",
+        "Black Dog",
+        "the doctor",
+        "Jim"
+      ],
+      "places": [
+        "Admiral Benbow inn"
+      ],
+      "objects": [
+        "sea-chest",
+        "cutlass"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_006",
+      "characters": [
+        "the blind man",
+        "the captain",
+        "Doctor Livesey",
+        "my mother",
+        "Black Dog",
+        "the blind beggar"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "Black Hill Cove",
+        "the hamlet",
+        "the next cove"
+      ],
+      "objects": [
+        "cutlass",
+        "sea-chest",
+        "stick"
+      ],
+      "identity_notes": [
+        "the blind man and the blind beggar may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_007",
+      "characters": [
+        "Jim",
+        "my mother",
+        "Dr. Livesey",
+        "Mrs. Crossley",
+        "Captain Flint"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "Kitt's Hole",
+        "Dr. Livesey's"
+      ],
+      "objects": [
+        "sea-chest",
+        "cutlass",
+        "tinder box",
+        "gully",
+        "pistol",
+        "quadrant",
+        "tin canikin",
+        "brace of pistols",
+        "bar silver",
+        "Spanish watch",
+        "compasses",
+        "thimble",
+        "thread",
+        "needles",
+        "pigtail tobacco",
+        "tarry string",
+        "black spot",
+        "key",
+        "candle",
+        "bag",
+        "horses"
+      ],
+      "identity_notes": [
+        "Admiral Benbow and Admiral Benbow inn refer to the same place."
+      ]
+    },
+    {
+      "chunk_id": "chunk_008",
+      "characters": [
+        "my mother",
+        "I",
+        "the blind man",
+        "Mrs. Crossley",
+        "the captain"
+      ],
+      "places": [
+        "the inn",
+        "the tavern",
+        "the bottom of the dell",
+        "the hill",
+        "the hamlet",
+        "the bridge",
+        "the bank",
+        "the arch"
+      ],
+      "objects": [
+        "West Indian shells",
+        "silver",
+        "trinkets",
+        "boat-cloak",
+        "oilcloth",
+        "canvas bag",
+        "gold",
+        "doubloons",
+        "louis d'ors",
+        "guineas",
+        "pieces of eight",
+        "oilskin packet",
+        "candle",
+        "chest"
+      ],
+      "identity_notes": [
+        "the inn and the tavern may refer to the same place"
+      ]
+    },
+    {
+      "chunk_id": "chunk_009",
+      "characters": [
+        "Pew",
+        "the man with the lantern",
+        "the captain",
+        "Dirk",
+        "Johnny",
+        "Black Dog",
+        "the boy",
+        "the man who searched the captain's body"
+      ],
+      "places": [
+        "Admiral Benbow",
+        "the hamlet",
+        "the hillside",
+        "the cove",
+        "the road"
+      ],
+      "objects": [
+        "sea-chest",
+        "lantern"
+      ],
+      "identity_notes": [
+        "the blind beggar and Pew refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_010",
+      "characters": [
+        "Dr. Livesey",
+        "the captain",
+        "Mr. Dance",
+        "the squire",
+        "Master Pew",
+        "my mother",
+        "Jim Hawkins",
+        "Mr. Trelawney"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "Kitt's Hole",
+        "Dr. Livesey's house",
+        "the hamlet"
+      ],
+      "objects": [
+        "money-bag",
+        "silver from the till",
+        "oilskin packet",
+        "powdered wig"
+      ],
+      "identity_notes": [
+        "the squire and Mr. Trelawney may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_011",
+      "characters": [
+        "squire",
+        "Dr. Livesey",
+        "captain",
+        "Hawkins",
+        "Joyce",
+        "Hunter",
+        "Redruth",
+        "Trelawney",
+        "Jim"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "Trinidad",
+        "Port of Spain",
+        "Bristol",
+        "Skeleton Island",
+        "the island"
+      ],
+      "objects": [
+        "bundle",
+        "book",
+        "sealed paper",
+        "map",
+        "thimble",
+        "medical scissors"
+      ],
+      "identity_notes": [
+        "squire and Trelawney may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_012",
+      "characters": [
+        "Dr. Livesey",
+        "the squire",
+        "old Redruth",
+        "Tom Redruth",
+        "young Hawkins",
+        "Long John Silver",
+        "Blandly",
+        "John Trelawney",
+        "Arrow"
+      ],
+      "places": [
+        "Old Anchor Inn",
+        "Bristol",
+        "the hall",
+        "the housekeeper's room",
+        "the dock"
+      ],
+      "objects": [
+        "map",
+        "HISPANIOLA",
+        "letter"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_013",
+      "characters": [
+        "the squire",
+        "old Tom Redruth",
+        "the captain",
+        "my mother",
+        "the boy",
+        "Mr. Trelawney",
+        "the doctor",
+        "the narrator",
+        "the stout old gentleman"
+      ],
+      "places": [
+        "Admiral Benbow",
+        "Bristol",
+        "Royal George"
+      ],
+      "objects": [
+        "armchair",
+        "schooner"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_014",
+      "characters": [
+        "Long John Silver",
+        "Black Dog",
+        "Tom Morgan",
+        "Ben",
+        "Pew"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "the Spy-Glass"
+      ],
+      "objects": [
+        "brass telescope"
+      ],
+      "identity_notes": [
+        "the tallow-faced man and Black Dog refer to the same entity",
+        "the blind man and Pew refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_015",
+      "characters": [
+        "Dr. Livesey",
+        "Long John Silver",
+        "Captain Trelawney",
+        "Hawkins",
+        "the squire",
+        "Mr. Arrow",
+        "Captain Smollett",
+        "Black Dog"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "quays"
+      ],
+      "objects": [
+        "HISPANIOLA"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_016",
+      "characters": [],
+      "places": [],
+      "objects": [],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_017",
+      "characters": [
+        "Mr. Blandly",
+        "Long John",
+        "the captain",
+        "Mr. Arrow",
+        "Job Anderson",
+        "Mr. Trelawney",
+        "Israel Hands",
+        "Barbecue",
+        "Hawkins"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "Treasure Island"
+      ],
+      "objects": [
+        "crutch",
+        "lanyard",
+        "cage",
+        "dishes",
+        "handkerchief",
+        "sugar",
+        "bars",
+        "parrot",
+        "HISPANIOLA",
+        "line",
+        "bulkhead"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_018",
+      "characters": [
+        "Dr. Livesey",
+        "Silver",
+        "the squire",
+        "Captain Smollett",
+        "the youngest hand",
+        "Old Pew"
+      ],
+      "places": [
+        "Treasure Island",
+        "Corso Castle"
+      ],
+      "objects": [
+        "HISPANIOLA",
+        "apple barrel"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_019",
+      "characters": [],
+      "places": [],
+      "objects": [],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_020",
+      "characters": [
+        "Dick",
+        "Israel",
+        "Silver",
+        "Captain Smollett",
+        "Dr. Livesey",
+        "John",
+        "Mr. Arrow",
+        "Billy Bones",
+        "Hands"
+      ],
+      "places": [
+        "Skeleton Island",
+        "Foremast Hill",
+        "Main Hill",
+        "Mizzen Hill",
+        "Spy-glass",
+        "the anchorage"
+      ],
+      "objects": [
+        "pannikin",
+        "barrel",
+        "chart",
+        "chest",
+        "keg",
+        "apple barrel",
+        "HISPANIOLA"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_021",
+      "characters": [
+        "Captain Smollett",
+        "Dr. Livesey",
+        "the squire",
+        "Mr. Trelawney",
+        "Long John",
+        "Jim Hawkins",
+        "Job Anderson",
+        "Hands",
+        "Silver"
+      ],
+      "places": [
+        "the cabin",
+        "the quarterdeck",
+        "the deck",
+        "the stern window",
+        "the ship",
+        "the sea"
+      ],
+      "objects": [
+        "sea-chest",
+        "cutlass",
+        "pipe",
+        "bottle of Spanish wine",
+        "raisins",
+        "glass of wine",
+        "wig"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_022",
+      "characters": [
+        "the captain",
+        "the doctor",
+        "Long John",
+        "Anderson",
+        "the squire",
+        "Silver"
+      ],
+      "places": [
+        "Treasure Island",
+        "Skeleton Island",
+        "the mainland",
+        "the haven behind Skeleton Island",
+        "the anchorage"
+      ],
+      "objects": [
+        "the Spy-glass",
+        "the HISPANIOLA",
+        "the booms",
+        "the rudder",
+        "the backstay",
+        "the anchor",
+        "the chains",
+        "the chart"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_023",
+      "characters": [
+        "the captain",
+        "Silver",
+        "Hunter",
+        "Joyce",
+        "Redruth",
+        "Jim",
+        "Long John"
+      ],
+      "places": [
+        "the anchorage",
+        "the Spy-glass",
+        "the fen",
+        "the marsh",
+        "the sandy knolls",
+        "the open piece of undulating, sandy country",
+        "the hills",
+        "the thicket",
+        "the reedy fen",
+        "the little rivers",
+        "the isle"
+      ],
+      "objects": [
+        "loaded pistols",
+        "boats",
+        "gigs",
+        "bow oar",
+        "foresheets",
+        "branch",
+        "rattle"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_024",
+      "characters": [
+        "Long John Silver",
+        "Tom",
+        "Alan"
+      ],
+      "places": [
+        "Spy-glass",
+        "marsh"
+      ],
+      "objects": [
+        "live-oak",
+        "hat",
+        "crutch"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_025",
+      "characters": [
+        "Silver",
+        "Ben Gunn",
+        "Tom",
+        "Alan"
+      ],
+      "places": [
+        "marsh",
+        "mountain",
+        "little hill with two peaks",
+        "foot of the little hill"
+      ],
+      "objects": [
+        "knife",
+        "whistle",
+        "pistol",
+        "wisp of grass",
+        "trunk of a pine",
+        "tree trunk",
+        "HISPANIOLA",
+        "boats"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_026",
+      "characters": [
+        "Ben Gunn",
+        "Jim"
+      ],
+      "places": [],
+      "objects": [
+        "brass buttons",
+        "bits of stick",
+        "loops of tarry gaskin",
+        "brass-buckled leather belt",
+        "cheese",
+        "rum",
+        "thimble",
+        "livery clothes"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_027",
+      "characters": [
+        "Jim",
+        "Benjamin Gunn",
+        "the squire",
+        "the cap'n",
+        "Billy Bones",
+        "Long John"
+      ],
+      "places": [
+        "the island",
+        "the anchorage",
+        "the white rock",
+        "the cemetery"
+      ],
+      "objects": [
+        "WALRUS",
+        "spade",
+        "pick-axe",
+        "musket",
+        "goatskins",
+        "Union Jack"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_028",
+      "characters": [
+        "the captain",
+        "the squire",
+        "Hunter",
+        "Jim Hawkins",
+        "Silver",
+        "Redruth",
+        "Joyce",
+        "Mr. Hands"
+      ],
+      "places": [
+        "the HISPANIOLA",
+        "stockade",
+        "knoll",
+        "spring",
+        "log-house",
+        "forecastle",
+        "cabin",
+        "stern-port",
+        "fore companion",
+        "anchorage",
+        "river"
+      ],
+      "objects": [
+        "jolly-boat",
+        "medicine chest",
+        "powder tins",
+        "muskets",
+        "biscuits",
+        "pork",
+        "cognac",
+        "silk handkerchief",
+        "pistols",
+        "mattress",
+        "oars",
+        "sail",
+        "paling"
+      ],
+      "identity_notes": [
+        "HISPANIOLA and schooner may refer to the same ship"
+      ]
+    },
+    {
+      "chunk_id": "chunk_029",
+      "characters": [
+        "Abraham Gray",
+        "Captain Smollett",
+        "Redruth",
+        "Trelawney",
+        "Israel Hands",
+        "the squire",
+        "the doctor"
+      ],
+      "places": [
+        "block house",
+        "stockade"
+      ],
+      "objects": [
+        "HISPANIOLA",
+        "Jolly-boat",
+        "gigs",
+        "long nine",
+        "cutlass",
+        "muskets",
+        "powder",
+        "pork",
+        "biscuit"
+      ],
+      "identity_notes": [
+        "Mr. Smollett and the captain may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_030",
+      "characters": [
+        "the captain",
+        "the squire",
+        "Jim",
+        "Redruth",
+        "Trelawney",
+        "Gray",
+        "Job Anderson",
+        "the boatswain",
+        "Tom Redruth",
+        "the old gamekeeper"
+      ],
+      "places": [
+        "the stockade",
+        "the log-house",
+        "the woods",
+        "the enclosure",
+        "the palisade",
+        "the strip of wood",
+        "the shore"
+      ],
+      "objects": [
+        "the boat",
+        "the gig",
+        "the cutlass",
+        "the gun",
+        "the British colours",
+        "the Bible",
+        "the rope",
+        "the pen",
+        "the ink",
+        "the log-book",
+        "the tobacco",
+        "the fir-tree",
+        "the mattress"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_031",
+      "characters": [
+        "Dr. Livesey",
+        "the captain",
+        "the squire",
+        "Alexander Smollett",
+        "David Livesey",
+        "Abraham Gray",
+        "John Trelawney",
+        "John Hunter",
+        "Richard Joyce",
+        "Thomas Redruth",
+        "James Hawkins",
+        "Ben Gunn"
+      ],
+      "places": [
+        "Treasure Island",
+        "log-house",
+        "stockade",
+        "anchorage"
+      ],
+      "objects": [
+        "flag",
+        "musket",
+        "powder",
+        "shot",
+        "pork",
+        "gig",
+        "oar",
+        "cannonball",
+        "ball",
+        "jacket"
+      ],
+      "identity_notes": [
+        "Dr. Livesey and David Livesey may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_032",
+      "characters": [],
+      "places": [],
+      "objects": [],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_033",
+      "characters": [
+        "the captain",
+        "Dr. Livesey",
+        "Jim",
+        "Gray",
+        "Long John",
+        "Ben Gunn",
+        "Captain Smollett"
+      ],
+      "places": [
+        "stockade",
+        "morass",
+        "island",
+        "knoll"
+      ],
+      "objects": [
+        "white cloth",
+        "crutch",
+        "muskets",
+        "iron kettle"
+      ],
+      "identity_notes": [
+        "the captain and Captain Smollett may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_034",
+      "characters": [
+        "Silver",
+        "the captain",
+        "Long John",
+        "Mr. Smollett",
+        "Abe Gray",
+        "Alexander Smollett"
+      ],
+      "places": [
+        "the island",
+        "block house",
+        "stockade",
+        "spring"
+      ],
+      "objects": [
+        "pipe",
+        "crutch",
+        "flag of truce",
+        "chart"
+      ],
+      "identity_notes": [
+        "the captain and Alexander Smollett may refer to the same entity",
+        "Mr. Smollett and the captain may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_035",
+      "characters": [
+        "Captain Smollett",
+        "Mr. Trelawney",
+        "Dr. Livesey",
+        "Gray",
+        "Joyce",
+        "Hawkins",
+        "Hunter"
+      ],
+      "places": [
+        "block house",
+        "stockade",
+        "porch"
+      ],
+      "objects": [
+        "cutlasses",
+        "muskets",
+        "loaded muskets",
+        "fire-basket",
+        "sand",
+        "tables",
+        "ammunition",
+        "firewood"
+      ],
+      "identity_notes": [
+        "the doctor and Dr. Livesey refer to the same character",
+        "the captain and Captain Smollett refer to the same character"
+      ]
+    },
+    {
+      "chunk_id": "chunk_036",
+      "characters": [
+        "doctor",
+        "captain",
+        "Squire",
+        "Gray",
+        "Hunter",
+        "Joyce",
+        "Mr. Trelawney",
+        "Mr. Smollett",
+        "Anderson"
+      ],
+      "places": [
+        "log-house",
+        "stockade",
+        "woods",
+        "hill",
+        "palisade"
+      ],
+      "objects": [
+        "cutlass",
+        "musket",
+        "pistol"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_037",
+      "characters": [
+        "Dr. Livesey",
+        "the captain",
+        "Squire",
+        "Hunter",
+        "Captain Smollett",
+        "Anderson",
+        "Job",
+        "Gray",
+        "Ben Gunn",
+        "Silver",
+        "the red cap man"
+      ],
+      "places": [
+        "Admiral Benbow inn",
+        "block house",
+        "sandy spit",
+        "anchorage",
+        "Skeleton Island",
+        "sea",
+        "Treasure Island",
+        "palisade",
+        "white rock"
+      ],
+      "objects": [
+        "cutlass",
+        "musket",
+        "pistols",
+        "powderhorn",
+        "bullets",
+        "biscuit",
+        "bread-bag",
+        "plaster",
+        "red cap",
+        "chart",
+        "Jolly Roger",
+        "HISPANIOLA"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_038",
+      "characters": [
+        "Ben Gunn",
+        "Captain Smollett",
+        "the man with the red cap",
+        "his comrade"
+      ],
+      "places": [
+        "Treasure Island",
+        "Spy-glass",
+        "the anchorage",
+        "the swamp",
+        "the white rock"
+      ],
+      "objects": [
+        "coracle",
+        "tent",
+        "biscuit",
+        "sea-gully",
+        "hawser",
+        "HISPANIOLA"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_039",
+      "characters": [],
+      "places": [],
+      "objects": [],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_040",
+      "characters": [
+        "Silver",
+        "Captain Smollett"
+      ],
+      "places": [
+        "Treasure Island",
+        "Haulbowline Head",
+        "Mizzen-mast Hill",
+        "Cape of the Woods"
+      ],
+      "objects": [
+        "coracle",
+        "sea-cap",
+        "HISPANIOLA"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_041",
+      "characters": [],
+      "places": [],
+      "objects": [],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_042",
+      "characters": [
+        "Mr. Hands",
+        "Captain Silver",
+        "the doctor",
+        "O'Brien",
+        "the coxswain",
+        "the man with the red cap"
+      ],
+      "places": [
+        "Treasure Island",
+        "North Inlet",
+        "Captain Kidd's anchorage",
+        "cellar"
+      ],
+      "objects": [
+        "medical book",
+        "bottles",
+        "barrels",
+        "brandy",
+        "biscuit",
+        "pickled fruits",
+        "raisins",
+        "cheese",
+        "water",
+        "silk handkerchief",
+        "HISPANIOLA"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_043",
+      "characters": [
+        "Jim",
+        "the coxswain",
+        "Mr. Hands",
+        "O'Brien"
+      ],
+      "places": [
+        "North Inlet"
+      ],
+      "objects": [
+        "knife",
+        "bottle of wine",
+        "brandy",
+        "port",
+        "coil of rope",
+        "HISPANIOLA"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_044",
+      "characters": [
+        "Jim",
+        "Hands",
+        "Mr. Hands",
+        "Cap'n Hawkins"
+      ],
+      "places": [
+        "North Inlet",
+        "southern anchorage"
+      ],
+      "objects": [
+        "tobacco",
+        "wine",
+        "dirk",
+        "pistol",
+        "tiller",
+        "capstan",
+        "line",
+        "pines",
+        "HISPANIOLA"
+      ],
+      "identity_notes": [
+        "Hands and Mr. Hands may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_045",
+      "characters": [
+        "Jim",
+        "Israel Hands",
+        "the coxswain"
+      ],
+      "places": [
+        "HISPANIOLA"
+      ],
+      "objects": [
+        "dirk",
+        "pistol",
+        "scuppers",
+        "main-mast"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_046",
+      "characters": [
+        "Hands",
+        "Israel",
+        "O'Brien",
+        "Ben Gunn"
+      ],
+      "places": [
+        "anchorage",
+        "western shore",
+        "eastern hill",
+        "stockade",
+        "block house",
+        "river",
+        "two-peaked hill",
+        "wood"
+      ],
+      "objects": [
+        "dirk",
+        "hawser",
+        "main-sail",
+        "jibs",
+        "halyards",
+        "cut hawser",
+        "HISPANIOLA"
+      ],
+      "identity_notes": [
+        "O'Brien and the coxswain may refer to the same entity",
+        "the dead man refers to O'Brien"
+      ]
+    },
+    {
+      "chunk_id": "chunk_047",
+      "characters": [
+        "Silver",
+        "Captain Silver"
+      ],
+      "places": [
+        "the Spy-glass",
+        "the block house",
+        "the stockade",
+        "the grove",
+        "the clearing",
+        "the palisade",
+        "the log-house"
+      ],
+      "objects": [
+        "Captain Flint",
+        "the torch",
+        "the brand",
+        "the fire"
+      ],
+      "identity_notes": [
+        "Silver and Captain Silver may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_048",
+      "characters": [],
+      "places": [],
+      "objects": [],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_049",
+      "characters": [
+        "Silver",
+        "John Silver",
+        "Morgan",
+        "Tom Morgan",
+        "Jim Hawkins",
+        "Long John",
+        "Black Dog"
+      ],
+      "places": [
+        "Bristol",
+        "block house"
+      ],
+      "objects": [
+        "pipe",
+        "cutlass",
+        "sea-chest",
+        "schooner",
+        "chart",
+        "apple barrel",
+        "cable",
+        "knife",
+        "sledge-hammer",
+        "hawse",
+        "yard-arm",
+        "board",
+        "gallows",
+        "treasure",
+        "ship"
+      ],
+      "identity_notes": [
+        "Silver and John Silver refer to the same character",
+        "Morgan and Tom Morgan refer to the same character"
+      ]
+    },
+    {
+      "chunk_id": "chunk_050",
+      "characters": [
+        "Silver",
+        "Long John",
+        "Jim Hawkins",
+        "Morgan",
+        "George",
+        "Dick",
+        "the captain",
+        "the sea-cook",
+        "the doctor"
+      ],
+      "places": [
+        "stockade"
+      ],
+      "objects": [
+        "torch",
+        "pipe",
+        "cannikin",
+        "cask",
+        "Bible",
+        "black spot",
+        "book",
+        "knife",
+        "brandy",
+        "cognac",
+        "cutlass"
+      ],
+      "identity_notes": [
+        "Silver and the captain refer to the same entity",
+        "Silver and the sea-cook refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_051",
+      "characters": [
+        "George",
+        "John Silver",
+        "Morgan",
+        "Anderson",
+        "Hands",
+        "the captain",
+        "the doctor"
+      ],
+      "places": [
+        "Execution Dock by London town",
+        "gibbet",
+        "HISPANIOLA",
+        "consort"
+      ],
+      "objects": [
+        "captain's chest",
+        "oilcloth",
+        "chart on yellow paper",
+        "black spot",
+        "barrel",
+        "treasure"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_052",
+      "characters": [],
+      "places": [],
+      "objects": [],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_053",
+      "characters": [
+        "Silver",
+        "Dr. Livesey",
+        "Jim",
+        "Captain Smollett",
+        "the squire"
+      ],
+      "places": [
+        "stockade",
+        "house"
+      ],
+      "objects": [
+        "barrel",
+        "chart",
+        "crutch",
+        "boots"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_054",
+      "characters": [
+        "Jim",
+        "Dr. Livesey",
+        "Silver",
+        "the doctor",
+        "Captain Flint",
+        "Barbecue",
+        "Mr. Hawkins",
+        "Ben Gunn"
+      ],
+      "places": [
+        "North Inlet",
+        "the southern beach",
+        "the wood",
+        "stockade"
+      ],
+      "objects": [
+        "ship",
+        "treasure",
+        "boats",
+        "chart",
+        "biscuit",
+        "fried junk",
+        "bacon",
+        "fire"
+      ],
+      "identity_notes": [
+        "the doctor and Dr. Livesey refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_055",
+      "characters": [
+        "Dr. Livesey",
+        "Silver",
+        "Captain Flint",
+        "the doctor",
+        "Long John",
+        "old Morgan",
+        "George Merry",
+        "Tom Morgan",
+        "Allardyce",
+        "the sea-cook"
+      ],
+      "places": [
+        "Skeleton Island",
+        "Spy-glass",
+        "Mizzen-mast Hill",
+        "the anchorage",
+        "the second river",
+        "the plateau"
+      ],
+      "objects": [
+        "cutlass",
+        "guns",
+        "pistol",
+        "rope",
+        "line",
+        "picks and shovels",
+        "pork",
+        "bread",
+        "brandy",
+        "chart",
+        "compass",
+        "bones",
+        "creeper",
+        "knife",
+        "gigs",
+        "thwart"
+      ],
+      "identity_notes": [
+        "doctor and Dr. Livesey may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_056",
+      "characters": [
+        "Silver",
+        "Morgan",
+        "Merry",
+        "Dick",
+        "Ben Gunn",
+        "Flint"
+      ],
+      "places": [
+        "Skeleton Island",
+        "Cape of the Woods",
+        "Spy-glass",
+        "the anchorage",
+        "the plateau",
+        "the spit",
+        "the eastern lowlands"
+      ],
+      "objects": [
+        "copper doit",
+        "baccy box",
+        "doubloons",
+        "Bible"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_057",
+      "characters": [
+        "Dick",
+        "Merry",
+        "Silver",
+        "Dr. Livesey",
+        "Ben Gunn"
+      ],
+      "places": [
+        "Skeleton Island",
+        "western bay",
+        "plateau",
+        "Spy-glass"
+      ],
+      "objects": [
+        "Bible",
+        "compass",
+        "pick",
+        "packing-cases",
+        "boards",
+        "crutch",
+        "rope",
+        "CACHE",
+        "hot iron",
+        "tools"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_058",
+      "characters": [
+        "Jim",
+        "Silver",
+        "Dr. Livesey",
+        "Morgan",
+        "Merry",
+        "Long John",
+        "Gray",
+        "Ben Gunn",
+        "the doctor",
+        "the squire"
+      ],
+      "places": [
+        "Mizzen-mast Hill",
+        "North Inlet",
+        "the island",
+        "the cave",
+        "the stockade",
+        "the anchorage",
+        "the twopointed hill"
+      ],
+      "objects": [
+        "double-barrelled pistol",
+        "pick-axe",
+        "musket",
+        "gigs",
+        "boats",
+        "HISPANIOLA",
+        "chest"
+      ],
+      "identity_notes": [
+        "Dr. Livesey and the doctor may refer to the same entity",
+        "Long John and Silver may refer to the same entity"
+      ]
+    },
+    {
+      "chunk_id": "chunk_059",
+      "characters": [
+        "the squire",
+        "John Silver",
+        "Captain Smollett",
+        "Ben Gunn",
+        "Gray",
+        "the doctor"
+      ],
+      "places": [
+        "Ben Gunn's cave",
+        "North Inlet",
+        "Rum Cove",
+        "the island",
+        "the shoulder of the hill",
+        "the lowlands of the isle"
+      ],
+      "objects": [
+        "musket",
+        "HISPANIOLA",
+        "bars of gold",
+        "bread-bags",
+        "goat",
+        "wine",
+        "anchor",
+        "boat",
+        "gig",
+        "main-sail"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_060",
+      "characters": [
+        "the doctor",
+        "Silver",
+        "Ben Gunn",
+        "the captain",
+        "Gray",
+        "the squire"
+      ],
+      "places": [
+        "North Inlet",
+        "Treasure Island"
+      ],
+      "objects": [
+        "powder and shot",
+        "salt goat",
+        "medicine",
+        "tools",
+        "clothing",
+        "spare sail",
+        "fathom of rope",
+        "tobacco",
+        "treasure",
+        "water",
+        "goat meat",
+        "main-sail",
+        "musket",
+        "bulwarks",
+        "mattress",
+        "ship",
+        "HISPANIOLA",
+        "dog"
+      ],
+      "identity_notes": []
+    },
+    {
+      "chunk_id": "chunk_061",
+      "characters": [
+        "Silver",
+        "the maroon",
+        "the sea-cook",
+        "Captain Smollett",
+        "Gray",
+        "Ben Gunn",
+        "Captain Flint",
+        "Mr. Blandly"
+      ],
+      "places": [
+        "the island",
+        "Bristol"
+      ],
+      "objects": [
+        "sacks of coin",
+        "bar silver",
+        "arms",
+        "HISPANIOLA"
+      ],
+      "identity_notes": []
+    }
+  ],
+  "characters": [
+    "Squire Trelawney",
+    "Dr. Livesey",
+    "my father",
+    "the captain",
+    "the old sea-dog",
+    "the brown old seaman",
+    "the stranger",
+    "Black Dog",
+    "Jim",
+    "Bill",
+    "my mother",
+    "Doctor Livesey",
+    "Billy Bones",
+    "the doctor",
+    "the blind man",
+    "the blind beggar",
+    "Mrs. Crossley",
+    "Captain Flint",
+    "I",
+    "Pew",
+    "the man with the lantern",
+    "Dirk",
+    "Johnny",
+    "the boy",
+    "the man who searched the captain's body",
+    "Mr. Dance",
+    "the squire",
+    "Master Pew",
+    "Jim Hawkins",
+    "Mr. Trelawney",
+    "squire",
+    "captain",
+    "Hawkins",
+    "Joyce",
+    "Hunter",
+    "Redruth",
+    "Trelawney",
+    "old Redruth",
+    "Tom Redruth",
+    "young Hawkins",
+    "Long John Silver",
+    "Blandly",
+    "John Trelawney",
+    "Arrow",
+    "old Tom Redruth",
+    "the narrator",
+    "the stout old gentleman",
+    "Tom Morgan",
+    "Ben",
+    "Captain Trelawney",
+    "Mr. Arrow",
+    "Captain Smollett",
+    "Mr. Blandly",
+    "Long John",
+    "Job Anderson",
+    "Israel Hands",
+    "Barbecue",
+    "Silver",
+    "the youngest hand",
+    "Old Pew",
+    "Dick",
+    "Israel",
+    "John",
+    "Hands",
+    "Anderson",
+    "Tom",
+    "Alan",
+    "Ben Gunn",
+    "Benjamin Gunn",
+    "the cap'n",
+    "Mr. Hands",
+    "Abraham Gray",
+    "Gray",
+    "the boatswain",
+    "the old gamekeeper",
+    "Alexander Smollett",
+    "David Livesey",
+    "John Hunter",
+    "Richard Joyce",
+    "Thomas Redruth",
+    "James Hawkins",
+    "Mr. Smollett",
+    "Abe Gray",
+    "doctor",
+    "Squire",
+    "Job",
+    "the red cap man",
+    "the man with the red cap",
+    "his comrade",
+    "Captain Silver",
+    "O'Brien",
+    "the coxswain",
+    "Cap'n Hawkins",
+    "John Silver",
+    "Morgan",
+    "George",
+    "the sea-cook",
+    "Mr. Hawkins",
+    "old Morgan",
+    "George Merry",
+    "Allardyce",
+    "Merry",
+    "Flint",
+    "the maroon"
+  ],
+  "characters_normalized": [
+    {
+      "canonical": "Abe Gray",
+      "variants": [
+        "Abe Gray"
+      ],
+      "chunks": [
+        "chunk_034"
+      ]
+    },
+    {
+      "canonical": "Abraham Gray",
+      "variants": [
+        "Abraham Gray"
+      ],
+      "chunks": [
+        "chunk_029",
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "Alan",
+      "variants": [
+        "Alan"
+      ],
+      "chunks": [
+        "chunk_024",
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "Alexander Smollett",
+      "variants": [
+        "Alexander Smollett"
+      ],
+      "chunks": [
+        "chunk_031",
+        "chunk_034"
+      ]
+    },
+    {
+      "canonical": "Allardyce",
+      "variants": [
+        "Allardyce"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "Anderson",
+      "variants": [
+        "Anderson"
+      ],
+      "chunks": [
+        "chunk_022",
+        "chunk_036",
+        "chunk_037",
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "Arrow",
+      "variants": [
+        "Arrow"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "Barbecue",
+      "variants": [
+        "Barbecue"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "Ben",
+      "variants": [
+        "Ben"
+      ],
+      "chunks": [
+        "chunk_014"
+      ]
+    },
+    {
+      "canonical": "Ben Gunn",
+      "variants": [
+        "Ben Gunn"
+      ],
+      "chunks": [
+        "chunk_025",
+        "chunk_026",
+        "chunk_031",
+        "chunk_033",
+        "chunk_037",
+        "chunk_038",
+        "chunk_046",
+        "chunk_054",
+        "chunk_056",
+        "chunk_057",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "Benjamin Gunn",
+      "variants": [
+        "Benjamin Gunn"
+      ],
+      "chunks": [
+        "chunk_027"
+      ]
+    },
+    {
+      "canonical": "Bill",
+      "variants": [
+        "Bill"
+      ],
+      "chunks": [
+        "chunk_003"
+      ]
+    },
+    {
+      "canonical": "Billy Bones",
+      "variants": [
+        "Billy Bones"
+      ],
+      "chunks": [
+        "chunk_004",
+        "chunk_020",
+        "chunk_027"
+      ]
+    },
+    {
+      "canonical": "Black Dog",
+      "variants": [
+        "Black Dog"
+      ],
+      "chunks": [
+        "chunk_003",
+        "chunk_005",
+        "chunk_006",
+        "chunk_009",
+        "chunk_014",
+        "chunk_015",
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "Blandly",
+      "variants": [
+        "Blandly"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "Cap'n Hawkins",
+      "variants": [
+        "Cap'n Hawkins"
+      ],
+      "chunks": [
+        "chunk_044"
+      ]
+    },
+    {
+      "canonical": "captain",
+      "variants": [
+        "captain"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_036"
+      ]
+    },
+    {
+      "canonical": "Captain Flint",
+      "variants": [
+        "Captain Flint"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_054",
+        "chunk_055",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "Captain Silver",
+      "variants": [
+        "Captain Silver"
+      ],
+      "chunks": [
+        "chunk_042",
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "Captain Smollett",
+      "variants": [
+        "Captain Smollett"
+      ],
+      "chunks": [
+        "chunk_015",
+        "chunk_018",
+        "chunk_020",
+        "chunk_021",
+        "chunk_029",
+        "chunk_033",
+        "chunk_035",
+        "chunk_037",
+        "chunk_038",
+        "chunk_040",
+        "chunk_053",
+        "chunk_059",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "Captain Trelawney",
+      "variants": [
+        "Captain Trelawney"
+      ],
+      "chunks": [
+        "chunk_015"
+      ]
+    },
+    {
+      "canonical": "David Livesey",
+      "variants": [
+        "David Livesey"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "Dick",
+      "variants": [
+        "Dick"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_050",
+        "chunk_056",
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "Dirk",
+      "variants": [
+        "Dirk"
+      ],
+      "chunks": [
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "doctor",
+      "variants": [
+        "doctor"
+      ],
+      "chunks": [
+        "chunk_036"
+      ]
+    },
+    {
+      "canonical": "Doctor Livesey",
+      "variants": [
+        "Doctor Livesey"
+      ],
+      "chunks": [
+        "chunk_004",
+        "chunk_006"
+      ]
+    },
+    {
+      "canonical": "Dr. Livesey",
+      "variants": [
+        "Dr. Livesey"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_001",
+        "chunk_007",
+        "chunk_010",
+        "chunk_011",
+        "chunk_012",
+        "chunk_015",
+        "chunk_018",
+        "chunk_020",
+        "chunk_021",
+        "chunk_031",
+        "chunk_033",
+        "chunk_035",
+        "chunk_037",
+        "chunk_053",
+        "chunk_054",
+        "chunk_055",
+        "chunk_057",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "Flint",
+      "variants": [
+        "Flint"
+      ],
+      "chunks": [
+        "chunk_056"
+      ]
+    },
+    {
+      "canonical": "George",
+      "variants": [
+        "George"
+      ],
+      "chunks": [
+        "chunk_050",
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "George Merry",
+      "variants": [
+        "George Merry"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "Gray",
+      "variants": [
+        "Gray"
+      ],
+      "chunks": [
+        "chunk_030",
+        "chunk_033",
+        "chunk_035",
+        "chunk_036",
+        "chunk_037",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "Hands",
+      "variants": [
+        "Hands"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_021",
+        "chunk_044",
+        "chunk_046",
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "Hawkins",
+      "variants": [
+        "Hawkins"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_015",
+        "chunk_017",
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "his comrade",
+      "variants": [
+        "his comrade"
+      ],
+      "chunks": [
+        "chunk_038"
+      ]
+    },
+    {
+      "canonical": "Hunter",
+      "variants": [
+        "Hunter"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_023",
+        "chunk_028",
+        "chunk_035",
+        "chunk_036",
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "I",
+      "variants": [
+        "I"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "Israel",
+      "variants": [
+        "Israel"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "Israel Hands",
+      "variants": [
+        "Israel Hands"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_029",
+        "chunk_045"
+      ]
+    },
+    {
+      "canonical": "James Hawkins",
+      "variants": [
+        "James Hawkins"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "Jim",
+      "variants": [
+        "Jim"
+      ],
+      "chunks": [
+        "chunk_003",
+        "chunk_004",
+        "chunk_005",
+        "chunk_007",
+        "chunk_011",
+        "chunk_023",
+        "chunk_026",
+        "chunk_027",
+        "chunk_030",
+        "chunk_033",
+        "chunk_043",
+        "chunk_044",
+        "chunk_045",
+        "chunk_053",
+        "chunk_054",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "Jim Hawkins",
+      "variants": [
+        "Jim Hawkins"
+      ],
+      "chunks": [
+        "chunk_010",
+        "chunk_021",
+        "chunk_028",
+        "chunk_049",
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "Job",
+      "variants": [
+        "Job"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "Job Anderson",
+      "variants": [
+        "Job Anderson"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_021",
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "John",
+      "variants": [
+        "John"
+      ],
+      "chunks": [
+        "chunk_020"
+      ]
+    },
+    {
+      "canonical": "John Hunter",
+      "variants": [
+        "John Hunter"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "John Silver",
+      "variants": [
+        "John Silver"
+      ],
+      "chunks": [
+        "chunk_049",
+        "chunk_051",
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "John Trelawney",
+      "variants": [
+        "John Trelawney"
+      ],
+      "chunks": [
+        "chunk_012",
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "Johnny",
+      "variants": [
+        "Johnny"
+      ],
+      "chunks": [
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "Joyce",
+      "variants": [
+        "Joyce"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_023",
+        "chunk_028",
+        "chunk_035",
+        "chunk_036"
+      ]
+    },
+    {
+      "canonical": "Long John",
+      "variants": [
+        "Long John"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_021",
+        "chunk_022",
+        "chunk_023",
+        "chunk_027",
+        "chunk_033",
+        "chunk_034",
+        "chunk_049",
+        "chunk_050",
+        "chunk_055",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "Long John Silver",
+      "variants": [
+        "Long John Silver"
+      ],
+      "chunks": [
+        "chunk_012",
+        "chunk_014",
+        "chunk_015",
+        "chunk_024"
+      ]
+    },
+    {
+      "canonical": "Master Pew",
+      "variants": [
+        "Master Pew"
+      ],
+      "chunks": [
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "Merry",
+      "variants": [
+        "Merry"
+      ],
+      "chunks": [
+        "chunk_056",
+        "chunk_057",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "Morgan",
+      "variants": [
+        "Morgan"
+      ],
+      "chunks": [
+        "chunk_049",
+        "chunk_050",
+        "chunk_051",
+        "chunk_056",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "Mr. Arrow",
+      "variants": [
+        "Mr. Arrow"
+      ],
+      "chunks": [
+        "chunk_015",
+        "chunk_017",
+        "chunk_020"
+      ]
+    },
+    {
+      "canonical": "Mr. Blandly",
+      "variants": [
+        "Mr. Blandly"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "Mr. Dance",
+      "variants": [
+        "Mr. Dance"
+      ],
+      "chunks": [
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "Mr. Hands",
+      "variants": [
+        "Mr. Hands"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_042",
+        "chunk_043",
+        "chunk_044"
+      ]
+    },
+    {
+      "canonical": "Mr. Hawkins",
+      "variants": [
+        "Mr. Hawkins"
+      ],
+      "chunks": [
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "Mr. Smollett",
+      "variants": [
+        "Mr. Smollett"
+      ],
+      "chunks": [
+        "chunk_034",
+        "chunk_036"
+      ]
+    },
+    {
+      "canonical": "Mr. Trelawney",
+      "variants": [
+        "Mr. Trelawney"
+      ],
+      "chunks": [
+        "chunk_010",
+        "chunk_013",
+        "chunk_017",
+        "chunk_021",
+        "chunk_035",
+        "chunk_036"
+      ]
+    },
+    {
+      "canonical": "Mrs. Crossley",
+      "variants": [
+        "Mrs. Crossley"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "my father",
+      "variants": [
+        "my father"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_001"
+      ]
+    },
+    {
+      "canonical": "my mother",
+      "variants": [
+        "my mother"
+      ],
+      "chunks": [
+        "chunk_004",
+        "chunk_006",
+        "chunk_007",
+        "chunk_008",
+        "chunk_010",
+        "chunk_013"
+      ]
+    },
+    {
+      "canonical": "O'Brien",
+      "variants": [
+        "O'Brien"
+      ],
+      "chunks": [
+        "chunk_042",
+        "chunk_043",
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "old Morgan",
+      "variants": [
+        "old Morgan"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "Old Pew",
+      "variants": [
+        "Old Pew"
+      ],
+      "chunks": [
+        "chunk_018"
+      ]
+    },
+    {
+      "canonical": "old Redruth",
+      "variants": [
+        "old Redruth"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "old Tom Redruth",
+      "variants": [
+        "old Tom Redruth"
+      ],
+      "chunks": [
+        "chunk_013"
+      ]
+    },
+    {
+      "canonical": "Pew",
+      "variants": [
+        "Pew"
+      ],
+      "chunks": [
+        "chunk_009",
+        "chunk_014"
+      ]
+    },
+    {
+      "canonical": "Redruth",
+      "variants": [
+        "Redruth"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_023",
+        "chunk_028",
+        "chunk_029",
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "Richard Joyce",
+      "variants": [
+        "Richard Joyce"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "Silver",
+      "variants": [
+        "Silver"
+      ],
+      "chunks": [
+        "chunk_018",
+        "chunk_020",
+        "chunk_021",
+        "chunk_022",
+        "chunk_023",
+        "chunk_025",
+        "chunk_028",
+        "chunk_034",
+        "chunk_037",
+        "chunk_040",
+        "chunk_047",
+        "chunk_049",
+        "chunk_050",
+        "chunk_053",
+        "chunk_054",
+        "chunk_055",
+        "chunk_056",
+        "chunk_057",
+        "chunk_058",
+        "chunk_060",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "squire",
+      "variants": [
+        "squire",
+        "Squire"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_036",
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "Squire Trelawney",
+      "variants": [
+        "Squire Trelawney"
+      ],
+      "chunks": [
+        "chunk_000"
+      ]
+    },
+    {
+      "canonical": "the blind beggar",
+      "variants": [
+        "the blind beggar"
+      ],
+      "chunks": [
+        "chunk_006"
+      ]
+    },
+    {
+      "canonical": "the blind man",
+      "variants": [
+        "the blind man"
+      ],
+      "chunks": [
+        "chunk_006",
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the boatswain",
+      "variants": [
+        "the boatswain"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the boy",
+      "variants": [
+        "the boy"
+      ],
+      "chunks": [
+        "chunk_009",
+        "chunk_013"
+      ]
+    },
+    {
+      "canonical": "the brown old seaman",
+      "variants": [
+        "the brown old seaman"
+      ],
+      "chunks": [
+        "chunk_000"
+      ]
+    },
+    {
+      "canonical": "the cap'n",
+      "variants": [
+        "the cap'n"
+      ],
+      "chunks": [
+        "chunk_027"
+      ]
+    },
+    {
+      "canonical": "the captain",
+      "variants": [
+        "the captain"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_001",
+        "chunk_003",
+        "chunk_004",
+        "chunk_005",
+        "chunk_006",
+        "chunk_008",
+        "chunk_009",
+        "chunk_010",
+        "chunk_013",
+        "chunk_017",
+        "chunk_022",
+        "chunk_023",
+        "chunk_028",
+        "chunk_030",
+        "chunk_031",
+        "chunk_033",
+        "chunk_034",
+        "chunk_037",
+        "chunk_050",
+        "chunk_051",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "the coxswain",
+      "variants": [
+        "the coxswain"
+      ],
+      "chunks": [
+        "chunk_042",
+        "chunk_043",
+        "chunk_045"
+      ]
+    },
+    {
+      "canonical": "the doctor",
+      "variants": [
+        "the doctor"
+      ],
+      "chunks": [
+        "chunk_005",
+        "chunk_013",
+        "chunk_022",
+        "chunk_029",
+        "chunk_042",
+        "chunk_050",
+        "chunk_051",
+        "chunk_054",
+        "chunk_055",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "the man who searched the captain's body",
+      "variants": [
+        "the man who searched the captain's body"
+      ],
+      "chunks": [
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "the man with the lantern",
+      "variants": [
+        "the man with the lantern"
+      ],
+      "chunks": [
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "the man with the red cap",
+      "variants": [
+        "the man with the red cap"
+      ],
+      "chunks": [
+        "chunk_038",
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "the maroon",
+      "variants": [
+        "the maroon"
+      ],
+      "chunks": [
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "the narrator",
+      "variants": [
+        "the narrator"
+      ],
+      "chunks": [
+        "chunk_013"
+      ]
+    },
+    {
+      "canonical": "the old gamekeeper",
+      "variants": [
+        "the old gamekeeper"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the old sea-dog",
+      "variants": [
+        "the old sea-dog"
+      ],
+      "chunks": [
+        "chunk_000"
+      ]
+    },
+    {
+      "canonical": "the red cap man",
+      "variants": [
+        "the red cap man"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "the sea-cook",
+      "variants": [
+        "the sea-cook"
+      ],
+      "chunks": [
+        "chunk_050",
+        "chunk_055",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "the squire",
+      "variants": [
+        "the squire"
+      ],
+      "chunks": [
+        "chunk_010",
+        "chunk_012",
+        "chunk_013",
+        "chunk_015",
+        "chunk_018",
+        "chunk_021",
+        "chunk_022",
+        "chunk_027",
+        "chunk_028",
+        "chunk_029",
+        "chunk_030",
+        "chunk_031",
+        "chunk_053",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "the stout old gentleman",
+      "variants": [
+        "the stout old gentleman"
+      ],
+      "chunks": [
+        "chunk_013"
+      ]
+    },
+    {
+      "canonical": "the stranger",
+      "variants": [
+        "the stranger"
+      ],
+      "chunks": [
+        "chunk_003"
+      ]
+    },
+    {
+      "canonical": "the youngest hand",
+      "variants": [
+        "the youngest hand"
+      ],
+      "chunks": [
+        "chunk_018"
+      ]
+    },
+    {
+      "canonical": "Thomas Redruth",
+      "variants": [
+        "Thomas Redruth"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "Tom",
+      "variants": [
+        "Tom"
+      ],
+      "chunks": [
+        "chunk_024",
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "Tom Morgan",
+      "variants": [
+        "Tom Morgan"
+      ],
+      "chunks": [
+        "chunk_014",
+        "chunk_049",
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "Tom Redruth",
+      "variants": [
+        "Tom Redruth"
+      ],
+      "chunks": [
+        "chunk_012",
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "Trelawney",
+      "variants": [
+        "Trelawney"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_029",
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "young Hawkins",
+      "variants": [
+        "young Hawkins"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    }
+  ],
+  "places": [
+    "Admiral Benbow inn",
+    "the cove",
+    "the cliffs",
+    "cove",
+    "cliffs",
+    "hamlet",
+    "my father's house",
+    "the captain's door",
+    "Black Hill Cove",
+    "the hamlet",
+    "the next cove",
+    "Kitt's Hole",
+    "Dr. Livesey's",
+    "the inn",
+    "the tavern",
+    "the bottom of the dell",
+    "the hill",
+    "the bridge",
+    "the bank",
+    "the arch",
+    "Admiral Benbow",
+    "the hillside",
+    "the road",
+    "Dr. Livesey's house",
+    "Trinidad",
+    "Port of Spain",
+    "Bristol",
+    "Skeleton Island",
+    "the island",
+    "Old Anchor Inn",
+    "the hall",
+    "the housekeeper's room",
+    "the dock",
+    "Royal George",
+    "the Spy-Glass",
+    "quays",
+    "Treasure Island",
+    "Corso Castle",
+    "Foremast Hill",
+    "Main Hill",
+    "Mizzen Hill",
+    "Spy-glass",
+    "the anchorage",
+    "the cabin",
+    "the quarterdeck",
+    "the deck",
+    "the stern window",
+    "the ship",
+    "the sea",
+    "the mainland",
+    "the haven behind Skeleton Island",
+    "the Spy-glass",
+    "the fen",
+    "the marsh",
+    "the sandy knolls",
+    "the open piece of undulating, sandy country",
+    "the hills",
+    "the thicket",
+    "the reedy fen",
+    "the little rivers",
+    "the isle",
+    "marsh",
+    "mountain",
+    "little hill with two peaks",
+    "foot of the little hill",
+    "the white rock",
+    "the cemetery",
+    "the HISPANIOLA",
+    "stockade",
+    "knoll",
+    "spring",
+    "log-house",
+    "forecastle",
+    "cabin",
+    "stern-port",
+    "fore companion",
+    "anchorage",
+    "river",
+    "block house",
+    "the stockade",
+    "the log-house",
+    "the woods",
+    "the enclosure",
+    "the palisade",
+    "the strip of wood",
+    "the shore",
+    "morass",
+    "island",
+    "porch",
+    "woods",
+    "hill",
+    "palisade",
+    "sandy spit",
+    "sea",
+    "white rock",
+    "the swamp",
+    "Haulbowline Head",
+    "Mizzen-mast Hill",
+    "Cape of the Woods",
+    "North Inlet",
+    "Captain Kidd's anchorage",
+    "cellar",
+    "southern anchorage",
+    "HISPANIOLA",
+    "western shore",
+    "eastern hill",
+    "two-peaked hill",
+    "wood",
+    "the block house",
+    "the grove",
+    "the clearing",
+    "Execution Dock by London town",
+    "gibbet",
+    "consort",
+    "house",
+    "the southern beach",
+    "the wood",
+    "the second river",
+    "the plateau",
+    "the spit",
+    "the eastern lowlands",
+    "western bay",
+    "plateau",
+    "the cave",
+    "the twopointed hill",
+    "Ben Gunn's cave",
+    "Rum Cove",
+    "the shoulder of the hill",
+    "the lowlands of the isle"
+  ],
+  "places_normalized": [
+    {
+      "canonical": "Admiral Benbow",
+      "variants": [
+        "Admiral Benbow"
+      ],
+      "chunks": [
+        "chunk_009",
+        "chunk_013"
+      ]
+    },
+    {
+      "canonical": "Admiral Benbow inn",
+      "variants": [
+        "Admiral Benbow inn"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_001",
+        "chunk_003",
+        "chunk_005",
+        "chunk_006",
+        "chunk_007",
+        "chunk_010",
+        "chunk_011",
+        "chunk_014",
+        "chunk_015",
+        "chunk_017",
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "anchorage",
+      "variants": [
+        "anchorage"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_031",
+        "chunk_037",
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "Ben Gunn's cave",
+      "variants": [
+        "Ben Gunn's cave"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "Black Hill Cove",
+      "variants": [
+        "Black Hill Cove"
+      ],
+      "chunks": [
+        "chunk_006"
+      ]
+    },
+    {
+      "canonical": "block house",
+      "variants": [
+        "block house"
+      ],
+      "chunks": [
+        "chunk_029",
+        "chunk_034",
+        "chunk_035",
+        "chunk_037",
+        "chunk_046",
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "Bristol",
+      "variants": [
+        "Bristol"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_012",
+        "chunk_013",
+        "chunk_049",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "cabin",
+      "variants": [
+        "cabin"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "Cape of the Woods",
+      "variants": [
+        "Cape of the Woods"
+      ],
+      "chunks": [
+        "chunk_040",
+        "chunk_056"
+      ]
+    },
+    {
+      "canonical": "Captain Kidd's anchorage",
+      "variants": [
+        "Captain Kidd's anchorage"
+      ],
+      "chunks": [
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "cellar",
+      "variants": [
+        "cellar"
+      ],
+      "chunks": [
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "cliffs",
+      "variants": [
+        "cliffs"
+      ],
+      "chunks": [
+        "chunk_001"
+      ]
+    },
+    {
+      "canonical": "consort",
+      "variants": [
+        "consort"
+      ],
+      "chunks": [
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "Corso Castle",
+      "variants": [
+        "Corso Castle"
+      ],
+      "chunks": [
+        "chunk_018"
+      ]
+    },
+    {
+      "canonical": "cove",
+      "variants": [
+        "cove"
+      ],
+      "chunks": [
+        "chunk_001"
+      ]
+    },
+    {
+      "canonical": "Dr. Livesey's",
+      "variants": [
+        "Dr. Livesey's"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "Dr. Livesey's house",
+      "variants": [
+        "Dr. Livesey's house"
+      ],
+      "chunks": [
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "eastern hill",
+      "variants": [
+        "eastern hill"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "Execution Dock by London town",
+      "variants": [
+        "Execution Dock by London town"
+      ],
+      "chunks": [
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "foot of the little hill",
+      "variants": [
+        "foot of the little hill"
+      ],
+      "chunks": [
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "fore companion",
+      "variants": [
+        "fore companion"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "forecastle",
+      "variants": [
+        "forecastle"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "Foremast Hill",
+      "variants": [
+        "Foremast Hill"
+      ],
+      "chunks": [
+        "chunk_020"
+      ]
+    },
+    {
+      "canonical": "gibbet",
+      "variants": [
+        "gibbet"
+      ],
+      "chunks": [
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "hamlet",
+      "variants": [
+        "hamlet"
+      ],
+      "chunks": [
+        "chunk_001"
+      ]
+    },
+    {
+      "canonical": "Haulbowline Head",
+      "variants": [
+        "Haulbowline Head"
+      ],
+      "chunks": [
+        "chunk_040"
+      ]
+    },
+    {
+      "canonical": "hill",
+      "variants": [
+        "hill"
+      ],
+      "chunks": [
+        "chunk_036"
+      ]
+    },
+    {
+      "canonical": "HISPANIOLA",
+      "variants": [
+        "HISPANIOLA"
+      ],
+      "chunks": [
+        "chunk_045",
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "house",
+      "variants": [
+        "house"
+      ],
+      "chunks": [
+        "chunk_053"
+      ]
+    },
+    {
+      "canonical": "island",
+      "variants": [
+        "island"
+      ],
+      "chunks": [
+        "chunk_033"
+      ]
+    },
+    {
+      "canonical": "Kitt's Hole",
+      "variants": [
+        "Kitt's Hole"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "knoll",
+      "variants": [
+        "knoll"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_033"
+      ]
+    },
+    {
+      "canonical": "little hill with two peaks",
+      "variants": [
+        "little hill with two peaks"
+      ],
+      "chunks": [
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "log-house",
+      "variants": [
+        "log-house"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_031",
+        "chunk_036"
+      ]
+    },
+    {
+      "canonical": "Main Hill",
+      "variants": [
+        "Main Hill"
+      ],
+      "chunks": [
+        "chunk_020"
+      ]
+    },
+    {
+      "canonical": "marsh",
+      "variants": [
+        "marsh"
+      ],
+      "chunks": [
+        "chunk_024",
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "Mizzen Hill",
+      "variants": [
+        "Mizzen Hill"
+      ],
+      "chunks": [
+        "chunk_020"
+      ]
+    },
+    {
+      "canonical": "Mizzen-mast Hill",
+      "variants": [
+        "Mizzen-mast Hill"
+      ],
+      "chunks": [
+        "chunk_040",
+        "chunk_055",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "morass",
+      "variants": [
+        "morass"
+      ],
+      "chunks": [
+        "chunk_033"
+      ]
+    },
+    {
+      "canonical": "mountain",
+      "variants": [
+        "mountain"
+      ],
+      "chunks": [
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "my father's house",
+      "variants": [
+        "my father's house"
+      ],
+      "chunks": [
+        "chunk_004"
+      ]
+    },
+    {
+      "canonical": "North Inlet",
+      "variants": [
+        "North Inlet"
+      ],
+      "chunks": [
+        "chunk_042",
+        "chunk_043",
+        "chunk_044",
+        "chunk_054",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "Old Anchor Inn",
+      "variants": [
+        "Old Anchor Inn"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "palisade",
+      "variants": [
+        "palisade"
+      ],
+      "chunks": [
+        "chunk_036",
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "plateau",
+      "variants": [
+        "plateau"
+      ],
+      "chunks": [
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "porch",
+      "variants": [
+        "porch"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "Port of Spain",
+      "variants": [
+        "Port of Spain"
+      ],
+      "chunks": [
+        "chunk_011"
+      ]
+    },
+    {
+      "canonical": "quays",
+      "variants": [
+        "quays"
+      ],
+      "chunks": [
+        "chunk_015"
+      ]
+    },
+    {
+      "canonical": "river",
+      "variants": [
+        "river"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "Royal George",
+      "variants": [
+        "Royal George"
+      ],
+      "chunks": [
+        "chunk_013"
+      ]
+    },
+    {
+      "canonical": "Rum Cove",
+      "variants": [
+        "Rum Cove"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "sandy spit",
+      "variants": [
+        "sandy spit"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "sea",
+      "variants": [
+        "sea"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "Skeleton Island",
+      "variants": [
+        "Skeleton Island"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_020",
+        "chunk_022",
+        "chunk_037",
+        "chunk_055",
+        "chunk_056",
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "southern anchorage",
+      "variants": [
+        "southern anchorage"
+      ],
+      "chunks": [
+        "chunk_044"
+      ]
+    },
+    {
+      "canonical": "spring",
+      "variants": [
+        "spring"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_034"
+      ]
+    },
+    {
+      "canonical": "Spy-glass",
+      "variants": [
+        "Spy-glass"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_024",
+        "chunk_038",
+        "chunk_055",
+        "chunk_056",
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "stern-port",
+      "variants": [
+        "stern-port"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "stockade",
+      "variants": [
+        "stockade"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_029",
+        "chunk_031",
+        "chunk_033",
+        "chunk_034",
+        "chunk_035",
+        "chunk_036",
+        "chunk_046",
+        "chunk_050",
+        "chunk_053",
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "the anchorage",
+      "variants": [
+        "the anchorage"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_022",
+        "chunk_023",
+        "chunk_027",
+        "chunk_038",
+        "chunk_055",
+        "chunk_056",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "the arch",
+      "variants": [
+        "the arch"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the bank",
+      "variants": [
+        "the bank"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the block house",
+      "variants": [
+        "the block house"
+      ],
+      "chunks": [
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "the bottom of the dell",
+      "variants": [
+        "the bottom of the dell"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the bridge",
+      "variants": [
+        "the bridge"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the cabin",
+      "variants": [
+        "the cabin"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "the captain's door",
+      "variants": [
+        "the captain's door"
+      ],
+      "chunks": [
+        "chunk_004"
+      ]
+    },
+    {
+      "canonical": "the cave",
+      "variants": [
+        "the cave"
+      ],
+      "chunks": [
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "the cemetery",
+      "variants": [
+        "the cemetery"
+      ],
+      "chunks": [
+        "chunk_027"
+      ]
+    },
+    {
+      "canonical": "the clearing",
+      "variants": [
+        "the clearing"
+      ],
+      "chunks": [
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "the cliffs",
+      "variants": [
+        "the cliffs"
+      ],
+      "chunks": [
+        "chunk_000"
+      ]
+    },
+    {
+      "canonical": "the cove",
+      "variants": [
+        "the cove"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "the deck",
+      "variants": [
+        "the deck"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "the dock",
+      "variants": [
+        "the dock"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "the eastern lowlands",
+      "variants": [
+        "the eastern lowlands"
+      ],
+      "chunks": [
+        "chunk_056"
+      ]
+    },
+    {
+      "canonical": "the enclosure",
+      "variants": [
+        "the enclosure"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the fen",
+      "variants": [
+        "the fen"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the grove",
+      "variants": [
+        "the grove"
+      ],
+      "chunks": [
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "the hall",
+      "variants": [
+        "the hall"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "the hamlet",
+      "variants": [
+        "the hamlet"
+      ],
+      "chunks": [
+        "chunk_006",
+        "chunk_008",
+        "chunk_009",
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "the haven behind Skeleton Island",
+      "variants": [
+        "the haven behind Skeleton Island"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the hill",
+      "variants": [
+        "the hill"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the hills",
+      "variants": [
+        "the hills"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the hillside",
+      "variants": [
+        "the hillside"
+      ],
+      "chunks": [
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "the HISPANIOLA",
+      "variants": [
+        "the HISPANIOLA"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "the housekeeper's room",
+      "variants": [
+        "the housekeeper's room"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "the inn",
+      "variants": [
+        "the inn"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the island",
+      "variants": [
+        "the island"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_027",
+        "chunk_034",
+        "chunk_058",
+        "chunk_059",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "the isle",
+      "variants": [
+        "the isle"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the little rivers",
+      "variants": [
+        "the little rivers"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the log-house",
+      "variants": [
+        "the log-house"
+      ],
+      "chunks": [
+        "chunk_030",
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "the lowlands of the isle",
+      "variants": [
+        "the lowlands of the isle"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "the mainland",
+      "variants": [
+        "the mainland"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the marsh",
+      "variants": [
+        "the marsh"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the next cove",
+      "variants": [
+        "the next cove"
+      ],
+      "chunks": [
+        "chunk_006"
+      ]
+    },
+    {
+      "canonical": "the open piece of undulating, sandy country",
+      "variants": [
+        "the open piece of undulating, sandy country"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the palisade",
+      "variants": [
+        "the palisade"
+      ],
+      "chunks": [
+        "chunk_030",
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "the plateau",
+      "variants": [
+        "the plateau"
+      ],
+      "chunks": [
+        "chunk_055",
+        "chunk_056"
+      ]
+    },
+    {
+      "canonical": "the quarterdeck",
+      "variants": [
+        "the quarterdeck"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "the reedy fen",
+      "variants": [
+        "the reedy fen"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the road",
+      "variants": [
+        "the road"
+      ],
+      "chunks": [
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "the sandy knolls",
+      "variants": [
+        "the sandy knolls"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the sea",
+      "variants": [
+        "the sea"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "the second river",
+      "variants": [
+        "the second river"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "the ship",
+      "variants": [
+        "the ship"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "the shore",
+      "variants": [
+        "the shore"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the shoulder of the hill",
+      "variants": [
+        "the shoulder of the hill"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "the southern beach",
+      "variants": [
+        "the southern beach"
+      ],
+      "chunks": [
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "the spit",
+      "variants": [
+        "the spit"
+      ],
+      "chunks": [
+        "chunk_056"
+      ]
+    },
+    {
+      "canonical": "the Spy-Glass",
+      "variants": [
+        "the Spy-Glass",
+        "the Spy-glass"
+      ],
+      "chunks": [
+        "chunk_014",
+        "chunk_023",
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "the stern window",
+      "variants": [
+        "the stern window"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "the stockade",
+      "variants": [
+        "the stockade"
+      ],
+      "chunks": [
+        "chunk_030",
+        "chunk_047",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "the strip of wood",
+      "variants": [
+        "the strip of wood"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the swamp",
+      "variants": [
+        "the swamp"
+      ],
+      "chunks": [
+        "chunk_038"
+      ]
+    },
+    {
+      "canonical": "the tavern",
+      "variants": [
+        "the tavern"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the thicket",
+      "variants": [
+        "the thicket"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "the twopointed hill",
+      "variants": [
+        "the twopointed hill"
+      ],
+      "chunks": [
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "the white rock",
+      "variants": [
+        "the white rock"
+      ],
+      "chunks": [
+        "chunk_027",
+        "chunk_038"
+      ]
+    },
+    {
+      "canonical": "the wood",
+      "variants": [
+        "the wood"
+      ],
+      "chunks": [
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "the woods",
+      "variants": [
+        "the woods"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "Treasure Island",
+      "variants": [
+        "Treasure Island"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_018",
+        "chunk_022",
+        "chunk_031",
+        "chunk_037",
+        "chunk_038",
+        "chunk_040",
+        "chunk_042",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "Trinidad",
+      "variants": [
+        "Trinidad"
+      ],
+      "chunks": [
+        "chunk_011"
+      ]
+    },
+    {
+      "canonical": "two-peaked hill",
+      "variants": [
+        "two-peaked hill"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "western bay",
+      "variants": [
+        "western bay"
+      ],
+      "chunks": [
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "western shore",
+      "variants": [
+        "western shore"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "white rock",
+      "variants": [
+        "white rock"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "wood",
+      "variants": [
+        "wood"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "woods",
+      "variants": [
+        "woods"
+      ],
+      "chunks": [
+        "chunk_036"
+      ]
+    }
+  ],
+  "objects": [
+    "sea-chest",
+    "cutlass",
+    "brass telescope",
+    "handspike",
+    "fourpenny piece",
+    "signboard",
+    "rum",
+    "basin",
+    "lancet",
+    "noggin",
+    "silver fourpenny",
+    "golden guinea",
+    "stick",
+    "tinder box",
+    "gully",
+    "pistol",
+    "quadrant",
+    "tin canikin",
+    "brace of pistols",
+    "bar silver",
+    "Spanish watch",
+    "compasses",
+    "thimble",
+    "thread",
+    "needles",
+    "pigtail tobacco",
+    "tarry string",
+    "black spot",
+    "key",
+    "candle",
+    "bag",
+    "horses",
+    "West Indian shells",
+    "silver",
+    "trinkets",
+    "boat-cloak",
+    "oilcloth",
+    "canvas bag",
+    "gold",
+    "doubloons",
+    "louis d'ors",
+    "guineas",
+    "pieces of eight",
+    "oilskin packet",
+    "chest",
+    "lantern",
+    "money-bag",
+    "silver from the till",
+    "powdered wig",
+    "bundle",
+    "book",
+    "sealed paper",
+    "map",
+    "medical scissors",
+    "HISPANIOLA",
+    "letter",
+    "armchair",
+    "schooner",
+    "crutch",
+    "lanyard",
+    "cage",
+    "dishes",
+    "handkerchief",
+    "sugar",
+    "bars",
+    "parrot",
+    "line",
+    "bulkhead",
+    "apple barrel",
+    "pannikin",
+    "barrel",
+    "chart",
+    "keg",
+    "pipe",
+    "bottle of Spanish wine",
+    "raisins",
+    "glass of wine",
+    "wig",
+    "the Spy-glass",
+    "the HISPANIOLA",
+    "the booms",
+    "the rudder",
+    "the backstay",
+    "the anchor",
+    "the chains",
+    "the chart",
+    "loaded pistols",
+    "boats",
+    "gigs",
+    "bow oar",
+    "foresheets",
+    "branch",
+    "rattle",
+    "live-oak",
+    "hat",
+    "knife",
+    "whistle",
+    "wisp of grass",
+    "trunk of a pine",
+    "tree trunk",
+    "brass buttons",
+    "bits of stick",
+    "loops of tarry gaskin",
+    "brass-buckled leather belt",
+    "cheese",
+    "livery clothes",
+    "WALRUS",
+    "spade",
+    "pick-axe",
+    "musket",
+    "goatskins",
+    "Union Jack",
+    "jolly-boat",
+    "medicine chest",
+    "powder tins",
+    "muskets",
+    "biscuits",
+    "pork",
+    "cognac",
+    "silk handkerchief",
+    "pistols",
+    "mattress",
+    "oars",
+    "sail",
+    "paling",
+    "Jolly-boat",
+    "long nine",
+    "powder",
+    "biscuit",
+    "the boat",
+    "the gig",
+    "the cutlass",
+    "the gun",
+    "the British colours",
+    "the Bible",
+    "the rope",
+    "the pen",
+    "the ink",
+    "the log-book",
+    "the tobacco",
+    "the fir-tree",
+    "the mattress",
+    "flag",
+    "shot",
+    "gig",
+    "oar",
+    "cannonball",
+    "ball",
+    "jacket",
+    "white cloth",
+    "iron kettle",
+    "flag of truce",
+    "cutlasses",
+    "loaded muskets",
+    "fire-basket",
+    "sand",
+    "tables",
+    "ammunition",
+    "firewood",
+    "powderhorn",
+    "bullets",
+    "bread-bag",
+    "plaster",
+    "red cap",
+    "Jolly Roger",
+    "coracle",
+    "tent",
+    "sea-gully",
+    "hawser",
+    "sea-cap",
+    "medical book",
+    "bottles",
+    "barrels",
+    "brandy",
+    "pickled fruits",
+    "water",
+    "bottle of wine",
+    "port",
+    "coil of rope",
+    "tobacco",
+    "wine",
+    "dirk",
+    "tiller",
+    "capstan",
+    "pines",
+    "scuppers",
+    "main-mast",
+    "main-sail",
+    "jibs",
+    "halyards",
+    "cut hawser",
+    "Captain Flint",
+    "the torch",
+    "the brand",
+    "the fire",
+    "cable",
+    "sledge-hammer",
+    "hawse",
+    "yard-arm",
+    "board",
+    "gallows",
+    "treasure",
+    "ship",
+    "torch",
+    "cannikin",
+    "cask",
+    "Bible",
+    "captain's chest",
+    "chart on yellow paper",
+    "boots",
+    "fried junk",
+    "bacon",
+    "fire",
+    "guns",
+    "rope",
+    "picks and shovels",
+    "bread",
+    "compass",
+    "bones",
+    "creeper",
+    "thwart",
+    "copper doit",
+    "baccy box",
+    "pick",
+    "packing-cases",
+    "boards",
+    "CACHE",
+    "hot iron",
+    "tools",
+    "double-barrelled pistol",
+    "bars of gold",
+    "bread-bags",
+    "goat",
+    "anchor",
+    "boat",
+    "powder and shot",
+    "salt goat",
+    "medicine",
+    "clothing",
+    "spare sail",
+    "fathom of rope",
+    "goat meat",
+    "bulwarks",
+    "dog",
+    "sacks of coin",
+    "arms"
+  ],
+  "objects_normalized": [
+    {
+      "canonical": "ammunition",
+      "variants": [
+        "ammunition"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "anchor",
+      "variants": [
+        "anchor"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "apple barrel",
+      "variants": [
+        "apple barrel"
+      ],
+      "chunks": [
+        "chunk_018",
+        "chunk_020",
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "armchair",
+      "variants": [
+        "armchair"
+      ],
+      "chunks": [
+        "chunk_013"
+      ]
+    },
+    {
+      "canonical": "arms",
+      "variants": [
+        "arms"
+      ],
+      "chunks": [
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "baccy box",
+      "variants": [
+        "baccy box"
+      ],
+      "chunks": [
+        "chunk_056"
+      ]
+    },
+    {
+      "canonical": "bacon",
+      "variants": [
+        "bacon"
+      ],
+      "chunks": [
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "bag",
+      "variants": [
+        "bag"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "ball",
+      "variants": [
+        "ball"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "bar silver",
+      "variants": [
+        "bar silver"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "barrel",
+      "variants": [
+        "barrel"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_051",
+        "chunk_053"
+      ]
+    },
+    {
+      "canonical": "barrels",
+      "variants": [
+        "barrels"
+      ],
+      "chunks": [
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "bars",
+      "variants": [
+        "bars"
+      ],
+      "chunks": [
+        "chunk_017"
+      ]
+    },
+    {
+      "canonical": "bars of gold",
+      "variants": [
+        "bars of gold"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "basin",
+      "variants": [
+        "basin"
+      ],
+      "chunks": [
+        "chunk_004"
+      ]
+    },
+    {
+      "canonical": "Bible",
+      "variants": [
+        "Bible"
+      ],
+      "chunks": [
+        "chunk_050",
+        "chunk_056",
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "biscuit",
+      "variants": [
+        "biscuit"
+      ],
+      "chunks": [
+        "chunk_029",
+        "chunk_037",
+        "chunk_038",
+        "chunk_042",
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "biscuits",
+      "variants": [
+        "biscuits"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "bits of stick",
+      "variants": [
+        "bits of stick"
+      ],
+      "chunks": [
+        "chunk_026"
+      ]
+    },
+    {
+      "canonical": "black spot",
+      "variants": [
+        "black spot"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_050",
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "board",
+      "variants": [
+        "board"
+      ],
+      "chunks": [
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "boards",
+      "variants": [
+        "boards"
+      ],
+      "chunks": [
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "boat",
+      "variants": [
+        "boat"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "boat-cloak",
+      "variants": [
+        "boat-cloak"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "boats",
+      "variants": [
+        "boats"
+      ],
+      "chunks": [
+        "chunk_023",
+        "chunk_025",
+        "chunk_054",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "bones",
+      "variants": [
+        "bones"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "book",
+      "variants": [
+        "book"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "boots",
+      "variants": [
+        "boots"
+      ],
+      "chunks": [
+        "chunk_053"
+      ]
+    },
+    {
+      "canonical": "bottle of Spanish wine",
+      "variants": [
+        "bottle of Spanish wine"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "bottle of wine",
+      "variants": [
+        "bottle of wine"
+      ],
+      "chunks": [
+        "chunk_043"
+      ]
+    },
+    {
+      "canonical": "bottles",
+      "variants": [
+        "bottles"
+      ],
+      "chunks": [
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "bow oar",
+      "variants": [
+        "bow oar"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "brace of pistols",
+      "variants": [
+        "brace of pistols"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "branch",
+      "variants": [
+        "branch"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "brandy",
+      "variants": [
+        "brandy"
+      ],
+      "chunks": [
+        "chunk_042",
+        "chunk_043",
+        "chunk_050",
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "brass buttons",
+      "variants": [
+        "brass buttons"
+      ],
+      "chunks": [
+        "chunk_026"
+      ]
+    },
+    {
+      "canonical": "brass telescope",
+      "variants": [
+        "brass telescope"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_014"
+      ]
+    },
+    {
+      "canonical": "brass-buckled leather belt",
+      "variants": [
+        "brass-buckled leather belt"
+      ],
+      "chunks": [
+        "chunk_026"
+      ]
+    },
+    {
+      "canonical": "bread",
+      "variants": [
+        "bread"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "bread-bag",
+      "variants": [
+        "bread-bag"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "bread-bags",
+      "variants": [
+        "bread-bags"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "bulkhead",
+      "variants": [
+        "bulkhead"
+      ],
+      "chunks": [
+        "chunk_017"
+      ]
+    },
+    {
+      "canonical": "bullets",
+      "variants": [
+        "bullets"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "bulwarks",
+      "variants": [
+        "bulwarks"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "bundle",
+      "variants": [
+        "bundle"
+      ],
+      "chunks": [
+        "chunk_011"
+      ]
+    },
+    {
+      "canonical": "cable",
+      "variants": [
+        "cable"
+      ],
+      "chunks": [
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "CACHE",
+      "variants": [
+        "CACHE"
+      ],
+      "chunks": [
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "cage",
+      "variants": [
+        "cage"
+      ],
+      "chunks": [
+        "chunk_017"
+      ]
+    },
+    {
+      "canonical": "candle",
+      "variants": [
+        "candle"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "cannikin",
+      "variants": [
+        "cannikin"
+      ],
+      "chunks": [
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "cannonball",
+      "variants": [
+        "cannonball"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "canvas bag",
+      "variants": [
+        "canvas bag"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "capstan",
+      "variants": [
+        "capstan"
+      ],
+      "chunks": [
+        "chunk_044"
+      ]
+    },
+    {
+      "canonical": "Captain Flint",
+      "variants": [
+        "Captain Flint"
+      ],
+      "chunks": [
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "captain's chest",
+      "variants": [
+        "captain's chest"
+      ],
+      "chunks": [
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "cask",
+      "variants": [
+        "cask"
+      ],
+      "chunks": [
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "chart",
+      "variants": [
+        "chart"
+      ],
+      "chunks": [
+        "chunk_020",
+        "chunk_034",
+        "chunk_037",
+        "chunk_049",
+        "chunk_053",
+        "chunk_054",
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "chart on yellow paper",
+      "variants": [
+        "chart on yellow paper"
+      ],
+      "chunks": [
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "cheese",
+      "variants": [
+        "cheese"
+      ],
+      "chunks": [
+        "chunk_026",
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "chest",
+      "variants": [
+        "chest"
+      ],
+      "chunks": [
+        "chunk_008",
+        "chunk_020",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "clothing",
+      "variants": [
+        "clothing"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "cognac",
+      "variants": [
+        "cognac"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "coil of rope",
+      "variants": [
+        "coil of rope"
+      ],
+      "chunks": [
+        "chunk_043"
+      ]
+    },
+    {
+      "canonical": "compass",
+      "variants": [
+        "compass"
+      ],
+      "chunks": [
+        "chunk_055",
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "compasses",
+      "variants": [
+        "compasses"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "copper doit",
+      "variants": [
+        "copper doit"
+      ],
+      "chunks": [
+        "chunk_056"
+      ]
+    },
+    {
+      "canonical": "coracle",
+      "variants": [
+        "coracle"
+      ],
+      "chunks": [
+        "chunk_038",
+        "chunk_040"
+      ]
+    },
+    {
+      "canonical": "creeper",
+      "variants": [
+        "creeper"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "crutch",
+      "variants": [
+        "crutch"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_024",
+        "chunk_033",
+        "chunk_034",
+        "chunk_053",
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "cut hawser",
+      "variants": [
+        "cut hawser"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "cutlass",
+      "variants": [
+        "cutlass"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_003",
+        "chunk_005",
+        "chunk_006",
+        "chunk_007",
+        "chunk_021",
+        "chunk_029",
+        "chunk_036",
+        "chunk_037",
+        "chunk_049",
+        "chunk_050",
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "cutlasses",
+      "variants": [
+        "cutlasses"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "dirk",
+      "variants": [
+        "dirk"
+      ],
+      "chunks": [
+        "chunk_044",
+        "chunk_045",
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "dishes",
+      "variants": [
+        "dishes"
+      ],
+      "chunks": [
+        "chunk_017"
+      ]
+    },
+    {
+      "canonical": "dog",
+      "variants": [
+        "dog"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "double-barrelled pistol",
+      "variants": [
+        "double-barrelled pistol"
+      ],
+      "chunks": [
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "doubloons",
+      "variants": [
+        "doubloons"
+      ],
+      "chunks": [
+        "chunk_008",
+        "chunk_056"
+      ]
+    },
+    {
+      "canonical": "fathom of rope",
+      "variants": [
+        "fathom of rope"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "fire",
+      "variants": [
+        "fire"
+      ],
+      "chunks": [
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "fire-basket",
+      "variants": [
+        "fire-basket"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "firewood",
+      "variants": [
+        "firewood"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "flag",
+      "variants": [
+        "flag"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "flag of truce",
+      "variants": [
+        "flag of truce"
+      ],
+      "chunks": [
+        "chunk_034"
+      ]
+    },
+    {
+      "canonical": "foresheets",
+      "variants": [
+        "foresheets"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "fourpenny piece",
+      "variants": [
+        "fourpenny piece"
+      ],
+      "chunks": [
+        "chunk_001"
+      ]
+    },
+    {
+      "canonical": "fried junk",
+      "variants": [
+        "fried junk"
+      ],
+      "chunks": [
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "gallows",
+      "variants": [
+        "gallows"
+      ],
+      "chunks": [
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "gig",
+      "variants": [
+        "gig"
+      ],
+      "chunks": [
+        "chunk_031",
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "gigs",
+      "variants": [
+        "gigs"
+      ],
+      "chunks": [
+        "chunk_023",
+        "chunk_029",
+        "chunk_055",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "glass of wine",
+      "variants": [
+        "glass of wine"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "goat",
+      "variants": [
+        "goat"
+      ],
+      "chunks": [
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "goat meat",
+      "variants": [
+        "goat meat"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "goatskins",
+      "variants": [
+        "goatskins"
+      ],
+      "chunks": [
+        "chunk_027"
+      ]
+    },
+    {
+      "canonical": "gold",
+      "variants": [
+        "gold"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "golden guinea",
+      "variants": [
+        "golden guinea"
+      ],
+      "chunks": [
+        "chunk_004"
+      ]
+    },
+    {
+      "canonical": "guineas",
+      "variants": [
+        "guineas"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "gully",
+      "variants": [
+        "gully"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "guns",
+      "variants": [
+        "guns"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "halyards",
+      "variants": [
+        "halyards"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "handkerchief",
+      "variants": [
+        "handkerchief"
+      ],
+      "chunks": [
+        "chunk_017"
+      ]
+    },
+    {
+      "canonical": "handspike",
+      "variants": [
+        "handspike"
+      ],
+      "chunks": [
+        "chunk_000"
+      ]
+    },
+    {
+      "canonical": "hat",
+      "variants": [
+        "hat"
+      ],
+      "chunks": [
+        "chunk_024"
+      ]
+    },
+    {
+      "canonical": "hawse",
+      "variants": [
+        "hawse"
+      ],
+      "chunks": [
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "hawser",
+      "variants": [
+        "hawser"
+      ],
+      "chunks": [
+        "chunk_038",
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "HISPANIOLA",
+      "variants": [
+        "HISPANIOLA"
+      ],
+      "chunks": [
+        "chunk_012",
+        "chunk_015",
+        "chunk_017",
+        "chunk_018",
+        "chunk_020",
+        "chunk_025",
+        "chunk_029",
+        "chunk_037",
+        "chunk_038",
+        "chunk_040",
+        "chunk_042",
+        "chunk_043",
+        "chunk_044",
+        "chunk_046",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060",
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "horses",
+      "variants": [
+        "horses"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "hot iron",
+      "variants": [
+        "hot iron"
+      ],
+      "chunks": [
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "iron kettle",
+      "variants": [
+        "iron kettle"
+      ],
+      "chunks": [
+        "chunk_033"
+      ]
+    },
+    {
+      "canonical": "jacket",
+      "variants": [
+        "jacket"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "jibs",
+      "variants": [
+        "jibs"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "Jolly Roger",
+      "variants": [
+        "Jolly Roger"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "jolly-boat",
+      "variants": [
+        "jolly-boat",
+        "Jolly-boat"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_029"
+      ]
+    },
+    {
+      "canonical": "keg",
+      "variants": [
+        "keg"
+      ],
+      "chunks": [
+        "chunk_020"
+      ]
+    },
+    {
+      "canonical": "key",
+      "variants": [
+        "key"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "knife",
+      "variants": [
+        "knife"
+      ],
+      "chunks": [
+        "chunk_025",
+        "chunk_043",
+        "chunk_049",
+        "chunk_050",
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "lancet",
+      "variants": [
+        "lancet"
+      ],
+      "chunks": [
+        "chunk_004"
+      ]
+    },
+    {
+      "canonical": "lantern",
+      "variants": [
+        "lantern"
+      ],
+      "chunks": [
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "lanyard",
+      "variants": [
+        "lanyard"
+      ],
+      "chunks": [
+        "chunk_017"
+      ]
+    },
+    {
+      "canonical": "letter",
+      "variants": [
+        "letter"
+      ],
+      "chunks": [
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "line",
+      "variants": [
+        "line"
+      ],
+      "chunks": [
+        "chunk_017",
+        "chunk_044",
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "live-oak",
+      "variants": [
+        "live-oak"
+      ],
+      "chunks": [
+        "chunk_024"
+      ]
+    },
+    {
+      "canonical": "livery clothes",
+      "variants": [
+        "livery clothes"
+      ],
+      "chunks": [
+        "chunk_026"
+      ]
+    },
+    {
+      "canonical": "loaded muskets",
+      "variants": [
+        "loaded muskets"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "loaded pistols",
+      "variants": [
+        "loaded pistols"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "long nine",
+      "variants": [
+        "long nine"
+      ],
+      "chunks": [
+        "chunk_029"
+      ]
+    },
+    {
+      "canonical": "loops of tarry gaskin",
+      "variants": [
+        "loops of tarry gaskin"
+      ],
+      "chunks": [
+        "chunk_026"
+      ]
+    },
+    {
+      "canonical": "louis d'ors",
+      "variants": [
+        "louis d'ors"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "main-mast",
+      "variants": [
+        "main-mast"
+      ],
+      "chunks": [
+        "chunk_045"
+      ]
+    },
+    {
+      "canonical": "main-sail",
+      "variants": [
+        "main-sail"
+      ],
+      "chunks": [
+        "chunk_046",
+        "chunk_059",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "map",
+      "variants": [
+        "map"
+      ],
+      "chunks": [
+        "chunk_011",
+        "chunk_012"
+      ]
+    },
+    {
+      "canonical": "mattress",
+      "variants": [
+        "mattress"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "medical book",
+      "variants": [
+        "medical book"
+      ],
+      "chunks": [
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "medical scissors",
+      "variants": [
+        "medical scissors"
+      ],
+      "chunks": [
+        "chunk_011"
+      ]
+    },
+    {
+      "canonical": "medicine",
+      "variants": [
+        "medicine"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "medicine chest",
+      "variants": [
+        "medicine chest"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "money-bag",
+      "variants": [
+        "money-bag"
+      ],
+      "chunks": [
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "musket",
+      "variants": [
+        "musket"
+      ],
+      "chunks": [
+        "chunk_027",
+        "chunk_031",
+        "chunk_036",
+        "chunk_037",
+        "chunk_058",
+        "chunk_059",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "muskets",
+      "variants": [
+        "muskets"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_029",
+        "chunk_033",
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "needles",
+      "variants": [
+        "needles"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "noggin",
+      "variants": [
+        "noggin"
+      ],
+      "chunks": [
+        "chunk_004"
+      ]
+    },
+    {
+      "canonical": "oar",
+      "variants": [
+        "oar"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "oars",
+      "variants": [
+        "oars"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "oilcloth",
+      "variants": [
+        "oilcloth"
+      ],
+      "chunks": [
+        "chunk_008",
+        "chunk_051"
+      ]
+    },
+    {
+      "canonical": "oilskin packet",
+      "variants": [
+        "oilskin packet"
+      ],
+      "chunks": [
+        "chunk_008",
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "packing-cases",
+      "variants": [
+        "packing-cases"
+      ],
+      "chunks": [
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "paling",
+      "variants": [
+        "paling"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "pannikin",
+      "variants": [
+        "pannikin"
+      ],
+      "chunks": [
+        "chunk_020"
+      ]
+    },
+    {
+      "canonical": "parrot",
+      "variants": [
+        "parrot"
+      ],
+      "chunks": [
+        "chunk_017"
+      ]
+    },
+    {
+      "canonical": "pick",
+      "variants": [
+        "pick"
+      ],
+      "chunks": [
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "pick-axe",
+      "variants": [
+        "pick-axe"
+      ],
+      "chunks": [
+        "chunk_027",
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "pickled fruits",
+      "variants": [
+        "pickled fruits"
+      ],
+      "chunks": [
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "picks and shovels",
+      "variants": [
+        "picks and shovels"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "pieces of eight",
+      "variants": [
+        "pieces of eight"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "pigtail tobacco",
+      "variants": [
+        "pigtail tobacco"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "pines",
+      "variants": [
+        "pines"
+      ],
+      "chunks": [
+        "chunk_044"
+      ]
+    },
+    {
+      "canonical": "pipe",
+      "variants": [
+        "pipe"
+      ],
+      "chunks": [
+        "chunk_021",
+        "chunk_034",
+        "chunk_049",
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "pistol",
+      "variants": [
+        "pistol"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_025",
+        "chunk_036",
+        "chunk_044",
+        "chunk_045",
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "pistols",
+      "variants": [
+        "pistols"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "plaster",
+      "variants": [
+        "plaster"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "pork",
+      "variants": [
+        "pork"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_029",
+        "chunk_031",
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "port",
+      "variants": [
+        "port"
+      ],
+      "chunks": [
+        "chunk_043"
+      ]
+    },
+    {
+      "canonical": "powder",
+      "variants": [
+        "powder"
+      ],
+      "chunks": [
+        "chunk_029",
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "powder and shot",
+      "variants": [
+        "powder and shot"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "powder tins",
+      "variants": [
+        "powder tins"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "powdered wig",
+      "variants": [
+        "powdered wig"
+      ],
+      "chunks": [
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "powderhorn",
+      "variants": [
+        "powderhorn"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "quadrant",
+      "variants": [
+        "quadrant"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "raisins",
+      "variants": [
+        "raisins"
+      ],
+      "chunks": [
+        "chunk_021",
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "rattle",
+      "variants": [
+        "rattle"
+      ],
+      "chunks": [
+        "chunk_023"
+      ]
+    },
+    {
+      "canonical": "red cap",
+      "variants": [
+        "red cap"
+      ],
+      "chunks": [
+        "chunk_037"
+      ]
+    },
+    {
+      "canonical": "rope",
+      "variants": [
+        "rope"
+      ],
+      "chunks": [
+        "chunk_055",
+        "chunk_057"
+      ]
+    },
+    {
+      "canonical": "rum",
+      "variants": [
+        "rum"
+      ],
+      "chunks": [
+        "chunk_003",
+        "chunk_004",
+        "chunk_026"
+      ]
+    },
+    {
+      "canonical": "sacks of coin",
+      "variants": [
+        "sacks of coin"
+      ],
+      "chunks": [
+        "chunk_061"
+      ]
+    },
+    {
+      "canonical": "sail",
+      "variants": [
+        "sail"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "salt goat",
+      "variants": [
+        "salt goat"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "sand",
+      "variants": [
+        "sand"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "schooner",
+      "variants": [
+        "schooner"
+      ],
+      "chunks": [
+        "chunk_013",
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "scuppers",
+      "variants": [
+        "scuppers"
+      ],
+      "chunks": [
+        "chunk_045"
+      ]
+    },
+    {
+      "canonical": "sea-cap",
+      "variants": [
+        "sea-cap"
+      ],
+      "chunks": [
+        "chunk_040"
+      ]
+    },
+    {
+      "canonical": "sea-chest",
+      "variants": [
+        "sea-chest"
+      ],
+      "chunks": [
+        "chunk_000",
+        "chunk_001",
+        "chunk_005",
+        "chunk_006",
+        "chunk_007",
+        "chunk_009",
+        "chunk_021",
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "sea-gully",
+      "variants": [
+        "sea-gully"
+      ],
+      "chunks": [
+        "chunk_038"
+      ]
+    },
+    {
+      "canonical": "sealed paper",
+      "variants": [
+        "sealed paper"
+      ],
+      "chunks": [
+        "chunk_011"
+      ]
+    },
+    {
+      "canonical": "ship",
+      "variants": [
+        "ship"
+      ],
+      "chunks": [
+        "chunk_049",
+        "chunk_054",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "shot",
+      "variants": [
+        "shot"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "signboard",
+      "variants": [
+        "signboard"
+      ],
+      "chunks": [
+        "chunk_003"
+      ]
+    },
+    {
+      "canonical": "silk handkerchief",
+      "variants": [
+        "silk handkerchief"
+      ],
+      "chunks": [
+        "chunk_028",
+        "chunk_042"
+      ]
+    },
+    {
+      "canonical": "silver",
+      "variants": [
+        "silver"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "silver fourpenny",
+      "variants": [
+        "silver fourpenny"
+      ],
+      "chunks": [
+        "chunk_004"
+      ]
+    },
+    {
+      "canonical": "silver from the till",
+      "variants": [
+        "silver from the till"
+      ],
+      "chunks": [
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "sledge-hammer",
+      "variants": [
+        "sledge-hammer"
+      ],
+      "chunks": [
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "spade",
+      "variants": [
+        "spade"
+      ],
+      "chunks": [
+        "chunk_027"
+      ]
+    },
+    {
+      "canonical": "Spanish watch",
+      "variants": [
+        "Spanish watch"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "spare sail",
+      "variants": [
+        "spare sail"
+      ],
+      "chunks": [
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "stick",
+      "variants": [
+        "stick"
+      ],
+      "chunks": [
+        "chunk_006"
+      ]
+    },
+    {
+      "canonical": "sugar",
+      "variants": [
+        "sugar"
+      ],
+      "chunks": [
+        "chunk_017"
+      ]
+    },
+    {
+      "canonical": "tables",
+      "variants": [
+        "tables"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "tarry string",
+      "variants": [
+        "tarry string"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "tent",
+      "variants": [
+        "tent"
+      ],
+      "chunks": [
+        "chunk_038"
+      ]
+    },
+    {
+      "canonical": "the anchor",
+      "variants": [
+        "the anchor"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the backstay",
+      "variants": [
+        "the backstay"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the Bible",
+      "variants": [
+        "the Bible"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the boat",
+      "variants": [
+        "the boat"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the booms",
+      "variants": [
+        "the booms"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the brand",
+      "variants": [
+        "the brand"
+      ],
+      "chunks": [
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "the British colours",
+      "variants": [
+        "the British colours"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the chains",
+      "variants": [
+        "the chains"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the chart",
+      "variants": [
+        "the chart"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the cutlass",
+      "variants": [
+        "the cutlass"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the fir-tree",
+      "variants": [
+        "the fir-tree"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the fire",
+      "variants": [
+        "the fire"
+      ],
+      "chunks": [
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "the gig",
+      "variants": [
+        "the gig"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the gun",
+      "variants": [
+        "the gun"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the HISPANIOLA",
+      "variants": [
+        "the HISPANIOLA"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the ink",
+      "variants": [
+        "the ink"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the log-book",
+      "variants": [
+        "the log-book"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the mattress",
+      "variants": [
+        "the mattress"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the pen",
+      "variants": [
+        "the pen"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the rope",
+      "variants": [
+        "the rope"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the rudder",
+      "variants": [
+        "the rudder"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the Spy-glass",
+      "variants": [
+        "the Spy-glass"
+      ],
+      "chunks": [
+        "chunk_022"
+      ]
+    },
+    {
+      "canonical": "the tobacco",
+      "variants": [
+        "the tobacco"
+      ],
+      "chunks": [
+        "chunk_030"
+      ]
+    },
+    {
+      "canonical": "the torch",
+      "variants": [
+        "the torch"
+      ],
+      "chunks": [
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "thimble",
+      "variants": [
+        "thimble"
+      ],
+      "chunks": [
+        "chunk_007",
+        "chunk_011",
+        "chunk_026"
+      ]
+    },
+    {
+      "canonical": "thread",
+      "variants": [
+        "thread"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "thwart",
+      "variants": [
+        "thwart"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "tiller",
+      "variants": [
+        "tiller"
+      ],
+      "chunks": [
+        "chunk_044"
+      ]
+    },
+    {
+      "canonical": "tin canikin",
+      "variants": [
+        "tin canikin"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "tinder box",
+      "variants": [
+        "tinder box"
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "tobacco",
+      "variants": [
+        "tobacco"
+      ],
+      "chunks": [
+        "chunk_044",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "tools",
+      "variants": [
+        "tools"
+      ],
+      "chunks": [
+        "chunk_057",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "torch",
+      "variants": [
+        "torch"
+      ],
+      "chunks": [
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "treasure",
+      "variants": [
+        "treasure"
+      ],
+      "chunks": [
+        "chunk_049",
+        "chunk_051",
+        "chunk_054",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "tree trunk",
+      "variants": [
+        "tree trunk"
+      ],
+      "chunks": [
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "trinkets",
+      "variants": [
+        "trinkets"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "trunk of a pine",
+      "variants": [
+        "trunk of a pine"
+      ],
+      "chunks": [
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "Union Jack",
+      "variants": [
+        "Union Jack"
+      ],
+      "chunks": [
+        "chunk_027"
+      ]
+    },
+    {
+      "canonical": "WALRUS",
+      "variants": [
+        "WALRUS"
+      ],
+      "chunks": [
+        "chunk_027"
+      ]
+    },
+    {
+      "canonical": "water",
+      "variants": [
+        "water"
+      ],
+      "chunks": [
+        "chunk_042",
+        "chunk_060"
+      ]
+    },
+    {
+      "canonical": "West Indian shells",
+      "variants": [
+        "West Indian shells"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "whistle",
+      "variants": [
+        "whistle"
+      ],
+      "chunks": [
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "white cloth",
+      "variants": [
+        "white cloth"
+      ],
+      "chunks": [
+        "chunk_033"
+      ]
+    },
+    {
+      "canonical": "wig",
+      "variants": [
+        "wig"
+      ],
+      "chunks": [
+        "chunk_021"
+      ]
+    },
+    {
+      "canonical": "wine",
+      "variants": [
+        "wine"
+      ],
+      "chunks": [
+        "chunk_044",
+        "chunk_059"
+      ]
+    },
+    {
+      "canonical": "wisp of grass",
+      "variants": [
+        "wisp of grass"
+      ],
+      "chunks": [
+        "chunk_025"
+      ]
+    },
+    {
+      "canonical": "yard-arm",
+      "variants": [
+        "yard-arm"
+      ],
+      "chunks": [
+        "chunk_049"
+      ]
+    }
+  ],
+  "identity_notes": [
+    "the old sea-dog and the captain may refer to the same entity",
+    "the brown old seaman and the captain may refer to the same entity",
+    "Black Dog and the stranger may refer to the same entity",
+    "Bill and the captain may refer to the same entity",
+    "Billy Bones and the captain may refer to the same entity",
+    "the blind man and the blind beggar may refer to the same entity",
+    "Admiral Benbow and Admiral Benbow inn refer to the same place.",
+    "the inn and the tavern may refer to the same place",
+    "the blind beggar and Pew refer to the same entity",
+    "the squire and Mr. Trelawney may refer to the same entity",
+    "squire and Trelawney may refer to the same entity",
+    "the tallow-faced man and Black Dog refer to the same entity",
+    "the blind man and Pew refer to the same entity",
+    "HISPANIOLA and schooner may refer to the same ship",
+    "Mr. Smollett and the captain may refer to the same entity",
+    "Dr. Livesey and David Livesey may refer to the same entity",
+    "the captain and Captain Smollett may refer to the same entity",
+    "the captain and Alexander Smollett may refer to the same entity",
+    "the doctor and Dr. Livesey refer to the same character",
+    "the captain and Captain Smollett refer to the same character",
+    "Hands and Mr. Hands may refer to the same entity",
+    "O'Brien and the coxswain may refer to the same entity",
+    "the dead man refers to O'Brien",
+    "Silver and Captain Silver may refer to the same entity",
+    "Silver and John Silver refer to the same character",
+    "Morgan and Tom Morgan refer to the same character",
+    "Silver and the captain refer to the same entity",
+    "Silver and the sea-cook refer to the same entity",
+    "the doctor and Dr. Livesey refer to the same entity",
+    "doctor and Dr. Livesey may refer to the same entity",
+    "Dr. Livesey and the doctor may refer to the same entity",
+    "Long John and Silver may refer to the same entity"
+  ],
+  "identity_notes_normalized": [
+    {
+      "canonical": "Admiral Benbow and Admiral Benbow inn refer to the same place.",
+      "variants": [
+        "Admiral Benbow and Admiral Benbow inn refer to the same place."
+      ],
+      "chunks": [
+        "chunk_007"
+      ]
+    },
+    {
+      "canonical": "Bill and the captain may refer to the same entity",
+      "variants": [
+        "Bill and the captain may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_003"
+      ]
+    },
+    {
+      "canonical": "Billy Bones and the captain may refer to the same entity",
+      "variants": [
+        "Billy Bones and the captain may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_004"
+      ]
+    },
+    {
+      "canonical": "Black Dog and the stranger may refer to the same entity",
+      "variants": [
+        "Black Dog and the stranger may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_003"
+      ]
+    },
+    {
+      "canonical": "doctor and Dr. Livesey may refer to the same entity",
+      "variants": [
+        "doctor and Dr. Livesey may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_055"
+      ]
+    },
+    {
+      "canonical": "Dr. Livesey and David Livesey may refer to the same entity",
+      "variants": [
+        "Dr. Livesey and David Livesey may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_031"
+      ]
+    },
+    {
+      "canonical": "Dr. Livesey and the doctor may refer to the same entity",
+      "variants": [
+        "Dr. Livesey and the doctor may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "Hands and Mr. Hands may refer to the same entity",
+      "variants": [
+        "Hands and Mr. Hands may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_044"
+      ]
+    },
+    {
+      "canonical": "HISPANIOLA and schooner may refer to the same ship",
+      "variants": [
+        "HISPANIOLA and schooner may refer to the same ship"
+      ],
+      "chunks": [
+        "chunk_028"
+      ]
+    },
+    {
+      "canonical": "Long John and Silver may refer to the same entity",
+      "variants": [
+        "Long John and Silver may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_058"
+      ]
+    },
+    {
+      "canonical": "Morgan and Tom Morgan refer to the same character",
+      "variants": [
+        "Morgan and Tom Morgan refer to the same character"
+      ],
+      "chunks": [
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "Mr. Smollett and the captain may refer to the same entity",
+      "variants": [
+        "Mr. Smollett and the captain may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_029",
+        "chunk_034"
+      ]
+    },
+    {
+      "canonical": "O'Brien and the coxswain may refer to the same entity",
+      "variants": [
+        "O'Brien and the coxswain may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "Silver and Captain Silver may refer to the same entity",
+      "variants": [
+        "Silver and Captain Silver may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_047"
+      ]
+    },
+    {
+      "canonical": "Silver and John Silver refer to the same character",
+      "variants": [
+        "Silver and John Silver refer to the same character"
+      ],
+      "chunks": [
+        "chunk_049"
+      ]
+    },
+    {
+      "canonical": "Silver and the captain refer to the same entity",
+      "variants": [
+        "Silver and the captain refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "Silver and the sea-cook refer to the same entity",
+      "variants": [
+        "Silver and the sea-cook refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_050"
+      ]
+    },
+    {
+      "canonical": "squire and Trelawney may refer to the same entity",
+      "variants": [
+        "squire and Trelawney may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_011"
+      ]
+    },
+    {
+      "canonical": "the blind beggar and Pew refer to the same entity",
+      "variants": [
+        "the blind beggar and Pew refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_009"
+      ]
+    },
+    {
+      "canonical": "the blind man and Pew refer to the same entity",
+      "variants": [
+        "the blind man and Pew refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_014"
+      ]
+    },
+    {
+      "canonical": "the blind man and the blind beggar may refer to the same entity",
+      "variants": [
+        "the blind man and the blind beggar may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_006"
+      ]
+    },
+    {
+      "canonical": "the brown old seaman and the captain may refer to the same entity",
+      "variants": [
+        "the brown old seaman and the captain may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_000"
+      ]
+    },
+    {
+      "canonical": "the captain and Alexander Smollett may refer to the same entity",
+      "variants": [
+        "the captain and Alexander Smollett may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_034"
+      ]
+    },
+    {
+      "canonical": "the captain and Captain Smollett may refer to the same entity",
+      "variants": [
+        "the captain and Captain Smollett may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_033"
+      ]
+    },
+    {
+      "canonical": "the captain and Captain Smollett refer to the same character",
+      "variants": [
+        "the captain and Captain Smollett refer to the same character"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "the dead man refers to O'Brien",
+      "variants": [
+        "the dead man refers to O'Brien"
+      ],
+      "chunks": [
+        "chunk_046"
+      ]
+    },
+    {
+      "canonical": "the doctor and Dr. Livesey refer to the same character",
+      "variants": [
+        "the doctor and Dr. Livesey refer to the same character"
+      ],
+      "chunks": [
+        "chunk_035"
+      ]
+    },
+    {
+      "canonical": "the doctor and Dr. Livesey refer to the same entity",
+      "variants": [
+        "the doctor and Dr. Livesey refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_054"
+      ]
+    },
+    {
+      "canonical": "the inn and the tavern may refer to the same place",
+      "variants": [
+        "the inn and the tavern may refer to the same place"
+      ],
+      "chunks": [
+        "chunk_008"
+      ]
+    },
+    {
+      "canonical": "the old sea-dog and the captain may refer to the same entity",
+      "variants": [
+        "the old sea-dog and the captain may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_000"
+      ]
+    },
+    {
+      "canonical": "the squire and Mr. Trelawney may refer to the same entity",
+      "variants": [
+        "the squire and Mr. Trelawney may refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_010"
+      ]
+    },
+    {
+      "canonical": "the tallow-faced man and Black Dog refer to the same entity",
+      "variants": [
+        "the tallow-faced man and Black Dog refer to the same entity"
+      ],
+      "chunks": [
+        "chunk_014"
+      ]
+    }
+  ]
+}

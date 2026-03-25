@@ -1,0 +1,836 @@
+{
+  "dominant_pov": "first-person",
+  "observed_pov_values": [
+    "first-person",
+    "third-person"
+  ],
+  "dialogue_present_in_chunks": 55,
+  "internal_thought_present_in_chunks": 40,
+  "unattributed_dialogue_present_in_chunks": 3,
+  "explicitly_attributed_speakers": [
+    "the old sea-dog",
+    "the captain",
+    "Black Dog",
+    "Bill",
+    "my mother",
+    "Doctor Livesey",
+    "Jim",
+    "captain",
+    "I",
+    "he",
+    "Mrs. Crossley",
+    "the blind man",
+    "Pew",
+    "the man in the window",
+    "the fellow from the door",
+    "Dr. Livesey",
+    "Mr. Dance",
+    "the squire",
+    "Mr. Trelawney",
+    "the doctor",
+    "squire",
+    "doctor",
+    "Trelawney",
+    "Redruth",
+    "Tom",
+    "Squire Trelawney",
+    "Long John Silver",
+    "Harry",
+    "Ben",
+    "Morgan",
+    "Silver",
+    "Hawkins",
+    "Captain Smollett",
+    "Long John",
+    "Israel Hands",
+    "the coxswain",
+    "Barbecue",
+    "the youngest hand on board",
+    "Israel",
+    "Dick",
+    "Hands",
+    "lookout",
+    "Jim Hawkins",
+    "Anderson",
+    "bow oar",
+    "Ben Gunn",
+    "Mr. Smollett",
+    "Gray",
+    "Job Anderson",
+    "Tom Redruth",
+    "Hunter",
+    "Joyce",
+    "Mr. Hands",
+    "Cap'n Hawkins",
+    "Captain Flint",
+    "George",
+    "George Merry",
+    "Doctor",
+    "the fellow with the bandage",
+    "another",
+    "Merry"
+  ],
+  "per_chunk": [
+    {
+      "chunk_id": "chunk_000",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "the old sea-dog"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_001",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "the captain"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_002",
+      "pov": null,
+      "dialogue": false,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_003",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Black Dog",
+        "Bill"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_004",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "my mother",
+        "Doctor Livesey",
+        "the captain",
+        "Jim"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_005",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "captain",
+        "Black Dog",
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_006",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "I",
+        "he"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_007",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "my mother",
+        "Mrs. Crossley"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_008",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "my mother",
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_009",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "the blind man",
+        "Pew",
+        "the man in the window",
+        "the fellow from the door"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_010",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Dr. Livesey",
+        "Mr. Dance",
+        "the squire",
+        "Mr. Trelawney",
+        "the doctor"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_011",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "squire",
+        "doctor",
+        "Trelawney"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_012",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Redruth",
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_013",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Tom",
+        "I",
+        "Squire Trelawney"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_014",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Long John Silver",
+        "Harry",
+        "Ben",
+        "Morgan",
+        "Silver"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_015",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Long John Silver",
+        "Hawkins",
+        "squire",
+        "Dr. Livesey",
+        "Captain Smollett"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_016",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "the doctor",
+        "the squire",
+        "the captain",
+        "Mr. Trelawney",
+        "Captain Smollett",
+        "the doctor",
+        "the squire",
+        "the doctor",
+        "the captain",
+        "the doctor",
+        "the squire",
+        "the doctor",
+        "the captain",
+        "the doctor",
+        "the squire",
+        "the doctor",
+        "the captain"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_017",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Long John",
+        "the captain",
+        "Mr. Trelawney",
+        "Israel Hands",
+        "the coxswain",
+        "Barbecue"
+      ],
+      "unattributed_dialogue_present": true
+    },
+    {
+      "chunk_id": "chunk_018",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "the youngest hand on board",
+        "the captain"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_019",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Israel",
+        "Dick"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_020",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Hands",
+        "Silver",
+        "Captain Smollett",
+        "lookout"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_021",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Jim Hawkins",
+        "Dr. Livesey",
+        "Captain Smollett",
+        "the squire",
+        "Long John",
+        "Mr. Trelawney"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_022",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Anderson",
+        "Long John",
+        "the doctor",
+        "the captain",
+        "the squire"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_023",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "the captain",
+        "bow oar",
+        "Silver"
+      ],
+      "unattributed_dialogue_present": true
+    },
+    {
+      "chunk_id": "chunk_024",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Tom"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_025",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Ben Gunn"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_026",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Ben Gunn",
+        "Jim"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_027",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "I",
+        "he"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_028",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Captain Smollett"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_029",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Mr. Smollett",
+        "Gray",
+        "the captain",
+        "I",
+        "Mr. Trelawney",
+        "the squire",
+        "Israel Hands"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_030",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "I",
+        "the captain",
+        "the squire",
+        "Gray",
+        "Job Anderson",
+        "Tom Redruth"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_031",
+      "pov": "third-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "the captain",
+        "Dr. Livesey",
+        "the squire",
+        "Hunter",
+        "Ben Gunn"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_032",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "doctor",
+        "Captain Smollett"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_033",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "the captain",
+        "Long John",
+        "Dr. Livesey",
+        "Jim"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_034",
+      "pov": "third-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Long John",
+        "Captain Smollett",
+        "Mr. Smollett"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_035",
+      "pov": "third-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Captain Smollett",
+        "Dr. Livesey",
+        "Joyce",
+        "Mr. Trelawney",
+        "Gray",
+        "Hawkins",
+        "Hunter"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_036",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "the captain",
+        "Job Anderson",
+        "the doctor",
+        "Gray",
+        "Mr. Trelawney",
+        "Mr. Smollett"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_037",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Gray",
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_038",
+      "pov": "first-person",
+      "dialogue": false,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_039",
+      "pov": "first-person",
+      "dialogue": false,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_040",
+      "pov": "first-person",
+      "dialogue": false,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_041",
+      "pov": "first-person",
+      "dialogue": false,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_042",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Mr. Hands",
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_043",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Mr. Hands",
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_044",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Hands",
+        "Mr. Hands",
+        "Cap'n Hawkins",
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_045",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Jim",
+        "Israel Hands"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_046",
+      "pov": "first-person",
+      "dialogue": false,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_047",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Captain Flint"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_048",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Long John",
+        "Silver",
+        "Dick"
+      ],
+      "unattributed_dialogue_present": true
+    },
+    {
+      "chunk_id": "chunk_049",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Morgan",
+        "I"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_050",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Morgan",
+        "George",
+        "Dick",
+        "Long John"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_051",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "George",
+        "Silver",
+        "Morgan"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_052",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Dr. Livesey",
+        "Morgan",
+        "Dick",
+        "George Merry"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_053",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Doctor",
+        "Jim"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_054",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "I",
+        "the doctor",
+        "Silver",
+        "Jim",
+        "Barbecue"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_055",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Morgan",
+        "George Merry"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_056",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Morgan",
+        "the fellow with the bandage",
+        "another",
+        "Merry",
+        "Dick",
+        "Ben Gunn"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_057",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Dick",
+        "Merry",
+        "Silver"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_058",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [
+        "Silver",
+        "Jim",
+        "Merry",
+        "Long John",
+        "the doctor",
+        "Gray",
+        "Ben Gunn"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_059",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "the squire",
+        "Long John",
+        "the captain",
+        "Ben Gunn"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_060",
+      "pov": "first-person",
+      "dialogue": true,
+      "internal_thought": true,
+      "explicitly_attributed_speakers": [
+        "the doctor",
+        "Silver",
+        "Ben Gunn"
+      ],
+      "unattributed_dialogue_present": false
+    },
+    {
+      "chunk_id": "chunk_061",
+      "pov": "first-person",
+      "dialogue": false,
+      "internal_thought": false,
+      "explicitly_attributed_speakers": [],
+      "unattributed_dialogue_present": false
+    }
+  ]
+}
