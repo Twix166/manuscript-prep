@@ -11,15 +11,6 @@ Typical usage:
       --title "Treasure Island" \
       --subtitle "Merged ManuscriptPrep Analysis Report"
 
-Expected input files in --input-dir:
-- book_merged.json
-- structure_merged.json
-- dialogue_merged.json
-- entities_merged.json
-- dossiers_merged.json
-- conflict_report.json
-- merge_report.json
-
 Requires:
     pip install reportlab
 """
@@ -32,15 +23,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
     BaseDocTemplate,
     Frame,
-    ListFlowable,
-    ListItem,
     PageBreak,
     PageTemplate,
     Paragraph,
@@ -65,8 +54,12 @@ def maybe_read_json(path: Path) -> Optional[Dict[str, Any]]:
     return None
 
 
+def normalize_text(text: Any) -> str:
+    return " ".join(str(text).split())
+
+
 def truncate(text: Any, n: int = 160) -> str:
-    text = " ".join(str(text).split())
+    text = normalize_text(text)
     if len(text) <= n:
         return text
     return text[: n - 1].rstrip() + "…"
@@ -168,6 +161,42 @@ def make_styles():
             spaceAfter=4,
         )
     )
+    styles.add(
+        ParagraphStyle(
+            name="TableHeader",
+            parent=styles["BodyText"],
+            fontName="Helvetica-Bold",
+            fontSize=9.5,
+            leading=11,
+            textColor=colors.HexColor("#1E3557"),
+            spaceAfter=0,
+            spaceBefore=0,
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="TableCell",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=9.1,
+            leading=11.2,
+            spaceAfter=0,
+            spaceBefore=0,
+            wordWrap="CJK",
+        )
+    )
+    styles.add(
+        ParagraphStyle(
+            name="TableCellCompact",
+            parent=styles["BodyText"],
+            fontName="Helvetica",
+            fontSize=8.5,
+            leading=10.2,
+            spaceAfter=0,
+            spaceBefore=0,
+            wordWrap="CJK",
+        )
+    )
     return styles
 
 
@@ -179,27 +208,33 @@ def add_heading(story, text: str, styles, level: int = 0):
     story.append(p)
 
 
-def info_table(rows: List[List[Any]], col_widths=None, compact=False):
-    table = Table(rows, colWidths=col_widths, hAlign="LEFT", repeatRows=1)
-    body_font = 8.8 if compact else 9.5
-    header_font = 9.2 if compact else 9.8
+def p(text: Any, style: ParagraphStyle) -> Paragraph:
+    safe = normalize_text(text)
+    return Paragraph(safe.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"), style)
+
+
+def info_table(rows: List[List[Any]], styles, col_widths=None, compact=False):
+    header_style = styles["TableHeader"]
+    cell_style = styles["TableCellCompact"] if compact else styles["TableCell"]
+
+    converted = []
+    for r_idx, row in enumerate(rows):
+        converted_row = []
+        for cell in row:
+            converted_row.append(p(cell, header_style if r_idx == 0 else cell_style))
+        converted.append(converted_row)
+
+    table = Table(converted, colWidths=col_widths, hAlign="LEFT", repeatRows=1)
     table.setStyle(
         TableStyle(
             [
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#DCE6F4")),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.HexColor("#1E3557")),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, 0), header_font),
-                ("BOTTOMPADDING", (0, 0), (-1, 0), 7),
-                ("TOPPADDING", (0, 0), (-1, 0), 7),
-                ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-                ("FONTSIZE", (0, 1), (-1, -1), body_font),
-                ("TEXTCOLOR", (0, 1), (-1, -1), colors.black),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                ("TOPPADDING", (0, 1), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 1), (-1, -1), 6),
+                ("LEFTPADDING", (0, 0), (-1, -1), 7),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
                 ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#B7C6D9")),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F7FAFE")]),
             ]
@@ -216,7 +251,7 @@ def add_summary_cards(story, styles, summary_items: List[tuple[str, str]]):
         card = Table(
             [
                 [Paragraph(f"<b>{label}</b>", styles["BodyText"])],
-                [Paragraph(value, styles["BodySmall"])],
+                [Paragraph(normalize_text(value), styles["BodySmall"])],
             ],
             colWidths=[54 * mm],
         )
@@ -275,7 +310,7 @@ def build_toc():
 
 def add_kv_paragraphs(story, styles, items: List[tuple[str, Any]]):
     for k, v in items:
-        story.append(Paragraph(f"<b>{k}:</b> {v}", styles["BodySmall"]))
+        story.append(Paragraph(f"<b>{k}:</b> {normalize_text(v)}", styles["BodySmall"]))
     story.append(Spacer(1, 4))
 
 
@@ -300,8 +335,8 @@ def add_entities_section(story, styles, entities: Dict[str, Any]):
         items = entities.get(key, [])
         if items:
             rows = [["Value"]]
-            rows.extend([[truncate(x, 120)] for x in items if isinstance(x, str)])
-            story.append(info_table(rows, col_widths=[170 * mm]))
+            rows.extend([[truncate(x, 160)] for x in items if isinstance(x, str)])
+            story.append(info_table(rows, styles, col_widths=[170 * mm]))
         else:
             story.append(Paragraph("No entries recorded.", styles["BodySmall"]))
         story.append(Spacer(1, 6))
@@ -312,12 +347,12 @@ def add_entities_section(story, styles, entities: Dict[str, Any]):
             for item in norm_items[:40]:
                 rows.append(
                     [
-                        truncate(item.get("canonical", ""), 40),
-                        truncate(", ".join(item.get("variants", [])), 75),
+                        truncate(item.get("canonical", ""), 48),
+                        truncate(", ".join(item.get("variants", [])), 120),
                         ", ".join(item.get("chunks", [])),
                     ]
                 )
-            story.append(info_table(rows, col_widths=[42 * mm, 96 * mm, 32 * mm], compact=True))
+            story.append(info_table(rows, styles, col_widths=[40 * mm, 102 * mm, 28 * mm], compact=True))
             story.append(Spacer(1, 8))
 
 
@@ -352,23 +387,23 @@ def add_dossiers_section(story, styles, dossiers: Dict[str, Any]):
         add_heading(story, name, styles, 1)
         rows = [
             ["Field", "Value"],
-            ["Variants", truncate(variants, 200)],
-            ["Aliases", truncate(aliases, 200)],
-            ["Roles", truncate(roles, 200)],
-            ["Traits", truncate(traits, 200)],
-            ["Accents", truncate(accents, 200)],
-            ["Vocal notes", truncate(vocal_notes, 200)],
-            ["Spoken dialogue values", truncate(spoken, 200)],
-            ["Identity status values", truncate(identity_status, 200)],
-            ["Chunks", truncate(chunks, 200)],
+            ["Variants", truncate(variants, 220)],
+            ["Aliases", truncate(aliases, 220)],
+            ["Roles", truncate(roles, 220)],
+            ["Traits", truncate(traits, 220)],
+            ["Accents", truncate(accents, 220)],
+            ["Vocal notes", truncate(vocal_notes, 220)],
+            ["Spoken dialogue values", truncate(spoken, 220)],
+            ["Identity status values", truncate(identity_status, 220)],
+            ["Chunks", truncate(chunks, 220)],
         ]
-        story.append(info_table(rows, col_widths=[42 * mm, 134 * mm], compact=True))
+        story.append(info_table(rows, styles, col_widths=[46 * mm, 130 * mm], compact=True))
         story.append(Spacer(1, 4))
 
         if bios:
             story.append(Paragraph("<b>Biography evidence</b>", styles["BodySmall"]))
             for bio in bios:
-                story.append(Paragraph(truncate(bio, 800), styles["BodySmall"]))
+                story.append(Paragraph(truncate(bio, 1000), styles["BodySmall"]))
                 story.append(Spacer(1, 2))
 
         story.append(Spacer(1, 8))
@@ -398,12 +433,12 @@ def add_conflict_section(story, styles, conflict_report: Dict[str, Any]):
                 severity_values.append(f"{c.get('severity', '')}: {', '.join(map(str, c.get('values', [])))}")
             rows.append(
                 [
-                    truncate(item.get("name", ""), 32),
-                    truncate(conflict_types, 40),
-                    truncate(" | ".join(severity_values), 85),
+                    truncate(item.get("name", ""), 36),
+                    truncate(conflict_types, 48),
+                    truncate(" | ".join(severity_values), 110),
                 ]
             )
-        story.append(info_table(rows, col_widths=[42 * mm, 44 * mm, 90 * mm], compact=True))
+        story.append(info_table(rows, styles, col_widths=[38 * mm, 46 * mm, 92 * mm], compact=True))
         story.append(Spacer(1, 8))
     else:
         story.append(Paragraph("No character-level conflicts were detected.", styles["BodySmall"]))
@@ -418,10 +453,10 @@ def add_conflict_section(story, styles, conflict_report: Dict[str, Any]):
                 [
                     item.get("type", ""),
                     item.get("severity", ""),
-                    truncate(f"{', '.join(map(str, item.get('values', [])))} — {item.get('message', '')}", 95),
+                    truncate(f"{', '.join(map(str, item.get('values', [])))} — {item.get('message', '')}", 120),
                 ]
             )
-        story.append(info_table(rows, col_widths=[42 * mm, 25 * mm, 109 * mm], compact=True))
+        story.append(info_table(rows, styles, col_widths=[42 * mm, 25 * mm, 109 * mm], compact=True))
         story.append(Spacer(1, 8))
 
     variant_notes = conflict_report.get("entity_variant_notes", {})
@@ -434,13 +469,13 @@ def add_conflict_section(story, styles, conflict_report: Dict[str, Any]):
                 rows.append(
                     [
                         group_name,
-                        truncate(note.get("canonical", ""), 28),
-                        truncate(", ".join(note.get("variants", [])), 90),
+                        truncate(note.get("canonical", ""), 30),
+                        truncate(", ".join(note.get("variants", [])), 120),
                     ]
                 )
                 total_rows += 1
         if total_rows:
-            story.append(info_table(rows, col_widths=[42 * mm, 38 * mm, 96 * mm], compact=True))
+            story.append(info_table(rows, styles, col_widths=[40 * mm, 38 * mm, 98 * mm], compact=True))
         else:
             story.append(Paragraph("No entity variant notes were detected.", styles["BodySmall"]))
 
@@ -504,7 +539,7 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
         rows.append(["Book total duration (s)", str(timing.get("book_total_duration_seconds", "—"))])
         for k, v in (timing.get("pass_total_duration_seconds", {}) or {}).items():
             rows.append([f"Total {k} duration (s)", str(v)])
-        story.append(info_table(rows, col_widths=[105 * mm, 70 * mm]))
+        story.append(info_table(rows, styles, col_widths=[105 * mm, 70 * mm]))
         story.append(Spacer(1, 8))
 
     add_heading(story, "Structure", styles, 0)
@@ -524,23 +559,23 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
             ["Scene breaks recorded", str(len(structure.get("scene_breaks", [])))],
         ]
     )
-    story.append(info_table(rows, col_widths=[95 * mm, 80 * mm]))
+    story.append(info_table(rows, styles, col_widths=[95 * mm, 80 * mm]))
     story.append(Spacer(1, 8))
 
     if structure.get("chapters"):
         add_heading(story, "Chapter List", styles, 1)
         chapter_rows = [["#", "Chapter"]]
         for idx, ch in enumerate(structure.get("chapters", []), start=1):
-            chapter_rows.append([str(idx), truncate(ch, 120)])
-        story.append(info_table(chapter_rows, col_widths=[12 * mm, 163 * mm], compact=True))
+            chapter_rows.append([str(idx), truncate(ch, 180)])
+        story.append(info_table(chapter_rows, styles, col_widths=[12 * mm, 163 * mm], compact=True))
         story.append(Spacer(1, 8))
 
     if structure.get("parts"):
         add_heading(story, "Part List", styles, 1)
         part_rows = [["#", "Part"]]
-        for idx, p in enumerate(structure.get("parts", []), start=1):
-            part_rows.append([str(idx), truncate(p, 120)])
-        story.append(info_table(part_rows, col_widths=[12 * mm, 163 * mm], compact=True))
+        for idx, ptxt in enumerate(structure.get("parts", []), start=1):
+            part_rows.append([str(idx), truncate(ptxt, 180)])
+        story.append(info_table(part_rows, styles, col_widths=[12 * mm, 163 * mm], compact=True))
         story.append(Spacer(1, 8))
 
     add_heading(story, "Dialogue", styles, 0)
@@ -555,7 +590,7 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
             ["Attributed speakers", ", ".join(dialogue.get("explicitly_attributed_speakers", [])) or "—"],
         ]
     )
-    story.append(info_table(rows, col_widths=[66 * mm, 109 * mm]))
+    story.append(info_table(rows, styles, col_widths=[66 * mm, 109 * mm]))
     story.append(Spacer(1, 8))
 
     add_entities_section(story, styles, entities)
@@ -568,8 +603,7 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
     present_counts = merge_report.get("present_counts", {})
     missing = merge_report.get("missing", {})
     rows = [["Artifact", "Present count", "Missing chunks"]]
-    keys = ["structure", "dialogue", "entities", "dossiers", "timing"]
-    for key in keys:
+    for key in ["structure", "dialogue", "entities", "dossiers", "timing"]:
         rows.append(
             [
                 key,
@@ -577,7 +611,7 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
                 ", ".join(missing.get(key, [])) or "—",
             ]
         )
-    story.append(info_table(rows, col_widths=[32 * mm, 30 * mm, 113 * mm], compact=True))
+    story.append(info_table(rows, styles, col_widths=[32 * mm, 30 * mm, 113 * mm], compact=True))
 
     return story
 
