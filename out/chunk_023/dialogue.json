@@ -1,0 +1,13 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "the doctor",
+    "the captain",
+    "the squire",
+    "Long John",
+    "Silver"
+  ],
+  "unattributed_dialogue_present": false
+}

@@ -1,0 +1,114 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participated in discussions about the treasure voyage and evaluated Long John Silver's actions.",
+      "personality_traits": [
+        "assertive",
+        "practical"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Cook who engaged in humorous interactions with Hawkins and discussed ship details.",
+      "personality_traits": [
+        "humorous",
+        "resourceful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Discussed the treasure voyage with the crew and expressed concerns about the mission.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Narrator who observed and interacted with Long John Silver and the crew.",
+      "personality_traits": [
+        "observant",
+        "trustworthy"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participated in discussions about the treasure voyage and interactions with the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Arrow",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mate of the ship described with physical traits and interactions with the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Expressed dissatisfaction with the voyage and crew dynamics.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the cook",
+      "aliases": [
+        "Long John Silver"
+      ],
+      "role": "unknown",
+      "biography": "Individual who managed the kitchen and interacted with Hawkins.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned as a character involved in the narrative.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

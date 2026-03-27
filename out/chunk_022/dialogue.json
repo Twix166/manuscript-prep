@@ -1,0 +1,14 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "the squire",
+    "Dr. Livesey",
+    "the captain",
+    "Mr. Trelawney",
+    "Mr. Smollett",
+    "Anderson"
+  ],
+  "unattributed_dialogue_present": false
+}

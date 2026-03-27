@@ -1,0 +1,103 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "ship's doctor",
+      "biography": "Part of the group planning the voyage, addressed by the squire as ship's doctor.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "admiral",
+      "biography": "Plans to acquire a ship and crew, addresses Dr. Livesey as ship's doctor.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Under the care of Redruth, spends time imagining adventures on the map.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hawkins",
+      "aliases": [],
+      "role": "cabin-boy",
+      "biography": "Designated as cabin-boy by the squire, part of the group planning the voyage.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Redruth",
+      "aliases": [],
+      "role": "gamekeeper",
+      "biography": "Cares for Jim at the hall, involved in the group's preparations.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Joyce",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the group traveling to Bristol with the squire.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the group traveling to Bristol with the squire.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Addresses Trelawney, part of the group planning the voyage.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Addressed by the doctor, part of the group planning the voyage.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

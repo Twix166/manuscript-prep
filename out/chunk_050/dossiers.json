@@ -1,0 +1,56 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Doctor Livesey",
+      "aliases": [],
+      "role": "doctor",
+      "biography": "Part of the group negotiating with Cap'n Silver; involved in the flag of truce discussion",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Cap'n Silver",
+      "aliases": [],
+      "role": "cap'n",
+      "biography": "Led the negotiation with Doctor Livesey; established a blockhouse and secured supplies",
+      "personality_traits": [
+        "truculent",
+        "gracious"
+      ],
+      "vocal_notes": "curious",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Revealed his role in the ship's loss and the murder of the men aboard the schooner",
+      "personality_traits": [
+        "tremulous",
+        "bold"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Member of the buccaneer group; identified as Morgan by the crew",
+      "personality_traits": [
+        "gruff"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

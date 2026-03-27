@@ -1,0 +1,106 @@
+{
+  "character_dossiers": [
+    {
+      "name": "John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participates in mutiny, expresses frustration over failed plans, references injuries and illness among mutineers.",
+      "personality_traits": [
+        "frustrated",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Leader of mutineers, references lost ship and found treasure, manipulates group dynamics.",
+      "personality_traits": [
+        "authoritative",
+        "manipulative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "George Merry",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mutineer with ague shakes, described as physically frail.",
+      "personality_traits": [
+        "unwell"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Gave chart to Silver, referenced by mutineers as a figure of authority.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the old man Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mutineer who comments on Silver's leadership and the mutiny's outcome.",
+      "personality_traits": [
+        "calm"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the sea-cook",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mutineer who confronts George Merry, references lost ship and treasure.",
+      "personality_traits": [
+        "confrontational"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dick",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mutineer with cursed Bible, expresses unease about his situation.",
+      "personality_traits": [
+        "uneasy"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Receives paper from Silver, described as a recipient of the chart.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

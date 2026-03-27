@@ -1,0 +1,94 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Treats wounded men, consults with the squire, and prepares to seek Ben Gunn.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Suffering grievous wounds but not fatal, recovering under care.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Helps cook and consults with the doctor and captain.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A pirate who died after being shot and sustaining severe injuries.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Injured in the action, surviving with non-fatal wounds.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Sits with the narrator, expresses envy of the doctor's situation.",
+      "personality_traits": [
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A figure the doctor intends to seek for information about a hidden boat.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Job",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The shooter who wounded the captain.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

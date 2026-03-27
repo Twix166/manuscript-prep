@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-03-21T21:15:40.535639+00:00",
+  "timestamp": "2026-03-26T17:28:27.209562+00:00",
   "source_pdf": "work/source/TREASURE-ISLAND-by-Robert-Louis-Stevenson.pdf",
-  "book_title": "Treasure Island",
+  "book_title": "treasure-island",
   "book_slug": "treasure_island",
   "paths": {
     "raw_text": "work/extracted/treasure_island/raw.txt",
@@ -123,15 +123,15 @@
     "scene_break_markers": []
   },
   "chunking": {
-    "book_title": "Treasure Island",
+    "book_title": "treasure-island",
     "book_slug": "treasure_island",
     "chunk_dir": "work/chunks/treasure_island",
-    "chunk_count": 62,
+    "chunk_count": 64,
     "total_chunk_words": 70113,
-    "avg_chunk_words": 1130.85,
+    "avg_chunk_words": 1095.52,
     "target_chunk_words": 1200,
     "min_chunk_words": 800,
-    "max_chunk_words": 1500
+    "max_chunk_words": 1400
   },
   "flags": {
     "strip_front_matter": false,

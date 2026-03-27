@@ -1,0 +1,39 @@
+{
+  "characters": [
+    "Israel Hands",
+    "the man with the red cap"
+  ],
+  "places": [
+    "schooner",
+    "forecastle",
+    "after-deck",
+    "main-mast",
+    "cabin",
+    "cellar",
+    "rudder head",
+    "water-breaker",
+    "coxswain's reach"
+  ],
+  "objects": [
+    "empty bottle",
+    "broken bottle",
+    "main-sail",
+    "jib",
+    "boom",
+    "sheet",
+    "blocks",
+    "planks",
+    "scuppers",
+    "medical book",
+    "biscuit",
+    "pickled fruits",
+    "raisins",
+    "cheese",
+    "brandy",
+    "water",
+    "color lines",
+    "black flag",
+    "cap"
+  ],
+  "identity_notes": []
+}

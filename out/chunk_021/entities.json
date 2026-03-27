@@ -1,0 +1,28 @@
+{
+  "characters": [
+    "Silver",
+    "Long John",
+    "Captain Smollett",
+    "Dr. Livesey",
+    "the squire",
+    "Jim Hawkins",
+    "Mr. Trelawney"
+  ],
+  "places": [
+    "Skeleton Island",
+    "Fore-mast Hill",
+    "Spy-glass",
+    "anchorage"
+  ],
+  "objects": [
+    "chart",
+    "pipe",
+    "apple barrel",
+    "bottle of Spanish wine",
+    "raisins",
+    "chest"
+  ],
+  "identity_notes": [
+    "Silver and Long John may refer to the same entity"
+  ]
+}

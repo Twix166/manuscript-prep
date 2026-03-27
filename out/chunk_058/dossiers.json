@@ -1,0 +1,93 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Directed the group to a treasure site, took compass bearings, and attempted to reassure his crew after encountering a ghostly voice.",
+      "personality_traits": [
+        "determined",
+        "courageous"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Expressed fear of Flint, groveled on the ground, and reacted strongly to the ghostly voice.",
+      "personality_traits": [
+        "superstitious",
+        "fearful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Merry",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Commented on Flint's voice, expressed relief after Silver's argument, and urged the crew to move.",
+      "personality_traits": [
+        "superstitious",
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dick",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Prayed with his Bible, indicating a religious upbringing before falling into piracy.",
+      "personality_traits": [
+        "religious",
+        "disciplined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Identified as the source of the ghostly voice, with Silver and Morgan confirming his identity.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Flint",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A deceased pirate whose ghostly voice was feared by the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Darby M'Graw",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A deceased pirate whose ghostly voice sang a song, causing fear among the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

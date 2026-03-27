@@ -1,0 +1,54 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Injured and pinned to a mast, takes control of a ship after a confrontation with Mr. Hands, disposes of a dead body, and recovers from wounds.",
+      "personality_traits": [
+        "conceited",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Injured and wounded, attempts to negotiate with Jim, is shot and falls overboard after a confrontation.",
+      "personality_traits": [
+        "cunning",
+        "perplexed"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Israel",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Coxswain who falls into the water after a struggle, dies alongside O'Brien.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "O'Brien",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Dead body disposed of by Jim, found floating after being shot and drowned.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

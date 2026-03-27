@@ -1,0 +1,83 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member who provides detailed knowledge of Skeleton Island and its history.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member with a timber leg who demonstrates familiarity with the island's geography.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "captain",
+      "biography": "The ship's captain who leads the crew and makes decisions regarding their course.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "doctor",
+      "biography": "The ship's physician who engages in strategic discussions with the crew.",
+      "personality_traits": [
+        "addicted to tobacco"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "squire",
+      "biography": "A crew member who participates in decision-making and conversations with the captain.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The first-person narrator who overhears critical conversations and relays information.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A passenger or investor who engages in discussions about the ship's course.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

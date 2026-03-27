@@ -1,0 +1,36 @@
+{
+  "characters": [
+    "Long John",
+    "Silver",
+    "Captain Smollett",
+    "Mr. Smollett",
+    "Ben Gunn",
+    "Abe Gray"
+  ],
+  "places": [
+    "the sand",
+    "the knoll",
+    "the stockade",
+    "the spring",
+    "the porch",
+    "the block house",
+    "the trees",
+    "the island"
+  ],
+  "objects": [
+    "old iron kettle",
+    "crutch",
+    "blue coat",
+    "brass buttons",
+    "laced hat",
+    "pipe",
+    "tobacco",
+    "musket-balls",
+    "flag of truce",
+    "chart"
+  ],
+  "identity_notes": [
+    "Mr. Smollett and Captain Smollett may refer to the same entity",
+    "Long John and Silver may refer to the same entity"
+  ]
+}

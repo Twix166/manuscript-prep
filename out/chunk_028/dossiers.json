@@ -1,0 +1,104 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "In charge of decision-making during the mutiny crisis, oversees preparations to abandon the ship, and coordinates with the squire and Hunter.",
+      "personality_traits": [
+        "decisive",
+        "calm under pressure"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Expresses guilt for leading others into peril, appears shaken by the situation, and is present during critical planning discussions.",
+      "personality_traits": [
+        "guilt-ridden",
+        "anxious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Assists in loading the boat with supplies, demonstrates physical strength by pulling a good oar, and follows orders during the escape plan.",
+      "personality_traits": [
+        "reliable",
+        "obedient"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Escapes ashore with the mutineers, prompting concern for his safety among the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Leader of the mutineers, whose actions and orders influence the crew's decisions and the abandonment plan.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Old sailor tasked with guarding the ship's galley, armed with muskets and positioned to deter mutineers.",
+      "personality_traits": [
+        "experienced",
+        "protective"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Joyce",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participates in loading the boat with supplies, working alongside the narrator to prepare for the escape.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Coxswain of the ship, addressed by the captain during the mutiny crisis and involved in the abandonment plan.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

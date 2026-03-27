@@ -1,0 +1,32 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A seaman involved in maneuvering a ship and attempting to attack the narrator with a dirk.",
+      "personality_traits": [
+        "aggressive",
+        "impulsive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Israel Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A seaman involved in maneuvering a ship and attempting to attack the narrator with a dirk.",
+      "personality_traits": [
+        "aggressive",
+        "impulsive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

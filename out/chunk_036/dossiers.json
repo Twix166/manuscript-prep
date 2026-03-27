@@ -1,0 +1,95 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "captain",
+      "biography": "Commander of the group, oversees defensive preparations and issues orders during the attack.",
+      "personality_traits": [
+        "authoritative",
+        "strategic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Member of the group assigned to the north side for defense.",
+      "personality_traits": [
+        "confident",
+        "experienced"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "doctor",
+      "biography": "Medical professional involved in the defense and tactical assessment.",
+      "personality_traits": [
+        "precise",
+        "calm"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Member of the group stationed at a defensive post.",
+      "personality_traits": [
+        "dutiful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Joyce",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Defender assigned to the east side, participates in initial gunfire.",
+      "personality_traits": [
+        "composed",
+        "disciplined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Member of the group tasked with loading muskets and eating.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Assigned to distribute brandy during preparations.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

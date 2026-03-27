@@ -1,0 +1,83 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Medical practitioner involved in decision-making, left supplies for mutineers, and expressed concern for their welfare.",
+      "personality_traits": [
+        "pragmatic",
+        "compassionate"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "quartermaster",
+      "biography": "Former quartermaster with a complex relationship to the doctor, attempted to ingratiate himself, and mediated conflicts.",
+      "personality_traits": [
+        "manipulative",
+        "polite"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Loyal to the group, fearful of Silver, and contributed to treasure transportation efforts.",
+      "personality_traits": [
+        "loyal",
+        "fearful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participated in group decisions, approved deserting mutineers, and assisted with treasure transport.",
+      "personality_traits": [
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Recovered from illness, gave orders from the stern, and oversaw the ship's operations.",
+      "personality_traits": [
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Joined the doctor onshore activities, observed the island's departure, and interacted with locals.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

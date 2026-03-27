@@ -1,6 +1,21 @@
 # Architecture Overview
 
-ManuscriptPrep is split into three major layers.
+ManuscriptPrep is split into modular stages:
+
+1. ingest
+2. orchestrator
+3. merger
+4. resolver
+5. reporting
+
+## Design goals
+
+- deterministic preprocessing
+- conservative extraction
+- explicit intermediate artifacts
+- Linux-friendly deployment
+- configuration over hard-coded values
+- future-safe modularity
 
 ## 1. Ingest layer
 

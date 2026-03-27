@@ -1,0 +1,54 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A buccaneer leader who possesses a torch and engages in a dispute over a black spot. He is addressed as 'sea-cook' and holds authority over a group of conspirators.",
+      "personality_traits": [
+        "assertive",
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "George",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A buccaneer who challenges Silver's leadership, accuses him of mismanaging the crew, and references a man named Dick.",
+      "personality_traits": [
+        "confrontational",
+        "accusatory"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A buccaneer who participates in a dispute over leadership and the black spot, and speaks in a colloquial manner.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dick",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A buccaneer implicated in cutting out the black spot from a Bible, which is later referenced as a controversial act.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

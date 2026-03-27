@@ -1,0 +1,35 @@
+EXCERPT:
+Treasure Island Robert Louis Stevenson Page 118/142 "Ah, the others!" returned John. "They're a nice lot, ain't they? You say this cruise is bungled. Ah! By gum, if you could understand how bad it's bungled, you would see! We're that near the gibbet that my neck's stiff with thinking on it. You've seen 'em, maybe, hanged in chains, birds about 'em, seamen p'inting 'em out as they go down with the tide. 'Who's that?' says one. 'That! Why, that's John Silver. I knowed him well,' says another. And you can hear the chains a- jangle as you go about and reach for the other buoy. Now, that's about where we are, every mother's son of us, thanks to him, and Hands, and Anderson, and other ruination fools of you. And if you want to know about number four, and that boy, why, shiver my timbers, isn't he a hostage? Are we a-going to waste a hostage? No, not us; he might be our last chance, and I shouldn't wonder. Kill that boy? Not me, mates! And number three? Ah, well, there's a deal to say to number three. Maybe you don't count it nothing to have a real college doctor to see you every day — you, John, with your head broke — or you, George Merry, that had the ague shakes upon you not six hours agone, and has your eyes the colour of lemon peel to this same moment on the clock? And maybe, perhaps, you didn't know there was a consort coming either? But there is, and not so long till then; and we'll see who'll be glad to have a hostage when it comes to that. And as for number two, and why I made a bargain — well, you came crawling on your knees to me to make it — on your knees you came, you was that downhearted — and you'd have starved too if I hadn't — but that's a trifle! You look there — that's why!" And he cast down upon the floor a paper that I instantly recognized — none other than the chart on yellow paper, with the three red crosses, that I had found in the oilcloth at the bottom of the captain's chest. Why the doctor had given it to him was more than I could fancy. But if it were inexplicable to me, the appearance of the chart was incredible to the surviving mutineers. They leaped upon it like cats upon a mouse. It went from hand to hand, one tearing it from another; and by the oaths and the cries and the childish laughter with which they accompanied their examination, you would have thought, not only they were fingering the very gold, but were at sea with it, besides, in safety. "Yes," said one, "that's Flint, sure enough. J. F., and a score below, with a clove hitch to it; so he done ever." "Mighty pretty," said George. "But how are we to get away with it, and us no ship." Silver suddenly sprang up, and supporting himself with a hand against the wall: "Now I give you warning, George," he cried. "One more word of your sauce, and I'll call you down and fight you. How? Why, how do I know? You had ought to tell me that — you and the rest, that lost me my schooner, with your interference, burn
+
+Treasure Island Robert Louis Stevenson Page 119/142 you! But not you, you can't; you hain't got the invention of a cockroach. But civil you can speak, and shall, George Merry, you may lay to that." "That's fair enow," said the old man Morgan. "Fair! I reckon so," said the sea-cook. "You lost the ship; I found the treasure. Who's the better man at that? And now I resign, by thunder! Elect whom you please to be your cap'n now; I'm done with it." "Silver!" they cried. "Barbecue forever! Barbecue for cap'n!" "So that's the toon, is it?" cried the cook. "George, I reckon you'll have to wait another turn, friend; and lucky for you as I'm not a revengeful man. But that was never my way. And now, shipmates, this black spot? 'Tain't much good now, is it? Dick's crossed his luck and spoiled his Bible, and that's about all." "It'll do to kiss the book on still, won't it?" growled Dick, who was evidently uneasy at the curse he had brought upon himself. "A Bible with a bit cut out!" returned Silver derisively. "Not it. It don't bind no more'n a ballad-book." "Don't it, though?" cried Dick with a sort of joy. "Well, I reckon that's worth having too." "Here, Jim — here's a cur'osity for you," said Silver, and he tossed me the paper. It was around about the size of a crown piece. One side was blank, for it had been the last leaf; the other contained a verse or two of Revelation — these words among the rest, which struck sharply home upon my mind: "Without are dogs and murderers." The printed side had been blackened with wood ash, which already began to come off and soil my fingers; on the blank side had been written with the same material the one word "Depposed." I have that curiosity beside me at this moment, but not a trace of writing now remains beyond a single scratch, such as a man might make with his thumb-nail. That was the end of the night's business. Soon after, with a drink all round, we lay down to sleep, and the outside of Silver's vengeance was to put George Merry up for sentinel and threaten him with death if he should prove unfaithful. It was long ere I could close an eye, and heaven knows I had matter enough for thought in the man whom I had slain that afternoon, in my own most perilous position, and above all, in the remarkable game that I saw Silver now engaged upon — keeping the mutineers together with one hand and grasping with the other after every means, possible and impossible, to make his peace and save his miserable life. He himself slept peacefully and snored aloud, yet my heart was sore for him, wicked
+
+Treasure Island Robert Louis Stevenson Page 120/142 as he was, to think on the dark perils that environed and the shameful gibbet that awaited him.
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "John",
+    "John Silver",
+    "George Merry",
+    "the doctor",
+    "the old man Morgan",
+    "the sea-cook",
+    "Dick",
+    "Jim"
+  ],
+  "dialogue_info": {
+    "pov": "first-person",
+    "dialogue": true,
+    "internal_thought": false,
+    "explicitly_attributed_speakers": [
+      "John",
+      "George Merry",
+      "Silver",
+      "Morgan",
+      "Dick",
+      "the cook",
+      "the sea-cook"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

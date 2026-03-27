@@ -1,0 +1,29 @@
+{
+  "characters": [
+    "Silver",
+    "the lad",
+    "Israel Hands",
+    "the cook",
+    "Barbecue",
+    "old John",
+    "Cap'n Smollett"
+  ],
+  "places": [
+    "Bristol",
+    "cabin"
+  ],
+  "objects": [
+    "barrel",
+    "quid",
+    "map",
+    "pickles",
+    "wines",
+    "rum",
+    "water"
+  ],
+  "identity_notes": [
+    "the cook and Barbecue refer to the same entity",
+    "the cook and old John refer to the same entity",
+    "Barbecue and old John refer to the same entity"
+  ]
+}

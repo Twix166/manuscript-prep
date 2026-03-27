@@ -1,0 +1,28 @@
+EXCERPT:
+Treasure Island Robert Louis Stevenson Page 43/142 "'Tain't much use for fools, you may lay to it — that, nor nothing," cried Silver. "But now, you look here: you're young, you are, but you're as smart as paint. I see that when I set my eyes on you, and I'll talk to you like a man." You may imagine how I felt when I heard this abominable old rogue addressing another in the very same words of flattery as he had used to myself. I think, if I had been able, that I would have killed him through the barrel. Meantime, he ran on, little supposing he was overheard. "Here it is about gentlemen of fortune. They lives rough, and they risk swinging, but they eat and drink like fighting-cocks, and when a cruise is done, why, it's hundreds of pounds instead of hundreds of farthings in their pockets. Now, the most goes for rum and a good fling, and to sea again in their shirts. But that's not the course I lay. I puts it all away, some here, some there, and none too much anywheres, by reason of suspicion. I'm fifty, mark you; once back from this cruise, I set up gentleman in earnest. Time enough too, says you. Ah, but I've lived easy in the meantime, never denied myself o' nothing heart desires, and slep' soft and ate dainty all my days but when at sea. And how did I begin? Before the mast, like you!" "Well," said the other, "but all the other money's gone now, ain't it? You daren't show face in Bristol after this." "Why, where might you suppose it was?" asked Silver derisively. "At Bristol, in banks and places," answered his companion. "It were," said the cook; "it were when we weighed anchor. But my old missis has it all by now. And the Spy-glass is sold, lease and goodwill and rigging; and the old girl's off to meet me. I would tell you where, for I trust you, but it'd make jealousy among the mates." "And can you trust your missis?" asked the other. "Gentlemen of fortune," returned the cook, "usually trusts little among themselves, and right they are, you may lay to it. But I have a way with me, I have. When a mate brings a slip on his cable — one as knows me, I mean — it won't be in the same world with old John. There was some that was feared of Pew, and some that was feared of Flint; but Flint his own self was feared of me. Feared he was, and proud. They was the roughest crew afloat, was Flint's; the devil himself would have been feared to go to sea with them. Well now, I tell you, I'm not a boasting man, and you seen yourself how easy I keep company, but when I was quartermaster, LAMBS wasn't the word for Flint's old buccaneers. Ah, you may be sure of yourself in old John's ship."
+
+Treasure Island Robert Louis Stevenson Page 44/142 "Well, I tell you now," replied the lad, "I didn't half a quarter like the job till I had this talk with you, John; but there's my hand on it now." "And a brave lad you were, and smart too," answered Silver, shaking hands so heartily that all the barrel shook, "and a finer figurehead for a gentleman of fortune I never clapped my eyes on." By this time I had begun to understand the meaning of their terms. By a "gentleman of fortune" they plainly meant neither more nor less than a common pirate, and the little scene that I had overheard was the last act in the corruption of one of the honest hands — perhaps of the last one left aboard. But on this point I was soon to be relieved, for Silver giving a little whistle, a third man strolled up and sat down by the party. "Dick's square," said Silver. "Oh, I know'd Dick was square," returned the voice of the coxswain, Israel Hands. "He's no fool, is Dick." And he turned his quid and spat. "But look here," he went on, "here's what I want to know, Barbecue: how long are we a-going to stand off and on like a blessed bumboat? I've had a'most enough o' Cap'n Smollett; he's hazed me long enough, by thunder! I want to go into that cabin, I do. I want their pickles and wines, and that." "Israel," said Silver, "your head ain't much account, nor ever was. But you're able to hear, I reckon; leastways, your ears is big enough. Now, here's what I say: you'll berth forward, and you'll live hard, and you'll speak soft, and you'll keep sober till I give the word; and you may lay to that, my son." "Well, I don't say no, do I?" growled the coxswain. "What I say is, when? That's what I say." "When! By the powers!" cried Silver. "Well now, if you want to know, I'll tell you when. The last moment I can manage, and that's when. Here's a first-rate seaman, Cap'n Smollett, sails the blessed ship for us. Here's this squire and doctor with a map and such — I don't know where it is, do I? No more do you, says you. Well then, I mean this squire and doctor shall find the stuff, and help us to get it aboard, by the powers. Then we'll see. If I was sure of you all, sons of double Dutchmen, I'd have Cap'n Smollett navigate us half- way back again before I struck." "Why, we're all seamen aboard here, I should think," said the lad Dick. "We're all forecastle hands, you mean," snapped Silver. "We can steer a course, but who's to set one? That's what all you gentlemen split on, first and last. If I had my way, I'd have Cap'n Smollett work us back into the trades at least; then we'd have no blessed miscalculations and a spoonful of water a day. But I know the sort you
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "Silver",
+    "the lad",
+    "Israel Hands",
+    "the cook",
+    "Barbecue",
+    "old John",
+    "Cap'n Smollett"
+  ],
+  "dialogue_info": {
+    "pov": "first-person",
+    "dialogue": true,
+    "internal_thought": true,
+    "explicitly_attributed_speakers": [
+      "Silver",
+      "Israel Hands",
+      "Dick"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

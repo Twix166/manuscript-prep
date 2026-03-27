@@ -1,0 +1,31 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Israel Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Found propped against bulwarks, bleeding, and weakened after a struggle. Later given brandy and referred to as 'Mr. Hands' by the narrator.",
+      "personality_traits": [
+        "weakness",
+        "drunkenness"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the man with the red cap",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Described as stiff and motionless with arms outstretched, teeth exposed, and blood splashed around. Referred to as 'the man with the red cap' and implied to be dead.",
+      "personality_traits": [
+        "aggression"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialog,ue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

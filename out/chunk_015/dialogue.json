@@ -1,0 +1,13 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Long John Silver",
+    "squire",
+    "Dr. Livesey",
+    "Captain Smollett",
+    "Mr. Arrow"
+  ],
+  "unattributed_dialogue_present": false
+}

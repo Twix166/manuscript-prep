@@ -1,0 +1,49 @@
+project:
+  name: manuscriptprep
+  environment: production
+
+paths:
+  repo_root: /opt/manuscriptprep
+  workspace_root: /var/lib/manuscriptprep
+  input_root: /var/lib/manuscriptprep/input
+  extracted_root: /var/lib/manuscriptprep/extracted
+  cleaned_root: /var/lib/manuscriptprep/cleaned
+  chunks_root: /var/lib/manuscriptprep/chunks
+  output_root: /var/lib/manuscriptprep/out
+  merged_root: /var/lib/manuscriptprep/merged
+  resolved_root: /var/lib/manuscriptprep/resolved
+  reports_root: /var/lib/manuscriptprep/reports
+  logs_root: /var/log/manuscriptprep
+
+models:
+  structure: manuscriptprep-structure
+  dialogue: manuscriptprep-dialogue
+  entities: manuscriptprep-entities
+  dossiers: manuscriptprep-dossiers
+  resolver: manuscriptprep-resolver
+
+ollama:
+  host: http://127.0.0.1:11434
+  command: ollama
+
+timeouts:
+  idle_seconds: 180
+  hard_seconds: 900
+  retries: 2
+  idle_timeout_backoff: 1.5
+  max_idle_timeout_seconds: 600
+  resolver_timeout_seconds: 180
+
+chunking:
+  target_words: 1200
+  min_words: 800
+  max_words: 1500
+
+reporting:
+  include_resolution: true
+  max_biography_entries_per_dossier: 6
+
+logging:
+  level: INFO
+  jsonl: true
+  console: true

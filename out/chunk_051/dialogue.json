@@ -1,0 +1,13 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "the sea-cook",
+    "Morgan",
+    "Silver",
+    "one of the men",
+    "another"
+  ],
+  "unattributed_dialogue_present": false
+}

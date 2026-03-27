@@ -1,0 +1,103 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A former chieftain who quickly shifts plans, passes a pistol to Jim, and directs others during a conflict. Demonstrates strategic movement and calm under pressure.",
+      "personality_traits": [
+        "calm",
+        "strategic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A first-person narrator who receives a pistol from Silver and observes the conflict between Silver and others.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A buccaneer who reacts to finding gold with oaths and participates in the conflict.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Merry",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A buccaneer who challenges Silver, leads a charge, and is killed by musket fire.",
+      "personality_traits": [
+        "aggressive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A participant who fires musket shots, kills Merry, and joins the group with the doctor and Ben Gunn.",
+      "personality_traits": [
+        "aggressive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A leader who coordinates the group, directs actions, and recounts events to Silver and others.",
+      "personality_traits": [
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A companion who assists the doctor and participates in the group's movements.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A maroon who joins the group, interacts with Silver, and is recognized as a hero by Silver.",
+      "personality_traits": [
+        "embarrassed"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

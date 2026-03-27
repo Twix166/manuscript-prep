@@ -1,0 +1,14 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "the captain",
+    "Gray",
+    "Mr. Trelawney",
+    "Doctor",
+    "Joyce",
+    "Dr. Livesey"
+  ],
+  "unattributed_dialogue_present": false
+}

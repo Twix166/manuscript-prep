@@ -1,0 +1,143 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participates in combat, hands over a gun to Trelawney, discusses the timeline with the captain, and tends to the wounded.",
+      "personality_traits": [
+        "practical",
+        "dutiful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Commands the group, organizes the flag, discusses supplies, and oversees the handling of the dead mutineer.",
+      "personality_traits": [
+        "determined",
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Exchanges guns with the captain, remains calm during combat, and is described as a skilled marksman.",
+      "personality_traits": [
+        "calm",
+        "disciplined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Receives a cutlass from the narrator, demonstrates combat readiness, and participates in the fight.",
+      "personality_traits": [
+        "confident",
+        "competent"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Cares for the dying Tom Redruth, expresses remorse, and participates in combat.",
+      "personality_traits": [
+        "emotional",
+        "compassionate"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Assists the captain in setting up the flag and participates in combat.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Joyce",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participates in the initial gunfire and helps secure the dead mutineer.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Tom Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Dies after being shot, remains silent until his death, and is described as a loyal servant.",
+      "personality_traits": [
+        "silent",
+        "loyal"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Job Anderson",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Leads the mutineers in an attack, is killed during the fight.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the boatswain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the mutineers, described as leading the attack.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Blandly",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned as the person who will send a ship to find the group if they are not returned by August.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

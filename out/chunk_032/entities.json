@@ -1,0 +1,32 @@
+{
+  "characters": [
+    "the captain",
+    "Gray",
+    "Hunter",
+    "Silver",
+    "Alexander Smollett",
+    "David Livesey",
+    "Abraham Gray",
+    "John Trelawney",
+    "John Hunter",
+    "Richard Joyce",
+    "Thomas Redruth",
+    "James Hawkins",
+    "Jim Hawkins",
+    "Ben Gunn"
+  ],
+  "places": [
+    "Treasure Island",
+    "the stockade"
+  ],
+  "objects": [
+    "gig",
+    "musket",
+    "oar",
+    "pork"
+  ],
+  "identity_notes": [
+    "James Hawkins and Jim Hawkins refer to the same entity",
+    "Gray and Abraham Gray refer to the same entity"
+  ]
+}

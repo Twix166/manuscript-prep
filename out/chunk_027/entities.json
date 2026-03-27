@@ -1,0 +1,26 @@
+{
+  "characters": [
+    "Jim",
+    "Benjamin Gunn",
+    "the squire",
+    "Long John",
+    "Billy Bones"
+  ],
+  "places": [
+    "island",
+    "cemetery",
+    "wood",
+    "white rock",
+    "anchorage"
+  ],
+  "objects": [
+    "boat",
+    "musket",
+    "spade",
+    "pick-axe",
+    "cutlass",
+    "Union Jack",
+    "cannon"
+  ],
+  "identity_notes": []
+}

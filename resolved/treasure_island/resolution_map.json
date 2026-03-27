@@ -1,0 +1,899 @@
+{
+  "resolutions": [
+    {
+      "group_id": "group_000",
+      "canonical_name": "Abraham Gray",
+      "merge": true,
+      "confidence": "probable",
+      "members_to_merge": [
+        "Abe Gray",
+        "Abraham Gray"
+      ],
+      "members_to_keep_separate": [
+        "Gray"
+      ],
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "given_name_variant",
+        "chunk_overlap"
+      ]
+    },
+    {
+      "group_id": "group_001",
+      "canonical_name": "Alexander Smollett",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Alexander Smollett",
+        "Mr. Smollett"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same surname",
+        "chunk_overlap",
+        "role_overlap",
+        "title expansion match"
+      ]
+    },
+    {
+      "group_id": "group_002",
+      "canonical_name": "Job Anderson",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Anderson",
+        "Job Anderson"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "surname matches full name"
+      ]
+    },
+    {
+      "group_id": "group_003",
+      "canonical_name": "Mr. Arrow",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Arrow",
+        "Mr. Arrow"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same surname",
+        "chunk overlap",
+        "variant overlap",
+        "title expansion match"
+      ]
+    },
+    {
+      "group_id": "group_004",
+      "canonical_name": "Benjamin Gunn",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Ben Gunn",
+        "Benjamin Gunn"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "given name variant match",
+        "same surname",
+        "no competing candidate"
+      ]
+    },
+    {
+      "group_id": "group_005",
+      "canonical_name": "Black Dog",
+      "merge": true,
+      "confidence": "probable",
+      "members_to_merge": [
+        "Black Dog",
+        "the old sea-dog"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "title expansion match"
+      ]
+    },
+    {
+      "group_id": "group_006",
+      "canonical_name": "Mr. Blandly",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Blandly",
+        "Mr. Blandly"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same surname",
+        "variant_overlap",
+        "chunk_overlap",
+        "title_expansion_match"
+      ]
+    },
+    {
+      "group_id": "group_007",
+      "canonical_name": "Captain Trelawney",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Cap'n Hawkins",
+        "Captain Trelawney"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "variant_overlap",
+        "same_title",
+        "chunk_overlap",
+        "explicit title expansion"
+      ]
+    },
+    {
+      "group_id": "group_008",
+      "canonical_name": "the captain",
+      "merge": false,
+      "confidence": "do_not_merge",
+      "members_to_merge": [],
+      "members_to_keep_separate": [
+        "captain",
+        "the cap'n",
+        "the captain"
+      ],
+      "reasons": [
+        "captain is ambiguous",
+        "no named character evidence",
+        "multiple plausible identities",
+        "generic title variants without surname"
+      ]
+    },
+    {
+      "group_id": "group_009",
+      "canonical_name": "Doctor Livesey",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "David Livesey",
+        "Doctor Livesey"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same_surname",
+        "chunk_overlap",
+        "role_overlap",
+        "title_expansion_match"
+      ]
+    },
+    {
+      "group_id": "group_010",
+      "canonical_name": "Doctor",
+      "merge": true,
+      "confidence": "probable",
+      "members_to_merge": [
+        "doctor",
+        "the doctor"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "generic_title_to_titled_name",
+        "same_title",
+        "supporting_role_evidence"
+      ]
+    },
+    {
+      "group_id": "group_011",
+      "canonical_name": "George Merry",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "George Merry",
+        "Merry"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same surname",
+        "role_overlap",
+        "full name matches shortened form",
+        "no competing candidate"
+      ]
+    },
+    {
+      "group_id": "group_012",
+      "canonical_name": "Mr. Hands",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Hands",
+        "Mr. Hands"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same surname",
+        "variant_overlap",
+        "chunk_overlap",
+        "title_expansion"
+      ]
+    },
+    {
+      "group_id": "group_013",
+      "canonical_name": "Mr. Hawkins",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Hawkins",
+        "Mr. Hawkins"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "title expansion match",
+        "same surname",
+        "variant overlap"
+      ]
+    },
+    {
+      "group_id": "group_014",
+      "canonical_name": "John Hunter",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Hunter",
+        "John Hunter"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same surname",
+        "full name vs shortened form",
+        "role overlap",
+        "variant name matching"
+      ]
+    },
+    {
+      "group_id": "group_015",
+      "canonical_name": "Jim Hawkins",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "James Hawkins",
+        "Jim Hawkins"
+      ],
+      "members_to_keep_separate": [
+        "young Hawkins"
+      ],
+      "reasons": [
+        "short name to full name match",
+        "same surname",
+        "no competing candidate"
+      ]
+    },
+    {
+      "group_id": "group_016",
+      "canonical_name": "Long John",
+      "merge": true,
+      "confidence": "probable",
+      "members_to_merge": [
+        "John",
+        "Long John"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "name variant potential"
+      ]
+    },
+    {
+      "group_id": "group_017",
+      "canonical_name": "Long John Silver",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "John Silver",
+        "Long John Silver",
+        "Silver"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "variant_overlap",
+        "same_surname",
+        "chunk_overlap",
+        "title_expansion_match"
+      ]
+    },
+    {
+      "group_id": "group_018",
+      "canonical_name": "Squire Trelawney",
+      "merge": true,
+      "confidence": "probable",
+      "members_to_merge": [
+        "Mr. Trelawney",
+        "Squire Trelawney"
+      ],
+      "members_to_keep_separate": [
+        "John Trelawney"
+      ],
+      "reasons": [
+        "same surname",
+        "role overlap",
+        "title variants"
+      ]
+    },
+    {
+      "group_id": "group_019",
+      "canonical_name": "Richard Joyce",
+      "merge": true,
+      "confidence": "probable",
+      "members_to_merge": [
+        "Joyce",
+        "Richard Joyce"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "same surname",
+        "full name matches surname variant",
+        "role overlap evidence"
+      ]
+    },
+    {
+      "group_id": "group_020",
+      "canonical_name": "Master Pew",
+      "merge": false,
+      "confidence": "review",
+      "members_to_merge": [],
+      "members_to_keep_separate": [
+        "Master Pew",
+        "Old Pew",
+        "Pew"
+      ],
+      "reasons": [
+        "same surname but distinct given names",
+        "ambiguous role overlap",
+        "potential for different characters"
+      ]
+    },
+    {
+      "group_id": "group_021",
+      "canonical_name": "Tom Morgan",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "Morgan",
+        "Tom Morgan"
+      ],
+      "members_to_keep_separate": [
+        "old Morgan"
+      ],
+      "reasons": [
+        "title expansion match",
+        "same surname",
+        "chunk overlap",
+        "variant overlap"
+      ]
+    },
+    {
+      "group_id": "group_022",
+      "canonical_name": "Tom Redruth",
+      "merge": true,
+      "confidence": "safe",
+      "members_to_merge": [
+        "old Tom Redruth",
+        "Tom Redruth"
+      ],
+      "members_to_keep_separate": [
+        "old Redruth",
+        "Thomas Redruth",
+        "Redruth"
+      ],
+      "reasons": [
+        "same_surname",
+        "same_given_name",
+        "descriptor variant",
+        "chunk_overlap",
+        "role_overlap"
+      ]
+    },
+    {
+      "group_id": "group_023",
+      "canonical_name": "the squire",
+      "merge": true,
+      "confidence": "probable",
+      "members_to_merge": [
+        "squire",
+        "the squire"
+      ],
+      "members_to_keep_separate": [],
+      "reasons": [
+        "generic_title_to_titled_name",
+        "chunk_overlap",
+        "variant_overlap",
+        "same_title"
+      ]
+    }
+  ],
+  "variant_to_canonical": {
+    "abe gray": {
+      "variant": "Abe Gray",
+      "canonical_name": "Abraham Gray",
+      "confidence": "probable",
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "given_name_variant",
+        "chunk_overlap"
+      ]
+    },
+    "abraham gray": {
+      "variant": "Abraham Gray",
+      "canonical_name": "Abraham Gray",
+      "confidence": "probable",
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "given_name_variant",
+        "chunk_overlap"
+      ]
+    },
+    "alexander smollett": {
+      "variant": "Alexander Smollett",
+      "canonical_name": "Alexander Smollett",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "chunk_overlap",
+        "role_overlap",
+        "title expansion match"
+      ]
+    },
+    "mr. smollett": {
+      "variant": "Mr. Smollett",
+      "canonical_name": "Alexander Smollett",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "chunk_overlap",
+        "role_overlap",
+        "title expansion match"
+      ]
+    },
+    "anderson": {
+      "variant": "Anderson",
+      "canonical_name": "Job Anderson",
+      "confidence": "safe",
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "surname matches full name"
+      ]
+    },
+    "job anderson": {
+      "variant": "Job Anderson",
+      "canonical_name": "Job Anderson",
+      "confidence": "safe",
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "surname matches full name"
+      ]
+    },
+    "arrow": {
+      "variant": "Arrow",
+      "canonical_name": "Mr. Arrow",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "chunk overlap",
+        "variant overlap",
+        "title expansion match"
+      ]
+    },
+    "mr. arrow": {
+      "variant": "Mr. Arrow",
+      "canonical_name": "Mr. Arrow",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "chunk overlap",
+        "variant overlap",
+        "title expansion match"
+      ]
+    },
+    "ben gunn": {
+      "variant": "Ben Gunn",
+      "canonical_name": "Benjamin Gunn",
+      "confidence": "safe",
+      "reasons": [
+        "given name variant match",
+        "same surname",
+        "no competing candidate"
+      ]
+    },
+    "benjamin gunn": {
+      "variant": "Benjamin Gunn",
+      "canonical_name": "Benjamin Gunn",
+      "confidence": "safe",
+      "reasons": [
+        "given name variant match",
+        "same surname",
+        "no competing candidate"
+      ]
+    },
+    "black dog": {
+      "variant": "Black Dog",
+      "canonical_name": "Black Dog",
+      "confidence": "probable",
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "title expansion match"
+      ]
+    },
+    "the old sea dog": {
+      "variant": "the old sea-dog",
+      "canonical_name": "Black Dog",
+      "confidence": "probable",
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "title expansion match"
+      ]
+    },
+    "blandly": {
+      "variant": "Blandly",
+      "canonical_name": "Mr. Blandly",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "variant_overlap",
+        "chunk_overlap",
+        "title_expansion_match"
+      ]
+    },
+    "mr. blandly": {
+      "variant": "Mr. Blandly",
+      "canonical_name": "Mr. Blandly",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "variant_overlap",
+        "chunk_overlap",
+        "title_expansion_match"
+      ]
+    },
+    "capn hawkins": {
+      "variant": "Cap'n Hawkins",
+      "canonical_name": "Captain Trelawney",
+      "confidence": "safe",
+      "reasons": [
+        "variant_overlap",
+        "same_title",
+        "chunk_overlap",
+        "explicit title expansion"
+      ]
+    },
+    "captain trelawney": {
+      "variant": "Captain Trelawney",
+      "canonical_name": "Captain Trelawney",
+      "confidence": "safe",
+      "reasons": [
+        "variant_overlap",
+        "same_title",
+        "chunk_overlap",
+        "explicit title expansion"
+      ]
+    },
+    "david livesey": {
+      "variant": "David Livesey",
+      "canonical_name": "Doctor Livesey",
+      "confidence": "safe",
+      "reasons": [
+        "same_surname",
+        "chunk_overlap",
+        "role_overlap",
+        "title_expansion_match"
+      ]
+    },
+    "doctor livesey": {
+      "variant": "Doctor Livesey",
+      "canonical_name": "Doctor Livesey",
+      "confidence": "safe",
+      "reasons": [
+        "same_surname",
+        "chunk_overlap",
+        "role_overlap",
+        "title_expansion_match"
+      ]
+    },
+    "doctor": {
+      "variant": "doctor",
+      "canonical_name": "Doctor",
+      "confidence": "probable",
+      "reasons": [
+        "generic_title_to_titled_name",
+        "same_title",
+        "supporting_role_evidence"
+      ]
+    },
+    "the doctor": {
+      "variant": "the doctor",
+      "canonical_name": "Doctor",
+      "confidence": "probable",
+      "reasons": [
+        "generic_title_to_titled_name",
+        "same_title",
+        "supporting_role_evidence"
+      ]
+    },
+    "george merry": {
+      "variant": "George Merry",
+      "canonical_name": "George Merry",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "role_overlap",
+        "full name matches shortened form",
+        "no competing candidate"
+      ]
+    },
+    "merry": {
+      "variant": "Merry",
+      "canonical_name": "George Merry",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "role_overlap",
+        "full name matches shortened form",
+        "no competing candidate"
+      ]
+    },
+    "hands": {
+      "variant": "Hands",
+      "canonical_name": "Mr. Hands",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "variant_overlap",
+        "chunk_overlap",
+        "title_expansion"
+      ]
+    },
+    "mr. hands": {
+      "variant": "Mr. Hands",
+      "canonical_name": "Mr. Hands",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "variant_overlap",
+        "chunk_overlap",
+        "title_expansion"
+      ]
+    },
+    "hawkins": {
+      "variant": "Hawkins",
+      "canonical_name": "Mr. Hawkins",
+      "confidence": "safe",
+      "reasons": [
+        "title expansion match",
+        "same surname",
+        "variant overlap"
+      ]
+    },
+    "mr. hawkins": {
+      "variant": "Mr. Hawkins",
+      "canonical_name": "Mr. Hawkins",
+      "confidence": "safe",
+      "reasons": [
+        "title expansion match",
+        "same surname",
+        "variant overlap"
+      ]
+    },
+    "hunter": {
+      "variant": "Hunter",
+      "canonical_name": "John Hunter",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "full name vs shortened form",
+        "role overlap",
+        "variant name matching"
+      ]
+    },
+    "john hunter": {
+      "variant": "John Hunter",
+      "canonical_name": "John Hunter",
+      "confidence": "safe",
+      "reasons": [
+        "same surname",
+        "full name vs shortened form",
+        "role overlap",
+        "variant name matching"
+      ]
+    },
+    "james hawkins": {
+      "variant": "James Hawkins",
+      "canonical_name": "Jim Hawkins",
+      "confidence": "safe",
+      "reasons": [
+        "short name to full name match",
+        "same surname",
+        "no competing candidate"
+      ]
+    },
+    "jim hawkins": {
+      "variant": "Jim Hawkins",
+      "canonical_name": "Jim Hawkins",
+      "confidence": "safe",
+      "reasons": [
+        "short name to full name match",
+        "same surname",
+        "no competing candidate"
+      ]
+    },
+    "john": {
+      "variant": "John",
+      "canonical_name": "Long John",
+      "confidence": "probable",
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "name variant potential"
+      ]
+    },
+    "long john": {
+      "variant": "Long John",
+      "canonical_name": "Long John",
+      "confidence": "probable",
+      "reasons": [
+        "same_surname",
+        "role_overlap",
+        "name variant potential"
+      ]
+    },
+    "john silver": {
+      "variant": "John Silver",
+      "canonical_name": "Long John Silver",
+      "confidence": "safe",
+      "reasons": [
+        "variant_overlap",
+        "same_surname",
+        "chunk_overlap",
+        "title_expansion_match"
+      ]
+    },
+    "long john silver": {
+      "variant": "Long John Silver",
+      "canonical_name": "Long John Silver",
+      "confidence": "safe",
+      "reasons": [
+        "variant_overlap",
+        "same_surname",
+        "chunk_overlap",
+        "title_expansion_match"
+      ]
+    },
+    "silver": {
+      "variant": "Silver",
+      "canonical_name": "Long John Silver",
+      "confidence": "safe",
+      "reasons": [
+        "variant_overlap",
+        "same_surname",
+        "chunk_overlap",
+        "title_expansion_match"
+      ]
+    },
+    "mr. trelawney": {
+      "variant": "Mr. Trelawney",
+      "canonical_name": "Squire Trelawney",
+      "confidence": "probable",
+      "reasons": [
+        "same surname",
+        "role overlap",
+        "title variants"
+      ]
+    },
+    "squire trelawney": {
+      "variant": "Squire Trelawney",
+      "canonical_name": "Squire Trelawney",
+      "confidence": "probable",
+      "reasons": [
+        "same surname",
+        "role overlap",
+        "title variants"
+      ]
+    },
+    "joyce": {
+      "variant": "Joyce",
+      "canonical_name": "Richard Joyce",
+      "confidence": "probable",
+      "reasons": [
+        "same surname",
+        "full name matches surname variant",
+        "role overlap evidence"
+      ]
+    },
+    "richard joyce": {
+      "variant": "Richard Joyce",
+      "canonical_name": "Richard Joyce",
+      "confidence": "probable",
+      "reasons": [
+        "same surname",
+        "full name matches surname variant",
+        "role overlap evidence"
+      ]
+    },
+    "morgan": {
+      "variant": "Morgan",
+      "canonical_name": "Tom Morgan",
+      "confidence": "safe",
+      "reasons": [
+        "title expansion match",
+        "same surname",
+        "chunk overlap",
+        "variant overlap"
+      ]
+    },
+    "tom morgan": {
+      "variant": "Tom Morgan",
+      "canonical_name": "Tom Morgan",
+      "confidence": "safe",
+      "reasons": [
+        "title expansion match",
+        "same surname",
+        "chunk overlap",
+        "variant overlap"
+      ]
+    },
+    "old tom redruth": {
+      "variant": "old Tom Redruth",
+      "canonical_name": "Tom Redruth",
+      "confidence": "safe",
+      "reasons": [
+        "same_surname",
+        "same_given_name",
+        "descriptor variant",
+        "chunk_overlap",
+        "role_overlap"
+      ]
+    },
+    "tom redruth": {
+      "variant": "Tom Redruth",
+      "canonical_name": "Tom Redruth",
+      "confidence": "safe",
+      "reasons": [
+        "same_surname",
+        "same_given_name",
+        "descriptor variant",
+        "chunk_overlap",
+        "role_overlap"
+      ]
+    },
+    "squire": {
+      "variant": "squire",
+      "canonical_name": "the squire",
+      "confidence": "probable",
+      "reasons": [
+        "generic_title_to_titled_name",
+        "chunk_overlap",
+        "variant_overlap",
+        "same_title"
+      ]
+    },
+    "the squire": {
+      "variant": "the squire",
+      "canonical_name": "the squire",
+      "confidence": "probable",
+      "reasons": [
+        "generic_title_to_titled_name",
+        "chunk_overlap",
+        "variant_overlap",
+        "same_title"
+      ]
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "characters": [
+    "the doctor",
+    "the captain",
+    "the squire",
+    "Long John",
+    "Silver",
+    "Hunter",
+    "Joyce",
+    "Redruth",
+    "Jim"
+  ],
+  "places": [
+    "the shore",
+    "the anchorage",
+    "the island",
+    "the beaches",
+    "the rocks",
+    "the cabin",
+    "the deck",
+    "the shore-side trees",
+    "the thicket"
+  ],
+  "objects": [
+    "the chart",
+    "the companion",
+    "the pistols",
+    "the gigs",
+    "the bow oar",
+    "the foresheets",
+    "the branch"
+  ],
+  "identity_notes": []
+}

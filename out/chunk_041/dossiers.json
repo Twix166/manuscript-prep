@@ -1,0 +1,29 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned as a source of information about the current's direction.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the two drunkards",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Described as individuals on a schooner engaged in a quarrel, interrupted by external events.",
+      "personality_traits": [
+        "quarrelsome",
+        "intoxicated"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

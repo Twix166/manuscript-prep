@@ -1,0 +1,31 @@
+EXCERPT:
+Treasure Island Robert Louis Stevenson Page 65/142 We had soon touched land in the same place as before and set to provision the block house. All three made the first journey, heavily laden, and tossed our stores over the palisade. Then, leaving Joyce to guard them — one man, to be sure, but with half a dozen muskets — Hunter and I returned to the jolly-boat and loaded ourselves once more. So we proceeded without pausing to take breath, till the whole cargo was bestowed, when the two servants took up their position in the block house, and I, with all my power, sculled back to the HISPANIOLA. That we should have risked a second boat load seems more daring than it really was. They had the advantage of numbers, of course, but we had the advantage of arms. Not one of the men ashore had a musket, and before they could get within range for pistol shooting, we flattered ourselves we should be able to give a good account of a half-dozen at least. The squire was waiting for me at the stern window, all his faintness gone from him. He caught the painter and made it fast, and we fell to loading the boat for our very lives. Pork, powder, and biscuit was the cargo, with only a musket and a cutlass apiece for the squire and me and Redruth and the captain. The rest of the arms and powder we dropped overboard in two fathoms and a half of water, so that we could see the bright steel shining far below us in the sun, on the clean, sandy bottom. By this time the tide was beginning to ebb, and the ship was swinging round to her anchor. Voices were heard faintly halloaing in the direction of the two gigs; and though this reassured us for Joyce and Hunter, who were well to the eastward, it warned our party to be off. Redruth retreated from his place in the gallery and dropped into the boat, which we then brought round to the ship's counter, to be handier for Captain Smollett. "Now, men," said he, "do you hear me?" There was no answer from the forecastle. "It's to you, Abraham Gray — it's to you I am speaking." Still no reply. "Gray," resumed Mr. Smollett, a little louder, "I am leaving this ship, and I order you to follow your captain. I know you are a good man at bottom, and I dare say not one of the lot of you's as bad as he makes out. I have my watch here in my hand; I give you thirty seconds to join me in." There was a pause. "Come, my fine fellow," continued the captain; "don't hang so long in stays. I'm risking my life and the lives of these good gentlemen every second." There was a sudden scuffle, a sound of blows, and out burst Abraham Gray with a knife cut on the side of the cheek, and came running to the captain like a dog to the whistle.
+
+Treasure Island Robert Louis Stevenson Page 66/142 "I'm with you, sir," said he. And the next moment he and the captain had dropped aboard of us, and we had shoved off and given way. We were clear out of the ship, but not yet ashore in our stockade.
+
+Chapter XVII - Narrative Continued by the Doctor: The Jolly-boatʼs Last Trip
+
+This fifth trip was quite different from any of the others. In the first place, the little gallipot of a boat that we were in was gravely overloaded. Five grown men, and three of them — Trelawney, Redruth, and the captain — over six feet high, was already more than she was meant to carry. Add to that the powder, pork, and bread-bags. The gunwale was lipping astern. Several times we shipped a little water, and my breeches and the tails of my coat were all soaking wet before we had gone a hundred yards. The captain made us trim the boat, and we got her to lie a little more evenly. All the same, we were afraid to breathe. In the second place, the ebb was now making — a strong rippling current running westward through the basin, and then south'ard and seaward down the straits by which we had entered in the morning. Even the ripples were a danger to our overloaded craft, but the worst of it was that we were swept out of our true course and away from our proper landing-place behind the point. If we let the current have its way we should come ashore beside the gigs, where the pirates might appear at any moment. "I cannot keep her head for the stockade, sir," said I to the captain. I was steering, while he and Redruth, two fresh men, were at the oars. "The tide keeps washing her down. Could you pull a little stronger?" "Not without swamping the boat," said he. "You must bear up, sir, if you please — bear up until you see you're gaining." I tried and found by experiment that the tide kept sweeping us westward until I had laid her head due east, or just about right angles to the way we ought to go. "We'll never get ashore at this rate," said I. "If it's the only course that we can lie, sir, we must even lie it," returned the captain. "We must keep upstream. You see, sir," he went on, "if once we dropped to leeward of the landing-place, it's hard to say where we should get ashore, besides the chance of being boarded by the gigs; whereas, the way we go the current must slacken, and then we can dodge back along the shore." "The current's less a'ready, sir," said the man Gray, who was sitting in the foresheets; "you can ease her off a bit."
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "the squire",
+    "Captain Smollett",
+    "Abraham Gray",
+    "Redruth",
+    "Trelawney",
+    "the captain"
+  ],
+  "dialogue_info": {
+    "pov": "first-person",
+    "dialogue": true,
+    "internal_thought": false,
+    "explicitly_attributed_speakers": [
+      "Redruth",
+      "Mr. Smollett",
+      "Gray"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

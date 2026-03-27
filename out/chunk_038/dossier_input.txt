@@ -1,0 +1,30 @@
+EXCERPT:
+Chapter XXII - How My Sea Adventure Began
+
+There was no return of the mutineers — not so much as another shot out of the woods. They had "got their rations for that day," as the captain put it, and we had the place to ourselves and a quiet time to overhaul the wounded and get dinner. Squire and I cooked outside in spite of the danger, and even outside we could hardly tell what we were at, for horror of the loud groans that reached us from the doctor's patients. Out of the eight men who had fallen in the action, only three still breathed — that one of the pirates who had been shot at the loophole, Hunter, and Captain Smollett; and of these, the first two were as good as dead; the mutineer indeed died under the doctor's knife, and Hunter, do what we could, never recovered consciousness in this world. He lingered all day, breathing loudly like the old buccaneer at home in his apoplectic fit, but the bones of his chest had been crushed by the blow and his skull fractured in falling, and some time in the following night, without sign or sound, he went to his Maker. As for the captain, his wounds were grievous indeed, but not dangerous. No organ was fatally injured. Anderson's ball — for it was Job that shot him first — had broken his shoulder-blade and touched the lung, not badly; the second had only torn and displaced some muscles in the calf. He was sure to recover, the doctor said, but in the meantime, and for weeks to come, he must not walk nor move his arm, nor so much as speak when he could help it. My own accidental cut across the knuckles was a flea- bite. Doctor Livesey patched it up with plaster and pulled my ears for me into the bargain. After dinner the squire and the doctor sat by the captain's side awhile in consultation; and when they had talked to their hearts' content, it being then a little past noon, the doctor took up his hat and pistols, girt on a cutlass, put the chart in his pocket, and with a musket over his shoulder crossed the palisade on the north side and set off briskly through the trees. Gray and I were sitting together at the far end of the block house, to be out of earshot of our officers consulting; and Gray took his pipe out of his mouth and fairly forgot to put it back again, so thunder-struck he was at this occurrence.
+
+Treasure Island Robert Louis Stevenson Page 86/142 "Why, in the name of Davy Jones," said he, "is Dr. Livesey mad?" "Why no," says I. "He's about the last of this crew for that, I take it." "Well, shipmate," said Gray, "mad he may not be; but if HE'S not, you mark my words, I am." "I take it," replied I, "the doctor has his idea; and if I am right, he's going now to see Ben Gunn." I was right, as appeared later; but in the meantime, the house being stifling hot and the little patch of sand inside the palisade ablaze with midday sun, I began to get another thought into my head, which was not by any means so right. What I began to do was to envy the doctor walking in the cool shadow of the woods with the birds about him and the pleasant smell of the pines, while I sat grilling, with my clothes stuck to the hot resin, and so much blood about me and so many poor dead bodies lying all around that I took a disgust of the place that was almost as strong as fear. All the time I was washing out the block house, and then washing up the things from dinner, this disgust and envy kept growing stronger and stronger, till at last, being near a bread-bag, and no one then observing me, I took the first step towards my escapade and filled both pockets of my coat with biscuit. I was a fool, if you like, and certainly I was going to do a foolish, over-bold act; but I was determined to do it with all the precautions in my power. These biscuits, should anything befall me, would keep me, at least, from starving till far on in the next day. The next thing I laid hold of was a brace of pistols, and as I already had a powderhorn and bullets, I felt myself well supplied with arms. As for the scheme I had in my head, it was not a bad one in itself. I was to go down the sandy spit that divides the anchorage on the east from the open sea, find the white rock I had observed last evening, and ascertain whether it was there or not that Ben Gunn had hidden his boat, a thing quite worth doing, as I still believe. But as I was certain I should not be allowed to leave the enclosure, my only plan was to take French leave and slip out when nobody was watching, and that was so bad a way of doing it as made the thing itself wrong. But I was only a boy, and I had made my mind up. Well, as things at last fell out, I found an admirable opportunity. The squire and Gray were busy helping the captain with his bandages, the coast was clear, I made
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "Dr. Livesey",
+    "the captain",
+    "Squire",
+    "Hunter",
+    "Captain Smollett",
+    "Gray",
+    "Ben Gunn",
+    "Job"
+  ],
+  "dialogue_info": {
+    "pov": "first-person",
+    "dialogue": true,
+    "internal_thought": true,
+    "explicitly_attributed_speakers": [
+      "I",
+      "Gray"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

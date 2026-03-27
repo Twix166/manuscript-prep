@@ -1,0 +1,15 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "old Morgan",
+    "George Merry",
+    "Silver",
+    "the cook",
+    "Tom Morgan",
+    "the fellow with the bandage",
+    "another"
+  ],
+  "unattributed_dialogue_present": false
+}

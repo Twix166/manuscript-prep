@@ -1,0 +1,28 @@
+EXCERPT:
+Treasure Island Robert Louis Stevenson Page 57/142 next moment and had twice buried his knife up to the hilt in that defenceless body. From my place of ambush, I could hear him pant aloud as he struck the blows. I do not know what it rightly is to faint, but I do know that for the next little while the whole world swam away from before me in a whirling mist; Silver and the birds, and the tall Spy-glass hilltop, going round and round and topsy-turvy before my eyes, and all manner of bells ringing and distant voices shouting in my ear. When I came again to myself the monster had pulled himself together, his crutch under his arm, his hat upon his head. Just before him Tom lay motionless upon the sward; but the murderer minded him not a whit, cleansing his blood-stained knife the while upon a wisp of grass. Everything else was unchanged, the sun still shining mercilessly on the steaming marsh and the tall pinnacle of the mountain, and I could scarce persuade myself that murder had been actually done and a human life cruelly cut short a moment since before my eyes. But now John put his hand into his pocket, brought out a whistle, and blew upon it several modulated blasts that rang far across the heated air. I could not tell, of course, the meaning of the signal, but it instantly awoke my fears. More men would be coming. I might be discovered. They had already slain two of the honest people; after Tom and Alan, might not I come next? Instantly I began to extricate myself and crawl back again, with what speed and silence I could manage, to the more open portion of the wood. As I did so, I could hear hails coming and going between the old buccaneer and his comrades, and this sound of danger lent me wings. As soon as I was clear of the thicket, I ran as I never ran before, scarce minding the direction of my flight, so long as it led me from the murderers; and as I ran, fear grew and grew upon me until it turned into a kind of frenzy. Indeed, could anyone be more entirely lost than I? When the gun fired, how should I dare to go down to the boats among those fiends, still smoking from their crime? Would not the first of them who saw me wring my neck like a snipe's? Would not my absence itself be an evidence to them of my alarm, and therefore of my fatal knowledge? It was all over, I thought. Good-bye to the HISPANIOLA; good-bye to the squire, the doctor, and the captain! There was nothing left for me but death by starvation or death by the hands of the mutineers. All this while, as I say, I was still running, and without taking any notice, I had drawn near to the foot of the little hill with the two peaks and had got into a part of the island where the live-oaks grew more widely apart and seemed more like forest trees in their bearing and dimensions. Mingled with these were a few scattered
+
+Treasure Island Robert Louis Stevenson Page 58/142 pines, some fifty, some nearer seventy, feet high. The air too smelt more freshly than down beside the marsh. And here a fresh alarm brought me to a standstill with a thumping heart.
+
+Chapter XV - The Man of the Island
+
+From the side of the hill, which was here steep and stony, a spout of gravel was dislodged and fell rattling and bounding through the trees. My eyes turned instinctively in that direction, and I saw a figure leap with great rapidity behind the trunk of a pine. What it was, whether bear or man or monkey, I could in no wise tell. It seemed dark and shaggy; more I knew not. But the terror of this new apparition brought me to a stand. I was now, it seemed, cut off upon both sides; behind me the murderers, before me this lurking nondescript. And immediately I began to prefer the dangers that I knew to those I knew not. Silver himself appeared less terrible in contrast with this creature of the woods, and I turned on my heel, and looking sharply behind me over my shoulder, began to retrace my steps in the direction of the boats. Instantly the figure reappeared, and making a wide circuit, began to head me off. I was tired, at any rate; but had I been as fresh as when I rose, I could see it was in vain for me to contend in speed with such an adversary. From trunk to trunk the creature flitted like a deer, running manlike on two legs, but unlike any man that I had ever seen, stooping almost double as it ran. Yet a man it was, I could no longer be in doubt about that. I began to recall what I had heard of cannibals. I was within an ace of calling for help. But the mere fact that he was a man, however wild, had somewhat reassured me, and my fear of Silver began to revive in proportion. I stood still, therefore, and cast about for some method of escape; and as I was so thinking, the recollection of my pistol flashed into my mind. As soon as I remembered I was not defenceless, courage glowed again in my heart and I set my face resolutely for this man of the island and walked briskly towards him. He was concealed by this time behind another tree trunk; but he must have been watching me closely, for as soon as I began to move in his direction he reappeared and took a step to meet me. Then he hesitated, drew back, came forward again, and at last, to my wonder and confusion, threw himself on his knees and held out his clasped hands in supplication. At that I once more stopped. "Who are you?" I asked. "Ben Gunn," he answered, and his voice sounded hoarse and awkward, like a rusty
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "Silver",
+    "Ben Gunn",
+    "Tom",
+    "Alan"
+  ],
+  "dialogue_info": {
+    "pov": "first-person",
+    "dialogue": true,
+    "internal_thought": true,
+    "explicitly_attributed_speakers": [
+      "I",
+      "he"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Was on deck alone when the ship arrived, confessed to Silver's escape and theft of treasure, later spent his money and returned begging.",
+      "personality_traits": [
+        "resourceful",
+        "impulsive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Escaped with the maroon in a shore boat, stole treasure from the ship, and disappeared.",
+      "personality_traits": [
+        "cunning",
+        "self-serving"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Retired from the sea after the events, survived the voyage.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Saved his money, studied his profession, became a shipmate and part owner, married, and has a family.",
+      "personality_traits": [
+        "prudent",
+        "ambitious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Blandly",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Had plans to fit out his consort ship when the HISPANIOLA returned.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Flint",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A one-legged pirate who buried treasure, referenced in the narrator's nightmares.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the old Negress",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Associated with Silver's disappearance, possibly his companion.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

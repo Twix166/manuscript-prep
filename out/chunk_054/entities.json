@@ -1,0 +1,35 @@
+{
+  "characters": [
+    "Dr. Livesey",
+    "Captain Silver",
+    "Jim",
+    "George Merry",
+    "Morgan",
+    "Dick",
+    "Hawkins",
+    "Cap'n Smollett"
+  ],
+  "places": [
+    "block house",
+    "stockade",
+    "margin of the wood",
+    "hilltop"
+  ],
+  "objects": [
+    "crutch",
+    "log-house",
+    "spars",
+    "chart",
+    "medicine",
+    "Bibles",
+    "grog",
+    "brandy",
+    "boots",
+    "tongue",
+    "fire"
+  ],
+  "identity_notes": [
+    "George and George Merry refer to the same entity",
+    "Silver and Captain Silver refer to the same entity"
+  ]
+}

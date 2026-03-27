@@ -1,0 +1,12 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "the captain",
+    "Long John",
+    "Mr. Smollett",
+    "Gray"
+  ],
+  "unattributed_dialogue_present": false
+}

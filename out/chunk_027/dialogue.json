@@ -1,0 +1,10 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Jim",
+    "Ben Gunn"
+  ],
+  "unattributed_dialogue_present": false
+}

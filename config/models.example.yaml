@@ -1,0 +1,21 @@
+models:
+  structure:
+    base: qwen3:8b-q4_K_M
+    built_name: manuscriptprep-structure
+    modelfile: modelfiles/structure.Modelfile
+  dialogue:
+    base: qwen3:8b-q4_K_M
+    built_name: manuscriptprep-dialogue
+    modelfile: modelfiles/dialogue.Modelfile
+  entities:
+    base: qwen3:8b-q4_K_M
+    built_name: manuscriptprep-entities
+    modelfile: modelfiles/entities.Modelfile
+  dossiers:
+    base: qwen3:8b-q4_K_M
+    built_name: manuscriptprep-dossiers
+    modelfile: modelfiles/dossiers.Modelfile
+  resolver:
+    base: qwen3:8b-q4_K_M
+    built_name: manuscriptprep-resolver
+    modelfile: modelfiles/resolver.Modelfile

@@ -1,0 +1,15 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "John",
+    "George Merry",
+    "Silver",
+    "Morgan",
+    "Dick",
+    "the cook",
+    "the sea-cook"
+  ],
+  "unattributed_dialogue_present": false
+}

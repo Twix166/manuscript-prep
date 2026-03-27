@@ -1,0 +1,92 @@
+{
+  "character_dossiers": [
+    {
+      "name": "John Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Organized the crew for the voyage, engaged Long John Silver as cook, resides in Bristol, and has a banker's account.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Former sailor, lost a leg in service, works as a cook, and has a banker's account.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Received the letter from Trelawney, is going to sea, and left his home in Bristol.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Sent to see his mother with Redruth's guard, later joins the voyage.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Tom Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Squire who repaired the Admiral Benbow inn and accompanied Livesey to Bristol.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Blandly",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Sent a consort to search for the crew if they don't return by August.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Arrow",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Sailing master chosen by Long John Silver.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Visited the Admiral Benbow inn and is present in Bristol.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "I",
+    "the squire",
+    "the captain",
+    "Tom"
+  ],
+  "unattributed_dialogue_present": false
+}

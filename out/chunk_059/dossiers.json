@@ -1,0 +1,76 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dick",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Holds a Bible, looks around with fearful glances, and is described as falling sick with fever.",
+      "personality_traits": [
+        "fearful",
+        "religious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Merry",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the group that regains spirits and focuses on the treasure, leading the search.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Hobbles on a crutch, curses, and plans to seize the treasure, showing determination.",
+      "personality_traits": [
+        "aggressive",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Warned about the fever affecting Dick.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Dead, with his body no longer present.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Flint",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Dead, with his ship's name branded on a packing case.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

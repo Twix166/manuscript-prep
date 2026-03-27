@@ -1,0 +1,33 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Mr. Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mr. Hands is a sailor with a leg injury who uses a dirk. He has a history of sailing and has been involved in violent acts.",
+      "personality_traits": [
+        "pragmatic",
+        "resourceful",
+        "defiant"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Cap'n Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Cap'n Hawkins is a captain who navigates the schooner and has a plan to get it into a sheltered anchorage.",
+      "personality_traits": [
+        "competent",
+        "decisive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "character_dossiers": [
+    {
+      "name": "I",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A sailor navigating a ship in distress, cutting halyards to save the vessel, and wading ashore after abandoning the ship. Later, navigating through woods toward a stockade and encountering a fire suspected to be related to a campsite.",
+      "personality_traits": [
+        "cautious",
+        "determined"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A captain whose orders dictate frugality with firewood. His men are described as adhering to his instructions regarding resource management.",
+      "personality_traits": [
+        "frugal"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A maroon encountered in the woods. The narrator avoids him cautiously, suggesting prior interaction.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A leader camped among marshes, whose presence is inferred through the narrator's caution about being seen.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

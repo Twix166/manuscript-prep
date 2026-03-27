@@ -1,0 +1,34 @@
+EXCERPT:
+Treasure Island Robert Louis Stevenson Page 41/142 before chaplain." And John would touch his forelock with a solemn way he had that made me think he was the best of men. In the meantime, the squire and Captain Smollett were still on pretty distant terms with one another. The squire made no bones about the matter; he despised the captain. The captain, on his part, never spoke but when he was spoken to, and then sharp and short and dry, and not a word wasted. He owned, when driven into a corner, that he seemed to have been wrong about the crew, that some of them were as brisk as he wanted to see and all had behaved fairly well. As for the ship, he had taken a downright fancy to her. "She'll lie a point nearer the wind than a man has a right to expect of his own married wife, sir. But," he would add, "all I say is, we're not home again, and I don't like the cruise." The squire, at this, would turn away and march up and down the deck, chin in air. "A trifle more of that man," he would say, "and I shall explode." We had some heavy weather, which only proved the qualities of the HISPANIOLA. Every man on board seemed well content, and they must have been hard to please if they had been otherwise, for it is my belief there was never a ship's company so spoiled since Noah put to sea. Double grog was going on the least excuse; there was duff on odd days, as, for instance, if the squire heard it was any man's birthday, and always a barrel of apples standing broached in the waist for anyone to help himself that had a fancy. "Never knew good come of it yet," the captain said to Dr. Livesey. "Spoil forecastle hands, make devils. That's my belief." But good did come of the apple barrel, as you shall hear, for if it had not been for that, we should have had no note of warning and might all have perished by the hand of treachery. This was how it came about. We had run up the trades to get the wind of the island we were after — I am not allowed to be more plain — and now we were running down for it with a bright lookout day and night. It was about the last day of our outward voyage by the largest computation; some time that night, or at latest before noon of the morrow, we should sight the Treasure Island. We were heading S.S.W. and had a steady breeze abeam and a quiet sea. The HISPANIOLA rolled steadily, dipping her bowsprit now and then with a whiff of spray. All was drawing alow and aloft; everyone was in the bravest spirits because we were now so near an end of the first
+
+part of our adventure.
+
+Now, just after sundown, when all my work was over and I was on my way to my berth, it occurred to me that I should like an apple. I ran on deck. The watch was all
+
+Treasure Island Robert Louis Stevenson Page 42/142 forward looking out for the island. The man at the helm was watching the luff of the sail and whistling away gently to himself, and that was the only sound excepting the swish of the sea against the bows and around the sides of the ship. In I got bodily into the apple barrel, and found there was scarce an apple left; but sitting down there in the dark, what with the sound of the waters and the rocking movement of the ship, I had either fallen asleep or was on the point of doing so when a heavy man sat down with rather a clash close by. The barrel shook as he leaned his shoulders against it, and I was just about to jump up when the man began to speak. It was Silver's voice, and before I had heard a dozen words, I would not have shown myself for all the world, but lay there, trembling and listening, in the extreme of fear and curiosity, for from these dozen words I understood that the lives of all the honest men aboard depended upon me alone.
+
+Chapter XI - What I Heard in the Apple Barrel
+
+"NO, not I," said Silver. "Flint was cap'n; I was quartermaster, along of my timber leg. The same broadside I lost my leg, old Pew lost his deadlights. It was a master surgeon, him that ampytated me — out of college and all — Latin by the bucket, and what not; but he was hanged like a dog, and sun-dried like the rest, at Corso Castle. That was Roberts' men, that was, and comed of changing names to their ships — ROYAL FORTUNE and so on. Now, what a ship was christened, so let her stay, I says. So it was with the CASSANDRA, as brought us all safe home from Malabar, after England took the viceroy of the Indies; so it was with the old WALRUS, Flint's old ship, as I've seen amuck with the red blood and fit to sink with gold." "Ah!" cried another voice, that of the youngest hand on board, and evidently full of admiration. "He was the flower of the flock, was Flint!" "Davis was a man too, by all accounts," said Silver. "I never sailed along of him; first with England, then with Flint, that's my story; and now here on my own account, in a manner of speaking. I laid by nine hundred safe, from England, and two thousand after Flint. That ain't bad for a man before the mast — all safe in bank. 'Tain't earning now, it's saving does it, you may lay to that. Where's all England's men now? I dunno. Where's Flint's? Why, most on 'em aboard here, and glad to get the duff — been begging before that, some on 'em. Old Pew, as had lost his sight, and might have thought shame, spends twelve hundred pound in a year, like a lord in Parliament. Where is he now? Well, he's dead now and under hatches; but for two year before that, shiver my timbers, the man was starving! He begged, and he stole, and he cut throats, and starved at that, by the powers!" "Well, it ain't much use, after all," said the young seaman.
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "Dr. Livesey",
+    "Silver",
+    "the squire",
+    "Captain Smollett",
+    "the youngest hand",
+    "Old Pew"
+  ],
+  "dialogue_info": {
+    "pov": "first-person",
+    "dialogue": true,
+    "internal_thought": false,
+    "explicitly_attributed_speakers": [
+      "Silver",
+      "the youngest hand on board"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

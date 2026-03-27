@@ -1,0 +1,9 @@
+logging:
+  level: INFO
+  console: true
+  jsonl: true
+  log_root: /var/log/manuscriptprep
+  files:
+    orchestrator: orchestrator.log.jsonl
+    ingest: ingest.log.jsonl
+    resolver: resolver.log.jsonl

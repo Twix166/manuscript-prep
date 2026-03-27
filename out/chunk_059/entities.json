@@ -1,0 +1,28 @@
+{
+  "characters": [
+    "Dick",
+    "Merry",
+    "Silver",
+    "Dr. Livesey",
+    "Ben Gunn",
+    "Flint"
+  ],
+  "places": [
+    "Skeleton Island",
+    "western bay",
+    "plateau",
+    "Spy-glass"
+  ],
+  "objects": [
+    "Bible",
+    "compass",
+    "tools",
+    "line",
+    "crutch",
+    "pick",
+    "packing-cases",
+    "boards",
+    "WALRUS"
+  ],
+  "identity_notes": []
+}

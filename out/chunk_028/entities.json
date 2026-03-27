@@ -1,0 +1,42 @@
+{
+  "characters": [
+    "the captain",
+    "the squire",
+    "Hunter",
+    "Jim Hawkins",
+    "Silver",
+    "Redruth",
+    "Joyce",
+    "Mr. Hands"
+  ],
+  "places": [
+    "the HISPANIOLA",
+    "the stockade",
+    "the knoll",
+    "the spring",
+    "the log-house",
+    "the forecastle",
+    "the cabin",
+    "the stern-port",
+    "the fore companion",
+    "the anchorage"
+  ],
+  "objects": [
+    "jolly-boat",
+    "muskets",
+    "powder tins",
+    "bags of biscuits",
+    "kegs of pork",
+    "cask of cognac",
+    "medicine chest",
+    "silk handkerchief",
+    "pistols",
+    "brace of pistols",
+    "matress",
+    "loaded muskets",
+    "oars",
+    "boat",
+    "sparred galley"
+  ],
+  "identity_notes": []
+}

@@ -1,0 +1,13 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "I",
+    "Silver",
+    "Morgan",
+    "George",
+    "the long man with the yellow eyes"
+  ],
+  "unattributed_dialogue_present": false
+}

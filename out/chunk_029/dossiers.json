@@ -1,0 +1,72 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Guarded stores at the blockhouse, joined the jolly-boat with arms and provisions.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Led the jolly-boat crew, ordered crew members to follow, and risked his life to secure provisions.",
+      "personality_traits": [
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Abraham Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Joined the captain after a scuffle, assisted in securing the jolly-boat.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the jolly-boat crew, assisted with steering and rowing.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Part of the overloaded jolly-boat crew, contributed to the provisioning effort.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Led the jolly-boat crew, coordinated efforts to navigate against the tide.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

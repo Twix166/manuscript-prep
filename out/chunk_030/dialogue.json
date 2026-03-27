@@ -1,0 +1,13 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": true,
+  "explicitly_attributed_speakers": [
+    "I",
+    "the captain",
+    "Gray",
+    "Trelawney",
+    "the squire"
+  ],
+  "unattributed_dialogue_present": false
+}

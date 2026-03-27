@@ -1,0 +1,35 @@
+{
+  "characters": [
+    "Jim",
+    "Silver",
+    "the doctor",
+    "Dr. Livesey",
+    "Mr. Hawkins",
+    "Captain Flint"
+  ],
+  "places": [
+    "the beach",
+    "the anchorage",
+    "the stockade"
+  ],
+  "objects": [
+    "cutlass",
+    "gun",
+    "pistol",
+    "biscuit",
+    "fried junk",
+    "pork",
+    "bread",
+    "brandy",
+    "pick",
+    "shovel",
+    "rope",
+    "gig",
+    "thwart",
+    "boat",
+    "HISPANIOLA"
+  ],
+  "identity_notes": [
+    "the doctor and Dr. Livesey may refer to the same entity"
+  ]
+}

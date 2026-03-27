@@ -1,0 +1,152 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participated in discussions about the treasure map and ship's arrangements, expressed agreement with the captain's points.",
+      "personality_traits": [
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Expressed concerns about mutiny, rearranged ship's powder and berths, emphasized responsibility for the crew's safety.",
+      "personality_traits": [
+        "authoritative",
+        "responsible"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Arrow",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Described as a mate, criticized for being too familiar with the crew.",
+      "personality_traits": [
+        "honest"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Expressed dislike for Mr. Arrow, took a firm stance on the captain's actions.",
+      "personality_traits": [
+        "stubborn"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Protested the disclosure of the island's location, expressed skepticism about the map's existence.",
+      "personality_traits": [
+        "cautious"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Expressed concerns about mutiny, rearranged ship's powder and berths, emphasized responsibility for the crew's safety.",
+      "personality_traits": [
+        "authoritative",
+        "responsible"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Participated in discussions about the treasure map and ship's arrangements, expressed agreement with the captain's points.",
+      "personality_traits": [
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in context of the map's disclosure, part of the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in context of the crew's dynamics, part of the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in context of the crew's dynamics, part of the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the cook",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in context of the crew's work, part of the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Redruth",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in context of the crew's arrangements, part of the crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

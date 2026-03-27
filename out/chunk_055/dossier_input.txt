@@ -1,0 +1,28 @@
+EXCERPT:
+Treasure Island Robert Louis Stevenson Page 123/142 breath in his body, like — you wouldn't think it too much, mayhap, to give him one good word? You'll please bear in mind it's not my life only now — it's that boy's into the bargain; and you'll speak me fair, doctor, and give me a bit o' hope to go on, for the sake of mercy." Silver was a changed man once he was out there and had his back to his friends and the block house; his cheeks seemed to have fallen in, his voice trembled; never was a soul more dead in earnest. "Why, John, you're not afraid?" asked Dr. Livesey. "Doctor, I'm no coward; no, not I— not SO much!" and he snapped his fingers. "If I was I wouldn't say it. But I'll own up fairly, I've the shakes upon me for the gallows. You're a good man and a true; I never seen a better man! And you'll not forget what I done good, not any more than you'll forget the bad, I know. And I step aside — see here — and leave you and Jim alone. And you'll put that down for me too, for it's a long stretch, is that!" So saying, he stepped back a little way, till he was out of earshot, and there sat down upon a tree-stump and began to whistle, spinning round now and again upon his seat so as to command a sight, sometimes of me and the doctor and sometimes of his unruly ruffians as they went to and fro in the sand between the fire — which they were busy rekindling — and the house, from which they brought forth pork and bread to make the breakfast. "So, Jim," said the doctor sadly, "here you are. As you have brewed, so shall you drink, my boy. Heaven knows, I cannot find it in my heart to blame you, but this much I will say, be it kind or unkind: when Captain Smollett was well, you dared not have gone off; and when he was ill and couldn't help it, by George, it was downright cowardly!" I will own that I here began to weep. "Doctor," I said, "you might spare me. I have blamed myself enough; my life's forfeit anyway, and I should have been dead by now if Silver hadn't stood for me; and doctor, believe this, I can die — and I dare say I deserve it — but what I fear is torture. If they come to torture me —" "Jim," the doctor interrupted, and his voice was quite changed, "Jim, I can't have this. Whip over, and we'll run for it." "Doctor," said I, "I passed my word." "I know, I know," he cried. "We can't help that, Jim, now. I'll take it on my shoulders, holus bolus, blame and shame, my boy; but stay here, I cannot let you. Jump! One jump, and you're out, and we'll run for it like antelopes."
+
+Treasure Island Robert Louis Stevenson Page 124/142 "No," I replied; "you know right well you wouldn't do the thing yourself — neither you nor squire nor captain; and no more will I. Silver trusted me; I passed my word, and back I go. But, doctor, you did not let me finish. If they come to torture me, I might let slip a word of where the ship is, for I got the ship, part by luck and part by risking, and she lies in North Inlet, on the southern beach, and just below high water. At half tide she must be high and dry." "The ship!" exclaimed the doctor. Rapidly I described to him my adventures, and he heard me out in silence. "There is a kind of fate in this," he observed when I had done. "Every step, it's you that saves our lives; and do you suppose by any chance that we are going to let you lose yours? That would be a poor return, my boy. You found out the plot; you found Ben Gunn — the best deed that ever you did, or will do, though you live to ninety. Oh, by Jupiter, and talking of Ben Gunn! Why, this is the mischief in person. Silver!" he cried. "Silver! I'll give you a piece of advice," he continued as the cook drew near again; "don't you be in any great hurry after that treasure." "Why, sir, I do my possible, which that ain't," said Silver. "I can only, asking your pardon, save my life and the boy's by seeking for that treasure; and you may lay to that." "Well, Silver," replied the doctor, "if that is so, I'll go one step further: look out for squalls when you find it." "Sir," said Silver, "as between man and man, that's too much and too little. What you're after, why you left the block house, why you given me that there chart, I don't know, now, do I? And yet I done your bidding with my eyes shut and never a word of hope! But no, this here's too much. If you won't tell me what you mean plain out, just say so and I'll leave the helm." "No," said the doctor musingly; "I've no right to say more; it's not my secret, you see, Silver, or, I give you my word, I'd tell it you. But I'll go as far with you as I dare go, and a step beyond, for I'll have my wig sorted by the captain or I'm mistaken! And first, I'll give you a bit of hope; Silver, if we both get alive out of this wolf-trap, I'll do my best to save you, short of perjury." Silver's face was radiant. "You couldn't say more, I'm sure, sir, not if you was my mother," he cried. "Well, that's my first concession," added the doctor. "My second is a piece of advice: keep the boy close beside you, and when you need help, halloo. I'm off to seek it for you, and that itself will show you if I speak at random. Good-bye, Jim." And Dr. Livesey shook hands with me through the stockade, nodded to Silver, and set off at a brisk pace into the wood.
+
+Treasure Island Robert Louis Stevenson Page 125/142
+
+EXTRACTION_DATA:
+{
+  "characters": [
+    "Dr. Livesey",
+    "Silver",
+    "Jim",
+    "Captain Smollett",
+    "Ben Gunn"
+  ],
+  "dialogue_info": {
+    "pov": "first-person",
+    "dialogue": true,
+    "internal_thought": true,
+    "explicitly_attributed_speakers": [
+      "Dr. Livesey",
+      "Silver",
+      "Jim"
+    ],
+    "unattributed_dialogue_present": false
+  }
+}

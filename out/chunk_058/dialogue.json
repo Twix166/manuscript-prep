@@ -1,0 +1,12 @@
+{
+  "pov": "first-person",
+  "dialogue": true,
+  "internal_thought": false,
+  "explicitly_attributed_speakers": [
+    "Silver",
+    "Morgan",
+    "Merry",
+    "Dick"
+  ],
+  "unattributed_dialogue_present": true
+}

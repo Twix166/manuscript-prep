@@ -1,0 +1,81 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Dr. Livesey",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Present during a meeting with the squire and the captain, smoking with his wig on his lap, indicating agitation. Speaks to Jim, tells him to sit, offers wine, and comments on Silver being a remarkable man.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Apologizes to the captain, acknowledges his judgment, and participates in planning against the mutiny. Offers wine to Jim and expresses concern about the crew's loyalty.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Leadership figure who assesses the mutiny risk, proposes strategies, and acknowledges the crew's loyalty. Engages in dialogue with the squire and doctor.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Proposes a plan to confront the mutiny by waiting for the right moment. Participates in strategic discussions with the captain and squire.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Relayed Silver's conversation to the group, is instructed to sit by Dr. Livesey, and is acknowledged as a potential ally by the squire.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Navigates the ship with expertise, describes the passage's conditions, and is observed by Jim during the journey.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Narrates the events, is questioned by the squire, and is acknowledged as a useful ally by the doctor. Feels helpless but becomes pivotal in the plot.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

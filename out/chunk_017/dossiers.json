@@ -1,0 +1,109 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Mr. Blandly",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Friend of the squire who came to bid the captain a good voyage.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member who leads the chorus of a song about the dead man's chest.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Commands the ship, orders Mr. Arrow below, and declares 'Overboard!'",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Arrow",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Crew member who becomes drunk, is ordered below, and disappears.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Job Anderson",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Boatswain who serves as mate after Mr. Arrow's disappearance.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Trelawney",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Individual who followed the sea and took a watch in easy weather.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Israel Hands",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Coxswain described as careful, wily, and experienced.",
+      "personality_traits": [
+        "wily",
+        "experienced"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Barbecue",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Cook who uses a crutch and maintains a clean galley with a parrot.",
+      "personality_traits": [
+        "kind",
+        "helpful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Individual who interacts with Barbecue and is addressed as 'my son.'",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Tom Morgan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Challenges John Silver's authority, draws his knife during a confrontation.",
+      "personality_traits": [
+        "confrontational",
+        "aggressive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Asserts leadership over the crew, delivers speeches, and holds a pipe.",
+      "personality_traits": [
+        "authoritative",
+        "calm",
+        "manipulative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Jim Hawkins",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Narrator and central figure, interacts with Silver and the sea-cook.",
+      "personality_traits": [
+        "brave",
+        "resourceful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the doctor",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Gave the chart to Silver, referenced in dialogue.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Referred to as a nickname, associated with Silver's crew.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

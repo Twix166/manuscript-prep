@@ -1,0 +1,41 @@
+{
+  "characters": [
+    "Dr. Livesey",
+    "the captain",
+    "Squire",
+    "Hunter",
+    "Captain Smollett",
+    "Gray",
+    "Ben Gunn",
+    "Job"
+  ],
+  "places": [
+    "block house",
+    "sandy spit",
+    "anchorage",
+    "open sea",
+    "white rock",
+    "palisade",
+    "woods",
+    "trees",
+    "coast"
+  ],
+  "objects": [
+    "brace of pistols",
+    "powderhorn",
+    "bullets",
+    "bread-bag",
+    "coat",
+    "biscuit",
+    "musket",
+    "cutlass",
+    "chart",
+    "plaster"
+  ],
+  "identity_notes": [
+    "the doctor and Dr. Livesey refer to the same entity",
+    "the captain and Captain Smollett refer to the same entity",
+    "the squire and Squire refer to the same entity",
+    "the woods and trees may refer to the same place"
+  ]
+}

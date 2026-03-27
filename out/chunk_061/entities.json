@@ -1,0 +1,36 @@
+{
+  "characters": [
+    "Ben Gunn",
+    "Dr. Livesey",
+    "Silver",
+    "Captain Smollett",
+    "the squire",
+    "Gray",
+    "Jim"
+  ],
+  "places": [
+    "North Inlet",
+    "Rum Cove",
+    "the two-pointed hill",
+    "the island",
+    "Ben Gunn's cave",
+    "the anchorage",
+    "the stockade"
+  ],
+  "objects": [
+    "pick-axe",
+    "musket",
+    "goat",
+    "chart",
+    "stores",
+    "treasure",
+    "gold",
+    "coin",
+    "bars of gold",
+    "HISPANIOLA",
+    "gigs",
+    "anchor",
+    "old wine"
+  ],
+  "identity_notes": []
+}

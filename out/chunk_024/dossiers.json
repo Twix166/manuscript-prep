@@ -1,0 +1,43 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Long John Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A sailor involved in a clandestine conversation with another crew member, attempting to warn and protect him from an impending threat.",
+      "personality_traits": [
+        "persuasive",
+        "loyal"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Tom",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A crew member who confronts Long John Silver, expressing defiance and a willingness to die in his duty.",
+      "personality_traits": [
+        "duty-bound",
+        "defiant"
+      ],
+      "vocal_notes": "hoarse",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Alan",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A deceased crew member killed by Long John Silver, referenced in a conversation between Silver and Tom.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}

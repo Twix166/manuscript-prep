@@ -1,0 +1,39 @@
+{
+  "characters": [
+    "the doctor",
+    "the captain",
+    "Mr. Arrow",
+    "the squire",
+    "Mr. Trelawney",
+    "Captain Smollett",
+    "Dr. Livesey",
+    "Hawkins",
+    "John Silver",
+    "Long John",
+    "the cook",
+    "Redruth"
+  ],
+  "places": [
+    "cabin",
+    "forecastle",
+    "galley",
+    "companion",
+    "main hold",
+    "after-part of the main hold",
+    "sparred passage",
+    "port side",
+    "deck"
+  ],
+  "objects": [
+    "swivel",
+    "powder",
+    "arms",
+    "hammocks",
+    "shore-boat"
+  ],
+  "identity_notes": [
+    "Long John and John Silver may refer to the same entity",
+    "the captain and Captain Smollett may refer to the same entity",
+    "Dr. Livesey and the doctor may refer to the same entity"
+  ]
+}

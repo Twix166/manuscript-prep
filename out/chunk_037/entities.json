@@ -1,0 +1,25 @@
+{
+  "characters": [
+    "the doctor",
+    "the captain",
+    "Squire",
+    "Gray",
+    "Hunter",
+    "Joyce",
+    "Mr. Trelawney",
+    "Mr. Smollett",
+    "Anderson"
+  ],
+  "places": [
+    "stockade",
+    "log-house",
+    "woods",
+    "palisade",
+    "hill"
+  ],
+  "objects": [
+    "cutlass",
+    "musket"
+  ],
+  "identity_notes": []
+}

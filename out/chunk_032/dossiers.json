@@ -1,0 +1,157 @@
+{
+  "character_dossiers": [
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "captain",
+      "biography": "Part of the group ashore, keeping a log of events",
+      "personality_traits": [
+        "dutiful",
+        "strategic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Volunteer to retrieve stores, part of the group ashore",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Hunter",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Volunteer to retrieve stores, part of the group ashore",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "commander",
+      "biography": "In command of mutineers, overseeing store retrieval",
+      "personality_traits": [
+        "authoritative"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Alexander Smollett",
+      "aliases": [],
+      "role": "master",
+      "biography": "Member of the ship's company, ashore with the group",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "David Livesey",
+      "aliases": [],
+      "role": "doctor",
+      "biography": "Member of the ship's company, ashore with the group",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Abraham Gray",
+      "aliases": [],
+      "role": "carpenter's mate",
+      "biography": "Member of the ship's company, ashore with the group",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John Trelawney",
+      "aliases": [],
+      "role": "owner",
+      "biography": "Member of the ship's company, ashore with the group",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "John Hunter",
+      "aliases": [],
+      "role": "owner's servant",
+      "biography": "Member of the ship's company, ashore with the group",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Richard Joyce",
+      "aliases": [],
+      "role": "owner's servant",
+      "biography": "Member of the ship's company, ashore with the group",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Thomas Redruth",
+      "aliases": [],
+      "role": "owner's servant",
+      "biography": "Member of the ship's company, ashore with the group",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "James Hawkins",
+      "aliases": [
+        "Jim Hawkins"
+      ],
+      "role": "cabin-boy",
+      "biography": "Member of the ship's company, ashore with the group",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Landsman, encountered by Jim Hawkins",
+      "personality_traits": [
+        "cautious",
+        "resourceful"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

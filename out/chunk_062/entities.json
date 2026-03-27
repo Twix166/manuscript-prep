@@ -1,0 +1,44 @@
+{
+  "characters": [
+    "the doctor",
+    "Silver",
+    "Ben Gunn",
+    "Gray",
+    "the captain",
+    "the squire"
+  ],
+  "places": [
+    "Treasure Island",
+    "North Inlet",
+    "the narrows",
+    "spit of sand",
+    "the southern point",
+    "the lowlands of the isle"
+  ],
+  "objects": [
+    "bread-bags",
+    "tools",
+    "ropes",
+    "spare sail",
+    "fathom of rope",
+    "powder and shot",
+    "salt goat",
+    "medicines",
+    "necessaries",
+    "clothing",
+    "tobacco",
+    "musket",
+    "main-sail",
+    "shot",
+    "fruits",
+    "vegetables",
+    "money",
+    "treasure",
+    "gold",
+    "bars",
+    "rope's end",
+    "minted money",
+    "doubloons"
+  ],
+  "identity_notes": []
+}

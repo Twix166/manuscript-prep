@@ -1,0 +1,85 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Long John",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Dressed in a blue coat with brass buttons and a laced hat, he negotiates with the captain, complains about the cold, and offers terms.",
+      "personality_traits": [
+        "persistent",
+        "talkative",
+        "pragmatic"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Silver",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A mutineer and pirate negotiating with the captain, threatening and offering terms.",
+      "personality_traits": [
+        "determined",
+        "negotiator",
+        "threatening"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Captain Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "The captain, firm in his stance, offers terms to Silver and uses a pipe.",
+      "personality_traits": [
+        "firm",
+        "authoritative",
+        "resolute"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Mr. Smollett",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Intervenes when Silver talks about Abe Gray, shows temper.",
+      "personality_traits": [
+        "temperamental",
+        "assertive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben Gunn",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in the dialogue, but no direct information provided.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Abe Gray",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "Mentioned in the dialogue, but no direct information provided.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    }
+  ]
+}

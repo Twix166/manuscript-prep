@@ -1,0 +1,2906 @@
+{
+  "groups": [
+    {
+      "group_id": "group_000",
+      "members": [
+        "Abe Gray",
+        "Abraham Gray",
+        "Gray"
+      ],
+      "member_records": [
+        {
+          "name": "Abe Gray",
+          "normalized": "abe gray",
+          "parsed": {
+            "original": "Abe Gray",
+            "normalized": "abe gray",
+            "tokens": [
+              "abe",
+              "gray"
+            ],
+            "title": null,
+            "base_tokens": [
+              "abe",
+              "gray"
+            ],
+            "surname": "gray",
+            "given": "abe",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_034"
+          ],
+          "variants": [
+            "Abe Gray"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Abraham Gray",
+          "normalized": "abraham gray",
+          "parsed": {
+            "original": "Abraham Gray",
+            "normalized": "abraham gray",
+            "tokens": [
+              "abraham",
+              "gray"
+            ],
+            "title": null,
+            "base_tokens": [
+              "abraham",
+              "gray"
+            ],
+            "surname": "gray",
+            "given": "abraham",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_029",
+            "chunk_031"
+          ],
+          "variants": [
+            "Abraham Gray"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Gray",
+          "normalized": "gray",
+          "parsed": {
+            "original": "Gray",
+            "normalized": "gray",
+            "tokens": [
+              "gray"
+            ],
+            "title": null,
+            "base_tokens": [
+              "gray"
+            ],
+            "surname": "gray",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_030",
+            "chunk_033",
+            "chunk_035",
+            "chunk_036",
+            "chunk_037",
+            "chunk_058",
+            "chunk_059",
+            "chunk_060",
+            "chunk_061"
+          ],
+          "variants": [
+            "Gray"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Abe Gray": [],
+        "Abraham Gray": [
+          "same_surname",
+          "role_overlap"
+        ],
+        "Gray": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_001",
+      "members": [
+        "Alexander Smollett",
+        "Mr. Smollett"
+      ],
+      "member_records": [
+        {
+          "name": "Alexander Smollett",
+          "normalized": "alexander smollett",
+          "parsed": {
+            "original": "Alexander Smollett",
+            "normalized": "alexander smollett",
+            "tokens": [
+              "alexander",
+              "smollett"
+            ],
+            "title": null,
+            "base_tokens": [
+              "alexander",
+              "smollett"
+            ],
+            "surname": "smollett",
+            "given": "alexander",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_031",
+            "chunk_034"
+          ],
+          "variants": [
+            "Alexander Smollett"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Mr. Smollett",
+          "normalized": "mr. smollett",
+          "parsed": {
+            "original": "Mr. Smollett",
+            "normalized": "mr smollett",
+            "tokens": [
+              "mr",
+              "smollett"
+            ],
+            "title": "mr",
+            "base_tokens": [
+              "smollett"
+            ],
+            "surname": "smollett",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_034",
+            "chunk_036"
+          ],
+          "variants": [
+            "Mr. Smollett"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Alexander Smollett": [],
+        "Mr. Smollett": [
+          "same_surname",
+          "chunk_overlap",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_002",
+      "members": [
+        "Anderson",
+        "Job Anderson"
+      ],
+      "member_records": [
+        {
+          "name": "Anderson",
+          "normalized": "anderson",
+          "parsed": {
+            "original": "Anderson",
+            "normalized": "anderson",
+            "tokens": [
+              "anderson"
+            ],
+            "title": null,
+            "base_tokens": [
+              "anderson"
+            ],
+            "surname": "anderson",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown",
+            "pirate"
+          ],
+          "chunks": [
+            "chunk_022",
+            "chunk_036",
+            "chunk_037",
+            "chunk_051"
+          ],
+          "variants": [
+            "Anderson"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Job Anderson",
+          "normalized": "job anderson",
+          "parsed": {
+            "original": "Job Anderson",
+            "normalized": "job anderson",
+            "tokens": [
+              "job",
+              "anderson"
+            ],
+            "title": null,
+            "base_tokens": [
+              "job",
+              "anderson"
+            ],
+            "surname": "anderson",
+            "given": "job",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_017",
+            "chunk_021",
+            "chunk_030"
+          ],
+          "variants": [
+            "Job Anderson"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Anderson": [],
+        "Job Anderson": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_003",
+      "members": [
+        "Arrow",
+        "Mr. Arrow"
+      ],
+      "member_records": [
+        {
+          "name": "Arrow",
+          "normalized": "arrow",
+          "parsed": {
+            "original": "Arrow",
+            "normalized": "arrow",
+            "tokens": [
+              "arrow"
+            ],
+            "title": null,
+            "base_tokens": [
+              "arrow"
+            ],
+            "surname": "arrow",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_012"
+          ],
+          "variants": [
+            "Arrow"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "Mr. Arrow",
+          "normalized": "mr. arrow",
+          "parsed": {
+            "original": "Mr. Arrow",
+            "normalized": "mr arrow",
+            "tokens": [
+              "mr",
+              "arrow"
+            ],
+            "title": "mr",
+            "base_tokens": [
+              "arrow"
+            ],
+            "surname": "arrow",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_015",
+            "chunk_017",
+            "chunk_020",
+            "chunk_012"
+          ],
+          "variants": [
+            "Mr. Arrow",
+            "Arrow"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Arrow": [],
+        "Mr. Arrow": [
+          "same_surname",
+          "chunk_overlap",
+          "variant_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_004",
+      "members": [
+        "Ben Gunn",
+        "Benjamin Gunn"
+      ],
+      "member_records": [
+        {
+          "name": "Ben Gunn",
+          "normalized": "ben gunn",
+          "parsed": {
+            "original": "Ben Gunn",
+            "normalized": "ben gunn",
+            "tokens": [
+              "ben",
+              "gunn"
+            ],
+            "title": null,
+            "base_tokens": [
+              "ben",
+              "gunn"
+            ],
+            "surname": "gunn",
+            "given": "ben",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_025",
+            "chunk_026",
+            "chunk_031",
+            "chunk_033",
+            "chunk_037",
+            "chunk_038",
+            "chunk_046",
+            "chunk_054",
+            "chunk_056",
+            "chunk_057",
+            "chunk_058",
+            "chunk_059",
+            "chunk_060",
+            "chunk_061"
+          ],
+          "variants": [
+            "Ben Gunn"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Benjamin Gunn",
+          "normalized": "benjamin gunn",
+          "parsed": {
+            "original": "Benjamin Gunn",
+            "normalized": "benjamin gunn",
+            "tokens": [
+              "benjamin",
+              "gunn"
+            ],
+            "title": null,
+            "base_tokens": [
+              "benjamin",
+              "gunn"
+            ],
+            "surname": "gunn",
+            "given": "benjamin",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_027"
+          ],
+          "variants": [
+            "Benjamin Gunn"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Ben Gunn": [],
+        "Benjamin Gunn": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_005",
+      "members": [
+        "Black Dog",
+        "the old sea-dog"
+      ],
+      "member_records": [
+        {
+          "name": "Black Dog",
+          "normalized": "black dog",
+          "parsed": {
+            "original": "Black Dog",
+            "normalized": "black dog",
+            "tokens": [
+              "black",
+              "dog"
+            ],
+            "title": null,
+            "base_tokens": [
+              "black",
+              "dog"
+            ],
+            "surname": "dog",
+            "given": "black",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_003",
+            "chunk_005",
+            "chunk_006",
+            "chunk_009",
+            "chunk_014",
+            "chunk_015",
+            "chunk_049"
+          ],
+          "variants": [
+            "Black Dog"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "the old sea-dog",
+          "normalized": "the old sea dog",
+          "parsed": {
+            "original": "the old sea-dog",
+            "normalized": "old sea dog",
+            "tokens": [
+              "old",
+              "sea",
+              "dog"
+            ],
+            "title": null,
+            "base_tokens": [
+              "old",
+              "sea",
+              "dog"
+            ],
+            "surname": "dog",
+            "given": "old",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_000"
+          ],
+          "variants": [
+            "the old sea-dog"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Black Dog": [],
+        "the old sea-dog": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_006",
+      "members": [
+        "Blandly",
+        "Mr. Blandly"
+      ],
+      "member_records": [
+        {
+          "name": "Blandly",
+          "normalized": "blandly",
+          "parsed": {
+            "original": "Blandly",
+            "normalized": "blandly",
+            "tokens": [
+              "blandly"
+            ],
+            "title": null,
+            "base_tokens": [
+              "blandly"
+            ],
+            "surname": "blandly",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_012"
+          ],
+          "variants": [
+            "Blandly"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "Mr. Blandly",
+          "normalized": "mr. blandly",
+          "parsed": {
+            "original": "Mr. Blandly",
+            "normalized": "mr blandly",
+            "tokens": [
+              "mr",
+              "blandly"
+            ],
+            "title": "mr",
+            "base_tokens": [
+              "blandly"
+            ],
+            "surname": "blandly",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_017",
+            "chunk_061",
+            "chunk_012"
+          ],
+          "variants": [
+            "Mr. Blandly",
+            "Blandly"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Blandly": [],
+        "Mr. Blandly": [
+          "same_surname",
+          "chunk_overlap",
+          "variant_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_007",
+      "members": [
+        "Cap'n Hawkins",
+        "Captain Trelawney"
+      ],
+      "member_records": [
+        {
+          "name": "Cap'n Hawkins",
+          "normalized": "capn hawkins",
+          "parsed": {
+            "original": "Cap'n Hawkins",
+            "normalized": "captain hawkins",
+            "tokens": [
+              "captain",
+              "hawkins"
+            ],
+            "title": "captain",
+            "base_tokens": [
+              "hawkins"
+            ],
+            "surname": "hawkins",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_044"
+          ],
+          "variants": [
+            "Cap'n Hawkins"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "Captain Trelawney",
+          "normalized": "captain trelawney",
+          "parsed": {
+            "original": "Captain Trelawney",
+            "normalized": "captain trelawney",
+            "tokens": [
+              "captain",
+              "trelawney"
+            ],
+            "title": "captain",
+            "base_tokens": [
+              "trelawney"
+            ],
+            "surname": "trelawney",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown",
+            "pirate",
+            "captain",
+            "confirmed",
+            "Cap'n"
+          ],
+          "chunks": [
+            "chunk_015",
+            "chunk_000",
+            "chunk_001",
+            "chunk_003",
+            "chunk_004",
+            "chunk_005",
+            "chunk_006",
+            "chunk_007",
+            "chunk_008",
+            "chunk_009",
+            "chunk_010",
+            "chunk_011",
+            "chunk_013",
+            "chunk_017",
+            "chunk_018",
+            "chunk_020",
+            "chunk_021",
+            "chunk_022",
+            "chunk_023",
+            "chunk_027",
+            "chunk_028",
+            "chunk_029",
+            "chunk_030",
+            "chunk_031",
+            "chunk_033",
+            "chunk_034",
+            "chunk_035",
+            "chunk_036",
+            "chunk_037",
+            "chunk_038",
+            "chunk_040",
+            "chunk_042",
+            "chunk_044",
+            "chunk_047",
+            "chunk_049",
+            "chunk_050",
+            "chunk_051",
+            "chunk_053",
+            "chunk_054",
+            "chunk_055",
+            "chunk_056",
+            "chunk_057",
+            "chunk_058",
+            "chunk_059",
+            "chunk_060",
+            "chunk_061"
+          ],
+          "variants": [
+            "Captain Trelawney",
+            "the captain",
+            "Captain Flint",
+            "captain",
+            "Captain Smollett",
+            "the cap'n",
+            "Trelawney",
+            "Mr. Trelawney",
+            "Captain Silver",
+            "Cap'n Hawkins",
+            "Silver",
+            "Flint",
+            "John Silver"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Cap'n Hawkins": [],
+        "Captain Trelawney": [
+          "same_title",
+          "chunk_overlap",
+          "variant_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_008",
+      "members": [
+        "captain",
+        "the cap'n",
+        "the captain"
+      ],
+      "member_records": [
+        {
+          "name": "captain",
+          "normalized": "captain",
+          "parsed": {
+            "original": "captain",
+            "normalized": "captain",
+            "tokens": [
+              "captain"
+            ],
+            "title": "captain",
+            "base_tokens": [],
+            "surname": null,
+            "given": null,
+            "is_generic": true
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_011",
+            "chunk_036"
+          ],
+          "variants": [
+            "captain"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "the cap'n",
+          "normalized": "the capn",
+          "parsed": {
+            "original": "the cap'n",
+            "normalized": "captain",
+            "tokens": [
+              "captain"
+            ],
+            "title": "captain",
+            "base_tokens": [],
+            "surname": null,
+            "given": null,
+            "is_generic": true
+          },
+          "sources": [
+            "entities",
+            "entities_normalized"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_027"
+          ],
+          "variants": [
+            "the cap'n"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "the captain",
+          "normalized": "the captain",
+          "parsed": {
+            "original": "the captain",
+            "normalized": "captain",
+            "tokens": [
+              "captain"
+            ],
+            "title": "captain",
+            "base_tokens": [],
+            "surname": null,
+            "given": null,
+            "is_generic": true
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_000",
+            "chunk_001",
+            "chunk_003",
+            "chunk_004",
+            "chunk_005",
+            "chunk_006",
+            "chunk_008",
+            "chunk_009",
+            "chunk_010",
+            "chunk_013",
+            "chunk_017",
+            "chunk_022",
+            "chunk_023",
+            "chunk_028",
+            "chunk_030",
+            "chunk_031",
+            "chunk_033",
+            "chunk_034",
+            "chunk_037",
+            "chunk_050",
+            "chunk_051",
+            "chunk_060"
+          ],
+          "variants": [
+            "the captain"
+          ],
+          "accents": [],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "captain": [],
+        "the cap'n": [
+          "exact_normalized_match",
+          "same_title",
+          "generic_title_to_titled_name",
+          "generic_title_to_titled_name"
+        ],
+        "the captain": [
+          "exact_normalized_match",
+          "same_title",
+          "generic_title_to_titled_name",
+          "generic_title_to_titled_name"
+        ]
+      }
+    },
+    {
+      "group_id": "group_009",
+      "members": [
+        "David Livesey",
+        "Doctor Livesey"
+      ],
+      "member_records": [
+        {
+          "name": "David Livesey",
+          "normalized": "david livesey",
+          "parsed": {
+            "original": "David Livesey",
+            "normalized": "david livesey",
+            "tokens": [
+              "david",
+              "livesey"
+            ],
+            "title": null,
+            "base_tokens": [
+              "david",
+              "livesey"
+            ],
+            "surname": "livesey",
+            "given": "david",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_031"
+          ],
+          "variants": [
+            "David Livesey"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Doctor Livesey",
+          "normalized": "doctor livesey",
+          "parsed": {
+            "original": "Doctor Livesey",
+            "normalized": "doctor livesey",
+            "tokens": [
+              "doctor",
+              "livesey"
+            ],
+            "title": "doctor",
+            "base_tokens": [
+              "livesey"
+            ],
+            "surname": "livesey",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown",
+            "doctor",
+            "magistrate"
+          ],
+          "chunks": [
+            "chunk_004",
+            "chunk_006",
+            "chunk_000",
+            "chunk_001",
+            "chunk_005",
+            "chunk_007",
+            "chunk_010",
+            "chunk_011",
+            "chunk_012",
+            "chunk_013",
+            "chunk_015",
+            "chunk_018",
+            "chunk_020",
+            "chunk_021",
+            "chunk_022",
+            "chunk_029",
+            "chunk_031",
+            "chunk_033",
+            "chunk_035",
+            "chunk_036",
+            "chunk_037",
+            "chunk_042",
+            "chunk_050",
+            "chunk_051",
+            "chunk_053",
+            "chunk_054",
+            "chunk_055",
+            "chunk_057",
+            "chunk_058",
+            "chunk_059",
+            "chunk_060"
+          ],
+          "variants": [
+            "Doctor Livesey",
+            "Dr. Livesey",
+            "the doctor",
+            "doctor"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "David Livesey": [],
+        "Doctor Livesey": [
+          "same_surname",
+          "chunk_overlap",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_010",
+      "members": [
+        "doctor",
+        "the doctor"
+      ],
+      "member_records": [
+        {
+          "name": "doctor",
+          "normalized": "doctor",
+          "parsed": {
+            "original": "doctor",
+            "normalized": "doctor",
+            "tokens": [
+              "doctor"
+            ],
+            "title": "doctor",
+            "base_tokens": [],
+            "surname": null,
+            "given": null,
+            "is_generic": true
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dialogue"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_036"
+          ],
+          "variants": [
+            "doctor",
+            "Doctor"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "the doctor",
+          "normalized": "the doctor",
+          "parsed": {
+            "original": "the doctor",
+            "normalized": "doctor",
+            "tokens": [
+              "doctor"
+            ],
+            "title": "doctor",
+            "base_tokens": [],
+            "surname": null,
+            "given": null,
+            "is_generic": true
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_005",
+            "chunk_013",
+            "chunk_022",
+            "chunk_029",
+            "chunk_042",
+            "chunk_050",
+            "chunk_051",
+            "chunk_054",
+            "chunk_055",
+            "chunk_058",
+            "chunk_059",
+            "chunk_060"
+          ],
+          "variants": [
+            "the doctor"
+          ],
+          "accents": [],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "doctor": [],
+        "the doctor": [
+          "exact_normalized_match",
+          "same_title",
+          "generic_title_to_titled_name",
+          "generic_title_to_titled_name"
+        ]
+      }
+    },
+    {
+      "group_id": "group_011",
+      "members": [
+        "George Merry",
+        "Merry"
+      ],
+      "member_records": [
+        {
+          "name": "George Merry",
+          "normalized": "george merry",
+          "parsed": {
+            "original": "George Merry",
+            "normalized": "george merry",
+            "tokens": [
+              "george",
+              "merry"
+            ],
+            "title": null,
+            "base_tokens": [
+              "george",
+              "merry"
+            ],
+            "surname": "merry",
+            "given": "george",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_055"
+          ],
+          "variants": [
+            "George Merry"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Merry",
+          "normalized": "merry",
+          "parsed": {
+            "original": "Merry",
+            "normalized": "merry",
+            "tokens": [
+              "merry"
+            ],
+            "title": null,
+            "base_tokens": [
+              "merry"
+            ],
+            "surname": "merry",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_056",
+            "chunk_057",
+            "chunk_058"
+          ],
+          "variants": [
+            "Merry"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "George Merry": [],
+        "Merry": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_012",
+      "members": [
+        "Hands",
+        "Mr. Hands"
+      ],
+      "member_records": [
+        {
+          "name": "Hands",
+          "normalized": "hands",
+          "parsed": {
+            "original": "Hands",
+            "normalized": "hands",
+            "tokens": [
+              "hands"
+            ],
+            "title": null,
+            "base_tokens": [
+              "hands"
+            ],
+            "surname": "hands",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_020",
+            "chunk_021",
+            "chunk_044",
+            "chunk_046",
+            "chunk_051"
+          ],
+          "variants": [
+            "Hands"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "Mr. Hands",
+          "normalized": "mr. hands",
+          "parsed": {
+            "original": "Mr. Hands",
+            "normalized": "mr hands",
+            "tokens": [
+              "mr",
+              "hands"
+            ],
+            "title": "mr",
+            "base_tokens": [
+              "hands"
+            ],
+            "surname": "hands",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown",
+            "pilot"
+          ],
+          "chunks": [
+            "chunk_028",
+            "chunk_042",
+            "chunk_043",
+            "chunk_044",
+            "chunk_020",
+            "chunk_021",
+            "chunk_046",
+            "chunk_051"
+          ],
+          "variants": [
+            "Mr. Hands",
+            "Hands"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Hands": [],
+        "Mr. Hands": [
+          "same_surname",
+          "chunk_overlap",
+          "variant_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_013",
+      "members": [
+        "Hawkins",
+        "Mr. Hawkins"
+      ],
+      "member_records": [
+        {
+          "name": "Hawkins",
+          "normalized": "hawkins",
+          "parsed": {
+            "original": "Hawkins",
+            "normalized": "hawkins",
+            "tokens": [
+              "hawkins"
+            ],
+            "title": null,
+            "base_tokens": [
+              "hawkins"
+            ],
+            "surname": "hawkins",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_011",
+            "chunk_015",
+            "chunk_017",
+            "chunk_035"
+          ],
+          "variants": [
+            "Hawkins"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "Mr. Hawkins",
+          "normalized": "mr. hawkins",
+          "parsed": {
+            "original": "Mr. Hawkins",
+            "normalized": "mr hawkins",
+            "tokens": [
+              "mr",
+              "hawkins"
+            ],
+            "title": "mr",
+            "base_tokens": [
+              "hawkins"
+            ],
+            "surname": "hawkins",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_054",
+            "chunk_011",
+            "chunk_015",
+            "chunk_017",
+            "chunk_035"
+          ],
+          "variants": [
+            "Mr. Hawkins",
+            "Hawkins"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Hawkins": [],
+        "Mr. Hawkins": [
+          "same_surname",
+          "chunk_overlap",
+          "variant_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_014",
+      "members": [
+        "Hunter",
+        "John Hunter"
+      ],
+      "member_records": [
+        {
+          "name": "Hunter",
+          "normalized": "hunter",
+          "parsed": {
+            "original": "Hunter",
+            "normalized": "hunter",
+            "tokens": [
+              "hunter"
+            ],
+            "title": null,
+            "base_tokens": [
+              "hunter"
+            ],
+            "surname": "hunter",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown",
+            "pirate"
+          ],
+          "chunks": [
+            "chunk_011",
+            "chunk_023",
+            "chunk_028",
+            "chunk_035",
+            "chunk_036",
+            "chunk_037"
+          ],
+          "variants": [
+            "Hunter"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "John Hunter",
+          "normalized": "john hunter",
+          "parsed": {
+            "original": "John Hunter",
+            "normalized": "john hunter",
+            "tokens": [
+              "john",
+              "hunter"
+            ],
+            "title": null,
+            "base_tokens": [
+              "john",
+              "hunter"
+            ],
+            "surname": "hunter",
+            "given": "john",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_031"
+          ],
+          "variants": [
+            "John Hunter"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Hunter": [],
+        "John Hunter": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_015",
+      "members": [
+        "James Hawkins",
+        "Jim Hawkins",
+        "young Hawkins"
+      ],
+      "member_records": [
+        {
+          "name": "James Hawkins",
+          "normalized": "james hawkins",
+          "parsed": {
+            "original": "James Hawkins",
+            "normalized": "james hawkins",
+            "tokens": [
+              "james",
+              "hawkins"
+            ],
+            "title": null,
+            "base_tokens": [
+              "james",
+              "hawkins"
+            ],
+            "surname": "hawkins",
+            "given": "james",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_031"
+          ],
+          "variants": [
+            "James Hawkins"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Jim Hawkins",
+          "normalized": "jim hawkins",
+          "parsed": {
+            "original": "Jim Hawkins",
+            "normalized": "jim hawkins",
+            "tokens": [
+              "jim",
+              "hawkins"
+            ],
+            "title": null,
+            "base_tokens": [
+              "jim",
+              "hawkins"
+            ],
+            "surname": "hawkins",
+            "given": "jim",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_010",
+            "chunk_021",
+            "chunk_028",
+            "chunk_049",
+            "chunk_050"
+          ],
+          "variants": [
+            "Jim Hawkins"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "young Hawkins",
+          "normalized": "young hawkins",
+          "parsed": {
+            "original": "young Hawkins",
+            "normalized": "young hawkins",
+            "tokens": [
+              "young",
+              "hawkins"
+            ],
+            "title": null,
+            "base_tokens": [
+              "young",
+              "hawkins"
+            ],
+            "surname": "hawkins",
+            "given": "young",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_012"
+          ],
+          "variants": [
+            "young Hawkins"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "James Hawkins": [],
+        "Jim Hawkins": [
+          "same_surname",
+          "role_overlap"
+        ],
+        "young Hawkins": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_016",
+      "members": [
+        "John",
+        "Long John"
+      ],
+      "member_records": [
+        {
+          "name": "John",
+          "normalized": "john",
+          "parsed": {
+            "original": "John",
+            "normalized": "john",
+            "tokens": [
+              "john"
+            ],
+            "title": null,
+            "base_tokens": [
+              "john"
+            ],
+            "surname": "john",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_020"
+          ],
+          "variants": [
+            "John"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Long John",
+          "normalized": "long john",
+          "parsed": {
+            "original": "Long John",
+            "normalized": "long john",
+            "tokens": [
+              "long",
+              "john"
+            ],
+            "title": null,
+            "base_tokens": [
+              "long",
+              "john"
+            ],
+            "surname": "john",
+            "given": "long",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_017",
+            "chunk_021",
+            "chunk_022",
+            "chunk_023",
+            "chunk_027",
+            "chunk_033",
+            "chunk_034",
+            "chunk_049",
+            "chunk_050",
+            "chunk_055",
+            "chunk_058"
+          ],
+          "variants": [
+            "Long John"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "John": [],
+        "Long John": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_017",
+      "members": [
+        "John Silver",
+        "Long John Silver",
+        "Silver"
+      ],
+      "member_records": [
+        {
+          "name": "John Silver",
+          "normalized": "john silver",
+          "parsed": {
+            "original": "John Silver",
+            "normalized": "john silver",
+            "tokens": [
+              "john",
+              "silver"
+            ],
+            "title": null,
+            "base_tokens": [
+              "john",
+              "silver"
+            ],
+            "surname": "silver",
+            "given": "john",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "captain",
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_049",
+            "chunk_051",
+            "chunk_059"
+          ],
+          "variants": [
+            "John Silver",
+            "Silver",
+            "Long John"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Long John Silver",
+          "normalized": "long john silver",
+          "parsed": {
+            "original": "Long John Silver",
+            "normalized": "long john silver",
+            "tokens": [
+              "long",
+              "john",
+              "silver"
+            ],
+            "title": null,
+            "base_tokens": [
+              "long",
+              "john",
+              "silver"
+            ],
+            "surname": "silver",
+            "given": "long",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_012",
+            "chunk_014",
+            "chunk_015",
+            "chunk_024"
+          ],
+          "variants": [
+            "Long John Silver"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Silver",
+          "normalized": "silver",
+          "parsed": {
+            "original": "Silver",
+            "normalized": "silver",
+            "tokens": [
+              "silver"
+            ],
+            "title": null,
+            "base_tokens": [
+              "silver"
+            ],
+            "surname": "silver",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown",
+            "captain",
+            "pirate"
+          ],
+          "chunks": [
+            "chunk_018",
+            "chunk_020",
+            "chunk_021",
+            "chunk_022",
+            "chunk_023",
+            "chunk_025",
+            "chunk_028",
+            "chunk_034",
+            "chunk_037",
+            "chunk_040",
+            "chunk_047",
+            "chunk_049",
+            "chunk_050",
+            "chunk_053",
+            "chunk_054",
+            "chunk_055",
+            "chunk_056",
+            "chunk_057",
+            "chunk_058",
+            "chunk_060",
+            "chunk_061"
+          ],
+          "variants": [
+            "Silver"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "John Silver": [],
+        "Long John Silver": [
+          "same_surname",
+          "role_overlap"
+        ],
+        "Silver": [
+          "same_surname",
+          "chunk_overlap",
+          "role_overlap",
+          "variant_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_018",
+      "members": [
+        "John Trelawney",
+        "Mr. Trelawney",
+        "Squire Trelawney"
+      ],
+      "member_records": [
+        {
+          "name": "John Trelawney",
+          "normalized": "john trelawney",
+          "parsed": {
+            "original": "John Trelawney",
+            "normalized": "john trelawney",
+            "tokens": [
+              "john",
+              "trelawney"
+            ],
+            "title": null,
+            "base_tokens": [
+              "john",
+              "trelawney"
+            ],
+            "surname": "trelawney",
+            "given": "john",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_012",
+            "chunk_031"
+          ],
+          "variants": [
+            "John Trelawney"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Mr. Trelawney",
+          "normalized": "mr. trelawney",
+          "parsed": {
+            "original": "Mr. Trelawney",
+            "normalized": "mr trelawney",
+            "tokens": [
+              "mr",
+              "trelawney"
+            ],
+            "title": "mr",
+            "base_tokens": [
+              "trelawney"
+            ],
+            "surname": "trelawney",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_010",
+            "chunk_013",
+            "chunk_017",
+            "chunk_021",
+            "chunk_035",
+            "chunk_036",
+            "chunk_011"
+          ],
+          "variants": [
+            "Mr. Trelawney",
+            "Trelawney"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Squire Trelawney",
+          "normalized": "squire trelawney",
+          "parsed": {
+            "original": "Squire Trelawney",
+            "normalized": "squire trelawney",
+            "tokens": [
+              "squire",
+              "trelawney"
+            ],
+            "title": "squire",
+            "base_tokens": [
+              "trelawney"
+            ],
+            "surname": "trelawney",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_000"
+          ],
+          "variants": [
+            "Squire Trelawney"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "John Trelawney": [],
+        "Mr. Trelawney": [
+          "same_surname",
+          "role_overlap"
+        ],
+        "Squire Trelawney": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_019",
+      "members": [
+        "Joyce",
+        "Richard Joyce"
+      ],
+      "member_records": [
+        {
+          "name": "Joyce",
+          "normalized": "joyce",
+          "parsed": {
+            "original": "Joyce",
+            "normalized": "joyce",
+            "tokens": [
+              "joyce"
+            ],
+            "title": null,
+            "base_tokens": [
+              "joyce"
+            ],
+            "surname": "joyce",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_011",
+            "chunk_023",
+            "chunk_028",
+            "chunk_035",
+            "chunk_036"
+          ],
+          "variants": [
+            "Joyce"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Richard Joyce",
+          "normalized": "richard joyce",
+          "parsed": {
+            "original": "Richard Joyce",
+            "normalized": "richard joyce",
+            "tokens": [
+              "richard",
+              "joyce"
+            ],
+            "title": null,
+            "base_tokens": [
+              "richard",
+              "joyce"
+            ],
+            "surname": "joyce",
+            "given": "richard",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_031"
+          ],
+          "variants": [
+            "Richard Joyce"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Joyce": [],
+        "Richard Joyce": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_020",
+      "members": [
+        "Master Pew",
+        "Old Pew",
+        "Pew"
+      ],
+      "member_records": [
+        {
+          "name": "Master Pew",
+          "normalized": "master pew",
+          "parsed": {
+            "original": "Master Pew",
+            "normalized": "master pew",
+            "tokens": [
+              "master",
+              "pew"
+            ],
+            "title": null,
+            "base_tokens": [
+              "master",
+              "pew"
+            ],
+            "surname": "pew",
+            "given": "master",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_010"
+          ],
+          "variants": [
+            "Master Pew"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Old Pew",
+          "normalized": "old pew",
+          "parsed": {
+            "original": "Old Pew",
+            "normalized": "old pew",
+            "tokens": [
+              "old",
+              "pew"
+            ],
+            "title": null,
+            "base_tokens": [
+              "old",
+              "pew"
+            ],
+            "surname": "pew",
+            "given": "old",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_018"
+          ],
+          "variants": [
+            "Old Pew"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Pew",
+          "normalized": "pew",
+          "parsed": {
+            "original": "Pew",
+            "normalized": "pew",
+            "tokens": [
+              "pew"
+            ],
+            "title": null,
+            "base_tokens": [
+              "pew"
+            ],
+            "surname": "pew",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_009",
+            "chunk_014"
+          ],
+          "variants": [
+            "Pew",
+            "the blind man"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Master Pew": [],
+        "Old Pew": [
+          "same_surname",
+          "role_overlap"
+        ],
+        "Pew": [
+          "same_surname",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_021",
+      "members": [
+        "Morgan",
+        "old Morgan",
+        "Tom Morgan"
+      ],
+      "member_records": [
+        {
+          "name": "Morgan",
+          "normalized": "morgan",
+          "parsed": {
+            "original": "Morgan",
+            "normalized": "morgan",
+            "tokens": [
+              "morgan"
+            ],
+            "title": null,
+            "base_tokens": [
+              "morgan"
+            ],
+            "surname": "morgan",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_049",
+            "chunk_050",
+            "chunk_051",
+            "chunk_056",
+            "chunk_058"
+          ],
+          "variants": [
+            "Morgan",
+            "Tom Morgan"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "old Morgan",
+          "normalized": "old morgan",
+          "parsed": {
+            "original": "old Morgan",
+            "normalized": "old morgan",
+            "tokens": [
+              "old",
+              "morgan"
+            ],
+            "title": null,
+            "base_tokens": [
+              "old",
+              "morgan"
+            ],
+            "surname": "morgan",
+            "given": "old",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_055"
+          ],
+          "variants": [
+            "old Morgan"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Tom Morgan",
+          "normalized": "tom morgan",
+          "parsed": {
+            "original": "Tom Morgan",
+            "normalized": "tom morgan",
+            "tokens": [
+              "tom",
+              "morgan"
+            ],
+            "title": null,
+            "base_tokens": [
+              "tom",
+              "morgan"
+            ],
+            "surname": "morgan",
+            "given": "tom",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_014",
+            "chunk_049",
+            "chunk_055"
+          ],
+          "variants": [
+            "Tom Morgan",
+            "Morgan"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "Morgan": [],
+        "old Morgan": [
+          "same_surname",
+          "role_overlap"
+        ],
+        "Tom Morgan": [
+          "same_surname",
+          "chunk_overlap",
+          "role_overlap",
+          "variant_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_022",
+      "members": [
+        "old Redruth",
+        "old Tom Redruth",
+        "Redruth",
+        "Thomas Redruth",
+        "Tom Redruth"
+      ],
+      "member_records": [
+        {
+          "name": "old Redruth",
+          "normalized": "old redruth",
+          "parsed": {
+            "original": "old Redruth",
+            "normalized": "old redruth",
+            "tokens": [
+              "old",
+              "redruth"
+            ],
+            "title": null,
+            "base_tokens": [
+              "old",
+              "redruth"
+            ],
+            "surname": "redruth",
+            "given": "old",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_012"
+          ],
+          "variants": [
+            "old Redruth"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "old Tom Redruth",
+          "normalized": "old tom redruth",
+          "parsed": {
+            "original": "old Tom Redruth",
+            "normalized": "old tom redruth",
+            "tokens": [
+              "old",
+              "tom",
+              "redruth"
+            ],
+            "title": null,
+            "base_tokens": [
+              "old",
+              "tom",
+              "redruth"
+            ],
+            "surname": "redruth",
+            "given": "old",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_013"
+          ],
+          "variants": [
+            "old Tom Redruth"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Redruth",
+          "normalized": "redruth",
+          "parsed": {
+            "original": "Redruth",
+            "normalized": "redruth",
+            "tokens": [
+              "redruth"
+            ],
+            "title": null,
+            "base_tokens": [
+              "redruth"
+            ],
+            "surname": "redruth",
+            "given": null,
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_011",
+            "chunk_023",
+            "chunk_028",
+            "chunk_029",
+            "chunk_030"
+          ],
+          "variants": [
+            "Redruth"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Thomas Redruth",
+          "normalized": "thomas redruth",
+          "parsed": {
+            "original": "Thomas Redruth",
+            "normalized": "thomas redruth",
+            "tokens": [
+              "thomas",
+              "redruth"
+            ],
+            "title": null,
+            "base_tokens": [
+              "thomas",
+              "redruth"
+            ],
+            "surname": "redruth",
+            "given": "thomas",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dossiers"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_031"
+          ],
+          "variants": [
+            "Thomas Redruth"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        },
+        {
+          "name": "Tom Redruth",
+          "normalized": "tom redruth",
+          "parsed": {
+            "original": "Tom Redruth",
+            "normalized": "tom redruth",
+            "tokens": [
+              "tom",
+              "redruth"
+            ],
+            "title": null,
+            "base_tokens": [
+              "tom",
+              "redruth"
+            ],
+            "surname": "redruth",
+            "given": "tom",
+            "is_generic": false
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown"
+          ],
+          "chunks": [
+            "chunk_012",
+            "chunk_030"
+          ],
+          "variants": [
+            "Tom Redruth"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "old Redruth": [],
+        "old Tom Redruth": [
+          "same_surname",
+          "same_given_name",
+          "role_overlap"
+        ],
+        "Redruth": [
+          "same_surname",
+          "role_overlap"
+        ],
+        "Thomas Redruth": [
+          "same_surname",
+          "role_overlap"
+        ],
+        "Tom Redruth": [
+          "same_surname",
+          "chunk_overlap",
+          "role_overlap"
+        ]
+      }
+    },
+    {
+      "group_id": "group_023",
+      "members": [
+        "squire",
+        "the squire"
+      ],
+      "member_records": [
+        {
+          "name": "squire",
+          "normalized": "squire",
+          "parsed": {
+            "original": "squire",
+            "normalized": "squire",
+            "tokens": [
+              "squire"
+            ],
+            "title": "squire",
+            "base_tokens": [],
+            "surname": null,
+            "given": null,
+            "is_generic": true
+          },
+          "sources": [
+            "entities",
+            "entities",
+            "entities_normalized",
+            "dialogue"
+          ],
+          "roles": [],
+          "chunks": [
+            "chunk_011",
+            "chunk_036",
+            "chunk_037"
+          ],
+          "variants": [
+            "squire",
+            "Squire"
+          ],
+          "accents": [],
+          "notes": []
+        },
+        {
+          "name": "the squire",
+          "normalized": "the squire",
+          "parsed": {
+            "original": "the squire",
+            "normalized": "squire",
+            "tokens": [
+              "squire"
+            ],
+            "title": "squire",
+            "base_tokens": [],
+            "surname": null,
+            "given": null,
+            "is_generic": true
+          },
+          "sources": [
+            "entities",
+            "entities_normalized",
+            "dialogue",
+            "dossiers",
+            "conflict_report"
+          ],
+          "roles": [
+            "unknown",
+            "confirmed",
+            "squire"
+          ],
+          "chunks": [
+            "chunk_010",
+            "chunk_012",
+            "chunk_013",
+            "chunk_015",
+            "chunk_018",
+            "chunk_021",
+            "chunk_022",
+            "chunk_027",
+            "chunk_028",
+            "chunk_029",
+            "chunk_030",
+            "chunk_031",
+            "chunk_053",
+            "chunk_058",
+            "chunk_059",
+            "chunk_060",
+            "chunk_011",
+            "chunk_036",
+            "chunk_037"
+          ],
+          "variants": [
+            "the squire",
+            "squire",
+            "Squire"
+          ],
+          "accents": [
+            "not specified in excerpt"
+          ],
+          "notes": []
+        }
+      ],
+      "pairing_reasons": {
+        "squire": [],
+        "the squire": [
+          "exact_normalized_match",
+          "same_title",
+          "generic_title_to_titled_name",
+          "generic_title_to_titled_name",
+          "chunk_overlap",
+          "variant_overlap"
+        ]
+      }
+    }
+  ]
+}

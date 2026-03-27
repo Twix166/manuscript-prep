@@ -1,0 +1,25 @@
+{
+  "characters": [
+    "Tom Morgan",
+    "John Silver",
+    "Jim Hawkins",
+    "the doctor",
+    "Long John"
+  ],
+  "places": [
+    "block house"
+  ],
+  "objects": [
+    "cutlass",
+    "torch",
+    "pipe",
+    "cask",
+    "cannikin",
+    "firewood"
+  ],
+  "identity_notes": [
+    "Long John and John Silver are the same entity",
+    "the sea-cook refers to John Silver",
+    "the house and block house are the same entity"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "characters": [
+    "Dr. Livesey",
+    "the captain",
+    "Trelawney",
+    "Gray",
+    "the squire",
+    "Hunter",
+    "Joyce",
+    "Tom Redruth",
+    "Job Anderson",
+    "the boatswain",
+    "Blandly"
+  ],
+  "places": [
+    "stockade",
+    "log-house",
+    "block house",
+    "wood",
+    "palisade",
+    "gallery",
+    "enclosure"
+  ],
+  "objects": [
+    "cutlass",
+    "gun",
+    "priming",
+    "Bible",
+    "rope",
+    "pen",
+    "ink",
+    "log-book",
+    "tobacco",
+    "British colours",
+    "fir-tree",
+    "flag",
+    "powder",
+    "shot",
+    "ball",
+    "sand",
+    "mattress"
+  ],
+  "identity_notes": []
+}

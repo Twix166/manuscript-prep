@@ -1,0 +1,26 @@
+{
+  "characters": [
+    "Captain Smollett",
+    "Mr. Trelawney",
+    "Dr. Livesey",
+    "Gray",
+    "Joyce",
+    "Hawkins",
+    "Hunter"
+  ],
+  "places": [
+    "block house",
+    "stockade",
+    "porch",
+    "clearing"
+  ],
+  "objects": [
+    "cutlasses",
+    "muskets",
+    "fire-basket",
+    "sand",
+    "ammonition",
+    "tables"
+  ],
+  "identity_notes": []
+}

@@ -1,0 +1,125 @@
+{
+  "character_dossiers": [
+    {
+      "name": "Long John Silver",
+      "aliases": [],
+      "role": "landlord",
+      "biography": "A one-legged tavern keeper with a crutch, described as tall, strong, and cheerful. Known for his interactions with customers and the narrator.",
+      "personality_traits": [
+        "cheerful",
+        "friendly",
+        "stern"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Black Dog",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A buccaneer mentioned in dialogue, recognized by the narrator as a former customer at the Admiral Benbow.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the tallow-faced man",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A man with a tallow face missing two fingers, previously seen at the Admiral Benbow.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Tom Morgan",
+      "aliases": [],
+      "role": "sailor",
+      "biography": "An old, grey-haired sailor with a mahogany face, described as rolling a quid and speaking with a crew member.",
+      "personality_traits": [
+        "stupid",
+        "submissive"
+      ],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Ben",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A runner associated with the tavern, tasked with chasing Black Dog.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the squire",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A character who gives a note to the narrator addressed to Long John Silver.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the blind man",
+      "aliases": [
+        "Pew"
+      ],
+      "role": "unknown",
+      "biography": "A blind beggar previously seen at the Admiral Benbow, recognized by the narrator.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Pew",
+      "aliases": [
+        "the blind man"
+      ],
+      "role": "unknown",
+      "biography": "A blind beggar previously seen at the Admiral Benbow, recognized by the narrator.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "Harry",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A character who recognizes Black Dog and alerts Long John Silver.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": true,
+      "identity_status": "confirmed"
+    },
+    {
+      "name": "the captain",
+      "aliases": [],
+      "role": "unknown",
+      "biography": "A character mentioned in dialogue, referenced by Long John Silver as part of a buccaneer group.",
+      "personality_traits": [],
+      "vocal_notes": "unknown",
+      "accent": "not specified in excerpt",
+      "spoken_dialogue": false,
+      "identity_status": "confirmed"
+    }
+  ]
+}
