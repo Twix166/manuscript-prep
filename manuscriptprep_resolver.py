@@ -53,8 +53,12 @@ import json
 import re
 import subprocess
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
+from manuscriptprep.paths import build_paths
 
 TITLE_EQUIVS = {
     "dr": "doctor",
@@ -127,6 +131,17 @@ If the group should NOT be merged, set:
 - "confidence": "do_not_merge" or "review"
 - "canonical_name": ""
 """
+
+
+@dataclass
+class ResolverRuntimeSettings:
+    input_dir: Path
+    output_dir: Path
+    model: str
+    timeout: int
+    min_variant_count: int
+    max_group_size: int
+    config_path: Optional[Path]
 
 def read_json(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
@@ -520,53 +535,107 @@ def apply_resolution_to_book(book_merged: Dict[str, Any], resolution_map: Dict[s
     out["resolution_map"] = resolution_map
     return out
 
+
+def resolve_resolver_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPrepConfig]) -> ResolverRuntimeSettings:
+    if cfg is None:
+        if args.input_dir is None or args.output_dir is None or args.model is None:
+            raise ConfigError(
+                "Missing required --input-dir, --output-dir, or --model. Provide them explicitly, or use --config with --book-slug."
+            )
+        return ResolverRuntimeSettings(
+            input_dir=args.input_dir.expanduser(),
+            output_dir=args.output_dir.expanduser(),
+            model=args.model,
+            timeout=args.timeout if args.timeout is not None else 180,
+            min_variant_count=args.min_variant_count if args.min_variant_count is not None else 2,
+            max_group_size=args.max_group_size if args.max_group_size is not None else 8,
+            config_path=None,
+        )
+
+    paths = build_paths(cfg)
+    input_dir = args.input_dir.expanduser() if args.input_dir is not None else None
+    output_dir = args.output_dir.expanduser() if args.output_dir is not None else None
+
+    if input_dir is None or output_dir is None:
+        if not args.book_slug:
+            raise ConfigError(
+                "When using --config without explicit --input-dir and --output-dir, provide --book-slug."
+            )
+        slug = args.book_slug
+        input_dir = input_dir or (paths.merged_root / slug)
+        output_dir = output_dir or (paths.resolved_root / slug)
+
+    model = args.model or str(cfg.require("models", "resolver"))
+    timeout = args.timeout if args.timeout is not None else int(cfg.get("timeouts", "resolver_timeout_seconds", default=180))
+    min_variant_count = args.min_variant_count if args.min_variant_count is not None else 2
+    max_group_size = args.max_group_size if args.max_group_size is not None else 8
+
+    return ResolverRuntimeSettings(
+        input_dir=input_dir,
+        output_dir=output_dir,
+        model=model,
+        timeout=timeout,
+        min_variant_count=min_variant_count,
+        max_group_size=max_group_size,
+        config_path=cfg.path,
+    )
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Book-level LLM resolver for ManuscriptPrep.")
-    parser.add_argument("--input-dir", type=Path, required=True, help="Merged book directory")
-    parser.add_argument("--output-dir", type=Path, required=True, help="Output directory for resolved artifacts")
-    parser.add_argument("--model", required=True, help="Ollama model name to use for resolution")
-    parser.add_argument("--timeout", type=int, default=180, help="Per-group Ollama timeout in seconds")
-    parser.add_argument("--min-variant-count", type=int, default=2, help="Minimum group size to send for LLM resolution")
-    parser.add_argument("--max-group-size", type=int, default=8, help="Maximum candidate group size")
+    parser.add_argument("--config", type=Path, default=None, help="Optional YAML config file")
+    parser.add_argument("--book-slug", default=None, help="Book slug used to derive config-based paths")
+    parser.add_argument("--input-dir", type=Path, required=False, help="Merged book directory")
+    parser.add_argument("--output-dir", type=Path, required=False, help="Output directory for resolved artifacts")
+    parser.add_argument("--model", required=False, help="Ollama model name to use for resolution")
+    parser.add_argument("--timeout", type=int, default=None, help="Per-group Ollama timeout in seconds")
+    parser.add_argument("--min-variant-count", type=int, default=None, help="Minimum group size to send for LLM resolution")
+    parser.add_argument("--max-group-size", type=int, default=None, help="Maximum candidate group size")
     return parser.parse_args()
 
 def main() -> int:
     args = parse_args()
-    if not args.input_dir.is_dir():
-        raise SystemExit(f"Input dir does not exist: {args.input_dir}")
+    try:
+        cfg = load_config(args.config) if args.config is not None else None
+        settings = resolve_resolver_settings(args, cfg)
+    except (ConfigError, RuntimeError) as exc:
+        raise SystemExit(str(exc))
+    if not settings.input_dir.is_dir():
+        raise SystemExit(f"Input dir does not exist: {settings.input_dir}")
 
-    book_merged = read_json(args.input_dir / "book_merged.json")
-    entities = read_json(args.input_dir / "entities_merged.json")
-    dossiers = read_json(args.input_dir / "dossiers_merged.json")
-    conflict_report = read_json(args.input_dir / "conflict_report.json")
+    book_merged = read_json(settings.input_dir / "book_merged.json")
+    entities = read_json(settings.input_dir / "entities_merged.json")
+    dossiers = read_json(settings.input_dir / "dossiers_merged.json")
+    conflict_report = read_json(settings.input_dir / "conflict_report.json")
 
     pool = build_character_pool(book_merged, entities, dossiers, conflict_report)
     groups = cluster_candidates(
         pool=pool,
-        min_variant_count=args.min_variant_count,
-        max_group_size=args.max_group_size,
+        min_variant_count=settings.min_variant_count,
+        max_group_size=settings.max_group_size,
     )
 
-    llm_results = resolve_groups_with_llm(groups, args.model, args.timeout)
+    llm_results = resolve_groups_with_llm(groups, settings.model, settings.timeout)
     resolution_map = build_resolution_map(llm_results)
     book_resolved = apply_resolution_to_book(book_merged, resolution_map)
+    book_resolved["config_path"] = str(settings.config_path.resolve()) if settings.config_path is not None else None
 
     resolution_report = {
-        "model": args.model,
+        "model": settings.model,
         "candidate_group_count": len(groups),
         "resolved_group_count": len(llm_results),
         "merged_group_count": sum(1 for r in resolution_map.get("resolutions", []) if r.get("merge")),
         "variant_mapping_count": len(resolution_map.get("variant_to_canonical", {})),
+        "config_path": str(settings.config_path.resolve()) if settings.config_path is not None else None,
     }
 
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    write_json(args.output_dir / "resolution_candidates.json", {"groups": groups})
-    write_json(args.output_dir / "resolution_map.json", resolution_map)
-    write_json(args.output_dir / "resolution_report.json", resolution_report)
-    write_json(args.output_dir / "book_resolved.json", book_resolved)
+    settings.output_dir.mkdir(parents=True, exist_ok=True)
+    write_json(settings.output_dir / "resolution_candidates.json", {"groups": groups})
+    write_json(settings.output_dir / "resolution_map.json", resolution_map)
+    write_json(settings.output_dir / "resolution_report.json", resolution_report)
+    write_json(settings.output_dir / "book_resolved.json", book_resolved)
 
-    print(f"Resolved {len(groups)} candidate groups with model {args.model}")
-    print(f"Wrote resolved outputs to {args.output_dir}")
+    print(f"Resolved {len(groups)} candidate groups with model {settings.model}")
+    print(f"Wrote resolved outputs to {settings.output_dir}")
     return 0
 
 if __name__ == "__main__":

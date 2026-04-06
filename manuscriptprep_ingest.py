@@ -32,6 +32,7 @@ Optional:
 
 Requirements:
 - Python 3.10+
+- PyYAML if using --config
 - pdftotext (recommended)
 - pdfinfo (optional but helpful)
 - ocrmypdf + tesseract (optional, only for scanned PDFs)
@@ -52,6 +53,9 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
+from manuscriptprep.paths import build_paths
 
 
 def utc_now_iso() -> str:
@@ -128,6 +132,26 @@ class ChunkRecord:
     contains_toc_like_content: bool
     contains_front_matter: bool
     warnings: List[str]
+
+
+@dataclass
+class IngestRuntimeSettings:
+    input_pdf: Path
+    title: str
+    workdir: Path
+    source_dir: Path
+    extracted_dir: Path
+    cleaned_dir: Path
+    chunks_dir: Path
+    manifests_dir: Path
+    logs_dir: Path
+    tmp_dir: Path
+    chunk_words: int
+    min_chunk_words: int
+    max_chunk_words: int
+    force_ocr: bool
+    strip_front_matter: bool
+    strip_toc: bool
 
 
 def require_tool(name: str) -> None:
@@ -551,19 +575,88 @@ def chunk_clean_text(
     return chunks, chunk_stats
 
 
+def resolve_work_paths(cfg: Optional[ManuscriptPrepConfig], workdir: Path, book_slug: str) -> Dict[str, Path]:
+    if cfg is None:
+        return {
+            "source_dir": workdir / "source",
+            "extracted_dir": workdir / "extracted" / book_slug,
+            "cleaned_dir": workdir / "cleaned" / book_slug,
+            "chunks_dir": workdir / "chunks",
+            "manifests_dir": workdir / "manifests" / book_slug,
+            "logs_dir": workdir / "logs",
+            "tmp_dir": workdir / "tmp" / book_slug,
+        }
+
+    paths = build_paths(cfg)
+    return {
+        "source_dir": paths.input_root,
+        "extracted_dir": paths.extracted_root / book_slug,
+        "cleaned_dir": paths.cleaned_root / book_slug,
+        "chunks_dir": paths.chunks_root,
+        "manifests_dir": paths.workspace_root / "manifests" / book_slug,
+        "logs_dir": paths.logs_root,
+        "tmp_dir": paths.workspace_root / "tmp" / book_slug,
+    }
+
+
+def resolve_ingest_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPrepConfig]) -> IngestRuntimeSettings:
+    if args.input is None:
+        raise ConfigError("Missing required input PDF. Use --input.")
+    if args.title is None:
+        raise ConfigError("Missing required book title. Use --title.")
+
+    input_pdf = args.input.expanduser()
+    title = args.title
+    book_slug = slugify(title)
+
+    if cfg is not None:
+        workdir = (args.workdir.expanduser() if args.workdir is not None else Path(cfg.require("paths", "workspace_root")).expanduser())
+        chunk_words = args.chunk_words if args.chunk_words is not None else int(cfg.get("chunking", "target_words", default=1800))
+        min_chunk_words = args.min_chunk_words if args.min_chunk_words is not None else int(cfg.get("chunking", "min_words", default=1200))
+        max_chunk_words = args.max_chunk_words if args.max_chunk_words is not None else int(cfg.get("chunking", "max_words", default=2200))
+    else:
+        if args.workdir is None:
+            raise ConfigError("Missing required workspace directory. Use --workdir or provide --config.")
+        workdir = args.workdir.expanduser()
+        chunk_words = args.chunk_words if args.chunk_words is not None else 1800
+        min_chunk_words = args.min_chunk_words if args.min_chunk_words is not None else 1200
+        max_chunk_words = args.max_chunk_words if args.max_chunk_words is not None else 2200
+
+    paths = resolve_work_paths(cfg, workdir, book_slug)
+    return IngestRuntimeSettings(
+        input_pdf=input_pdf,
+        title=title,
+        workdir=workdir,
+        source_dir=paths["source_dir"],
+        extracted_dir=paths["extracted_dir"],
+        cleaned_dir=paths["cleaned_dir"],
+        chunks_dir=paths["chunks_dir"],
+        manifests_dir=paths["manifests_dir"],
+        logs_dir=paths["logs_dir"],
+        tmp_dir=paths["tmp_dir"],
+        chunk_words=chunk_words,
+        min_chunk_words=min_chunk_words,
+        max_chunk_words=max_chunk_words,
+        force_ocr=args.force_ocr,
+        strip_front_matter=args.strip_front_matter,
+        strip_toc=args.strip_toc,
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="End-to-end ingest pipeline for ManuscriptPrep")
-    parser.add_argument("--input", type=Path, required=True, help="Source PDF path")
-    parser.add_argument("--workdir", type=Path, required=True, help="Workspace directory")
-    parser.add_argument("--title", required=True, help="Book title, used for book_slug subdirectories")
+    parser.add_argument("--config", type=Path, default=None, help="Optional YAML config file")
+    parser.add_argument("--input", type=Path, required=False, help="Source PDF path")
+    parser.add_argument("--workdir", type=Path, required=False, help="Workspace directory")
+    parser.add_argument("--title", required=False, help="Book title, used for book_slug subdirectories")
     parser.add_argument(
         "--chunk-words",
         type=int,
-        default=1800,
+        default=None,
         help="Target chunk size in words. Reduce this if the orchestrator is timing out.",
     )
-    parser.add_argument("--min-chunk-words", type=int, default=1200, help="Minimum chunk size in words")
-    parser.add_argument("--max-chunk-words", type=int, default=2200, help="Maximum chunk size in words")
+    parser.add_argument("--min-chunk-words", type=int, default=None, help="Minimum chunk size in words")
+    parser.add_argument("--max-chunk-words", type=int, default=None, help="Maximum chunk size in words")
     parser.add_argument("--force-ocr", action="store_true", help="Force OCR extraction path")
     parser.add_argument("--strip-front-matter", action="store_true", help="Reserved flag for future front matter splitting")
     parser.add_argument("--strip-toc", action="store_true", help="Reserved flag for future TOC splitting")
@@ -573,55 +666,61 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    input_pdf = args.input
+    try:
+        cfg = load_config(args.config) if args.config is not None else None
+        settings = resolve_ingest_settings(args, cfg)
+    except (ConfigError, RuntimeError) as exc:
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 1
+
+    input_pdf = settings.input_pdf
     if not input_pdf.is_file():
         print(f"Input PDF does not exist: {input_pdf}", file=sys.stderr)
         return 1
 
-    if args.min_chunk_words > args.chunk_words or args.chunk_words > args.max_chunk_words:
+    if settings.min_chunk_words > settings.chunk_words or settings.chunk_words > settings.max_chunk_words:
         print(
             "Chunk sizes must satisfy: min_chunk_words <= chunk_words <= max_chunk_words",
             file=sys.stderr,
         )
         return 1
 
-    workdir = args.workdir
-    book_slug = slugify(args.title)
+    book_slug = slugify(settings.title)
 
-    source_dir = workdir / "source"
-    extracted_dir = workdir / "extracted" / book_slug
-    cleaned_dir = workdir / "cleaned" / book_slug
-    chunks_dir = workdir / "chunks"
-    manifests_dir = workdir / "manifests" / book_slug
-    logs_dir = workdir / "logs"
-    tmp_dir = workdir / "tmp" / book_slug
-
-    for d in [source_dir, extracted_dir, cleaned_dir, chunks_dir, manifests_dir, logs_dir, tmp_dir]:
+    for d in [
+        settings.source_dir,
+        settings.extracted_dir,
+        settings.cleaned_dir,
+        settings.chunks_dir,
+        settings.manifests_dir,
+        settings.logs_dir,
+        settings.tmp_dir,
+    ]:
         d.mkdir(parents=True, exist_ok=True)
 
-    logger = Logger(logs_dir / "ingest.log")
-    logger.log(f"Starting ManuscriptPrep ingest for title='{args.title}' slug='{book_slug}'")
+    logger = Logger(settings.logs_dir / "ingest.log")
+    logger.log(f"Starting ManuscriptPrep ingest for title='{settings.title}' slug='{book_slug}'")
 
-    workspace_pdf = source_dir / input_pdf.name
+    workspace_pdf = settings.source_dir / input_pdf.name
     if workspace_pdf.resolve() != input_pdf.resolve():
         shutil.copy2(input_pdf, workspace_pdf)
         logger.log(f"Copied source PDF to workspace: {workspace_pdf}")
     else:
         logger.log(f"Using source PDF in place: {workspace_pdf}")
 
-    raw_txt_path = extracted_dir / "raw.txt"
-    raw_ocr_txt_path = extracted_dir / "raw_ocr.txt"
-    clean_txt_path = cleaned_dir / "clean.txt"
+    raw_txt_path = settings.extracted_dir / "raw.txt"
+    raw_ocr_txt_path = settings.extracted_dir / "raw_ocr.txt"
+    clean_txt_path = settings.cleaned_dir / "clean.txt"
 
-    classification = classify_pdf(workspace_pdf, tmp_dir, logger)
+    classification = classify_pdf(workspace_pdf, settings.tmp_dir, logger)
 
     extraction_info = extract_raw_text(
         pdf_path=workspace_pdf,
         raw_txt_path=raw_txt_path,
         raw_ocr_txt_path=raw_ocr_txt_path,
-        tmp_dir=tmp_dir,
+        tmp_dir=settings.tmp_dir,
         classification=classification,
-        force_ocr=args.force_ocr,
+        force_ocr=settings.force_ocr,
         logger=logger,
     )
 
@@ -634,26 +733,26 @@ def main() -> int:
 
     chunks, chunk_stats = chunk_clean_text(
         clean_text_value=clean_text_value,
-        book_title=args.title,
-        chunks_root=chunks_dir,
-        min_chunk_words=args.min_chunk_words,
-        target_chunk_words=args.chunk_words,
-        max_chunk_words=args.max_chunk_words,
+        book_title=settings.title,
+        chunks_root=settings.chunks_dir,
+        min_chunk_words=settings.min_chunk_words,
+        target_chunk_words=settings.chunk_words,
+        max_chunk_words=settings.max_chunk_words,
         logger=logger,
     )
 
     chunk_manifest = {
         "source_pdf": str(workspace_pdf),
-        "book_title": args.title,
+        "book_title": settings.title,
         "book_slug": book_slug,
         "raw_text": str(raw_txt_path),
         "clean_text": str(clean_txt_path),
-        "chunk_dir": str(chunks_dir / book_slug),
+        "chunk_dir": str(settings.chunks_dir / book_slug),
         "chunk_count": len(chunks),
         "chunk_settings": {
-            "target_chunk_words": args.chunk_words,
-            "min_chunk_words": args.min_chunk_words,
-            "max_chunk_words": args.max_chunk_words,
+            "target_chunk_words": settings.chunk_words,
+            "min_chunk_words": settings.min_chunk_words,
+            "max_chunk_words": settings.max_chunk_words,
         },
         "chunks": [asdict(c) for c in chunks],
     }
@@ -661,13 +760,13 @@ def main() -> int:
     ingest_manifest = {
         "timestamp": utc_now_iso(),
         "source_pdf": str(workspace_pdf),
-        "book_title": args.title,
+        "book_title": settings.title,
         "book_slug": book_slug,
         "paths": {
             "raw_text": str(raw_txt_path),
             "raw_ocr_text": str(raw_ocr_txt_path) if extraction_info.get("ocr_used") else None,
             "clean_text": str(clean_txt_path),
-            "chunk_dir": str(chunks_dir / book_slug),
+            "chunk_dir": str(settings.chunks_dir / book_slug),
         },
         "classification": asdict(classification),
         "extraction": extraction_info,
@@ -675,17 +774,18 @@ def main() -> int:
         "structure_hints": structure_hints,
         "chunking": chunk_stats,
         "flags": {
-            "strip_front_matter": args.strip_front_matter,
-            "strip_toc": args.strip_toc,
-            "force_ocr": args.force_ocr,
+            "strip_front_matter": settings.strip_front_matter,
+            "strip_toc": settings.strip_toc,
+            "force_ocr": settings.force_ocr,
         },
+        "config_path": str(args.config.expanduser().resolve()) if args.config is not None else None,
     }
 
-    write_json(manifests_dir / "chunk_manifest.json", chunk_manifest)
-    write_json(manifests_dir / "ingest_manifest.json", ingest_manifest)
+    write_json(settings.manifests_dir / "chunk_manifest.json", chunk_manifest)
+    write_json(settings.manifests_dir / "ingest_manifest.json", ingest_manifest)
 
-    logger.log(f"Wrote chunk manifest to {manifests_dir / 'chunk_manifest.json'}")
-    logger.log(f"Wrote ingest manifest to {manifests_dir / 'ingest_manifest.json'}")
+    logger.log(f"Wrote chunk manifest to {settings.manifests_dir / 'chunk_manifest.json'}")
+    logger.log(f"Wrote ingest manifest to {settings.manifests_dir / 'ingest_manifest.json'}")
     logger.log("Ingest complete")
 
     return 0

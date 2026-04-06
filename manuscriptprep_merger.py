@@ -36,6 +36,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
+from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
+from manuscriptprep.paths import build_paths
+
 PASS_FILES = {
     "structure": "structure.json",
     "dialogue": "dialogue.json",
@@ -223,6 +226,14 @@ class ChunkData:
     dossiers: Optional[Dict[str, Any]]
     timing: Optional[Dict[str, Any]]
     chunk_manifest_entry: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class MergerRuntimeSettings:
+    input_dir: Path
+    output_dir: Path
+    chunk_manifest: Optional[Path]
+    config_path: Optional[Path]
 
 
 def find_chunk_dirs(input_dir: Path) -> List[Path]:
@@ -867,10 +878,48 @@ def build_conflict_report(
     }
 
 
+def resolve_merger_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPrepConfig]) -> MergerRuntimeSettings:
+    if cfg is None:
+        if args.input_dir is None or args.output_dir is None:
+            raise ConfigError("Missing required --input-dir or --output-dir. Provide both, or use --config with --book-slug.")
+        return MergerRuntimeSettings(
+            input_dir=args.input_dir.expanduser(),
+            output_dir=args.output_dir.expanduser(),
+            chunk_manifest=args.chunk_manifest.expanduser() if args.chunk_manifest is not None else None,
+            config_path=None,
+        )
+
+    paths = build_paths(cfg)
+    input_dir = args.input_dir.expanduser() if args.input_dir is not None else None
+    output_dir = args.output_dir.expanduser() if args.output_dir is not None else None
+
+    if input_dir is None or output_dir is None:
+        if not args.book_slug:
+            raise ConfigError(
+                "When using --config without explicit --input-dir and --output-dir, provide --book-slug."
+            )
+        slug = args.book_slug
+        input_dir = input_dir or (paths.output_root / slug)
+        output_dir = output_dir or (paths.merged_root / slug)
+
+    chunk_manifest = args.chunk_manifest.expanduser() if args.chunk_manifest is not None else None
+    if chunk_manifest is None and args.book_slug:
+        chunk_manifest = paths.workspace_root / "manifests" / args.book_slug / "chunk_manifest.json"
+
+    return MergerRuntimeSettings(
+        input_dir=input_dir,
+        output_dir=output_dir,
+        chunk_manifest=chunk_manifest,
+        config_path=cfg.path,
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Merge ManuscriptPrep per-chunk outputs into book-level JSON.")
-    parser.add_argument("--input-dir", type=Path, required=True, help="Chunk output directory, e.g. out/treasure_island")
-    parser.add_argument("--output-dir", type=Path, required=True, help="Destination for merged outputs")
+    parser.add_argument("--config", type=Path, default=None, help="Optional YAML config file")
+    parser.add_argument("--book-slug", default=None, help="Book slug used to derive config-based paths")
+    parser.add_argument("--input-dir", type=Path, required=False, help="Chunk output directory, e.g. out/treasure_island")
+    parser.add_argument("--output-dir", type=Path, required=False, help="Destination for merged outputs")
     parser.add_argument(
         "--chunk-manifest",
         type=Path,
@@ -882,13 +931,19 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    if not args.input_dir.is_dir():
-        raise SystemExit(f"Input dir does not exist: {args.input_dir}")
+    try:
+        cfg = load_config(args.config) if args.config is not None else None
+        settings = resolve_merger_settings(args, cfg)
+    except (ConfigError, RuntimeError) as exc:
+        raise SystemExit(str(exc))
 
-    manifest, manifest_map = load_chunk_manifest(args.chunk_manifest)
-    chunk_dirs = find_chunk_dirs(args.input_dir)
+    if not settings.input_dir.is_dir():
+        raise SystemExit(f"Input dir does not exist: {settings.input_dir}")
+
+    manifest, manifest_map = load_chunk_manifest(settings.chunk_manifest)
+    chunk_dirs = find_chunk_dirs(settings.input_dir)
     if not chunk_dirs:
-        raise SystemExit(f"No chunk directories found in {args.input_dir}")
+        raise SystemExit(f"No chunk directories found in {settings.input_dir}")
 
     chunks = [load_chunk_data(chunk_dir, manifest_map) for chunk_dir in chunk_dirs]
 
@@ -905,13 +960,14 @@ def main() -> int:
         dossiers_merged=dossiers_merged,
     )
 
-    book_slug = args.input_dir.name
+    book_slug = settings.input_dir.name
     book_title = manifest.get("book_title") if manifest else None
 
     book_merged = {
         "book_slug": book_slug,
         "book_title": book_title,
-        "source_chunk_manifest": str(args.chunk_manifest) if args.chunk_manifest else None,
+        "source_chunk_manifest": str(settings.chunk_manifest) if settings.chunk_manifest else None,
+        "config_path": str(settings.config_path.resolve()) if settings.config_path is not None else None,
         "merge_report": report,
         "timing_summary": timing_summary,
         "conflict_report": conflict_report,
@@ -921,17 +977,17 @@ def main() -> int:
         "dossiers": dossiers_merged,
     }
 
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    write_json(args.output_dir / "structure_merged.json", structure_merged)
-    write_json(args.output_dir / "dialogue_merged.json", dialogue_merged)
-    write_json(args.output_dir / "entities_merged.json", entities_merged)
-    write_json(args.output_dir / "dossiers_merged.json", dossiers_merged)
-    write_json(args.output_dir / "conflict_report.json", conflict_report)
-    write_json(args.output_dir / "merge_report.json", report)
-    write_json(args.output_dir / "book_merged.json", book_merged)
+    settings.output_dir.mkdir(parents=True, exist_ok=True)
+    write_json(settings.output_dir / "structure_merged.json", structure_merged)
+    write_json(settings.output_dir / "dialogue_merged.json", dialogue_merged)
+    write_json(settings.output_dir / "entities_merged.json", entities_merged)
+    write_json(settings.output_dir / "dossiers_merged.json", dossiers_merged)
+    write_json(settings.output_dir / "conflict_report.json", conflict_report)
+    write_json(settings.output_dir / "merge_report.json", report)
+    write_json(settings.output_dir / "book_merged.json", book_merged)
 
-    print(f"Merged {len(chunks)} chunks from {args.input_dir}")
-    print(f"Wrote merged outputs to {args.output_dir}")
+    print(f"Merged {len(chunks)} chunks from {settings.input_dir}")
+    print(f"Wrote merged outputs to {settings.output_dir}")
     return 0
 
 

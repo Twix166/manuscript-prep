@@ -4,6 +4,11 @@ manuscriptprep_orchestrator_tui.py
 
 A live TUI orchestrator for a 4-pass Ollama manuscript pipeline.
 
+Status:
+- Legacy orchestrator implementation.
+- Kept for reference and comparison.
+- Prefer `manuscriptprep_orchestrator_tui_refactored.py` for supported runs.
+
 Passes:
 1. structure
 2. dialogue
