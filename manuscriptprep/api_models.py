@@ -48,6 +48,7 @@ class ArtifactRef:
     path: str
     kind: str
     stage: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -57,6 +58,10 @@ class StageRun:
     started_at: Optional[str] = None
     finished_at: Optional[str] = None
     error: Optional[str] = None
+    command: List[str] = field(default_factory=list)
+    exit_code: Optional[int] = None
+    stdout_path: Optional[str] = None
+    stderr_path: Optional[str] = None
 
 
 @dataclass

@@ -37,6 +37,8 @@ import sys
 import threading
 import time
 import uuid
+from urllib import error as urllib_error
+from urllib import request as urllib_request
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -110,6 +112,7 @@ class TUIState:
     orchestrator_log: List[str] = field(default_factory=list)
     model_stdout_lines: List[str] = field(default_factory=list)
     model_stderr_lines: List[str] = field(default_factory=list)
+    gateway_job_id: Optional[str] = None
 
     def log(self, msg: str) -> None:
         timestamp = time.strftime("%H:%M:%S")
@@ -206,6 +209,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=None, help="Directory for outputs")
     parser.add_argument("--config", type=Path, default=None, help="Optional YAML config file")
     parser.add_argument("--book-slug", default=None, help="Optional book slug used when deriving paths from config")
+    parser.add_argument("--gateway-url", default=None, help="Optional gateway base URL for API-backed orchestration")
     parser.add_argument("--glob", default="*.txt", help="Glob for input-dir mode")
     parser.add_argument("--no-tui", action="store_true", help="Disable TUI and use plain logging")
 
@@ -317,6 +321,48 @@ def resolve_output_dir(args: argparse.Namespace, config_data: Dict[str, Any]) ->
         slug = args.input.stem
 
     return Path(output_root).expanduser() / slug
+
+
+def gateway_request(base_url: str, method: str, path: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    body = None
+    headers = {"Accept": "application/json"}
+    if payload is not None:
+        body = json.dumps(payload).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    req = urllib_request.Request(base_url.rstrip("/") + path, data=body, headers=headers, method=method)
+    try:
+        with urllib_request.urlopen(req) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib_error.HTTPError as exc:
+        raw = exc.read().decode("utf-8")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            payload = {"error": raw or str(exc)}
+        raise RuntimeError(payload.get("error", str(exc))) from exc
+    except urllib_error.URLError as exc:
+        raise RuntimeError(f"Gateway request failed: {exc.reason}") from exc
+
+
+def build_gateway_orchestrate_payload(args: argparse.Namespace, output_dir: Path) -> Dict[str, Any]:
+    if args.input is not None:
+        raise RuntimeError("Gateway mode currently requires --input-dir, not --input.")
+    if args.input_dir is None:
+        raise RuntimeError("Gateway mode requires --input-dir.")
+    if not args.input_dir.is_dir():
+        raise RuntimeError(f"Input directory does not exist: {args.input_dir}")
+
+    book_slug = args.book_slug or args.input_dir.name
+    payload: Dict[str, Any] = {
+        "pipeline": "orchestrate",
+        "book_slug": book_slug,
+        "config_path": str(args.config.expanduser().resolve()) if args.config else None,
+        "options": {
+            "input_dir": str(args.input_dir.expanduser()),
+            "output_dir": str(output_dir),
+        },
+    }
+    return payload
 
 
 def resolve_log_path(args: argparse.Namespace, output_dir: Path, runtime: RuntimeConfig) -> Path:
@@ -470,6 +516,7 @@ def render_tui(state: TUIState):
     status_table.add_column(ratio=1)
     status_table.add_column(ratio=3)
     status_table.add_row("Chunk", state.current_chunk)
+    status_table.add_row("Gateway job", state.gateway_job_id or "-")
     status_table.add_row("Pass", state.current_pass)
     status_table.add_row("Status", state.pass_status)
     status_table.add_row("Step", state.current_step)
@@ -1245,6 +1292,100 @@ def run_plain(args: argparse.Namespace, runtime: RuntimeConfig, output_dir: Path
         return 1
 
 
+def run_gateway_plain(args: argparse.Namespace, output_dir: Path, logger: JsonlLogger) -> int:
+    try:
+        payload = build_gateway_orchestrate_payload(args, output_dir)
+        created = gateway_request(args.gateway_url, "POST", "/v1/jobs", payload)
+        job_id = created["job_id"]
+        logger.emit(
+            level="INFO",
+            event_type="gateway_job_created",
+            message="Created gateway orchestrate job",
+            extra={"job_id": job_id, "gateway_url": args.gateway_url},
+        )
+        completed = gateway_request(args.gateway_url, "POST", f"/v1/jobs/{job_id}/run")
+        if completed.get("status") != "succeeded":
+            raise RuntimeError(completed.get("status", "Gateway job failed"))
+        print(f"[DONE] Gateway job completed: {job_id}")
+        return 0
+    except Exception as exc:
+        logger.emit(level="ERROR", event_type="gateway_run_abort", message=str(exc))
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 1
+
+
+def run_gateway_tui(args: argparse.Namespace, output_dir: Path, logger: JsonlLogger) -> int:
+    state = TUIState(current_pass="gateway", pass_status="submitting", current_step="creating gateway job")
+    run_result: Dict[str, Any] = {}
+    run_error: List[Exception] = []
+
+    try:
+        payload = build_gateway_orchestrate_payload(args, output_dir)
+        created = gateway_request(args.gateway_url, "POST", "/v1/jobs", payload)
+        job_id = created["job_id"]
+        state.gateway_job_id = job_id
+        state.log(f"Created gateway job: {job_id}")
+        logger.emit(
+            level="INFO",
+            event_type="gateway_job_created",
+            message="Created gateway orchestrate job",
+            extra={"job_id": job_id, "gateway_url": args.gateway_url},
+        )
+    except Exception as exc:
+        logger.emit(level="ERROR", event_type="gateway_job_create_failed", message=str(exc))
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 1
+
+    def _runner() -> None:
+        try:
+            run_result["payload"] = gateway_request(args.gateway_url, "POST", f"/v1/jobs/{state.gateway_job_id}/run")
+        except Exception as exc:  # pragma: no cover
+            run_error.append(exc)
+
+    thread = threading.Thread(target=_runner, daemon=True)
+    thread.start()
+
+    with Live(render_tui(state), refresh_per_second=8, screen=True) as live:
+        while thread.is_alive():
+            state.pass_status = "running"
+            state.current_step = "waiting for gateway job"
+            try:
+                fetched = gateway_request(args.gateway_url, "GET", f"/v1/jobs/{state.gateway_job_id}")
+                state.current_chunk = fetched.get("book_slug") or "-"
+                state.log(f"Gateway job status: {fetched.get('status', 'unknown')}")
+            except Exception:
+                state.log("Gateway polling failed; keeping last known state")
+            live.update(render_tui(state), refresh=True)
+            time.sleep(0.5)
+        thread.join()
+        live.update(render_tui(state), refresh=True)
+
+    if run_error:
+        exc = run_error[0]
+        logger.emit(level="ERROR", event_type="gateway_run_abort", message=str(exc))
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 1
+
+    completed = run_result.get("payload", {})
+    if completed.get("status") != "succeeded":
+        message = completed.get("status", "Gateway job failed")
+        logger.emit(level="ERROR", event_type="gateway_run_failed", message=message)
+        print(f"[ERROR] {message}", file=sys.stderr)
+        return 1
+
+    state.pass_status = "done"
+    state.current_step = "gateway job complete"
+    state.log(f"Gateway job completed: {state.gateway_job_id}")
+    logger.emit(
+        level="INFO",
+        event_type="gateway_run_complete",
+        message="Gateway orchestrate job completed",
+        extra={"job_id": state.gateway_job_id},
+    )
+    print(f"[DONE] Gateway job completed: {state.gateway_job_id}")
+    return 0
+
+
 def main() -> int:
     args = parse_args()
 
@@ -1259,6 +1400,11 @@ def main() -> int:
     run_id = str(uuid.uuid4())
     log_path = resolve_log_path(args, output_dir, runtime)
     logger = JsonlLogger(log_path, run_id)
+
+    if args.gateway_url:
+        if args.no_tui:
+            return run_gateway_plain(args, output_dir, logger)
+        return run_gateway_tui(args, output_dir, logger)
 
     if args.no_tui:
         return run_plain(args, runtime, output_dir, logger)

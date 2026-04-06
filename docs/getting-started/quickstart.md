@@ -40,6 +40,16 @@ python manuscriptprep_orchestrator_tui_refactored.py \
   --output-dir out/treasure_island
 ```
 
+Or, to run orchestration through the gateway API:
+
+```bash
+python manuscriptprep_orchestrator_tui_refactored.py \
+  --gateway-url http://127.0.0.1:8765 \
+  --input-dir work/chunks/treasure_island \
+  --output-dir out/treasure_island \
+  --book-slug treasure_island
+```
+
 ## 4. Merge the outputs
 
 Create the book-level merged files.
@@ -71,4 +81,12 @@ python manuscriptprep_pdf_report.py \
   --input-dir merged/treasure_island \
   --output reports/treasure_island_report.pdf \
   --title "Treasure Island"
+```
+
+Or, with shared defaults from config:
+
+```bash
+python manuscriptprep_pdf_report.py \
+  --config config/manuscriptprep.example.yaml \
+  --book-slug treasure_island
 ```

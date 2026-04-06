@@ -72,10 +72,18 @@ def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_en
     assert status == 200
     assert ran["status"] == "succeeded"
     assert ran["artifacts"]
+    assert ran["stage_runs"][0]["command"]
+    assert ran["stage_runs"][0]["stdout_path"]
+    assert ran["stage_runs"][0]["stderr_path"]
     persisted = store.get_job(job_id)
     assert persisted is not None
     assert persisted.status == "succeeded"
     assert persisted.artifacts[0].stage == "ingest"
+
+    status, artifact = app.get_job_artifact(job_id, "ingest_stdout")
+    assert status == 200
+    assert artifact["exists"] is True
+    assert "preview" in artifact
 
 
 def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) -> None:

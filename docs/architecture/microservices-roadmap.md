@@ -13,7 +13,9 @@ The current slices introduce:
 - a persistent file-backed job store
 - a minimal HTTP gateway service
 - artifact references on jobs
+- per-stage command/stdout/stderr capture for gateway-managed runs
 - synchronous execution adapters for `ingest`, `orchestrate`, `merge`, `resolve`, and `report`
+- a single gateway-managed `manuscript-prep` job that chains all stages locally
 
 The current scripts remain the execution backend while the API contract is
 established. The gateway can now create and run stage jobs against the
@@ -26,21 +28,20 @@ existing CLI implementations.
 - `GET /v1/jobs`
 - `POST /v1/jobs`
 - `GET /v1/jobs/{job_id}`
+- `GET /v1/jobs/{job_id}/artifacts/{artifact_name}`
 - `POST /v1/jobs/{job_id}/run`
 
 ## Immediate Follow-Up Slices
 
-1. add execution adapters for orchestrate, merge, resolve, and report
-2. attach richer artifact metadata and stage logs to jobs
-3. update the TUI to consume the gateway instead of calling scripts directly
-4. add a basic web UI against the same endpoints
-5. replace file-backed jobs with a database-backed store when concurrency needs it
+1. update the TUI to consume the gateway instead of calling scripts directly
+2. add a basic web UI against the same endpoints
+3. replace file-backed jobs with a database-backed store when concurrency needs it
+4. add asynchronous workers and queue-backed execution
 
 ## Current Limitations
 
 - execution is synchronous
 - jobs are persisted as local JSON files, not database records
-- there is not yet a single gateway endpoint that runs the full multi-stage pipeline as one long-lived job
 - the TUI and web UI have not yet been switched to consume the gateway
 
 ## Target Service Split

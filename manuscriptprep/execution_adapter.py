@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from manuscriptprep.api_models import ArtifactRef, JobRecord, utc_now_iso
@@ -16,11 +18,28 @@ from manuscriptprep.paths import build_paths
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+@dataclass
+class CommandExecution:
+    exit_code: int
+    stdout_path: Path
+    stderr_path: Path
+    command_path: Path
+    stdout: str
+    stderr: str
+
+
 class ExecutionAdapter:
-    def __init__(self, repo_root: Path | None = None, python_bin: str | None = None, env: dict[str, str] | None = None) -> None:
+    def __init__(
+        self,
+        repo_root: Path | None = None,
+        python_bin: str | None = None,
+        env: dict[str, str] | None = None,
+        runtime_root: Path | None = None,
+    ) -> None:
         self.repo_root = repo_root or REPO_ROOT
         self.python_bin = python_bin or sys.executable
         self.env = env or os.environ.copy()
+        self.runtime_root = (runtime_root or (self.repo_root / "work" / "gateway_jobs" / "runtime")).expanduser()
 
     def run_job(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         if job.pipeline == "manuscript-prep":
@@ -37,7 +56,58 @@ class ExecutionAdapter:
             return self._run_report(job)
         raise ValueError(f"Execution adapter does not yet support pipeline: {job.pipeline}")
 
-    def _run_command(self, cmd: list[str], error_message: str) -> None:
+    def _stage_run(self, job: JobRecord, stage_name: str):
+        for stage in job.stage_runs:
+            if stage.name == stage_name:
+                return stage
+        raise ValueError(f"Unknown stage on job: {stage_name}")
+
+    def _stage_runtime_dir(self, job: JobRecord, stage_name: str) -> Path:
+        path = self.runtime_root / job.job_id / stage_name
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def _record_stage_execution(
+        self,
+        job: JobRecord,
+        stage_name: str,
+        cmd: list[str],
+        result: CommandExecution,
+    ) -> list[ArtifactRef]:
+        stage = self._stage_run(job, stage_name)
+        stage.command = list(cmd)
+        stage.exit_code = result.exit_code
+        stage.stdout_path = str(result.stdout_path)
+        stage.stderr_path = str(result.stderr_path)
+
+        return [
+            ArtifactRef(
+                name=f"{stage_name}_command",
+                path=str(result.command_path),
+                kind="json",
+                stage=stage_name,
+            ),
+            ArtifactRef(
+                name=f"{stage_name}_stdout",
+                path=str(result.stdout_path),
+                kind="text",
+                stage=stage_name,
+                metadata={"bytes": result.stdout_path.stat().st_size},
+            ),
+            ArtifactRef(
+                name=f"{stage_name}_stderr",
+                path=str(result.stderr_path),
+                kind="text",
+                stage=stage_name,
+                metadata={"bytes": result.stderr_path.stat().st_size},
+            ),
+        ]
+
+    def _run_command(self, job: JobRecord, stage_name: str, cmd: list[str], error_message: str) -> CommandExecution:
+        runtime_dir = self._stage_runtime_dir(job, stage_name)
+        stdout_path = runtime_dir / "stdout.txt"
+        stderr_path = runtime_dir / "stderr.txt"
+        command_path = runtime_dir / "command.json"
         result = subprocess.run(
             cmd,
             cwd=str(self.repo_root),
@@ -46,8 +116,31 @@ class ExecutionAdapter:
             text=True,
             check=False,
         )
+        stdout_path.write_text(result.stdout, encoding="utf-8")
+        stderr_path.write_text(result.stderr, encoding="utf-8")
+        command_path.write_text(
+            json.dumps(
+                {
+                    "stage": stage_name,
+                    "cwd": str(self.repo_root),
+                    "exit_code": result.returncode,
+                    "command": cmd,
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
         if result.returncode != 0:
             raise RuntimeError(result.stderr.strip() or result.stdout.strip() or error_message)
+        return CommandExecution(
+            exit_code=result.returncode,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+            command_path=command_path,
+            stdout=result.stdout,
+            stderr=result.stderr,
+        )
 
     def _mark_stage_running(self, job: JobRecord, stage_name: str) -> None:
         now = utc_now_iso()
@@ -159,7 +252,7 @@ class ExecutionAdapter:
         if job.options.get("force_ocr"):
             cmd.append("--force-ocr")
 
-        self._run_command(cmd, "Ingest execution failed")
+        result = self._run_command(job, "ingest", cmd, "Ingest execution failed")
 
         book_slug = job.book_slug or ""
         workdir_path = Path(str(workdir))
@@ -168,7 +261,7 @@ class ExecutionAdapter:
         cleaned_path = workdir_path / "cleaned" / book_slug / "clean.txt"
         raw_path = workdir_path / "extracted" / book_slug / "raw.txt"
 
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "ingest", cmd, result) + [
             ArtifactRef(name="raw_text", path=str(raw_path), kind="text", stage="ingest"),
             ArtifactRef(name="clean_text", path=str(cleaned_path), kind="text", stage="ingest"),
             ArtifactRef(name="chunk_dir", path=str(chunk_dir), kind="directory", stage="ingest"),
@@ -198,10 +291,10 @@ class ExecutionAdapter:
         if job.book_slug:
             cmd.extend(["--book-slug", str(job.book_slug)])
 
-        self._run_command(cmd, "Orchestrator execution failed")
+        result = self._run_command(job, "orchestrate", cmd, "Orchestrator execution failed")
 
         out_root = Path(str(output_dir))
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "orchestrate", cmd, result) + [
             ArtifactRef(name="output_dir", path=str(out_root), kind="directory", stage="orchestrate"),
             ArtifactRef(name="orchestrator_log", path=str(out_root / "orchestrator.log.jsonl"), kind="jsonl", stage="orchestrate"),
         ]
@@ -228,10 +321,10 @@ class ExecutionAdapter:
         if job.options.get("chunk_manifest"):
             cmd.extend(["--chunk-manifest", str(job.options["chunk_manifest"])])
 
-        self._run_command(cmd, "Merger execution failed")
+        result = self._run_command(job, "merge", cmd, "Merger execution failed")
 
         merged_root = Path(str(output_dir))
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "merge", cmd, result) + [
             ArtifactRef(name="merged_dir", path=str(merged_root), kind="directory", stage="merge"),
             ArtifactRef(name="book_merged", path=str(merged_root / "book_merged.json"), kind="json", stage="merge"),
             ArtifactRef(name="merge_report", path=str(merged_root / "merge_report.json"), kind="json", stage="merge"),
@@ -261,10 +354,10 @@ class ExecutionAdapter:
         if model:
             cmd.extend(["--model", str(model)])
 
-        self._run_command(cmd, "Resolver execution failed")
+        result = self._run_command(job, "resolve", cmd, "Resolver execution failed")
 
         resolved_root = Path(str(output_dir))
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "resolve", cmd, result) + [
             ArtifactRef(name="resolved_dir", path=str(resolved_root), kind="directory", stage="resolve"),
             ArtifactRef(name="book_resolved", path=str(resolved_root / "book_resolved.json"), kind="json", stage="resolve"),
             ArtifactRef(name="resolution_map", path=str(resolved_root / "resolution_map.json"), kind="json", stage="resolve"),
@@ -288,13 +381,17 @@ class ExecutionAdapter:
         ]
         if job.title:
             cmd.extend(["--title", str(job.title)])
+        if job.config_path:
+            cmd.extend(["--config", str(job.config_path)])
+        if job.book_slug:
+            cmd.extend(["--book-slug", str(job.book_slug)])
         if job.options.get("subtitle"):
             cmd.extend(["--subtitle", str(job.options["subtitle"])])
 
-        self._run_command(cmd, "Report execution failed")
+        result = self._run_command(job, "report", cmd, "Report execution failed")
 
         report_path = Path(str(output_path))
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "report", cmd, result) + [
             ArtifactRef(name="report_pdf", path=str(report_path), kind="pdf", stage="report"),
         ]
         return self._mark_stage_succeeded(job, "report"), artifacts

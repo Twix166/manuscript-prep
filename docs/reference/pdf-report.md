@@ -17,6 +17,7 @@ The PDF report generator creates a human-readable book report from merged or res
 ## Inputs
 
 - merged or resolved output directory
+- optional shared YAML config plus `book_slug` for derived paths
 
 ## Outputs
 
@@ -25,3 +26,11 @@ The PDF report generator creates a human-readable book report from merged or res
 ## Notes
 
 The report generator should prefer resolved outputs when present, but remain compatible with merged-only outputs.
+
+Supported invocation modes:
+- explicit paths: `--input-dir` and `--output`
+- config-derived paths: `--config` plus `--book-slug`, which resolves
+  - input dir from `paths.merged_root/<book_slug>`
+  - output PDF from `paths.reports_root/<book_slug>_report.pdf`
+
+Explicit CLI paths override config-derived defaults.

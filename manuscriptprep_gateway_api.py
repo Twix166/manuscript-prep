@@ -29,7 +29,9 @@ from manuscriptprep.service_registry import get_pipeline_definition, list_pipeli
 class GatewayAPI:
     def __init__(self, store: JobStore | None = None, adapter: ExecutionAdapter | None = None) -> None:
         self.store = store or JobStore()
-        self.adapter = adapter or ExecutionAdapter()
+        self.adapter = adapter or ExecutionAdapter(runtime_root=self.store.root / "runtime")
+        if getattr(self.adapter, "runtime_root", None) is None:
+            self.adapter.runtime_root = self.store.root / "runtime"
 
     def health(self) -> Tuple[int, Dict[str, Any]]:
         return HTTPStatus.OK, {"status": "ok", "service": "gateway-api", "timestamp": utc_now_iso()}
@@ -45,6 +47,36 @@ class GatewayAPI:
         if job is None:
             return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
         return HTTPStatus.OK, to_dict(job)
+
+    def get_job_artifact(self, job_id: str, artifact_name: str) -> Tuple[int, Dict[str, Any]]:
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+
+        artifact = next((item for item in job.artifacts if item.name == artifact_name), None)
+        if artifact is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown artifact on job {job_id}: {artifact_name}"}
+
+        path = Path(artifact.path)
+        exists = path.exists()
+        payload: Dict[str, Any] = {
+            "job_id": job_id,
+            "artifact": to_dict(artifact),
+            "exists": exists,
+        }
+        if not exists:
+            return HTTPStatus.OK, payload
+
+        payload["size_bytes"] = path.stat().st_size
+        if artifact.kind in {"text", "json", "jsonl"}:
+            content = path.read_text(encoding="utf-8")
+            payload["preview"] = content[:4000]
+            if artifact.kind == "json":
+                try:
+                    payload["content"] = json.loads(content)
+                except json.JSONDecodeError:
+                    payload["content"] = None
+        return HTTPStatus.OK, payload
 
     def create_job(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
         try:
@@ -135,6 +167,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
             status, payload = self.app.list_jobs()
             self._write_json(status, payload)
             return
+
+        if path.startswith("/v1/jobs/") and "/artifacts/" in path:
+            parts = path.strip("/").split("/")
+            if len(parts) == 5:
+                _, _, job_id, _, artifact_name = parts
+                status, payload = self.app.get_job_artifact(job_id, artifact_name)
+                self._write_json(status, payload)
+                return
 
         if path.startswith("/v1/jobs/"):
             job_id = path.rsplit("/", 1)[-1]

@@ -34,7 +34,8 @@ Notes:
 
 - `manuscriptprep_orchestrator_tui.py` is a legacy orchestrator kept for reference and comparison.
 - `scripts/manuscriptprep_orchestrator_tui_configured.py` is a config wiring scaffold, not the supported production runner.
-- `manuscriptprep_gateway_api.py` is the current API-oriented microservices slice. It can create and run stage jobs against the existing local CLI implementations through a persistent local job store.
+- `manuscriptprep_gateway_api.py` is the current API-oriented microservices slice. It can create and run stage jobs, run one end-to-end `manuscript-prep` job, and expose persisted job artifacts and per-stage command logs through a local job store.
+- `manuscriptprep_orchestrator_tui_refactored.py` can now also run in gateway-client mode with `--gateway-url` while preserving the existing direct local orchestration mode.
 
 ---
 
@@ -550,6 +551,14 @@ python manuscriptprep_pdf_report.py \
   --input-dir merged/treasure_island \
   --output reports/treasure_island_report.pdf \
   --title "Treasure Island"
+```
+
+Or, with shared defaults from config:
+
+```bash
+python manuscriptprep_pdf_report.py \
+  --config config/manuscriptprep.example.yaml \
+  --book-slug treasure_island
 ```
 
 ---

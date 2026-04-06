@@ -33,3 +33,20 @@ def test_job_store_persists_jobs_to_disk(tmp_path) -> None:
     fetched = reloaded.get_job(created.job_id)
     assert fetched is not None
     assert fetched.job_id == created.job_id
+
+
+def test_job_store_persists_stage_execution_metadata(tmp_path) -> None:
+    store = JobStore(root=tmp_path)
+    created = store.create_job(JobCreateRequest(pipeline="ingest", book_slug="treasure_island"))
+    created.stage_runs[0].command = ["python", "manuscriptprep_ingest.py"]
+    created.stage_runs[0].exit_code = 0
+    created.stage_runs[0].stdout_path = "/tmp/stdout.txt"
+    created.stage_runs[0].stderr_path = "/tmp/stderr.txt"
+    store.update_job(created)
+
+    reloaded = JobStore(root=tmp_path)
+    fetched = reloaded.get_job(created.job_id)
+    assert fetched is not None
+    assert fetched.stage_runs[0].command == ["python", "manuscriptprep_ingest.py"]
+    assert fetched.stage_runs[0].exit_code == 0
+    assert fetched.stage_runs[0].stdout_path == "/tmp/stdout.txt"
