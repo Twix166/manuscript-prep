@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Config-aware ManuscriptPrep orchestrator TUI scaffold.
 
+Status:
+- Scaffold only.
+- Not the supported production orchestrator for this repository.
+- Prefer `manuscriptprep_orchestrator_tui_refactored.py`.
+
 Important:
 - This is a clean refactor scaffold for wiring your existing orchestrator to the
   shared config system.

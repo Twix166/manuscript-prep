@@ -4,6 +4,20 @@
 
 The orchestrator runs the model passes over each chunk.
 
+## Supported Runner
+
+The canonical supported orchestrator entry point is:
+
+```bash
+python manuscriptprep_orchestrator_tui_refactored.py
+```
+
+Status notes:
+
+- `manuscriptprep_orchestrator_tui_refactored.py` is the supported runner.
+- `manuscriptprep_orchestrator_tui.py` is a legacy implementation kept for reference.
+- `scripts/manuscriptprep_orchestrator_tui_configured.py` is a scaffold for config refactoring, not the production runner.
+
 ## Responsibilities
 
 - run structure, dialogue, entities, and dossiers
@@ -51,3 +65,4 @@ out/orchestrator.log.jsonl
 ## Notes
 
 The orchestrator should be the only stage responsible for pass-level runtime policy.
+Use the refactored orchestrator when following the documented pipeline flow.

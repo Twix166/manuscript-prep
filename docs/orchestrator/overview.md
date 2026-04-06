@@ -2,6 +2,17 @@
 
 The orchestrator runs the multi-pass analysis pipeline over chunk files.
 
+The canonical supported entry point is:
+
+```bash
+python manuscriptprep_orchestrator_tui_refactored.py
+```
+
+Related files:
+
+- `manuscriptprep_orchestrator_tui.py`: legacy implementation
+- `scripts/manuscriptprep_orchestrator_tui_configured.py`: scaffold only
+
 ## Responsibilities
 
 - run all passes in sequence

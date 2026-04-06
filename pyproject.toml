@@ -1,0 +1,11 @@
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+  "unit: fast deterministic unit tests",
+  "regression: regression tests for previously fragile behavior",
+  "smoke: end-to-end smoke tests over the supported CLI flow",
+  "integration: multi-component integration tests",
+]
+

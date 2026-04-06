@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+"""Minimal HTTP gateway for the first API-oriented microservices slice.
+
+This service is intentionally small:
+- no external framework dependency
+- in-memory job store
+- explicit JSON contracts
+
+The goal is to establish the API surface that a future TUI client or web UI
+can target before worker extraction and persistent storage are introduced.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+from http import HTTPStatus
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from typing import Any, Dict, Tuple
+from urllib.parse import urlparse
+
+from manuscriptprep.api_models import JobCreateRequest, to_dict, utc_now_iso
+from manuscriptprep.execution_adapter import ExecutionAdapter
+from manuscriptprep.job_store import JobStore
+from manuscriptprep.service_registry import get_pipeline_definition, list_pipelines
+
+
+class GatewayAPI:
+    def __init__(self, store: JobStore | None = None, adapter: ExecutionAdapter | None = None) -> None:
+        self.store = store or JobStore()
+        self.adapter = adapter or ExecutionAdapter()
+
+    def health(self) -> Tuple[int, Dict[str, Any]]:
+        return HTTPStatus.OK, {"status": "ok", "service": "gateway-api", "timestamp": utc_now_iso()}
+
+    def list_pipelines(self) -> Tuple[int, Dict[str, Any]]:
+        return HTTPStatus.OK, {"pipelines": [to_dict(item) for item in list_pipelines()]}
+
+    def list_jobs(self) -> Tuple[int, Dict[str, Any]]:
+        return HTTPStatus.OK, {"jobs": [to_dict(item) for item in self.store.list_jobs()]}
+
+    def get_job(self, job_id: str) -> Tuple[int, Dict[str, Any]]:
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        return HTTPStatus.OK, to_dict(job)
+
+    def create_job(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        try:
+            request = JobCreateRequest(
+                pipeline=str(payload["pipeline"]),
+                book_slug=payload.get("book_slug"),
+                title=payload.get("title"),
+                config_path=payload.get("config_path"),
+                input_path=payload.get("input_path"),
+                options=payload.get("options", {}) or {},
+            )
+        except KeyError as exc:
+            return HTTPStatus.BAD_REQUEST, {"error": f"Missing required field: {exc.args[0]}"}
+        except (TypeError, ValueError) as exc:
+            return HTTPStatus.BAD_REQUEST, {"error": str(exc)}
+
+        if get_pipeline_definition(request.pipeline) is None:
+            return HTTPStatus.BAD_REQUEST, {"error": f"Unknown pipeline: {request.pipeline}"}
+
+        job = self.store.create_job(request)
+        return HTTPStatus.CREATED, to_dict(job)
+
+    def run_job(self, job_id: str) -> Tuple[int, Dict[str, Any]]:
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if job.status == "running":
+            return HTTPStatus.CONFLICT, {"error": f"Job is already running: {job_id}"}
+
+        job.status = "running"
+        job.updated_at = utc_now_iso()
+        if job.stage_runs:
+            job.stage_runs[0].status = "running"
+            job.stage_runs[0].started_at = utc_now_iso()
+        job = self.store.update_job(job)
+
+        try:
+            updated_job, artifacts = self.adapter.run_job(job)
+            updated_job.artifacts = artifacts
+            updated_job.updated_at = utc_now_iso()
+            updated_job = self.store.update_job(updated_job)
+            return HTTPStatus.OK, to_dict(updated_job)
+        except Exception as exc:
+            failed = job
+            failed.status = "failed"
+            failed.updated_at = utc_now_iso()
+            if all(stage.error is None for stage in failed.stage_runs) and failed.stage_runs:
+                failed.stage_runs[0].status = "failed"
+                failed.stage_runs[0].finished_at = failed.updated_at
+                failed.stage_runs[0].error = str(exc)
+            failed = self.store.update_job(failed)
+            return HTTPStatus.BAD_GATEWAY, to_dict(failed)
+
+
+class GatewayHandler(BaseHTTPRequestHandler):
+    app: GatewayAPI
+
+    def _write_json(self, status: int, payload: Dict[str, Any]) -> None:
+        body = json.dumps(payload, indent=2, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _read_json_body(self) -> Dict[str, Any]:
+        content_length = int(self.headers.get("Content-Length", "0"))
+        raw = self.rfile.read(content_length) if content_length else b"{}"
+        data = json.loads(raw.decode("utf-8"))
+        if not isinstance(data, dict):
+            raise ValueError("JSON body must be an object")
+        return data
+
+    def do_GET(self) -> None:  # noqa: N802
+        path = urlparse(self.path).path
+
+        if path == "/health":
+            status, payload = self.app.health()
+            self._write_json(status, payload)
+            return
+
+        if path == "/v1/pipelines":
+            status, payload = self.app.list_pipelines()
+            self._write_json(status, payload)
+            return
+
+        if path == "/v1/jobs":
+            status, payload = self.app.list_jobs()
+            self._write_json(status, payload)
+            return
+
+        if path.startswith("/v1/jobs/"):
+            job_id = path.rsplit("/", 1)[-1]
+            status, payload = self.app.get_job(job_id)
+            self._write_json(status, payload)
+            return
+
+        self._write_json(HTTPStatus.NOT_FOUND, {"error": f"Unknown route: {path}"})
+
+    def do_POST(self) -> None:  # noqa: N802
+        path = urlparse(self.path).path
+        if path == "/v1/jobs":
+            try:
+                payload = self._read_json_body()
+            except (json.JSONDecodeError, ValueError) as exc:
+                self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                return
+
+            status, response = self.app.create_job(payload)
+            self._write_json(status, response)
+            return
+
+        if path.startswith("/v1/jobs/") and path.endswith("/run"):
+            job_id = path.split("/")[-2]
+            status, response = self.app.run_job(job_id)
+            self._write_json(status, response)
+            return
+
+        self._write_json(HTTPStatus.NOT_FOUND, {"error": f"Unknown route: {path}"})
+
+    def log_message(self, format: str, *args: object) -> None:  # noqa: A003
+        return
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the ManuscriptPrep gateway API.")
+    parser.add_argument("--host", default="127.0.0.1", help="Bind host")
+    parser.add_argument("--port", type=int, default=8765, help="Bind port")
+    parser.add_argument("--jobs-root", default="work/gateway_jobs", help="Directory used for persistent job records")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    handler = GatewayHandler
+    handler.app = GatewayAPI(store=JobStore(root=Path(args.jobs_root)))
+    server = ThreadingHTTPServer((args.host, args.port), handler)
+    print(f"Gateway API listening on http://{args.host}:{args.port}")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

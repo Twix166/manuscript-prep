@@ -15,6 +15,48 @@ The stack is built to run **locally** on your own hardware, using **Ollama**, **
 
 ---
 
+## Supported Entry Points
+
+The currently supported pipeline entry points are:
+
+- `python manuscriptprep_ingest.py`
+- `python manuscriptprep_orchestrator_tui_refactored.py`
+- `python manuscriptprep_merger.py`
+- `python manuscriptprep_resolver.py`
+- `python manuscriptprep_pdf_report.py`
+- `python manuscriptprep_gateway_api.py`
+
+The canonical orchestrator is:
+
+- `manuscriptprep_orchestrator_tui_refactored.py`
+
+Notes:
+
+- `manuscriptprep_orchestrator_tui.py` is a legacy orchestrator kept for reference and comparison.
+- `scripts/manuscriptprep_orchestrator_tui_configured.py` is a config wiring scaffold, not the supported production runner.
+- `manuscriptprep_gateway_api.py` is the current API-oriented microservices slice. It can create and run stage jobs against the existing local CLI implementations through a persistent local job store.
+
+---
+
+## Test Workflow
+
+Before merging code changes, run the full test matrix:
+
+```bash
+bash scripts/run_test_matrix.sh
+```
+
+Test suites currently required for code changes:
+
+- `unit`
+- `regression`
+- `smoke`
+- `integration`
+
+Additional testing guidance lives in [docs/development/testing.md](docs/development/testing.md).
+
+---
+
 ## Overview
 
 ManuscriptPrep turns a source manuscript PDF into structured JSON outputs through a staged pipeline:
@@ -114,28 +156,37 @@ This preprocessing step is critical. A well-grounded model will refuse to invent
 
 ## Repository Layout
 
-A typical repository structure might look like this:
+Key paths in the current repository:
 
 ```text
 .
-├── Modelfiles/
-│   ├── structure.Modelfile
-│   ├── dialogue.Modelfile
-│   ├── entities.Modelfile
-│   └── dossiers.Modelfile
-├── scripts/
-│   ├── pdf_to_text.py
-│   ├── clean_text.py
-│   ├── chunk_text.py
-│   ├── manuscriptprep_orchestrator.py
-│   └── manuscriptprep_orchestrator_tui.py
-├── input/
-│   ├── manuscript.pdf
-│   ├── raw.txt
-│   ├── clean.txt
-│   └── chunks/
+├── manuscriptprep_ingest.py
+├── manuscriptprep_orchestrator_tui_refactored.py
+├── manuscriptprep_merger.py
+├── manuscriptprep_resolver.py
+├── manuscriptprep_pdf_report.py
+├── manuscriptprep/
+├── modelfiles/
+├── config/
+├── docs/
+├── work/
 ├── out/
-└── README.md
+├── merged/
+├── resolved/
+└── reports/
+```
+
+Typical runtime flow:
+
+```text
+source PDF
+  -> work/extracted/<book_slug>/
+  -> work/cleaned/<book_slug>/
+  -> work/chunks/<book_slug>/
+  -> out/<book_slug>/<chunk_id>/
+  -> merged/<book_slug>/
+  -> resolved/<book_slug>/
+  -> reports/<book_slug>_report.pdf
 ```
 
 ## Installation
@@ -434,6 +485,71 @@ List installed models:
 
 ```bash
 ollama list
+```
+
+---
+
+## Canonical Pipeline Commands
+
+Example end-to-end run:
+
+```bash
+python manuscriptprep_ingest.py \
+  --input source/TREASURE-ISLAND-by-Robert-Louis-Stevenson.pdf \
+  --workdir work \
+  --title "Treasure Island"
+```
+
+Or, with shared defaults from config:
+
+```bash
+python manuscriptprep_ingest.py \
+  --config config/manuscriptprep.example.yaml \
+  --input source/TREASURE-ISLAND-by-Robert-Louis-Stevenson.pdf \
+  --title "Treasure Island"
+```
+
+```bash
+python manuscriptprep_orchestrator_tui_refactored.py \
+  --input-dir work/chunks/treasure_island \
+  --output-dir out/treasure_island
+```
+
+```bash
+python manuscriptprep_merger.py \
+  --input-dir out/treasure_island \
+  --output-dir merged/treasure_island \
+  --chunk-manifest work/manifests/treasure_island/chunk_manifest.json
+```
+
+Or, with shared defaults from config:
+
+```bash
+python manuscriptprep_merger.py \
+  --config config/manuscriptprep.example.yaml \
+  --book-slug treasure_island
+```
+
+```bash
+python manuscriptprep_resolver.py \
+  --input-dir merged/treasure_island \
+  --output-dir resolved/treasure_island \
+  --model manuscriptprep-resolver
+```
+
+Or, with shared defaults from config:
+
+```bash
+python manuscriptprep_resolver.py \
+  --config config/manuscriptprep.example.yaml \
+  --book-slug treasure_island
+```
+
+```bash
+python manuscriptprep_pdf_report.py \
+  --input-dir merged/treasure_island \
+  --output reports/treasure_island_report.pdf \
+  --title "Treasure Island"
 ```
 
 ---

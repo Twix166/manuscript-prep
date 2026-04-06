@@ -19,6 +19,21 @@ The ingest stage prepares a source manuscript for LLM processing.
 - config file
 - optional chunk size overrides
 
+## Supported Runner
+
+The supported ingest entry point is:
+
+```bash
+python manuscriptprep_ingest.py
+```
+
+Config behavior:
+
+- `--config` is optional.
+- When `--config` is provided, ingest can derive workspace roots and chunk-size defaults from the shared YAML config.
+- CLI flags still override config values.
+- `--input` and `--title` remain required.
+
 ## Outputs
 
 Typical outputs:

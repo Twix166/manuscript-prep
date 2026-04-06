@@ -18,6 +18,20 @@ The resolver performs book-level identity reconciliation using a hybrid approach
 - resolver model
 - config file
 
+## Supported Runner
+
+The supported resolver entry point is:
+
+```bash
+python manuscriptprep_resolver.py
+```
+
+Config behavior:
+
+- `--config` is optional.
+- When `--config` is provided, resolver can derive `input_dir` from `paths.merged_root/<book_slug>`, `output_dir` from `paths.resolved_root/<book_slug>`, and `model` from `models.resolver`.
+- Explicit CLI values still override config-derived values.
+
 ## Outputs
 
 ```text
