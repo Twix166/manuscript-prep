@@ -42,5 +42,25 @@ services:
     volumes:
       - .:/app
 
+  worker:
+    build:
+      context: .
+    container_name: manuscriptprep-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MANUSCRIPTPREP_STORE_BACKEND: postgres
+      MANUSCRIPTPREP_DATABASE_URL: postgresql://manuscriptprep:manuscriptprep@postgres:5432/manuscriptprep
+      MANUSCRIPTPREP_POSTGRES_SCHEMA: gateway
+      PYTHONUNBUFFERED: "1"
+    command:
+      - python
+      - manuscriptprep_worker.py
+      - --runtime-root
+      - /app/work/gateway_jobs/runtime
+    volumes:
+      - .:/app
+
 volumes:
   manuscriptprep_postgres_data:

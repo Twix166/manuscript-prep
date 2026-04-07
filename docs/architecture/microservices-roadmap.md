@@ -12,14 +12,15 @@ The current slices introduce:
 - a pipeline and stage registry
 - a pluggable job store with file-backed and PostgreSQL-backed implementations
 - a minimal HTTP gateway service
+- a queued worker service that claims and executes jobs
 - artifact references on jobs
 - per-stage command/stdout/stderr capture for gateway-managed runs
-- synchronous execution adapters for `ingest`, `orchestrate`, `merge`, `resolve`, and `report`
+- execution adapters for `ingest`, `orchestrate`, `merge`, `resolve`, and `report`
 - a single gateway-managed `manuscript-prep` job that chains all stages locally
-- a `compose.yaml` stack that runs the gateway against PostgreSQL
+- a `compose.yaml` stack that runs gateway, worker, and PostgreSQL together
 
 The current scripts remain the execution backend while the API contract is
-established. The gateway can now create and run stage jobs against the
+established. The gateway now queues jobs while workers execute them against the
 existing CLI implementations.
 
 ## Initial Gateway Endpoints
@@ -34,16 +35,16 @@ existing CLI implementations.
 
 ## Immediate Follow-Up Slices
 
-1. add asynchronous workers and queue-backed execution
+1. add health, readiness, and worker heartbeat reporting
 2. add a basic web UI against the same endpoints
 3. introduce auth and user management on top of the PostgreSQL-backed gateway
 4. split stage runners into independently deployable worker services
 
 ## Current Limitations
 
-- execution is synchronous
 - file-backed persistence still exists as a fallback path and test backend
 - the TUI can use the gateway, but the web UI does not exist yet
+- worker retry, cancellation, and recovery semantics are still minimal
 
 ## Target Service Split
 

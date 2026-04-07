@@ -25,6 +25,7 @@ The currently supported pipeline entry points are:
 - `python manuscriptprep_resolver.py`
 - `python manuscriptprep_pdf_report.py`
 - `python manuscriptprep_gateway_api.py`
+- `python manuscriptprep_worker.py`
 
 The canonical orchestrator is:
 
@@ -34,7 +35,8 @@ Notes:
 
 - `manuscriptprep_orchestrator_tui.py` is a legacy orchestrator kept for reference and comparison.
 - `scripts/manuscriptprep_orchestrator_tui_configured.py` is a config wiring scaffold, not the supported production runner.
-- `manuscriptprep_gateway_api.py` is the current API-oriented microservices slice. It can create and run stage jobs, run one end-to-end `manuscript-prep` job, and expose persisted job artifacts and per-stage command logs through either a file-backed store or PostgreSQL.
+- `manuscriptprep_gateway_api.py` is the API control plane. It creates jobs, requeues jobs, and exposes persisted job artifacts and status through either a file-backed store or PostgreSQL.
+- `manuscriptprep_worker.py` is the execution worker. It claims queued jobs and runs them outside the gateway process.
 - `manuscriptprep_orchestrator_tui_refactored.py` can now also run in gateway-client mode with `--gateway-url` while preserving the existing direct local orchestration mode.
 
 ---
@@ -224,8 +226,9 @@ The repository now includes a root [compose.yaml](/home/rbalm/Manuscript_Prep_Mo
 
 - `postgres`
 - `gateway`
+- `worker`
 
-The compose stack configures the gateway to use PostgreSQL by default:
+The compose stack configures the gateway and worker to use PostgreSQL by default:
 
 ```bash
 docker compose up --build

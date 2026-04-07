@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from manuscriptprep.api_models import JobCreateRequest
 from manuscriptprep.job_store import JobStore
 from manuscriptprep.store_factory import create_job_store
 
@@ -42,3 +43,15 @@ def test_create_job_store_builds_postgres_store(monkeypatch: pytest.MonkeyPatch)
         "database_url": "postgresql://example",
         "schema": "gateway",
     }
+
+
+def test_file_store_can_claim_queued_job(tmp_path: Path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    created = store.create_job(JobCreateRequest(pipeline="ingest", book_slug="treasure_island"))
+
+    claimed = store.claim_next_job("worker-1")
+
+    assert claimed is not None
+    assert claimed.job_id == created.job_id
+    assert claimed.status == "running"
+    assert claimed.options["_worker_id"] == "worker-1"

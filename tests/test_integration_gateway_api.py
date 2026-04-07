@@ -4,6 +4,7 @@ import json
 import pytest
 
 from manuscriptprep.execution_adapter import ExecutionAdapter
+from manuscriptprep.job_worker import JobWorker
 from manuscriptprep.job_store import JobStore
 from manuscriptprep_gateway_api import GatewayAPI
 
@@ -40,7 +41,8 @@ def test_gateway_api_exposes_health_pipelines_and_jobs(tmp_path) -> None:
 def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)
-    app = GatewayAPI(store=store, adapter=adapter)
+    worker = JobWorker(store=store, adapter=adapter, poll_interval=0.01)
+    app = GatewayAPI(store=store)
 
     status, created = app.create_job(
         {
@@ -59,16 +61,19 @@ def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_en
     assert status == 201
     job_id = created["job_id"]
 
-    # adapter launches the existing CLI, so it needs the fake PATH from the shared fixture
-    adapter.repo_root = adapter.repo_root
     import os
     old_path = os.environ.get("PATH", "")
     os.environ["PATH"] = test_env["PATH"]
     try:
-        status, ran = app.run_job(job_id)
+        status, queued = app.run_job(job_id)
+        assert status == 202
+        assert queued["status"] == "queued"
+        assert worker.process_next_job() is True
     finally:
         os.environ["PATH"] = old_path
 
+    status, ran = app.get_job(job_id)
+    assert status == 200
     assert status == 200
     assert ran["status"] == "succeeded"
     assert ran["artifacts"]
@@ -89,7 +94,8 @@ def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_en
 def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)
-    app = GatewayAPI(store=store, adapter=adapter)
+    worker = JobWorker(store=store, adapter=adapter, poll_interval=0.01)
+    app = GatewayAPI(store=store)
 
     book_slug = "treasure_island"
     workdir = tmp_path / "work"
@@ -114,6 +120,9 @@ def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) 
     )
     assert status == 201
     status, ingested = app.run_job(created["job_id"])
+    assert status == 202
+    assert worker.process_next_job() is True
+    status, ingested = app.get_job(created["job_id"])
     assert status == 200
     assert ingested["status"] == "succeeded"
 
@@ -129,6 +138,9 @@ def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) 
     )
     assert status == 201
     status, orchestrated = app.run_job(created["job_id"])
+    assert status == 202
+    assert worker.process_next_job() is True
+    status, orchestrated = app.get_job(created["job_id"])
     assert status == 200
     assert orchestrated["status"] == "succeeded"
 
@@ -146,6 +158,9 @@ def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) 
     )
     assert status == 201
     status, merged = app.run_job(created["job_id"])
+    assert status == 202
+    assert worker.process_next_job() is True
+    status, merged = app.get_job(created["job_id"])
     assert status == 200
     assert merged["status"] == "succeeded"
     assert any(item["name"] == "book_merged" for item in merged["artifacts"])
@@ -163,6 +178,9 @@ def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) 
     )
     assert status == 201
     status, resolved = app.run_job(created["job_id"])
+    assert status == 202
+    assert worker.process_next_job() is True
+    status, resolved = app.get_job(created["job_id"])
     assert status == 200
     assert resolved["status"] == "succeeded"
     resolved_book = json.loads((resolved_dir / "book_resolved.json").read_text(encoding="utf-8"))
@@ -181,6 +199,9 @@ def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) 
     )
     assert status == 201
     status, reported = app.run_job(created["job_id"])
+    assert status == 202
+    assert worker.process_next_job() is True
+    status, reported = app.get_job(created["job_id"])
     assert status == 200
     assert reported["status"] == "succeeded"
     assert report_path.exists()
@@ -189,7 +210,8 @@ def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) 
 def test_gateway_api_runs_single_end_to_end_pipeline_job(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)
-    app = GatewayAPI(store=store, adapter=adapter)
+    worker = JobWorker(store=store, adapter=adapter, poll_interval=0.01)
+    app = GatewayAPI(store=store)
 
     book_slug = "treasure_island"
     workdir = tmp_path / "work"
@@ -216,6 +238,9 @@ def test_gateway_api_runs_single_end_to_end_pipeline_job(tmp_path, sample_pdf, t
     assert status == 201
 
     status, completed = app.run_job(created["job_id"])
+    assert status == 202
+    assert worker.process_next_job() is True
+    status, completed = app.get_job(created["job_id"])
     assert status == 200
     assert completed["status"] == "succeeded"
     assert [stage["status"] for stage in completed["stage_runs"]] == [

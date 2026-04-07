@@ -7,7 +7,7 @@ This service is intentionally small:
 - pluggable file or PostgreSQL-backed job persistence
 
 The goal is to establish the API surface that a future TUI client or web UI
-can target before worker extraction and asynchronous execution are introduced.
+can target while workers execute long-running jobs out of process.
 """
 
 from __future__ import annotations
@@ -22,7 +22,6 @@ from typing import Any, Dict, Tuple
 from urllib.parse import urlparse
 
 from manuscriptprep.api_models import JobCreateRequest, to_dict, utc_now_iso
-from manuscriptprep.execution_adapter import ExecutionAdapter
 from manuscriptprep.job_store import BaseJobStore
 from manuscriptprep.service_registry import get_pipeline_definition, list_pipelines
 from manuscriptprep.store_factory import create_job_store
@@ -32,14 +31,10 @@ class GatewayAPI:
     def __init__(
         self,
         store: BaseJobStore | None = None,
-        adapter: ExecutionAdapter | None = None,
         runtime_root: Path | None = None,
     ) -> None:
         self.store = store or create_job_store(backend="file", jobs_root=Path("work/gateway_jobs"))
         self.runtime_root = runtime_root or getattr(self.store, "root", Path("work/gateway_jobs")) / "runtime"
-        self.adapter = adapter or ExecutionAdapter(runtime_root=self.runtime_root)
-        if getattr(self.adapter, "runtime_root", None) is None:
-            self.adapter.runtime_root = self.runtime_root
 
     def health(self) -> Tuple[int, Dict[str, Any]]:
         return HTTPStatus.OK, {"status": "ok", "service": "gateway-api", "timestamp": utc_now_iso()}
@@ -112,31 +107,25 @@ class GatewayAPI:
         if job is None:
             return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
         if job.status == "running":
-            return HTTPStatus.CONFLICT, {"error": f"Job is already running: {job_id}"}
-
-        job.status = "running"
-        job.updated_at = utc_now_iso()
-        if job.stage_runs:
-            job.stage_runs[0].status = "running"
-            job.stage_runs[0].started_at = utc_now_iso()
-        job = self.store.update_job(job)
-
-        try:
-            updated_job, artifacts = self.adapter.run_job(job)
-            updated_job.artifacts = artifacts
-            updated_job.updated_at = utc_now_iso()
-            updated_job = self.store.update_job(updated_job)
-            return HTTPStatus.OK, to_dict(updated_job)
-        except Exception as exc:
-            failed = job
-            failed.status = "failed"
-            failed.updated_at = utc_now_iso()
-            if all(stage.error is None for stage in failed.stage_runs) and failed.stage_runs:
-                failed.stage_runs[0].status = "failed"
-                failed.stage_runs[0].finished_at = failed.updated_at
-                failed.stage_runs[0].error = str(exc)
-            failed = self.store.update_job(failed)
-            return HTTPStatus.BAD_GATEWAY, to_dict(failed)
+            return HTTPStatus.ACCEPTED, to_dict(job)
+        if job.status == "queued":
+            return HTTPStatus.ACCEPTED, to_dict(job)
+        if job.status in {"succeeded", "failed", "cancelled"}:
+            job.status = "queued"
+            job.updated_at = utc_now_iso()
+            for stage in job.stage_runs:
+                stage.status = "pending"
+                stage.started_at = None
+                stage.finished_at = None
+                stage.error = None
+                stage.command = []
+                stage.exit_code = None
+                stage.stdout_path = None
+                stage.stderr_path = None
+            job.artifacts = []
+            job = self.store.update_job(job)
+            return HTTPStatus.ACCEPTED, to_dict(job)
+        return HTTPStatus.ACCEPTED, to_dict(job)
 
 
 class GatewayHandler(BaseHTTPRequestHandler):

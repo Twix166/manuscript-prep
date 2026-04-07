@@ -70,6 +70,10 @@ class BaseJobStore(ABC):
     def update_job(self, job: JobRecord) -> JobRecord:
         raise NotImplementedError
 
+    @abstractmethod
+    def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
+        raise NotImplementedError
+
 
 class JobStore(BaseJobStore):
     def __init__(self, root: Path | None = None) -> None:
@@ -113,6 +117,31 @@ class JobStore(BaseJobStore):
 
     def update_job(self, job: JobRecord) -> JobRecord:
         with self._lock:
+            self._jobs[job.job_id] = job
+            self._persist(job)
+            return _job_from_dict(asdict(job))
+
+    def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
+        with self._lock:
+            queued_jobs = sorted(
+                (job for job in self._jobs.values() if job.status == "queued"),
+                key=lambda item: item.created_at,
+            )
+            if not queued_jobs:
+                return None
+
+            job = queued_jobs[0]
+            now = utc_now_iso()
+            job.status = "running"
+            job.updated_at = now
+            if job.stage_runs:
+                job.stage_runs[0].status = "running"
+                job.stage_runs[0].started_at = job.stage_runs[0].started_at or now
+            job.options = {
+                **job.options,
+                "_worker_id": worker_id,
+                "_claimed_at": now,
+            }
             self._jobs[job.job_id] = job
             self._persist(job)
             return _job_from_dict(asdict(job))
