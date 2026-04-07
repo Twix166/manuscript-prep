@@ -88,6 +88,8 @@ Additional testing guidance lives in [docs/development/testing.md](docs/developm
 
 Release/UAT guidance lives in [docs/development/uat_checklist.md](docs/development/uat_checklist.md).
 
+Release notes for the current baseline live in [docs/releases/v1.0.0.md](docs/releases/v1.0.0.md).
+
 ---
 
 ## Overview
