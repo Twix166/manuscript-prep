@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from abc import ABC, abstractmethod
 from dataclasses import asdict
 from pathlib import Path
 from threading import Lock
@@ -30,7 +31,47 @@ def _job_from_dict(data: Dict) -> JobRecord:
     )
 
 
-class JobStore:
+def create_job_record(request: JobCreateRequest) -> JobRecord:
+    definition = get_pipeline_definition(request.pipeline)
+    if definition is None:
+        raise ValueError(f"Unknown pipeline: {request.pipeline}")
+
+    now = utc_now_iso()
+    return JobRecord(
+        job_id=str(uuid4()),
+        pipeline=request.pipeline,
+        status="queued",
+        created_at=now,
+        updated_at=now,
+        book_slug=request.book_slug,
+        title=request.title,
+        config_path=request.config_path,
+        input_path=request.input_path,
+        options=dict(request.options),
+        stage_runs=[StageRun(name=stage.name, status="pending") for stage in definition.stages],
+        artifacts=[],
+    )
+
+
+class BaseJobStore(ABC):
+    @abstractmethod
+    def create_job(self, request: JobCreateRequest) -> JobRecord:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_job(self, job_id: str) -> Optional[JobRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_jobs(self) -> List[JobRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_job(self, job: JobRecord) -> JobRecord:
+        raise NotImplementedError
+
+
+class JobStore(BaseJobStore):
     def __init__(self, root: Path | None = None) -> None:
         self.root = (root or Path("work/gateway_jobs")).expanduser()
         self.root.mkdir(parents=True, exist_ok=True)
@@ -54,25 +95,7 @@ class JobStore:
         )
 
     def create_job(self, request: JobCreateRequest) -> JobRecord:
-        definition = get_pipeline_definition(request.pipeline)
-        if definition is None:
-            raise ValueError(f"Unknown pipeline: {request.pipeline}")
-
-        now = utc_now_iso()
-        job = JobRecord(
-            job_id=str(uuid4()),
-            pipeline=request.pipeline,
-            status="queued",
-            created_at=now,
-            updated_at=now,
-            book_slug=request.book_slug,
-            title=request.title,
-            config_path=request.config_path,
-            input_path=request.input_path,
-            options=dict(request.options),
-            stage_runs=[StageRun(name=stage.name, status="pending") for stage in definition.stages],
-            artifacts=[],
-        )
+        job = create_job_record(request)
 
         with self._lock:
             self._jobs[job.job_id] = job

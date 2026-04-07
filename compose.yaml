@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: manuscriptprep-postgres
+    environment:
+      POSTGRES_DB: manuscriptprep
+      POSTGRES_USER: manuscriptprep
+      POSTGRES_PASSWORD: manuscriptprep
+    ports:
+      - "${MANUSCRIPTPREP_POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - manuscriptprep_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U manuscriptprep -d manuscriptprep"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    build:
+      context: .
+    container_name: manuscriptprep-gateway
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MANUSCRIPTPREP_STORE_BACKEND: postgres
+      MANUSCRIPTPREP_DATABASE_URL: postgresql://manuscriptprep:manuscriptprep@postgres:5432/manuscriptprep
+      MANUSCRIPTPREP_POSTGRES_SCHEMA: gateway
+      PYTHONUNBUFFERED: "1"
+    command:
+      - python
+      - manuscriptprep_gateway_api.py
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8765"
+      - --runtime-root
+      - /app/work/gateway_jobs/runtime
+    ports:
+      - "${MANUSCRIPTPREP_GATEWAY_PORT:-8765}:8765"
+    volumes:
+      - .:/app
+
+volumes:
+  manuscriptprep_postgres_data:

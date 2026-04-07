@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-"""Minimal HTTP gateway for the first API-oriented microservices slice.
+"""Minimal HTTP gateway for the current API-oriented microservices slice.
 
 This service is intentionally small:
 - no external framework dependency
-- in-memory job store
 - explicit JSON contracts
+- pluggable file or PostgreSQL-backed job persistence
 
 The goal is to establish the API surface that a future TUI client or web UI
-can target before worker extraction and persistent storage are introduced.
+can target before worker extraction and asynchronous execution are introduced.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -22,16 +23,23 @@ from urllib.parse import urlparse
 
 from manuscriptprep.api_models import JobCreateRequest, to_dict, utc_now_iso
 from manuscriptprep.execution_adapter import ExecutionAdapter
-from manuscriptprep.job_store import JobStore
+from manuscriptprep.job_store import BaseJobStore
 from manuscriptprep.service_registry import get_pipeline_definition, list_pipelines
+from manuscriptprep.store_factory import create_job_store
 
 
 class GatewayAPI:
-    def __init__(self, store: JobStore | None = None, adapter: ExecutionAdapter | None = None) -> None:
-        self.store = store or JobStore()
-        self.adapter = adapter or ExecutionAdapter(runtime_root=self.store.root / "runtime")
+    def __init__(
+        self,
+        store: BaseJobStore | None = None,
+        adapter: ExecutionAdapter | None = None,
+        runtime_root: Path | None = None,
+    ) -> None:
+        self.store = store or create_job_store(backend="file", jobs_root=Path("work/gateway_jobs"))
+        self.runtime_root = runtime_root or getattr(self.store, "root", Path("work/gateway_jobs")) / "runtime"
+        self.adapter = adapter or ExecutionAdapter(runtime_root=self.runtime_root)
         if getattr(self.adapter, "runtime_root", None) is None:
-            self.adapter.runtime_root = self.store.root / "runtime"
+            self.adapter.runtime_root = self.runtime_root
 
     def health(self) -> Tuple[int, Dict[str, Any]]:
         return HTTPStatus.OK, {"status": "ok", "service": "gateway-api", "timestamp": utc_now_iso()}
@@ -214,13 +222,42 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--host", default="127.0.0.1", help="Bind host")
     parser.add_argument("--port", type=int, default=8765, help="Bind port")
     parser.add_argument("--jobs-root", default="work/gateway_jobs", help="Directory used for persistent job records")
+    parser.add_argument(
+        "--runtime-root",
+        default=None,
+        help="Directory used for gateway runtime artifacts such as command/stdout/stderr captures",
+    )
+    parser.add_argument(
+        "--store-backend",
+        choices=["file", "postgres"],
+        default=os.environ.get("MANUSCRIPTPREP_STORE_BACKEND", "file"),
+        help="Persistent store backend for gateway jobs",
+    )
+    parser.add_argument(
+        "--database-url",
+        default=os.environ.get("MANUSCRIPTPREP_DATABASE_URL"),
+        help="PostgreSQL connection string used when --store-backend=postgres",
+    )
+    parser.add_argument(
+        "--postgres-schema",
+        default=os.environ.get("MANUSCRIPTPREP_POSTGRES_SCHEMA", "public"),
+        help="PostgreSQL schema used for gateway job tables",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    jobs_root = Path(args.jobs_root)
+    runtime_root = Path(args.runtime_root).expanduser() if args.runtime_root else jobs_root / "runtime"
+    store = create_job_store(
+        backend=args.store_backend,
+        jobs_root=jobs_root,
+        database_url=args.database_url,
+        postgres_schema=args.postgres_schema,
+    )
     handler = GatewayHandler
-    handler.app = GatewayAPI(store=JobStore(root=Path(args.jobs_root)))
+    handler.app = GatewayAPI(store=store, runtime_root=runtime_root)
     server = ThreadingHTTPServer((args.host, args.port), handler)
     print(f"Gateway API listening on http://{args.host}:{args.port}")
     try:

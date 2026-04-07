@@ -1,4 +1,4 @@
 PyYAML
 rich
 reportlab
-
+psycopg[binary]

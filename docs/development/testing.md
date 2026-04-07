@@ -57,6 +57,8 @@ These tests use fake local tool shims for `pdftotext`, `ocrmypdf`, `pdfinfo`, an
 
 Multi-component tests for stage boundaries and artifact contracts across real CLI invocations.
 
+The default automated matrix does not require a live PostgreSQL instance. PostgreSQL-backed gateway testing is currently a manual stack-level check through [compose.yaml](/home/rbalm/Manuscript_Prep_Modelfile/compose.yaml).
+
 ## Additional checks worth keeping in mind
 
 The required suites above are the baseline. As the codebase matures, add:
@@ -65,4 +67,3 @@ The required suites above are the baseline. As the codebase matures, add:
 - linting and formatting checks
 - dependency-install checks in CI
 - performance checks for very large manuscript runs when representative fixtures exist
-

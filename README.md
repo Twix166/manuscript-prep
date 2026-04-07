@@ -34,7 +34,7 @@ Notes:
 
 - `manuscriptprep_orchestrator_tui.py` is a legacy orchestrator kept for reference and comparison.
 - `scripts/manuscriptprep_orchestrator_tui_configured.py` is a config wiring scaffold, not the supported production runner.
-- `manuscriptprep_gateway_api.py` is the current API-oriented microservices slice. It can create and run stage jobs, run one end-to-end `manuscript-prep` job, and expose persisted job artifacts and per-stage command logs through a local job store.
+- `manuscriptprep_gateway_api.py` is the current API-oriented microservices slice. It can create and run stage jobs, run one end-to-end `manuscript-prep` job, and expose persisted job artifacts and per-stage command logs through either a file-backed store or PostgreSQL.
 - `manuscriptprep_orchestrator_tui_refactored.py` can now also run in gateway-client mode with `--gateway-url` while preserving the existing direct local orchestration mode.
 
 ---
@@ -217,6 +217,34 @@ python --version
 ### 3. Install Python dependencies
 
 Create a virtual environment:
+
+### 4. Optional container stack
+
+The repository now includes a root [compose.yaml](/home/rbalm/Manuscript_Prep_Modelfile/compose.yaml) that starts:
+
+- `postgres`
+- `gateway`
+
+The compose stack configures the gateway to use PostgreSQL by default:
+
+```bash
+docker compose up --build
+```
+
+The gateway will be available on `http://127.0.0.1:8765` and PostgreSQL will be published on host port `5433` by default. The container-to-container database port remains `5432`.
+
+If those host ports conflict with your machine, override them when starting the stack:
+
+```bash
+MANUSCRIPTPREP_POSTGRES_PORT=55432 MANUSCRIPTPREP_GATEWAY_PORT=18765 docker compose up --build
+```
+
+The stack will use:
+
+- PostgreSQL database: `manuscriptprep`
+- PostgreSQL schema: `gateway`
+
+For local non-container development, the gateway can still run with the file-backed store by default.
 
 ```bash
 python -m venv .venv
