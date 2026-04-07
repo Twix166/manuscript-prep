@@ -1,5 +1,6 @@
 const storageKey = "manuscriptprep.apiToken";
 const autoRefreshMs = 3000;
+const ingestResultsCachePrefix = "manuscriptprep.ingestResults.";
 const stageLabels = {
   ingest: "Ingest",
   orchestrate: "Categorisation And Analysis",
@@ -242,13 +243,19 @@ async function triggerPipeline(pipeline) {
   }
 }
 
-function openLatestIngestResults() {
+async function openLatestIngestResults() {
   const manuscript = selectedManuscript();
   if (!manuscript || !manuscript.latest_ingest) {
     els.stageActionStatus.textContent = "No ingest results are available for the selected manuscript yet.";
     return;
   }
-  window.open(`/ui/ingest-results.html?manuscript_id=${encodeURIComponent(manuscript.manuscript_id)}`, "_blank", "noopener");
+  try {
+    const payload = await fetchJson(`/v1/manuscripts/${encodeURIComponent(manuscript.manuscript_id)}/ingest-results`);
+    localStorage.setItem(`${ingestResultsCachePrefix}${manuscript.manuscript_id}`, JSON.stringify(payload));
+    window.open(`/ui/ingest-results.html?manuscript_id=${encodeURIComponent(manuscript.manuscript_id)}`, "_blank", "noopener");
+  } catch (error) {
+    els.stageActionStatus.textContent = error.message;
+  }
 }
 
 function renderStageBoard() {
