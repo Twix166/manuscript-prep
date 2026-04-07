@@ -138,6 +138,7 @@ class ChunkRecord:
 class IngestRuntimeSettings:
     input_pdf: Path
     title: str
+    book_slug: str
     workdir: Path
     source_dir: Path
     extracted_dir: Path
@@ -461,8 +462,9 @@ def chunk_clean_text(
     target_chunk_words: int,
     max_chunk_words: int,
     logger: Logger,
+    book_slug: Optional[str] = None,
 ) -> Tuple[List[ChunkRecord], Dict[str, Any]]:
-    book_slug = slugify(book_title)
+    book_slug = book_slug or slugify(book_title)
     book_chunk_dir = chunks_root / book_slug
     book_chunk_dir.mkdir(parents=True, exist_ok=True)
 
@@ -607,7 +609,7 @@ def resolve_ingest_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPr
 
     input_pdf = args.input.expanduser()
     title = args.title
-    book_slug = slugify(title)
+    book_slug = str(args.book_slug).strip() if getattr(args, "book_slug", None) else slugify(title)
 
     if cfg is not None:
         workdir = (args.workdir.expanduser() if args.workdir is not None else Path(cfg.require("paths", "workspace_root")).expanduser())
@@ -626,6 +628,7 @@ def resolve_ingest_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPr
     return IngestRuntimeSettings(
         input_pdf=input_pdf,
         title=title,
+        book_slug=book_slug,
         workdir=workdir,
         source_dir=paths["source_dir"],
         extracted_dir=paths["extracted_dir"],
@@ -649,6 +652,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input", type=Path, required=False, help="Source PDF path")
     parser.add_argument("--workdir", type=Path, required=False, help="Workspace directory")
     parser.add_argument("--title", required=False, help="Book title, used for book_slug subdirectories")
+    parser.add_argument("--book-slug", required=False, help="Optional explicit book slug for output subdirectories")
     parser.add_argument(
         "--chunk-words",
         type=int,
@@ -685,7 +689,7 @@ def main() -> int:
         )
         return 1
 
-    book_slug = slugify(settings.title)
+    book_slug = settings.book_slug
 
     for d in [
         settings.source_dir,
@@ -734,6 +738,7 @@ def main() -> int:
     chunks, chunk_stats = chunk_clean_text(
         clean_text_value=clean_text_value,
         book_title=settings.title,
+        book_slug=book_slug,
         chunks_root=settings.chunks_dir,
         min_chunk_words=settings.min_chunk_words,
         target_chunk_words=settings.chunk_words,

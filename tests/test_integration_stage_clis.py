@@ -36,6 +36,35 @@ def test_ingest_cli_creates_expected_workspace_artifacts(tmp_path: Path, sample_
     assert (workdir / "chunks" / "treasure_island").exists()
 
 
+def test_ingest_cli_honors_explicit_book_slug(tmp_path: Path, sample_pdf: Path, test_env: dict[str, str]) -> None:
+    workdir = tmp_path / "work"
+    result = run_cli(
+        [
+            "manuscriptprep_ingest.py",
+            "--input",
+            str(sample_pdf),
+            "--workdir",
+            str(workdir),
+            "--title",
+            "Treasure Island",
+            "--book-slug",
+            "treasure_island_custom",
+            "--chunk-words",
+            "20",
+            "--min-chunk-words",
+            "5",
+            "--max-chunk-words",
+            "30",
+        ],
+        env=test_env,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (workdir / "manifests" / "treasure_island_custom" / "ingest_manifest.json").exists()
+    ingest_manifest = json.loads((workdir / "manifests" / "treasure_island_custom" / "ingest_manifest.json").read_text(encoding="utf-8"))
+    assert ingest_manifest["book_slug"] == "treasure_island_custom"
+    assert (workdir / "chunks" / "treasure_island_custom").exists()
+
+
 def test_ingest_cli_uses_config_defaults_for_paths_and_chunking(tmp_path: Path, sample_pdf: Path, test_env: dict[str, str]) -> None:
     workspace_root = tmp_path / "workspace"
     config_path = tmp_path / "config.yaml"

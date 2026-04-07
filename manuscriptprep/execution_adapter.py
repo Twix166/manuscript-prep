@@ -244,6 +244,8 @@ class ExecutionAdapter:
             "--title",
             str(job.title),
         ]
+        if job.book_slug:
+            cmd.extend(["--book-slug", str(job.book_slug)])
         if job.config_path:
             cmd.extend(["--config", str(job.config_path)])
         if job.options.get("chunk_words") is not None:
@@ -257,7 +259,7 @@ class ExecutionAdapter:
 
         result = self._run_command(job, "ingest", cmd, "Ingest execution failed")
 
-        book_slug = job.book_slug or ""
+        book_slug = job.book_slug or self._slugify(job.title or "")
         workdir_path = Path(str(workdir))
         manifests_dir = workdir_path / "manifests" / book_slug
         chunk_dir = workdir_path / "chunks" / book_slug

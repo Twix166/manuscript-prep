@@ -162,6 +162,56 @@ def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results
     assert ingest_results["chunk_manifest"]["content"]["chunk_count"] >= 1
     assert ingest_results["raw_text"]["preview"]
     assert ingest_results["clean_text"]["preview"]
+    assert "treasure_island" in ingest_results["ingest_manifest"]["artifact"]["path"]
+
+
+def test_gateway_api_ingest_artifacts_follow_manuscript_slug(tmp_path, sample_pdf, test_env) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    adapter = ExecutionAdapter(env=test_env)
+    worker = JobWorker(store=store, adapter=adapter, poll_interval=0.01)
+    app = GatewayAPI(store=store)
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Treasure Island",
+            "book_slug": "treasure_island_by_robert_louis_stevenson",
+            "source_path": str(sample_pdf),
+            "file_size_bytes": sample_pdf.stat().st_size,
+        }
+    )
+    assert status == 201
+
+    status, created = app.create_job(
+        {
+            "pipeline": "ingest",
+            "manuscript_id": manuscript["manuscript_id"],
+            "options": {
+                "workdir": str(tmp_path / "work"),
+                "chunk_words": 20,
+                "min_chunk_words": 5,
+                "max_chunk_words": 30,
+            },
+        }
+    )
+    assert status == 201
+
+    import os
+    old_path = os.environ.get("PATH", "")
+    os.environ["PATH"] = test_env["PATH"]
+    try:
+        status, queued = app.run_job(created["job_id"])
+        assert status == 202
+        assert queued["status"] == "queued"
+        assert worker.process_next_job() is True
+    finally:
+        os.environ["PATH"] = old_path
+
+    status, ingest_results = app.get_manuscript_ingest_results(manuscript["manuscript_id"])
+    assert status == 200
+    assert "treasure_island_by_robert_louis_stevenson" in ingest_results["ingest_manifest"]["artifact"]["path"]
+    assert ingest_results["ingest_manifest"]["exists"] is True
+    assert ingest_results["raw_text"]["exists"] is True
+    assert ingest_results["clean_text"]["exists"] is True
 
 
 def test_gateway_api_updates_and_deletes_manuscripts(tmp_path, sample_pdf) -> None:
