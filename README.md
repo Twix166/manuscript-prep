@@ -86,6 +86,8 @@ Test suites currently required for code changes:
 
 Additional testing guidance lives in [docs/development/testing.md](docs/development/testing.md).
 
+Release/UAT guidance lives in [docs/development/uat_checklist.md](docs/development/uat_checklist.md).
+
 ---
 
 ## Overview
