@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ManuscriptPrep Control Plane</title>
+    <link rel="stylesheet" href="/ui/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">ManuscriptPrep</p>
+          <h1>Control Plane</h1>
+          <p class="lede">Live view of jobs, manuscripts, config profiles, and artifacts from the gateway API.</p>
+        </div>
+        <form id="auth-form" class="auth-panel">
+          <label for="api-token">API token</label>
+          <input id="api-token" name="api-token" type="password" placeholder="Enter API token">
+          <button type="submit">Connect</button>
+          <p id="auth-status" class="muted">Token is stored only in browser local storage.</p>
+        </form>
+      </section>
+
+      <section class="grid two">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>System</h2>
+            <button data-refresh="system">Refresh</button>
+          </div>
+          <pre id="system-status">Connect to load system status.</pre>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Pipelines</h2>
+            <button data-refresh="pipelines">Refresh</button>
+          </div>
+          <ul id="pipeline-list" class="list"></ul>
+        </article>
+      </section>
+
+      <section class="grid three">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Jobs</h2>
+            <button data-refresh="jobs">Refresh</button>
+          </div>
+          <ul id="job-list" class="list selectable"></ul>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Manuscripts</h2>
+            <button data-refresh="manuscripts">Refresh</button>
+          </div>
+          <ul id="manuscript-list" class="list"></ul>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Config Profiles</h2>
+            <button data-refresh="config-profiles">Refresh</button>
+          </div>
+          <ul id="config-profile-list" class="list"></ul>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Selected Job</h2>
+          <button data-refresh="selected-job">Refresh</button>
+        </div>
+        <div class="grid two">
+          <pre id="job-detail">Select a job to inspect details.</pre>
+          <pre id="job-artifacts">Artifact index appears here.</pre>
+        </div>
+      </section>
+    </main>
+
+    <script src="/ui/app.js"></script>
+  </body>
+</html>

@@ -156,6 +156,11 @@ Suggested deliverables:
 - web job detail
 - artifact viewer
 
+Status:
+- added a gateway-served web UI at `/ui`
+- added job, manuscript, config profile, and artifact views in the operator dashboard
+- kept the TUI and web UI on the same API surface
+
 ## Recommended Build Order
 
 1. queued worker execution

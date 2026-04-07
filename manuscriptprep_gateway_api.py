@@ -27,6 +27,7 @@ from manuscriptprep.job_store import BaseJobStore
 from manuscriptprep.runtime_logging import emit_runtime_event
 from manuscriptprep.service_registry import get_pipeline_definition, list_pipelines
 from manuscriptprep.store_factory import create_job_store
+from manuscriptprep.web_ui import get_web_asset
 
 
 class GatewayAPI:
@@ -314,6 +315,13 @@ class GatewayHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _write_bytes(self, status: int, body: bytes, content_type: str) -> None:
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def _read_json_body(self) -> Dict[str, Any]:
         content_length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(content_length) if content_length else b"{}"
@@ -324,6 +332,15 @@ class GatewayHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+
+        if path in {"/", "/ui", "/ui/"} or path.startswith("/ui/"):
+            try:
+                content_type, body = get_web_asset(path.lstrip("/") or "index.html")
+            except FileNotFoundError:
+                self._write_json(HTTPStatus.NOT_FOUND, {"error": f"Unknown route: {path}"})
+                return
+            self._write_bytes(HTTPStatus.OK, body, content_type)
+            return
 
         if path == "/health":
             status, payload = self.app.health()

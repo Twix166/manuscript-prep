@@ -62,6 +62,11 @@ Artifact management:
 - `GET /v1/jobs/{job_id}/artifacts` returns the persisted artifact index for a job
 - artifacts produced by workers are now enriched with `sha256`, `bytes`, and `storage_backend` metadata
 
+Web UI:
+
+- `GET /ui` serves a lightweight operator dashboard from the gateway
+- the dashboard can inspect system status, jobs, manuscripts, config profiles, and per-job artifact indexes
+
 ---
 
 ## Test Workflow
