@@ -9,6 +9,7 @@ from pathlib import Path
 
 from manuscriptprep.execution_adapter import ExecutionAdapter
 from manuscriptprep.job_worker import JobWorker
+from manuscriptprep.runtime_logging import emit_runtime_event
 from manuscriptprep.store_factory import create_job_store
 
 
@@ -78,7 +79,14 @@ def main() -> int:
         poll_interval=args.poll_interval,
         stale_after_seconds=args.stale_after_seconds,
     )
-    print(f"ManuscriptPrep worker started: {worker.worker_id}")
+    emit_runtime_event(
+        "worker",
+        "startup",
+        worker_id=worker.worker_id,
+        poll_interval=args.poll_interval,
+        stale_after_seconds=args.stale_after_seconds,
+        store_backend=store.__class__.__name__,
+    )
     worker.run_forever()
     return 0
 

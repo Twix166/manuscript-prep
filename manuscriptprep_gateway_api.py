@@ -24,6 +24,7 @@ from urllib.parse import urlparse
 
 from manuscriptprep.api_models import JobCreateRequest, UserRecord, to_dict, utc_now_iso
 from manuscriptprep.job_store import BaseJobStore
+from manuscriptprep.runtime_logging import emit_runtime_event
 from manuscriptprep.service_registry import get_pipeline_definition, list_pipelines
 from manuscriptprep.store_factory import create_job_store
 
@@ -492,7 +493,14 @@ def main() -> int:
         bootstrap_token=args.bootstrap_admin_token,
     )
     server = ThreadingHTTPServer((args.host, args.port), handler)
-    print(f"Gateway API listening on http://{args.host}:{args.port}")
+    emit_runtime_event(
+        "gateway-api",
+        "startup",
+        host=args.host,
+        port=args.port,
+        store_backend=store.__class__.__name__,
+        auth_required=args.auth_required,
+    )
     try:
         server.serve_forever()
     except KeyboardInterrupt:

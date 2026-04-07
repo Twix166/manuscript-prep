@@ -271,6 +271,8 @@ The stack will use:
 - PostgreSQL schema: `gateway`
 - API auth: enabled for `/v1/*`
 - Default development admin token: `dev-admin-token` unless `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN` is overridden
+- environment-driven database credentials and admin token, with examples in `.env.example`
+- non-root `manuscriptprep` user inside the gateway and worker containers
 
 For local non-container development, the gateway can still run with the file-backed store by default.
 

@@ -133,6 +133,12 @@ Suggested deliverables:
 - hardened container config
 - deployment checklist
 
+Status:
+- added `.env.example` for deployment secrets and ports
+- moved compose database/admin settings to environment-driven values
+- switched gateway and worker containers to a non-root runtime user
+- added structured startup logs for gateway and worker services
+
 ## P6: Web UI and Operator Experience
 
 Goal: provide a production-facing interface on top of the stable API.
