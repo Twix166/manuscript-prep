@@ -22,7 +22,13 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from manuscriptprep.api_models import JobCreateRequest, UserRecord, to_dict, utc_now_iso
+from manuscriptprep.api_models import (
+    JobCreateRequest,
+    ManuscriptIngestSummary,
+    UserRecord,
+    to_dict,
+    utc_now_iso,
+)
 from manuscriptprep.config import load_config
 from manuscriptprep.job_store import BaseJobStore
 from manuscriptprep.paths import build_paths
@@ -166,7 +172,32 @@ class GatewayAPI:
         manuscripts = self.store.list_manuscripts()
         if self.auth_required and actor is not None and actor.role != "admin":
             manuscripts = [item for item in manuscripts if item.owner_user_id == actor.user_id]
-        return HTTPStatus.OK, {"manuscripts": [to_dict(item) for item in manuscripts]}
+        return HTTPStatus.OK, {"manuscripts": [self._serialize_manuscript(item) for item in manuscripts]}
+
+    def _latest_ingest_summary(self, manuscript_id: str) -> Optional[ManuscriptIngestSummary]:
+        jobs = sorted(self.store.list_jobs(), key=lambda item: item.updated_at, reverse=True)
+        for job in jobs:
+            if job.manuscript_id != manuscript_id:
+                continue
+            for stage in job.stage_runs:
+                if stage.name != "ingest":
+                    continue
+                return ManuscriptIngestSummary(
+                    job_id=job.job_id,
+                    pipeline=job.pipeline,
+                    status=stage.status,
+                    started_at=stage.started_at,
+                    finished_at=stage.finished_at,
+                    updated_at=job.updated_at,
+                    error=stage.error,
+                )
+        return None
+
+    def _serialize_manuscript(self, manuscript) -> Dict[str, Any]:
+        payload = to_dict(manuscript)
+        latest_ingest = self._latest_ingest_summary(manuscript.manuscript_id)
+        payload["latest_ingest"] = to_dict(latest_ingest) if latest_ingest is not None else None
+        return payload
 
     def create_manuscript(self, payload: Dict[str, Any], actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
@@ -183,7 +214,72 @@ class GatewayAPI:
             owner_user_id=actor.user_id if actor else payload.get("owner_user_id"),
             owner_username=actor.username if actor else payload.get("owner_username"),
         )
-        return HTTPStatus.CREATED, to_dict(manuscript)
+        return HTTPStatus.CREATED, self._serialize_manuscript(manuscript)
+
+    def update_manuscript(self, manuscript_id: str, payload: Dict[str, Any], actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        manuscript = self.store.get_manuscript(manuscript_id)
+        if manuscript is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
+        if not self._can_access_manuscript(actor, manuscript.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this manuscript"}
+        next_title = payload.get("title")
+        next_slug = payload.get("book_slug")
+        if next_title is not None:
+            next_title = str(next_title).strip()
+            if not next_title:
+                return HTTPStatus.BAD_REQUEST, {"error": "title cannot be blank"}
+        if next_slug is not None:
+            next_slug = self._slugify(str(next_slug))
+            if not next_slug:
+                return HTTPStatus.BAD_REQUEST, {"error": "book_slug cannot be blank"}
+        updated = self.store.update_manuscript(manuscript_id, title=next_title, book_slug=next_slug)
+        if updated is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
+        return HTTPStatus.OK, self._serialize_manuscript(updated)
+
+    def delete_manuscript(self, manuscript_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        manuscript = self.store.get_manuscript(manuscript_id)
+        if manuscript is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
+        if not self._can_access_manuscript(actor, manuscript.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this manuscript"}
+        if not self.store.delete_manuscript(manuscript_id):
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
+        return HTTPStatus.OK, {"deleted": True, "manuscript_id": manuscript_id}
+
+    def get_manuscript_ingest_results(self, manuscript_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        manuscript = self.store.get_manuscript(manuscript_id)
+        if manuscript is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
+        if not self._can_access_manuscript(actor, manuscript.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this manuscript"}
+        latest_ingest = self._latest_ingest_summary(manuscript_id)
+        if latest_ingest is None:
+            return HTTPStatus.NOT_FOUND, {"error": "No ingest results available for this manuscript yet"}
+        job = self.store.get_job(latest_ingest.job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {latest_ingest.job_id}"}
+
+        artifacts = {}
+        for artifact_name in ("ingest_manifest", "raw_text", "clean_text", "chunk_manifest"):
+            status, payload = self.get_job_artifact(latest_ingest.job_id, artifact_name, actor=actor)
+            if status != HTTPStatus.OK:
+                return HTTPStatus.NOT_FOUND, {"error": f"Missing ingest artifact: {artifact_name}"}
+            artifacts[artifact_name] = payload
+        return HTTPStatus.OK, {
+            "manuscript": self._serialize_manuscript(manuscript),
+            "job": to_dict(job),
+            **artifacts,
+        }
 
     def upload_manuscript(self, *, filename: str, body: bytes, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
@@ -457,6 +553,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
             self._write_json(status, payload)
             return
 
+        if path.startswith("/v1/manuscripts/") and path.endswith("/ingest-results"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 4:
+                _, _, manuscript_id, _ = parts
+                status, payload = self.app.get_manuscript_ingest_results(manuscript_id, actor=self._current_actor())
+                self._write_json(status, payload)
+                return
+
         if path == "/v1/config-profiles":
             status, payload = self.app.list_config_profiles(actor=self._current_actor())
             self._write_json(status, payload)
@@ -543,6 +647,29 @@ class GatewayHandler(BaseHTTPRequestHandler):
             self._write_json(status, response)
             return
 
+        self._write_json(HTTPStatus.NOT_FOUND, {"error": f"Unknown route: {path}"})
+
+    def do_PUT(self) -> None:  # noqa: N802
+        path = urlparse(self.path).path
+        if path.startswith("/v1/manuscripts/"):
+            manuscript_id = path.rsplit("/", 1)[-1]
+            try:
+                payload = self._read_json_body()
+            except (json.JSONDecodeError, ValueError) as exc:
+                self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                return
+            status, response = self.app.update_manuscript(manuscript_id, payload, actor=self._current_actor())
+            self._write_json(status, response)
+            return
+        self._write_json(HTTPStatus.NOT_FOUND, {"error": f"Unknown route: {path}"})
+
+    def do_DELETE(self) -> None:  # noqa: N802
+        path = urlparse(self.path).path
+        if path.startswith("/v1/manuscripts/"):
+            manuscript_id = path.rsplit("/", 1)[-1]
+            status, response = self.app.delete_manuscript(manuscript_id, actor=self._current_actor())
+            self._write_json(status, response)
+            return
         self._write_json(HTTPStatus.NOT_FOUND, {"error": f"Unknown route: {path}"})
 
     def log_message(self, format: str, *args: object) -> None:  # noqa: A003

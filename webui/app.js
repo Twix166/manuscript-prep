@@ -1,6 +1,5 @@
 const storageKey = "manuscriptprep.apiToken";
 const autoRefreshMs = 3000;
-const stageOrder = ["ingest", "orchestrate", "merge", "resolve", "report"];
 const stageLabels = {
   ingest: "Ingest",
   orchestrate: "Categorisation And Analysis",
@@ -18,10 +17,6 @@ const state = {
   selectedManuscriptId: null,
   selectedConfigProfileId: null,
   selectedJobId: null,
-  artifactViewer: {
-    jobId: null,
-    tab: "classification",
-  },
 };
 
 const els = {
@@ -37,6 +32,11 @@ const els = {
   configProfileDetail: document.getElementById("config-profile-detail"),
   manuscriptList: document.getElementById("manuscript-list"),
   manuscriptDetail: document.getElementById("manuscript-detail"),
+  selectedManuscriptTitle: document.getElementById("selected-manuscript-title"),
+  selectedManuscriptSlug: document.getElementById("selected-manuscript-slug"),
+  saveManuscript: document.getElementById("save-manuscript"),
+  openIngestResults: document.getElementById("open-ingest-results"),
+  deleteManuscript: document.getElementById("delete-manuscript"),
   pipelineOverview: document.getElementById("pipeline-overview"),
   stageBoard: document.getElementById("stage-board"),
   stageActionStatus: document.getElementById("stage-action-status"),
@@ -45,12 +45,6 @@ const els = {
   jobDetail: document.getElementById("job-detail"),
   jobArtifacts: document.getElementById("job-artifacts"),
   runFullPipeline: document.getElementById("run-full-pipeline"),
-  artifactViewer: document.getElementById("artifact-viewer"),
-  artifactViewerTitle: document.getElementById("artifact-viewer-title"),
-  artifactViewerStatus: document.getElementById("artifact-viewer-status"),
-  artifactViewerSummary: document.getElementById("artifact-viewer-summary"),
-  artifactViewerPanels: document.getElementById("artifact-viewer-panels"),
-  artifactViewerClose: document.getElementById("artifact-viewer-close"),
 };
 
 function currentHeaders(extra = {}) {
@@ -70,11 +64,11 @@ async function fetchJson(path) {
   return payload;
 }
 
-async function postJson(path, payload) {
+async function sendJson(method, path, payload = null) {
   const response = await fetch(path, {
-    method: "POST",
+    method,
     headers: currentHeaders({ "Content-Type": "application/json" }),
-    body: JSON.stringify(payload),
+    body: payload ? JSON.stringify(payload) : null,
   });
   const data = await response.json();
   if (!response.ok) {
@@ -112,199 +106,9 @@ function latestJobForPipeline(pipeline) {
   return state.jobs.find((job) => job.pipeline === pipeline) || null;
 }
 
-function prettyLabel(value) {
-  return String(value || "n/a")
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, (match) => match.toUpperCase());
-}
-
-function truncateText(value, maxLength = 5000) {
-  const text = String(value || "");
-  if (text.length <= maxLength) {
-    return text;
-  }
-  return `${text.slice(0, maxLength)}\n\n... truncated ...`;
-}
-
-function setArtifactTab(tab) {
-  state.artifactViewer.tab = tab;
-  for (const button of document.querySelectorAll("[data-artifact-tab]")) {
-    button.classList.toggle("active", button.getAttribute("data-artifact-tab") === tab);
-  }
-  for (const panel of els.artifactViewerPanels.querySelectorAll(".artifact-panel")) {
-    panel.classList.toggle("active", panel.getAttribute("data-artifact-panel") === tab);
-  }
-}
-
-function ingestSummaryCards(ingestManifest = {}, chunkManifest = {}) {
-  const extraction = ingestManifest.extraction || {};
-  const cleaning = ingestManifest.cleaning || {};
-  const chunking = chunkManifest.summary || {};
-  const classification = ingestManifest.classification || {};
-  return [
-    {
-      title: "Classification",
-      body: classification.mode || classification.pdf_type || classification.type || "Unknown",
-    },
-    {
-      title: "Pages",
-      body: extraction.page_count || ingestManifest.page_count || "n/a",
-    },
-    {
-      title: "Clean Words",
-      body: cleaning.word_count || chunking.total_words || "n/a",
-    },
-    {
-      title: "Chunks",
-      body: chunking.chunk_count || (Array.isArray(chunkManifest.chunks) ? chunkManifest.chunks.length : "n/a"),
-    },
-  ];
-}
-
-function renderArtifactSummary(cards) {
-  els.artifactViewerSummary.innerHTML = "";
-  for (const card of cards) {
-    const article = document.createElement("article");
-    article.className = "artifact-card";
-    article.innerHTML = `
-      <p class="eyebrow">${card.title}</p>
-      <h3>${card.body}</h3>
-    `;
-    els.artifactViewerSummary.appendChild(article);
-  }
-}
-
-function renderArtifactPanels({ ingestManifest, rawText, cleanText, chunkManifest }) {
-  const classification = ingestManifest.classification || ingestManifest.pdf_analysis || ingestManifest;
-  const extraction = ingestManifest.extraction || ingestManifest.text_extraction || {};
-  const cleaning = ingestManifest.cleaning || {};
-  const chunks = Array.isArray(chunkManifest.chunks) ? chunkManifest.chunks : [];
-  const chunkLines = chunks.slice(0, 20).map((chunk) => {
-    const label = chunk.chunk_id || chunk.id || "chunk";
-    const words = chunk.word_count || chunk.words || "n/a";
-    const title = chunk.title || chunk.heading || "";
-    return `${label} | ${words} words${title ? ` | ${title}` : ""}`;
-  });
-  els.artifactViewerPanels.innerHTML = "";
-
-  const panelDefinitions = [
-    {
-      tab: "classification",
-      title: "Classification",
-      description: "How the PDF was classified before extraction and chunking.",
-      blocks: [JSON.stringify(classification, null, 2)],
-    },
-    {
-      tab: "extract",
-      title: "Extract",
-      description: "Extraction metadata and a preview of the raw text pulled from the PDF.",
-      blocks: [JSON.stringify(extraction, null, 2), truncateText(rawText)],
-    },
-    {
-      tab: "clean",
-      title: "Clean",
-      description: "Normalization and cleaning output before orchestration.",
-      blocks: [JSON.stringify(cleaning, null, 2), truncateText(cleanText)],
-    },
-    {
-      tab: "chunking",
-      title: "Chunking",
-      description: "Chunk manifest summary and the first chunk records from ingest.",
-      blocks: [JSON.stringify(chunkManifest.summary || {}, null, 2), JSON.stringify(chunks.slice(0, 10), null, 2)],
-      chunkLines,
-    },
-  ];
-
-  for (const definition of panelDefinitions) {
-    const section = document.createElement("section");
-    section.className = "artifact-panel";
-    section.setAttribute("data-artifact-panel", definition.tab);
-
-    const heading = document.createElement("h3");
-    heading.textContent = definition.title;
-    section.appendChild(heading);
-
-    const description = document.createElement("p");
-    description.className = "meta";
-    description.textContent = definition.description;
-    section.appendChild(description);
-
-    if (definition.chunkLines) {
-      const chunkCard = document.createElement("div");
-      chunkCard.className = "artifact-card";
-      const chunkHeading = document.createElement("h3");
-      chunkHeading.textContent = "Chunk Index";
-      chunkCard.appendChild(chunkHeading);
-      const chunkList = document.createElement("ol");
-      chunkList.className = "artifact-list";
-      if (definition.chunkLines.length) {
-        for (const line of definition.chunkLines) {
-          const item = document.createElement("li");
-          item.textContent = line;
-          chunkList.appendChild(item);
-        }
-      } else {
-        const item = document.createElement("li");
-        item.textContent = "No chunks found";
-        chunkList.appendChild(item);
-      }
-      chunkCard.appendChild(chunkList);
-      section.appendChild(chunkCard);
-    }
-
-    for (const block of definition.blocks) {
-      const pre = document.createElement("pre");
-      pre.textContent = block;
-      section.appendChild(pre);
-    }
-
-    els.artifactViewerPanels.appendChild(section);
-  }
-  setArtifactTab(state.artifactViewer.tab);
-}
-
-async function openIngestViewer(jobId) {
-  try {
-    state.artifactViewer.jobId = jobId;
-    els.artifactViewerTitle.textContent = "Ingest Results";
-    els.artifactViewerStatus.textContent = "Loading classification, extract, clean, and chunking results...";
-    els.artifactViewerSummary.innerHTML = "";
-    els.artifactViewerPanels.innerHTML = "";
-    els.artifactViewer.showModal();
-    const names = ["ingest_manifest", "raw_text", "clean_text", "chunk_manifest"];
-    const [job, ...artifactPayloads] = await Promise.all([
-      fetchJson(`/v1/jobs/${jobId}`),
-      ...names.map((name) => fetchJson(`/v1/jobs/${jobId}/artifacts/${name}`)),
-    ]);
-    const byName = Object.fromEntries(artifactPayloads.map((payload) => [payload.artifact.name, payload]));
-    const ingestManifest = byName.ingest_manifest?.content || {};
-    const chunkManifest = byName.chunk_manifest?.content || {};
-    const rawText = byName.raw_text?.preview || "";
-    const cleanText = byName.clean_text?.preview || "";
-    els.artifactViewerTitle.textContent = `${job.title || job.book_slug || "Ingest"} Results`;
-    els.artifactViewerStatus.textContent = `Showing ingest outputs for job ${job.job_id}.`;
-    renderArtifactSummary(ingestSummaryCards(ingestManifest, chunkManifest));
-    renderArtifactPanels({ ingestManifest, rawText, cleanText, chunkManifest });
-  } catch (error) {
-    els.artifactViewerStatus.textContent = error.message;
-    els.artifactViewerPanels.innerHTML = "";
-    const section = document.createElement("section");
-    section.className = "artifact-panel active";
-    section.setAttribute("data-artifact-panel", "classification");
-    const pre = document.createElement("pre");
-    pre.textContent = error.message;
-    section.appendChild(pre);
-    els.artifactViewerPanels.appendChild(section);
-  }
-}
-
-function resolveModelRefs(stage) {
-  const profile = selectedConfigProfile();
-  const models = (profile && profile.metadata && profile.metadata.models) || {};
-  return (stage.metadata.models || []).map((ref) => {
-    const key = ref.split(".").pop();
-    return models[key] ? `${key}: ${models[key]}` : ref;
-  });
+function latestIngestForSelectedManuscript() {
+  const manuscript = selectedManuscript();
+  return manuscript ? manuscript.latest_ingest || null : null;
 }
 
 function formatDate(value) {
@@ -328,11 +132,9 @@ function renderConfigProfiles() {
     els.configProfileSelect.value = state.selectedConfigProfileId;
   }
   const profile = selectedConfigProfile();
-  if (!profile) {
-    els.configProfileDetail.textContent = "No config profile selected.";
-    return;
-  }
-  els.configProfileDetail.textContent = JSON.stringify(profile, null, 2);
+  els.configProfileDetail.textContent = profile
+    ? JSON.stringify(profile, null, 2)
+    : "No config profile selected.";
 }
 
 function renderManuscripts() {
@@ -340,12 +142,19 @@ function renderManuscripts() {
   if (!state.manuscripts.length) {
     els.manuscriptList.innerHTML = '<li class="muted">No manuscripts yet</li>';
     els.manuscriptDetail.textContent = "Upload and register a manuscript to begin.";
+    els.selectedManuscriptTitle.value = "";
+    els.selectedManuscriptSlug.value = "";
     return;
   }
   for (const manuscript of state.manuscripts) {
+    const latestIngest = manuscript.latest_ingest;
     const li = document.createElement("li");
     li.className = manuscript.manuscript_id === state.selectedManuscriptId ? "selected" : "";
-    li.textContent = `${manuscript.title} | ${manuscript.book_slug} | ${manuscript.file_size_bytes || 0} bytes`;
+    li.innerHTML = `
+      <strong>${manuscript.title}</strong>
+      <span>${manuscript.book_slug}</span><br>
+      <span class="meta">Ingest: ${latestIngest ? `${latestIngest.status} at ${formatDate(latestIngest.finished_at || latestIngest.updated_at)}` : "not run yet"}</span>
+    `;
     li.addEventListener("click", async () => {
       state.selectedManuscriptId = manuscript.manuscript_id;
       state.selectedJobId = null;
@@ -356,9 +165,33 @@ function renderManuscripts() {
     els.manuscriptList.appendChild(li);
   }
   const manuscript = selectedManuscript();
-  els.manuscriptDetail.textContent = manuscript
-    ? JSON.stringify(manuscript, null, 2)
-    : "Select a manuscript to see pipeline-ready details.";
+  if (!manuscript) {
+    els.manuscriptDetail.textContent = "Select a manuscript to see pipeline-ready details.";
+    return;
+  }
+  els.selectedManuscriptTitle.value = manuscript.title;
+  els.selectedManuscriptSlug.value = manuscript.book_slug;
+  els.manuscriptDetail.textContent = JSON.stringify(
+    {
+      manuscript_id: manuscript.manuscript_id,
+      title: manuscript.title,
+      book_slug: manuscript.book_slug,
+      source_path: manuscript.source_path,
+      file_size_bytes: manuscript.file_size_bytes,
+      latest_ingest: manuscript.latest_ingest,
+    },
+    null,
+    2,
+  );
+}
+
+function resolveModelRefs(stage) {
+  const profile = selectedConfigProfile();
+  const models = (profile && profile.metadata && profile.metadata.models) || {};
+  return (stage.metadata.models || []).map((ref) => {
+    const key = ref.split(".").pop();
+    return models[key] ? `${key}: ${models[key]}` : ref;
+  });
 }
 
 function renderPipelineOverview() {
@@ -394,18 +227,28 @@ async function triggerPipeline(pipeline) {
     return;
   }
   try {
-    const created = await postJson("/v1/jobs", {
+    const created = await sendJson("POST", "/v1/jobs", {
       pipeline,
       manuscript_id: manuscript.manuscript_id,
       config_profile_id: profile.config_profile_id,
     });
-    await postJson(`/v1/jobs/${created.job_id}/run`, {});
+    await sendJson("POST", `/v1/jobs/${created.job_id}/run`, {});
     state.selectedJobId = created.job_id;
     els.stageActionStatus.textContent = `${pipeline} job queued: ${created.job_id}`;
     await refreshJobs();
+    await refreshManuscripts();
   } catch (error) {
     els.stageActionStatus.textContent = error.message;
   }
+}
+
+function openLatestIngestResults() {
+  const manuscript = selectedManuscript();
+  if (!manuscript || !manuscript.latest_ingest) {
+    els.stageActionStatus.textContent = "No ingest results are available for the selected manuscript yet.";
+    return;
+  }
+  window.open(`/ui/ingest-results.html?manuscript_id=${encodeURIComponent(manuscript.manuscript_id)}`, "_blank", "noopener");
 }
 
 function renderStageBoard() {
@@ -437,12 +280,12 @@ function renderStageBoard() {
       </div>
     `;
     card.querySelector("button").addEventListener("click", () => triggerPipeline(stage.name));
-    if (stage.name === "ingest" && latestJob && latestJob.status === "succeeded") {
+    if (stage.name === "ingest" && latestIngestForSelectedManuscript()) {
       const viewButton = document.createElement("button");
       viewButton.type = "button";
       viewButton.className = "secondary-button";
-      viewButton.textContent = "View Ingest Results";
-      viewButton.addEventListener("click", () => openIngestViewer(latestJob.job_id));
+      viewButton.textContent = "Open Ingest Results";
+      viewButton.addEventListener("click", openLatestIngestResults);
       card.querySelector(".stage-card-actions").appendChild(viewButton);
     }
     els.stageBoard.appendChild(card);
@@ -482,10 +325,6 @@ async function refreshSelectedJob() {
     ]);
     els.jobDetail.textContent = JSON.stringify(freshJob, null, 2);
     els.jobArtifacts.textContent = JSON.stringify(artifacts, null, 2);
-    if (freshJob.pipeline === "ingest" && freshJob.status === "succeeded") {
-      const viewLine = "\n\n[UI] Use the \"View Ingest Results\" button in the ingest stage card to inspect classification, extract, clean, and chunking.";
-      els.jobArtifacts.textContent += viewLine;
-    }
   } catch (error) {
     els.jobDetail.textContent = error.message;
     els.jobArtifacts.textContent = error.message;
@@ -524,7 +363,11 @@ async function refreshManuscripts() {
   if (!state.selectedManuscriptId && state.manuscripts.length) {
     state.selectedManuscriptId = state.manuscripts[0].manuscript_id;
   }
+  if (state.selectedManuscriptId && !selectedManuscript()) {
+    state.selectedManuscriptId = state.manuscripts[0]?.manuscript_id || null;
+  }
   renderManuscripts();
+  renderStageBoard();
 }
 
 async function refreshJobs() {
@@ -581,7 +424,7 @@ els.uploadForm.addEventListener("submit", async (event) => {
     els.uploadStatus.textContent = "Uploading manuscript...";
     const upload = await postBinary("/v1/uploads/manuscripts", file.name, file);
     els.uploadStatus.textContent = "Registering manuscript...";
-    const manuscript = await postJson("/v1/manuscripts", {
+    const manuscript = await sendJson("POST", "/v1/manuscripts", {
       title,
       book_slug: slug || upload.book_slug_guess,
       source_path: upload.path,
@@ -597,16 +440,49 @@ els.uploadForm.addEventListener("submit", async (event) => {
   }
 });
 
-els.runFullPipeline.addEventListener("click", () => triggerPipeline("manuscript-prep"));
-els.artifactViewerClose.addEventListener("click", () => els.artifactViewer.close());
-els.artifactViewer.addEventListener("click", (event) => {
-  if (event.target === els.artifactViewer) {
-    els.artifactViewer.close();
+els.saveManuscript.addEventListener("click", async () => {
+  const manuscript = selectedManuscript();
+  if (!manuscript) {
+    els.stageActionStatus.textContent = "Select a manuscript first.";
+    return;
+  }
+  try {
+    const updated = await sendJson("PUT", `/v1/manuscripts/${manuscript.manuscript_id}`, {
+      title: els.selectedManuscriptTitle.value.trim(),
+      book_slug: els.selectedManuscriptSlug.value.trim(),
+    });
+    state.selectedManuscriptId = updated.manuscript_id;
+    els.stageActionStatus.textContent = `Manuscript updated: ${updated.title}`;
+    await refreshManuscripts();
+    await refreshJobs();
+  } catch (error) {
+    els.stageActionStatus.textContent = error.message;
   }
 });
-for (const button of document.querySelectorAll("[data-artifact-tab]")) {
-  button.addEventListener("click", () => setArtifactTab(button.getAttribute("data-artifact-tab")));
-}
+
+els.deleteManuscript.addEventListener("click", async () => {
+  const manuscript = selectedManuscript();
+  if (!manuscript) {
+    els.stageActionStatus.textContent = "Select a manuscript first.";
+    return;
+  }
+  if (!window.confirm(`Remove manuscript ${manuscript.title}?`)) {
+    return;
+  }
+  try {
+    await sendJson("DELETE", `/v1/manuscripts/${manuscript.manuscript_id}`);
+    els.stageActionStatus.textContent = `Removed manuscript: ${manuscript.title}`;
+    state.selectedManuscriptId = null;
+    state.selectedJobId = null;
+    await refreshManuscripts();
+    await refreshJobs();
+  } catch (error) {
+    els.stageActionStatus.textContent = error.message;
+  }
+});
+
+els.openIngestResults.addEventListener("click", openLatestIngestResults);
+els.runFullPipeline.addEventListener("click", () => triggerPipeline("manuscript-prep"));
 
 for (const button of document.querySelectorAll("[data-refresh]")) {
   button.addEventListener("click", async () => {
@@ -622,6 +498,7 @@ for (const button of document.querySelectorAll("[data-refresh]")) {
 setInterval(() => {
   if (state.token) {
     refreshSystem();
+    refreshManuscripts();
     refreshJobs();
   }
 }, autoRefreshMs);

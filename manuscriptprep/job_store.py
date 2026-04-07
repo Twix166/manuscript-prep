@@ -180,6 +180,20 @@ class BaseJobStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_manuscript(
+        self,
+        manuscript_id: str,
+        *,
+        book_slug: Optional[str] = None,
+        title: Optional[str] = None,
+    ) -> Optional[ManuscriptRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_manuscript(self, manuscript_id: str) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
     def upsert_config_profile(
         self,
         *,
@@ -500,6 +514,40 @@ class JobStore(BaseJobStore):
     def list_manuscripts(self) -> List[ManuscriptRecord]:
         with self._lock:
             return [_manuscript_from_dict(asdict(item)) for item in self._manuscripts.values()]
+
+    def update_manuscript(
+        self,
+        manuscript_id: str,
+        *,
+        book_slug: Optional[str] = None,
+        title: Optional[str] = None,
+    ) -> Optional[ManuscriptRecord]:
+        with self._lock:
+            manuscript = self._manuscripts.get(manuscript_id)
+            if manuscript is None:
+                return None
+            updated = ManuscriptRecord(
+                manuscript_id=manuscript.manuscript_id,
+                book_slug=book_slug or manuscript.book_slug,
+                title=title or manuscript.title,
+                source_path=manuscript.source_path,
+                file_size_bytes=manuscript.file_size_bytes,
+                owner_user_id=manuscript.owner_user_id,
+                owner_username=manuscript.owner_username,
+                created_at=manuscript.created_at,
+                updated_at=utc_now_iso(),
+            )
+            self._manuscripts[manuscript_id] = updated
+            self._persist_manuscripts()
+            return _manuscript_from_dict(asdict(updated))
+
+    def delete_manuscript(self, manuscript_id: str) -> bool:
+        with self._lock:
+            if manuscript_id not in self._manuscripts:
+                return False
+            del self._manuscripts[manuscript_id]
+            self._persist_manuscripts()
+            return True
 
     def upsert_config_profile(
         self,

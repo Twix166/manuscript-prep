@@ -110,6 +110,89 @@ def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_en
     assert {item["name"] for item in artifact_index["artifacts"]} >= {"ingest_stdout", "ingest_stderr", "ingest_command"}
 
 
+def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results(tmp_path, sample_pdf, test_env) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    adapter = ExecutionAdapter(env=test_env)
+    worker = JobWorker(store=store, adapter=adapter, poll_interval=0.01)
+    app = GatewayAPI(store=store)
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Treasure Island",
+            "book_slug": "treasure_island",
+            "source_path": str(sample_pdf),
+            "file_size_bytes": sample_pdf.stat().st_size,
+        }
+    )
+    assert status == 201
+
+    status, created = app.create_job(
+        {
+            "pipeline": "ingest",
+            "manuscript_id": manuscript["manuscript_id"],
+            "options": {
+                "workdir": str(tmp_path / "work"),
+                "chunk_words": 20,
+                "min_chunk_words": 5,
+                "max_chunk_words": 30,
+            },
+        }
+    )
+    assert status == 201
+
+    import os
+    old_path = os.environ.get("PATH", "")
+    os.environ["PATH"] = test_env["PATH"]
+    try:
+        status, queued = app.run_job(created["job_id"])
+        assert status == 202
+        assert queued["status"] == "queued"
+        assert worker.process_next_job() is True
+    finally:
+        os.environ["PATH"] = old_path
+
+    status, manuscripts = app.list_manuscripts()
+    assert status == 200
+    assert manuscripts["manuscripts"][0]["latest_ingest"]["status"] == "succeeded"
+    assert manuscripts["manuscripts"][0]["latest_ingest"]["finished_at"] is not None
+
+    status, ingest_results = app.get_manuscript_ingest_results(manuscript["manuscript_id"])
+    assert status == 200
+    assert ingest_results["ingest_manifest"]["content"]["classification"]["pdf_type"] in {"text", "image_or_mixed"}
+    assert ingest_results["chunk_manifest"]["content"]["chunk_count"] >= 1
+    assert ingest_results["raw_text"]["preview"]
+    assert ingest_results["clean_text"]["preview"]
+
+
+def test_gateway_api_updates_and_deletes_manuscripts(tmp_path, sample_pdf) -> None:
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"))
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Treasure Island",
+            "book_slug": "treasure_island",
+            "source_path": str(sample_pdf),
+        }
+    )
+    assert status == 201
+
+    status, updated = app.update_manuscript(
+        manuscript["manuscript_id"],
+        {"title": "Treasure Island Revised", "book_slug": "treasure_island_revised"},
+    )
+    assert status == 200
+    assert updated["title"] == "Treasure Island Revised"
+    assert updated["book_slug"] == "treasure_island_revised"
+
+    status, deleted = app.delete_manuscript(manuscript["manuscript_id"])
+    assert status == 200
+    assert deleted["deleted"] is True
+
+    status, manuscripts = app.list_manuscripts()
+    assert status == 200
+    assert manuscripts["manuscripts"] == []
+
+
 def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

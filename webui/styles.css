@@ -203,6 +203,17 @@ button:hover {
   border: 1px solid var(--accent-soft);
 }
 
+.danger-button {
+  background: white;
+  color: var(--failed);
+  border: 1px solid rgba(152, 47, 47, 0.18);
+}
+
+.list li strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
 .stage-card p,
 .stage-summary p {
   margin: 10px 0 0;

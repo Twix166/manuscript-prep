@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ManuscriptPrep Ingest Results</title>
+    <link rel="stylesheet" href="/ui/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">ManuscriptPrep</p>
+          <h1 id="ingest-results-title">Ingest Results</h1>
+          <p id="ingest-results-status" class="lede">Loading classification, extract, clean, and chunking results.</p>
+        </div>
+      </section>
+
+      <section id="ingest-results-summary" class="grid three"></section>
+
+      <section class="grid two">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Classification</h2>
+          </div>
+          <pre id="ingest-classification">Loading...</pre>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Chunking</h2>
+          </div>
+          <pre id="ingest-chunking">Loading...</pre>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Extract</h2>
+          </div>
+          <pre id="ingest-extract">Loading...</pre>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Clean</h2>
+          </div>
+          <pre id="ingest-clean">Loading...</pre>
+        </article>
+      </section>
+    </main>
+
+    <script src="/ui/ingest-results.js"></script>
+  </body>
+</html>

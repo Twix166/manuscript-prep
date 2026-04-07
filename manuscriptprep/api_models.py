@@ -121,6 +121,17 @@ class ManuscriptRecord:
 
 
 @dataclass
+class ManuscriptIngestSummary:
+    job_id: str
+    pipeline: str
+    status: str
+    started_at: Optional[str]
+    finished_at: Optional[str]
+    updated_at: str
+    error: Optional[str] = None
+
+
+@dataclass
 class ConfigProfileRecord:
     config_profile_id: str
     name: str

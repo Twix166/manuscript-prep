@@ -546,6 +546,63 @@ class PostgresJobStore(BaseJobStore):
             for row in rows
         ]
 
+    def update_manuscript(
+        self,
+        manuscript_id: str,
+        *,
+        book_slug: Optional[str] = None,
+        title: Optional[str] = None,
+    ) -> Optional[ManuscriptRecord]:
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
+                FROM {self.schema}.gateway_manuscripts
+                WHERE manuscript_id = %s
+                FOR UPDATE
+                """,
+                (manuscript_id,),
+            )
+            row = cur.fetchone()
+            if row is None:
+                conn.commit()
+                return None
+            now = utc_now_iso()
+            next_book_slug = book_slug or row[1]
+            next_title = title or row[2]
+            cur.execute(
+                f"""
+                UPDATE {self.schema}.gateway_manuscripts
+                SET book_slug = %s,
+                    title = %s,
+                    updated_at = %s::timestamptz
+                WHERE manuscript_id = %s
+                """,
+                (next_book_slug, next_title, now, manuscript_id),
+            )
+            conn.commit()
+            return _manuscript_from_dict(
+                {
+                    "manuscript_id": row[0],
+                    "book_slug": next_book_slug,
+                    "title": next_title,
+                    "source_path": row[3],
+                    "file_size_bytes": row[4],
+                    "owner_user_id": row[5],
+                    "owner_username": row[6],
+                    "created_at": row[7].isoformat(),
+                    "updated_at": now,
+                }
+            )
+
+    def delete_manuscript(self, manuscript_id: str) -> bool:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"DELETE FROM {self.schema}.gateway_manuscripts WHERE manuscript_id = %s",
+                (manuscript_id,),
+            )
+            return cur.rowcount > 0
+
     def upsert_config_profile(
         self,
         *,

@@ -20,3 +20,10 @@ def test_get_web_asset_serves_javascript() -> None:
 
     assert content_type.startswith("application/javascript")
     assert b"triggerPipeline" in body
+
+
+def test_get_web_asset_serves_ingest_results_page() -> None:
+    content_type, body = get_web_asset("ui/ingest-results.html")
+
+    assert content_type.startswith("text/html")
+    assert b"Ingest Results" in body
