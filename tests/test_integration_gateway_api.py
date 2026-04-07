@@ -216,6 +216,55 @@ def test_gateway_api_ingest_artifacts_follow_manuscript_slug(tmp_path, sample_pd
     assert ingest_results["clean_text"]["content"]
 
 
+def test_gateway_api_downloads_job_artifact(tmp_path, sample_pdf, test_env) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    adapter = ExecutionAdapter(env=test_env)
+    worker = JobWorker(store=store, adapter=adapter, poll_interval=0.01)
+    app = GatewayAPI(store=store)
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Treasure Island",
+            "book_slug": "treasure_island",
+            "source_path": str(sample_pdf),
+            "file_size_bytes": sample_pdf.stat().st_size,
+        }
+    )
+    assert status == 201
+
+    status, created = app.create_job(
+        {
+            "pipeline": "ingest",
+            "manuscript_id": manuscript["manuscript_id"],
+            "options": {
+                "workdir": str(tmp_path / "work"),
+                "chunk_words": 20,
+                "min_chunk_words": 5,
+                "max_chunk_words": 30,
+            },
+        }
+    )
+    assert status == 201
+
+    import os
+    old_path = os.environ.get("PATH", "")
+    os.environ["PATH"] = test_env["PATH"]
+    try:
+        status, queued = app.run_job(created["job_id"])
+        assert status == 202
+        assert queued["status"] == "queued"
+        assert worker.process_next_job() is True
+    finally:
+        os.environ["PATH"] = old_path
+
+    status, payload, content_type = app.download_job_artifact(created["job_id"], "ingest_manifest")
+    assert status == 200
+    assert content_type.startswith("application/json")
+    assert payload.is_file()
+    manifest = json.loads(payload.read_text(encoding="utf-8"))
+    assert manifest["book_title"] == "Treasure Island"
+
+
 def test_gateway_api_updates_and_deletes_manuscripts(tmp_path, sample_pdf) -> None:
     app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"))
 

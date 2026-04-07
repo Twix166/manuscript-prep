@@ -15,7 +15,13 @@ const els = {
   chunkList: document.getElementById("ingest-chunk-list"),
   rawText: document.getElementById("ingest-raw-text"),
   cleanText: document.getElementById("ingest-clean-text"),
+  downloadRawText: document.getElementById("download-raw-text"),
+  downloadCleanText: document.getElementById("download-clean-text"),
+  downloadChunkManifest: document.getElementById("download-chunk-manifest"),
+  downloadIngestManifest: document.getElementById("download-ingest-manifest"),
 };
+
+let currentJobId = null;
 
 async function fetchJson(path) {
   const response = await fetch(path, {
@@ -28,6 +34,38 @@ async function fetchJson(path) {
   return payload;
 }
 
+async function downloadArtifact(artifactName) {
+  if (!currentJobId) {
+    renderError("No ingest job is available for download yet.");
+    return;
+  }
+  const response = await fetch(`/v1/jobs/${encodeURIComponent(currentJobId)}/artifacts/${encodeURIComponent(artifactName)}/download`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    let message = `Download failed for ${artifactName}`;
+    try {
+      const payload = await response.json();
+      message = payload.error || message;
+    } catch {
+      // fall back to default message
+    }
+    throw new Error(message);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename="([^"]+)"/);
+  const filename = match ? match[1] : artifactName;
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function summaryCard(label, value) {
   const article = document.createElement("article");
   article.className = "panel";
@@ -36,6 +74,7 @@ function summaryCard(label, value) {
 }
 
 function renderPayload(payload) {
+  currentJobId = payload.job.job_id;
   const ingestManifest = payload.ingest_manifest.content || {};
   const chunkManifest = payload.chunk_manifest.content || {};
   const classification = ingestManifest.classification || ingestManifest;
@@ -103,6 +142,21 @@ async function load() {
       renderError(error.message);
     }
   }
+}
+
+for (const [button, artifactName] of [
+  [els.downloadRawText, "raw_text"],
+  [els.downloadCleanText, "clean_text"],
+  [els.downloadChunkManifest, "chunk_manifest"],
+  [els.downloadIngestManifest, "ingest_manifest"],
+]) {
+  button.addEventListener("click", async () => {
+    try {
+      await downloadArtifact(artifactName);
+    } catch (error) {
+      renderError(error.message);
+    }
+  });
 }
 
 load();

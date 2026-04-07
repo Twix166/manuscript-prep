@@ -13,6 +13,7 @@ can target while workers execute long-running jobs out of process.
 from __future__ import annotations
 
 import argparse
+import mimetypes
 import hashlib
 import json
 import os
@@ -397,6 +398,32 @@ class GatewayAPI:
                     payload["content"] = None
         return HTTPStatus.OK, payload
 
+    def download_job_artifact(self, job_id: str, artifact_name: str, actor: Optional[UserRecord] = None) -> Tuple[int, Path | Dict[str, Any], str]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error[0], error[1], "application/json; charset=utf-8"
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}, "application/json; charset=utf-8"
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}, "application/json; charset=utf-8"
+        artifact = next((item for item in job.artifacts if item.name == artifact_name), None)
+        if artifact is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown artifact on job {job_id}: {artifact_name}"}, "application/json; charset=utf-8"
+        path = Path(artifact.path)
+        if not path.exists() or not path.is_file():
+            return HTTPStatus.NOT_FOUND, {"error": f"Artifact is not available for download: {artifact_name}"}, "application/json; charset=utf-8"
+        content_type, _ = mimetypes.guess_type(path.name)
+        if artifact.kind == "json":
+            content_type = "application/json; charset=utf-8"
+        elif artifact.kind == "jsonl":
+            content_type = "application/x-ndjson; charset=utf-8"
+        elif artifact.kind == "text":
+            content_type = "text/plain; charset=utf-8"
+        elif content_type is None:
+            content_type = "application/octet-stream"
+        return HTTPStatus.OK, path, content_type
+
     def list_job_artifact_index(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
         if not allowed:
@@ -508,6 +535,15 @@ class GatewayHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _write_file(self, status: int, path: Path, content_type: str) -> None:
+        body = path.read_bytes()
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Content-Disposition", f'attachment; filename="{path.name}"')
+        self.end_headers()
+        self.wfile.write(body)
+
     def _read_json_body(self) -> Dict[str, Any]:
         content_length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(content_length) if content_length else b"{}"
@@ -583,6 +619,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
 
         if path.startswith("/v1/jobs/") and "/artifacts/" in path:
             parts = path.strip("/").split("/")
+            if len(parts) == 6 and parts[-1] == "download":
+                _, _, job_id, _, artifact_name, _ = parts
+                status, payload, content_type = self.app.download_job_artifact(job_id, artifact_name, actor=self._current_actor())
+                if isinstance(payload, Path):
+                    self._write_file(status, payload, content_type)
+                else:
+                    self._write_json(status, payload)
+                return
             if len(parts) == 5:
                 _, _, job_id, _, artifact_name = parts
                 status, payload = self.app.get_job_artifact(job_id, artifact_name, actor=self._current_actor())

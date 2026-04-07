@@ -105,6 +105,10 @@ h3 {
   gap: 10px;
 }
 
+.panel-actions.wrap {
+  flex-wrap: wrap;
+}
+
 .stack {
   display: grid;
   gap: 10px;
