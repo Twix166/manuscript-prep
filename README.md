@@ -67,7 +67,7 @@ Web UI:
 - `GET /ui` serves a lightweight operator dashboard from the gateway
 - the dashboard now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
-- successful ingest runs now expose a dedicated manuscript-scoped results page for classification, extraction, cleaned text, and chunking details, preloaded from the current UI session for reliable display
+- successful ingest runs now expose a dedicated manuscript-scoped results page for classification, extraction metadata, the full raw text, the full cleaned text, and the full chunk list, preloaded from the current UI session for reliable display
 - stage cards show pipeline substeps and the configured model names where applicable
 - the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads
 - the compose images now include the PDF/OCR toolchain (`pdftotext`, `pdfinfo`, `ocrmypdf`, `tesseract`, `ghostscript`) needed for ingest

@@ -160,8 +160,8 @@ def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results
     assert status == 200
     assert ingest_results["ingest_manifest"]["content"]["classification"]["pdf_type"] in {"text", "image_or_mixed"}
     assert ingest_results["chunk_manifest"]["content"]["chunk_count"] >= 1
-    assert ingest_results["raw_text"]["preview"]
-    assert ingest_results["clean_text"]["preview"]
+    assert ingest_results["raw_text"]["content"]
+    assert ingest_results["clean_text"]["content"]
     assert "treasure_island" in ingest_results["ingest_manifest"]["artifact"]["path"]
 
 
@@ -212,6 +212,8 @@ def test_gateway_api_ingest_artifacts_follow_manuscript_slug(tmp_path, sample_pd
     assert ingest_results["ingest_manifest"]["exists"] is True
     assert ingest_results["raw_text"]["exists"] is True
     assert ingest_results["clean_text"]["exists"] is True
+    assert ingest_results["raw_text"]["content"]
+    assert ingest_results["clean_text"]["content"]
 
 
 def test_gateway_api_updates_and_deletes_manuscripts(tmp_path, sample_pdf) -> None:

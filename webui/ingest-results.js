@@ -12,6 +12,9 @@ const els = {
   chunking: document.getElementById("ingest-chunking"),
   extract: document.getElementById("ingest-extract"),
   clean: document.getElementById("ingest-clean"),
+  chunkList: document.getElementById("ingest-chunk-list"),
+  rawText: document.getElementById("ingest-raw-text"),
+  cleanText: document.getElementById("ingest-clean-text"),
 };
 
 async function fetchJson(path) {
@@ -38,6 +41,7 @@ function renderPayload(payload) {
   const classification = ingestManifest.classification || ingestManifest;
   const extraction = ingestManifest.extraction || {};
   const cleaning = ingestManifest.cleaning || {};
+  const chunks = chunkManifest.chunks || [];
   const chunking = ingestManifest.chunking || {
     chunk_count: chunkManifest.chunk_count,
     chunk_settings: chunkManifest.chunk_settings,
@@ -52,13 +56,17 @@ function renderPayload(payload) {
   els.chunking.textContent = JSON.stringify(
     {
       summary: chunking,
-      chunks: (chunkManifest.chunks || []).slice(0, 10),
+      chunk_settings: chunkManifest.chunk_settings || null,
+      chunk_count: chunkManifest.chunk_count || chunks.length,
     },
     null,
     2,
   );
-  els.extract.textContent = `${JSON.stringify(extraction, null, 2)}\n\n${payload.raw_text.preview || ""}`;
-  els.clean.textContent = `${JSON.stringify(cleaning, null, 2)}\n\n${payload.clean_text.preview || ""}`;
+  els.extract.textContent = JSON.stringify(extraction, null, 2);
+  els.clean.textContent = JSON.stringify(cleaning, null, 2);
+  els.chunkList.textContent = JSON.stringify(chunks, null, 2);
+  els.rawText.textContent = payload.raw_text.content || payload.raw_text.preview || "";
+  els.cleanText.textContent = payload.clean_text.content || payload.clean_text.preview || "";
 }
 
 function renderError(message) {
@@ -67,6 +75,9 @@ function renderError(message) {
   els.chunking.textContent = message;
   els.extract.textContent = message;
   els.clean.textContent = message;
+  els.chunkList.textContent = message;
+  els.rawText.textContent = message;
+  els.cleanText.textContent = message;
 }
 
 async function load() {

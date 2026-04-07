@@ -274,6 +274,12 @@ class GatewayAPI:
             status, payload = self.get_job_artifact(latest_ingest.job_id, artifact_name, actor=actor)
             if status != HTTPStatus.OK:
                 return HTTPStatus.NOT_FOUND, {"error": f"Missing ingest artifact: {artifact_name}"}
+            artifact_meta = payload.get("artifact", {})
+            artifact_path = Path(str(artifact_meta.get("path", "")))
+            artifact_kind = str(artifact_meta.get("kind", ""))
+            if payload.get("exists") and artifact_kind in {"text", "json", "jsonl"} and artifact_path.is_file():
+                content = artifact_path.read_text(encoding="utf-8")
+                payload["content"] = content if artifact_kind == "text" else json.loads(content)
             artifacts[artifact_name] = payload
         return HTTPStatus.OK, {
             "manuscript": self._serialize_manuscript(manuscript),
