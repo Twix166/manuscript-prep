@@ -13,6 +13,7 @@ can target while workers execute long-running jobs out of process.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from http import HTTPStatus
@@ -65,6 +66,9 @@ class GatewayAPI:
             return True
         return actor.user_id == job_owner_user_id
 
+    def _can_access_manuscript(self, actor: Optional[UserRecord], owner_user_id: Optional[str]) -> bool:
+        return self._can_access_job(actor, owner_user_id)
+
     def health(self) -> Tuple[int, Dict[str, Any]]:
         return HTTPStatus.OK, {"status": "ok", "service": "gateway-api", "timestamp": utc_now_iso()}
 
@@ -98,6 +102,57 @@ class GatewayAPI:
         if not allowed:
             return error
         return HTTPStatus.OK, {"pipelines": [to_dict(item) for item in list_pipelines()]}
+
+    def list_manuscripts(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        manuscripts = self.store.list_manuscripts()
+        if self.auth_required and actor is not None and actor.role != "admin":
+            manuscripts = [item for item in manuscripts if item.owner_user_id == actor.user_id]
+        return HTTPStatus.OK, {"manuscripts": [to_dict(item) for item in manuscripts]}
+
+    def create_manuscript(self, payload: Dict[str, Any], actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        for field in ("book_slug", "title", "source_path"):
+            if not payload.get(field):
+                return HTTPStatus.BAD_REQUEST, {"error": f"Missing required field: {field}"}
+        manuscript = self.store.upsert_manuscript(
+            book_slug=str(payload["book_slug"]),
+            title=str(payload["title"]),
+            source_path=str(payload["source_path"]),
+            owner_user_id=actor.user_id if actor else payload.get("owner_user_id"),
+            owner_username=actor.username if actor else payload.get("owner_username"),
+        )
+        return HTTPStatus.CREATED, to_dict(manuscript)
+
+    def list_config_profiles(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        return HTTPStatus.OK, {"config_profiles": [to_dict(item) for item in self.store.list_config_profiles()]}
+
+    def create_config_profile(self, payload: Dict[str, Any], actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        if actor is not None and actor.role != "admin":
+            return HTTPStatus.FORBIDDEN, {"error": "Admin access required"}
+        for field in ("name", "config_path", "version"):
+            if not payload.get(field):
+                return HTTPStatus.BAD_REQUEST, {"error": f"Missing required field: {field}"}
+        checksum = payload.get("checksum")
+        if not checksum:
+            checksum = hashlib.sha256(str(payload["config_path"]).encode("utf-8")).hexdigest()
+        profile = self.store.upsert_config_profile(
+            name=str(payload["name"]),
+            config_path=str(payload["config_path"]),
+            version=str(payload["version"]),
+            checksum=str(checksum),
+        )
+        return HTTPStatus.CREATED, to_dict(profile)
 
     def list_jobs(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
@@ -159,12 +214,27 @@ class GatewayAPI:
         if not allowed:
             return error
         try:
+            manuscript = None
+            if payload.get("manuscript_id"):
+                manuscript = self.store.get_manuscript(str(payload["manuscript_id"]))
+                if manuscript is None:
+                    return HTTPStatus.BAD_REQUEST, {"error": f"Unknown manuscript: {payload['manuscript_id']}"}
+                if not self._can_access_manuscript(actor, manuscript.owner_user_id):
+                    return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this manuscript"}
+            config_profile = None
+            if payload.get("config_profile_id"):
+                config_profile = self.store.get_config_profile(str(payload["config_profile_id"]))
+                if config_profile is None:
+                    return HTTPStatus.BAD_REQUEST, {"error": f"Unknown config profile: {payload['config_profile_id']}"}
+
             request = JobCreateRequest(
                 pipeline=str(payload["pipeline"]),
-                book_slug=payload.get("book_slug"),
-                title=payload.get("title"),
-                config_path=payload.get("config_path"),
-                input_path=payload.get("input_path"),
+                book_slug=(manuscript.book_slug if manuscript else payload.get("book_slug")),
+                title=(manuscript.title if manuscript else payload.get("title")),
+                manuscript_id=(manuscript.manuscript_id if manuscript else payload.get("manuscript_id")),
+                config_profile_id=(config_profile.config_profile_id if config_profile else payload.get("config_profile_id")),
+                config_path=(config_profile.config_path if config_profile else payload.get("config_path")),
+                input_path=(manuscript.source_path if manuscript else payload.get("input_path")),
                 owner_user_id=(actor.user_id if actor else payload.get("owner_user_id")),
                 owner_username=(actor.username if actor else payload.get("owner_username")),
                 options=payload.get("options", {}) or {},
@@ -262,6 +332,16 @@ class GatewayHandler(BaseHTTPRequestHandler):
             self._write_json(status, payload)
             return
 
+        if path == "/v1/manuscripts":
+            status, payload = self.app.list_manuscripts(actor=self._current_actor())
+            self._write_json(status, payload)
+            return
+
+        if path == "/v1/config-profiles":
+            status, payload = self.app.list_config_profiles(actor=self._current_actor())
+            self._write_json(status, payload)
+            return
+
         if path == "/v1/jobs":
             status, payload = self.app.list_jobs(actor=self._current_actor())
             self._write_json(status, payload)
@@ -293,6 +373,26 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 return
 
             status, response = self.app.create_job(payload, actor=self._current_actor())
+            self._write_json(status, response)
+            return
+
+        if path == "/v1/manuscripts":
+            try:
+                payload = self._read_json_body()
+            except (json.JSONDecodeError, ValueError) as exc:
+                self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                return
+            status, response = self.app.create_manuscript(payload, actor=self._current_actor())
+            self._write_json(status, response)
+            return
+
+        if path == "/v1/config-profiles":
+            try:
+                payload = self._read_json_body()
+            except (json.JSONDecodeError, ValueError) as exc:
+                self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                return
+            status, response = self.app.create_config_profile(payload, actor=self._current_actor())
             self._write_json(status, response)
             return
 

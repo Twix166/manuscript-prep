@@ -325,3 +325,68 @@ def test_gateway_api_enforces_auth_and_job_ownership(tmp_path) -> None:
     status, system = app.system_status(actor=admin)
     assert status == 200
     assert system["store_backend"] == "JobStore"
+
+
+def test_gateway_api_manages_manuscripts_and_config_profiles(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    app = GatewayAPI(
+        store=store,
+        auth_required=True,
+        bootstrap_username="admin",
+        bootstrap_token="admin-token",
+    )
+    alice = store.upsert_user(username="alice", role="user", api_token="alice-token")
+    admin = app.authenticate("admin-token")
+    assert admin is not None
+
+    status, profile = app.create_config_profile(
+        {
+            "name": "default",
+            "config_path": "/tmp/manuscriptprep.yaml",
+            "version": "v1",
+        },
+        actor=admin,
+    )
+    assert status == 201
+
+    status, forbidden = app.create_config_profile(
+        {
+            "name": "user-profile",
+            "config_path": "/tmp/user.yaml",
+            "version": "v1",
+        },
+        actor=alice,
+    )
+    assert status == 403
+    assert forbidden["error"] == "Admin access required"
+
+    status, manuscript = app.create_manuscript(
+        {
+            "book_slug": "treasure_island",
+            "title": "Treasure Island",
+            "source_path": "/tmp/treasure-island.pdf",
+        },
+        actor=alice,
+    )
+    assert status == 201
+
+    status, alice_manuscripts = app.list_manuscripts(actor=alice)
+    assert status == 200
+    assert [item["manuscript_id"] for item in alice_manuscripts["manuscripts"]] == [manuscript["manuscript_id"]]
+
+    status, created = app.create_job(
+        {
+            "pipeline": "ingest",
+            "manuscript_id": manuscript["manuscript_id"],
+            "config_profile_id": profile["config_profile_id"],
+            "options": {"workdir": str(tmp_path / "work")},
+        },
+        actor=alice,
+    )
+    assert status == 201
+    assert created["manuscript_id"] == manuscript["manuscript_id"]
+    assert created["config_profile_id"] == profile["config_profile_id"]
+    assert created["book_slug"] == "treasure_island"
+    assert created["title"] == "Treasure Island"
+    assert created["input_path"] == "/tmp/treasure-island.pdf"
+    assert created["config_path"] == "/tmp/manuscriptprep.yaml"

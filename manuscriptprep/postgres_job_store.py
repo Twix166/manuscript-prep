@@ -8,8 +8,23 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Optional
 
-from manuscriptprep.api_models import JobCreateRequest, JobRecord, UserRecord, WorkerHeartbeat, utc_now_iso
-from manuscriptprep.job_store import BaseJobStore, _job_from_dict, _user_from_dict, create_job_record
+from manuscriptprep.api_models import (
+    ConfigProfileRecord,
+    JobCreateRequest,
+    JobRecord,
+    ManuscriptRecord,
+    UserRecord,
+    WorkerHeartbeat,
+    utc_now_iso,
+)
+from manuscriptprep.job_store import (
+    BaseJobStore,
+    _config_profile_from_dict,
+    _job_from_dict,
+    _manuscript_from_dict,
+    _user_from_dict,
+    create_job_record,
+)
 
 
 class PostgresJobStore(BaseJobStore):
@@ -71,6 +86,34 @@ class PostgresJobStore(BaseJobStore):
                     api_token TEXT NOT NULL UNIQUE,
                     created_at TIMESTAMPTZ NOT NULL,
                     updated_at TIMESTAMPTZ NOT NULL
+                )
+                """
+            )
+            cur.execute(
+                f"""
+                CREATE TABLE IF NOT EXISTS {self.schema}.gateway_manuscripts (
+                    manuscript_id TEXT PRIMARY KEY,
+                    book_slug TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    source_path TEXT NOT NULL,
+                    owner_user_id TEXT NULL,
+                    owner_username TEXT NULL,
+                    created_at TIMESTAMPTZ NOT NULL,
+                    updated_at TIMESTAMPTZ NOT NULL
+                )
+                """
+            )
+            cur.execute(
+                f"""
+                CREATE TABLE IF NOT EXISTS {self.schema}.gateway_config_profiles (
+                    config_profile_id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    config_path TEXT NOT NULL,
+                    version TEXT NOT NULL,
+                    checksum TEXT NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL,
+                    updated_at TIMESTAMPTZ NOT NULL,
+                    UNIQUE (name, version)
                 )
                 """
             )
@@ -343,3 +386,220 @@ class PostgresJobStore(BaseJobStore):
                 "updated_at": row[5].isoformat(),
             }
         )
+
+    def upsert_manuscript(
+        self,
+        *,
+        book_slug: str,
+        title: str,
+        source_path: str,
+        owner_user_id: Optional[str],
+        owner_username: Optional[str],
+    ) -> ManuscriptRecord:
+        now = utc_now_iso()
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT manuscript_id, created_at
+                FROM {self.schema}.gateway_manuscripts
+                WHERE book_slug = %s AND owner_user_id IS NOT DISTINCT FROM %s
+                FOR UPDATE
+                """,
+                (book_slug, owner_user_id),
+            )
+            row = cur.fetchone()
+            if row is None:
+                from uuid import uuid4
+
+                manuscript_id = str(uuid4())
+                created_at = now
+                cur.execute(
+                    f"""
+                    INSERT INTO {self.schema}.gateway_manuscripts
+                        (manuscript_id, book_slug, title, source_path, owner_user_id, owner_username, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
+                    """,
+                    (manuscript_id, book_slug, title, source_path, owner_user_id, owner_username, created_at, now),
+                )
+            else:
+                manuscript_id = row[0]
+                created_at = row[1].isoformat()
+                cur.execute(
+                    f"""
+                    UPDATE {self.schema}.gateway_manuscripts
+                    SET title = %s,
+                        source_path = %s,
+                        owner_user_id = %s,
+                        owner_username = %s,
+                        updated_at = %s::timestamptz
+                    WHERE manuscript_id = %s
+                    """,
+                    (title, source_path, owner_user_id, owner_username, now, manuscript_id),
+                )
+            conn.commit()
+        return _manuscript_from_dict(
+            {
+                "manuscript_id": manuscript_id,
+                "book_slug": book_slug,
+                "title": title,
+                "source_path": source_path,
+                "owner_user_id": owner_user_id,
+                "owner_username": owner_username,
+                "created_at": created_at,
+                "updated_at": now,
+            }
+        )
+
+    def get_manuscript(self, manuscript_id: str) -> Optional[ManuscriptRecord]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT manuscript_id, book_slug, title, source_path, owner_user_id, owner_username, created_at, updated_at
+                FROM {self.schema}.gateway_manuscripts
+                WHERE manuscript_id = %s
+                """,
+                (manuscript_id,),
+            )
+            row = cur.fetchone()
+        if row is None:
+            return None
+        return _manuscript_from_dict(
+            {
+                "manuscript_id": row[0],
+                "book_slug": row[1],
+                "title": row[2],
+                "source_path": row[3],
+                "owner_user_id": row[4],
+                "owner_username": row[5],
+                "created_at": row[6].isoformat(),
+                "updated_at": row[7].isoformat(),
+            }
+        )
+
+    def list_manuscripts(self) -> list[ManuscriptRecord]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT manuscript_id, book_slug, title, source_path, owner_user_id, owner_username, created_at, updated_at
+                FROM {self.schema}.gateway_manuscripts
+                ORDER BY created_at DESC
+                """
+            )
+            rows = cur.fetchall()
+        return [
+            _manuscript_from_dict(
+                {
+                    "manuscript_id": row[0],
+                    "book_slug": row[1],
+                    "title": row[2],
+                    "source_path": row[3],
+                    "owner_user_id": row[4],
+                    "owner_username": row[5],
+                    "created_at": row[6].isoformat(),
+                    "updated_at": row[7].isoformat(),
+                }
+            )
+            for row in rows
+        ]
+
+    def upsert_config_profile(self, *, name: str, config_path: str, version: str, checksum: str) -> ConfigProfileRecord:
+        now = utc_now_iso()
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT config_profile_id, created_at
+                FROM {self.schema}.gateway_config_profiles
+                WHERE name = %s AND version = %s
+                FOR UPDATE
+                """,
+                (name, version),
+            )
+            row = cur.fetchone()
+            if row is None:
+                from uuid import uuid4
+
+                profile_id = str(uuid4())
+                created_at = now
+                cur.execute(
+                    f"""
+                    INSERT INTO {self.schema}.gateway_config_profiles
+                        (config_profile_id, name, config_path, version, checksum, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
+                    """,
+                    (profile_id, name, config_path, version, checksum, created_at, now),
+                )
+            else:
+                profile_id = row[0]
+                created_at = row[1].isoformat()
+                cur.execute(
+                    f"""
+                    UPDATE {self.schema}.gateway_config_profiles
+                    SET config_path = %s,
+                        checksum = %s,
+                        updated_at = %s::timestamptz
+                    WHERE config_profile_id = %s
+                    """,
+                    (config_path, checksum, now, profile_id),
+                )
+            conn.commit()
+        return _config_profile_from_dict(
+            {
+                "config_profile_id": profile_id,
+                "name": name,
+                "config_path": config_path,
+                "version": version,
+                "checksum": checksum,
+                "created_at": created_at,
+                "updated_at": now,
+            }
+        )
+
+    def get_config_profile(self, config_profile_id: str) -> Optional[ConfigProfileRecord]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT config_profile_id, name, config_path, version, checksum, created_at, updated_at
+                FROM {self.schema}.gateway_config_profiles
+                WHERE config_profile_id = %s
+                """,
+                (config_profile_id,),
+            )
+            row = cur.fetchone()
+        if row is None:
+            return None
+        return _config_profile_from_dict(
+            {
+                "config_profile_id": row[0],
+                "name": row[1],
+                "config_path": row[2],
+                "version": row[3],
+                "checksum": row[4],
+                "created_at": row[5].isoformat(),
+                "updated_at": row[6].isoformat(),
+            }
+        )
+
+    def list_config_profiles(self) -> list[ConfigProfileRecord]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT config_profile_id, name, config_path, version, checksum, created_at, updated_at
+                FROM {self.schema}.gateway_config_profiles
+                ORDER BY created_at DESC
+                """
+            )
+            rows = cur.fetchall()
+        return [
+            _config_profile_from_dict(
+                {
+                    "config_profile_id": row[0],
+                    "name": row[1],
+                    "config_path": row[2],
+                    "version": row[3],
+                    "checksum": row[4],
+                    "created_at": row[5].isoformat(),
+                    "updated_at": row[6].isoformat(),
+                }
+            )
+            for row in rows
+        ]

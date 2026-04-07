@@ -87,6 +87,11 @@ Suggested deliverables:
 - configuration profiles table
 - job-to-manuscript and job-to-config foreign keys
 
+Status:
+- implemented managed manuscript records in the gateway store
+- implemented managed configuration profiles in the gateway store
+- jobs can now carry manuscript and config profile references
+
 ## P4: Artifact Storage Hardening
 
 Goal: separate metadata storage from durable artifact storage.

@@ -12,8 +12,10 @@ from uuid import uuid4
 
 from manuscriptprep.api_models import (
     ArtifactRef,
+    ConfigProfileRecord,
     JobCreateRequest,
     JobRecord,
+    ManuscriptRecord,
     StageRun,
     UserRecord,
     WorkerHeartbeat,
@@ -31,6 +33,8 @@ def _job_from_dict(data: Dict) -> JobRecord:
         updated_at=data["updated_at"],
         book_slug=data.get("book_slug"),
         title=data.get("title"),
+        manuscript_id=data.get("manuscript_id"),
+        config_profile_id=data.get("config_profile_id"),
         config_path=data.get("config_path"),
         input_path=data.get("input_path"),
         owner_user_id=data.get("owner_user_id"),
@@ -55,6 +59,8 @@ def create_job_record(request: JobCreateRequest) -> JobRecord:
         updated_at=now,
         book_slug=request.book_slug,
         title=request.title,
+        manuscript_id=request.manuscript_id,
+        config_profile_id=request.config_profile_id,
         config_path=request.config_path,
         input_path=request.input_path,
         owner_user_id=request.owner_user_id,
@@ -71,6 +77,31 @@ def _user_from_dict(data: Dict) -> UserRecord:
         username=data["username"],
         role=data["role"],
         api_token=data["api_token"],
+        created_at=data["created_at"],
+        updated_at=data["updated_at"],
+    )
+
+
+def _manuscript_from_dict(data: Dict) -> ManuscriptRecord:
+    return ManuscriptRecord(
+        manuscript_id=data["manuscript_id"],
+        book_slug=data["book_slug"],
+        title=data["title"],
+        source_path=data["source_path"],
+        owner_user_id=data.get("owner_user_id"),
+        owner_username=data.get("owner_username"),
+        created_at=data["created_at"],
+        updated_at=data["updated_at"],
+    )
+
+
+def _config_profile_from_dict(data: Dict) -> ConfigProfileRecord:
+    return ConfigProfileRecord(
+        config_profile_id=data["config_profile_id"],
+        name=data["name"],
+        config_path=data["config_path"],
+        version=data["version"],
+        checksum=data["checksum"],
         created_at=data["created_at"],
         updated_at=data["updated_at"],
     )
@@ -125,6 +156,38 @@ class BaseJobStore(ABC):
     def get_user_by_token(self, api_token: str) -> Optional[UserRecord]:
         raise NotImplementedError
 
+    @abstractmethod
+    def upsert_manuscript(
+        self,
+        *,
+        book_slug: str,
+        title: str,
+        source_path: str,
+        owner_user_id: Optional[str],
+        owner_username: Optional[str],
+    ) -> ManuscriptRecord:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_manuscript(self, manuscript_id: str) -> Optional[ManuscriptRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_manuscripts(self) -> List[ManuscriptRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def upsert_config_profile(self, *, name: str, config_path: str, version: str, checksum: str) -> ConfigProfileRecord:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_config_profile(self, config_profile_id: str) -> Optional[ConfigProfileRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_config_profiles(self) -> List[ConfigProfileRecord]:
+        raise NotImplementedError
+
 
 class JobStore(BaseJobStore):
     def __init__(self, root: Path | None = None) -> None:
@@ -134,6 +197,8 @@ class JobStore(BaseJobStore):
         self._jobs: Dict[str, JobRecord] = {}
         self._workers: Dict[str, WorkerHeartbeat] = {}
         self._users: Dict[str, UserRecord] = {}
+        self._manuscripts: Dict[str, ManuscriptRecord] = {}
+        self._config_profiles: Dict[str, ConfigProfileRecord] = {}
         self._load_existing_jobs()
 
     def _job_path(self, job_id: str) -> Path:
@@ -144,6 +209,12 @@ class JobStore(BaseJobStore):
 
     def _users_path(self) -> Path:
         return self.root / "_users.json"
+
+    def _manuscripts_path(self) -> Path:
+        return self.root / "_manuscripts.json"
+
+    def _config_profiles_path(self) -> Path:
+        return self.root / "_config_profiles.json"
 
     def _persist(self, job: JobRecord) -> None:
         self._job_path(job.job_id).write_text(
@@ -163,6 +234,18 @@ class JobStore(BaseJobStore):
             encoding="utf-8",
         )
 
+    def _persist_manuscripts(self) -> None:
+        self._manuscripts_path().write_text(
+            json.dumps([asdict(item) for item in self._manuscripts.values()], indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
+    def _persist_config_profiles(self) -> None:
+        self._config_profiles_path().write_text(
+            json.dumps([asdict(item) for item in self._config_profiles.values()], indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
     def _load_existing_jobs(self) -> None:
         for path in sorted(self.root.glob("*.json")):
             if path.name == "_workers.json":
@@ -172,6 +255,14 @@ class JobStore(BaseJobStore):
             if path.name == "_users.json":
                 data = json.loads(path.read_text(encoding="utf-8"))
                 self._users = {item["api_token"]: _user_from_dict(item) for item in data}
+                continue
+            if path.name == "_manuscripts.json":
+                data = json.loads(path.read_text(encoding="utf-8"))
+                self._manuscripts = {item["manuscript_id"]: _manuscript_from_dict(item) for item in data}
+                continue
+            if path.name == "_config_profiles.json":
+                data = json.loads(path.read_text(encoding="utf-8"))
+                self._config_profiles = {item["config_profile_id"]: _config_profile_from_dict(item) for item in data}
                 continue
             data = json.loads(path.read_text(encoding="utf-8"))
             job = _job_from_dict(data)
@@ -314,3 +405,101 @@ class JobStore(BaseJobStore):
         with self._lock:
             user = self._users.get(api_token)
             return _user_from_dict(asdict(user)) if user is not None else None
+
+    def upsert_manuscript(
+        self,
+        *,
+        book_slug: str,
+        title: str,
+        source_path: str,
+        owner_user_id: Optional[str],
+        owner_username: Optional[str],
+    ) -> ManuscriptRecord:
+        with self._lock:
+            now = utc_now_iso()
+            existing = next(
+                (
+                    item
+                    for item in self._manuscripts.values()
+                    if item.book_slug == book_slug and item.owner_user_id == owner_user_id
+                ),
+                None,
+            )
+            if existing is not None:
+                manuscript = ManuscriptRecord(
+                    manuscript_id=existing.manuscript_id,
+                    book_slug=book_slug,
+                    title=title,
+                    source_path=source_path,
+                    owner_user_id=owner_user_id,
+                    owner_username=owner_username,
+                    created_at=existing.created_at,
+                    updated_at=now,
+                )
+            else:
+                manuscript = ManuscriptRecord(
+                    manuscript_id=str(uuid4()),
+                    book_slug=book_slug,
+                    title=title,
+                    source_path=source_path,
+                    owner_user_id=owner_user_id,
+                    owner_username=owner_username,
+                    created_at=now,
+                    updated_at=now,
+                )
+            self._manuscripts[manuscript.manuscript_id] = manuscript
+            self._persist_manuscripts()
+            return _manuscript_from_dict(asdict(manuscript))
+
+    def get_manuscript(self, manuscript_id: str) -> Optional[ManuscriptRecord]:
+        with self._lock:
+            manuscript = self._manuscripts.get(manuscript_id)
+            return _manuscript_from_dict(asdict(manuscript)) if manuscript is not None else None
+
+    def list_manuscripts(self) -> List[ManuscriptRecord]:
+        with self._lock:
+            return [_manuscript_from_dict(asdict(item)) for item in self._manuscripts.values()]
+
+    def upsert_config_profile(self, *, name: str, config_path: str, version: str, checksum: str) -> ConfigProfileRecord:
+        with self._lock:
+            now = utc_now_iso()
+            existing = next(
+                (
+                    item
+                    for item in self._config_profiles.values()
+                    if item.name == name and item.version == version
+                ),
+                None,
+            )
+            if existing is not None:
+                profile = ConfigProfileRecord(
+                    config_profile_id=existing.config_profile_id,
+                    name=name,
+                    config_path=config_path,
+                    version=version,
+                    checksum=checksum,
+                    created_at=existing.created_at,
+                    updated_at=now,
+                )
+            else:
+                profile = ConfigProfileRecord(
+                    config_profile_id=str(uuid4()),
+                    name=name,
+                    config_path=config_path,
+                    version=version,
+                    checksum=checksum,
+                    created_at=now,
+                    updated_at=now,
+                )
+            self._config_profiles[profile.config_profile_id] = profile
+            self._persist_config_profiles()
+            return _config_profile_from_dict(asdict(profile))
+
+    def get_config_profile(self, config_profile_id: str) -> Optional[ConfigProfileRecord]:
+        with self._lock:
+            profile = self._config_profiles.get(config_profile_id)
+            return _config_profile_from_dict(asdict(profile)) if profile is not None else None
+
+    def list_config_profiles(self) -> List[ConfigProfileRecord]:
+        with self._lock:
+            return [_config_profile_from_dict(asdict(item)) for item in self._config_profiles.values()]

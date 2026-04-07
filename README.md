@@ -51,6 +51,12 @@ Authentication:
 - `/v1/*` routes can require an API token with `Authorization: Bearer <token>` or `X-API-Token`
 - the compose stack now boots a default admin token for development via `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN`
 
+Managed records:
+
+- `POST /v1/manuscripts` and `GET /v1/manuscripts`
+- `POST /v1/config-profiles` and `GET /v1/config-profiles`
+- jobs can now reference `manuscript_id` and `config_profile_id` instead of repeating source/config paths on every request
+
 ---
 
 ## Test Workflow

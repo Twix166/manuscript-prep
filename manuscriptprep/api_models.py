@@ -37,6 +37,8 @@ class JobCreateRequest:
     pipeline: str
     book_slug: Optional[str] = None
     title: Optional[str] = None
+    manuscript_id: Optional[str] = None
+    config_profile_id: Optional[str] = None
     config_path: Optional[str] = None
     input_path: Optional[str] = None
     owner_user_id: Optional[str] = None
@@ -75,6 +77,8 @@ class JobRecord:
     updated_at: str
     book_slug: Optional[str] = None
     title: Optional[str] = None
+    manuscript_id: Optional[str] = None
+    config_profile_id: Optional[str] = None
     config_path: Optional[str] = None
     input_path: Optional[str] = None
     owner_user_id: Optional[str] = None
@@ -98,6 +102,29 @@ class UserRecord:
     username: str
     role: str
     api_token: str
+    created_at: str
+    updated_at: str
+
+
+@dataclass
+class ManuscriptRecord:
+    manuscript_id: str
+    book_slug: str
+    title: str
+    source_path: str
+    owner_user_id: Optional[str]
+    owner_username: Optional[str]
+    created_at: str
+    updated_at: str
+
+
+@dataclass
+class ConfigProfileRecord:
+    config_profile_id: str
+    name: str
+    config_path: str
+    version: str
+    checksum: str
     created_at: str
     updated_at: str
 
