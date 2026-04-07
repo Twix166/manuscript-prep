@@ -65,6 +65,11 @@ Suggested deliverables:
 - auth flow
 - ownership checks on job and artifact endpoints
 
+Status:
+- implemented bootstrap admin token support
+- added token-based access control for `/v1/*`
+- added job ownership enforcement with admin override
+
 ## P3: Manuscript and Configuration Management
 
 Goal: move from ad hoc file inputs toward managed domain records.

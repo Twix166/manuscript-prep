@@ -27,6 +27,9 @@ services:
       MANUSCRIPTPREP_STORE_BACKEND: postgres
       MANUSCRIPTPREP_DATABASE_URL: postgresql://manuscriptprep:manuscriptprep@postgres:5432/manuscriptprep
       MANUSCRIPTPREP_POSTGRES_SCHEMA: gateway
+      MANUSCRIPTPREP_AUTH_REQUIRED: "true"
+      MANUSCRIPTPREP_BOOTSTRAP_ADMIN_USERNAME: admin
+      MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN: ${MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN:-dev-admin-token}
       PYTHONUNBUFFERED: "1"
     command:
       - python

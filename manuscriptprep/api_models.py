@@ -39,6 +39,8 @@ class JobCreateRequest:
     title: Optional[str] = None
     config_path: Optional[str] = None
     input_path: Optional[str] = None
+    owner_user_id: Optional[str] = None
+    owner_username: Optional[str] = None
     options: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -75,6 +77,8 @@ class JobRecord:
     title: Optional[str] = None
     config_path: Optional[str] = None
     input_path: Optional[str] = None
+    owner_user_id: Optional[str] = None
+    owner_username: Optional[str] = None
     options: Dict[str, Any] = field(default_factory=dict)
     stage_runs: List[StageRun] = field(default_factory=list)
     artifacts: List[ArtifactRef] = field(default_factory=list)
@@ -86,6 +90,16 @@ class WorkerHeartbeat:
     status: str
     heartbeat_at: str
     last_job_id: Optional[str] = None
+
+
+@dataclass
+class UserRecord:
+    user_id: str
+    username: str
+    role: str
+    api_token: str
+    created_at: str
+    updated_at: str
 
 
 def to_dict(obj: Any) -> Dict[str, Any]:

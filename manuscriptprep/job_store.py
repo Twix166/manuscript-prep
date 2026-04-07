@@ -10,7 +10,15 @@ from threading import Lock
 from typing import Dict, List, Optional
 from uuid import uuid4
 
-from manuscriptprep.api_models import ArtifactRef, JobCreateRequest, JobRecord, StageRun, WorkerHeartbeat, utc_now_iso
+from manuscriptprep.api_models import (
+    ArtifactRef,
+    JobCreateRequest,
+    JobRecord,
+    StageRun,
+    UserRecord,
+    WorkerHeartbeat,
+    utc_now_iso,
+)
 from manuscriptprep.service_registry import get_pipeline_definition
 
 
@@ -25,6 +33,8 @@ def _job_from_dict(data: Dict) -> JobRecord:
         title=data.get("title"),
         config_path=data.get("config_path"),
         input_path=data.get("input_path"),
+        owner_user_id=data.get("owner_user_id"),
+        owner_username=data.get("owner_username"),
         options=data.get("options", {}) or {},
         stage_runs=[StageRun(**item) for item in data.get("stage_runs", [])],
         artifacts=[ArtifactRef(**item) for item in data.get("artifacts", [])],
@@ -47,9 +57,22 @@ def create_job_record(request: JobCreateRequest) -> JobRecord:
         title=request.title,
         config_path=request.config_path,
         input_path=request.input_path,
+        owner_user_id=request.owner_user_id,
+        owner_username=request.owner_username,
         options=dict(request.options),
         stage_runs=[StageRun(name=stage.name, status="pending") for stage in definition.stages],
         artifacts=[],
+    )
+
+
+def _user_from_dict(data: Dict) -> UserRecord:
+    return UserRecord(
+        user_id=data["user_id"],
+        username=data["username"],
+        role=data["role"],
+        api_token=data["api_token"],
+        created_at=data["created_at"],
+        updated_at=data["updated_at"],
     )
 
 
@@ -94,6 +117,14 @@ class BaseJobStore(ABC):
     def is_ready(self) -> bool:
         raise NotImplementedError
 
+    @abstractmethod
+    def upsert_user(self, username: str, role: str, api_token: str) -> UserRecord:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_user_by_token(self, api_token: str) -> Optional[UserRecord]:
+        raise NotImplementedError
+
 
 class JobStore(BaseJobStore):
     def __init__(self, root: Path | None = None) -> None:
@@ -102,6 +133,7 @@ class JobStore(BaseJobStore):
         self._lock = Lock()
         self._jobs: Dict[str, JobRecord] = {}
         self._workers: Dict[str, WorkerHeartbeat] = {}
+        self._users: Dict[str, UserRecord] = {}
         self._load_existing_jobs()
 
     def _job_path(self, job_id: str) -> Path:
@@ -109,6 +141,9 @@ class JobStore(BaseJobStore):
 
     def _workers_path(self) -> Path:
         return self.root / "_workers.json"
+
+    def _users_path(self) -> Path:
+        return self.root / "_users.json"
 
     def _persist(self, job: JobRecord) -> None:
         self._job_path(job.job_id).write_text(
@@ -122,11 +157,21 @@ class JobStore(BaseJobStore):
             encoding="utf-8",
         )
 
+    def _persist_users(self) -> None:
+        self._users_path().write_text(
+            json.dumps([asdict(user) for user in self._users.values()], indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
     def _load_existing_jobs(self) -> None:
         for path in sorted(self.root.glob("*.json")):
             if path.name == "_workers.json":
                 data = json.loads(path.read_text(encoding="utf-8"))
                 self._workers = {item["worker_id"]: WorkerHeartbeat(**item) for item in data}
+                continue
+            if path.name == "_users.json":
+                data = json.loads(path.read_text(encoding="utf-8"))
+                self._users = {item["api_token"]: _user_from_dict(item) for item in data}
                 continue
             data = json.loads(path.read_text(encoding="utf-8"))
             job = _job_from_dict(data)
@@ -238,3 +283,34 @@ class JobStore(BaseJobStore):
 
     def is_ready(self) -> bool:
         return True
+
+    def upsert_user(self, username: str, role: str, api_token: str) -> UserRecord:
+        with self._lock:
+            now = utc_now_iso()
+            existing = self._users.get(api_token)
+            if existing is not None:
+                user = UserRecord(
+                    user_id=existing.user_id,
+                    username=username,
+                    role=role,
+                    api_token=api_token,
+                    created_at=existing.created_at,
+                    updated_at=now,
+                )
+            else:
+                user = UserRecord(
+                    user_id=str(uuid4()),
+                    username=username,
+                    role=role,
+                    api_token=api_token,
+                    created_at=now,
+                    updated_at=now,
+                )
+            self._users[api_token] = user
+            self._persist_users()
+            return _user_from_dict(asdict(user))
+
+    def get_user_by_token(self, api_token: str) -> Optional[UserRecord]:
+        with self._lock:
+            user = self._users.get(api_token)
+            return _user_from_dict(asdict(user)) if user is not None else None

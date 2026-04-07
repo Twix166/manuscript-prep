@@ -269,3 +269,59 @@ def test_gateway_api_runs_single_end_to_end_pipeline_job(tmp_path, sample_pdf, t
     assert "book_merged" in artifact_names
     assert "book_resolved" in artifact_names
     assert "report_pdf" in artifact_names
+
+
+def test_gateway_api_enforces_auth_and_job_ownership(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    app = GatewayAPI(
+        store=store,
+        auth_required=True,
+        bootstrap_username="admin",
+        bootstrap_token="admin-token",
+    )
+    alice = store.upsert_user(username="alice", role="user", api_token="alice-token")
+    bob = store.upsert_user(username="bob", role="user", api_token="bob-token")
+    admin = app.authenticate("admin-token")
+    assert admin is not None
+
+    status, payload = app.list_jobs()
+    assert status == 401
+    assert payload["error"] == "Authentication required"
+
+    status, created = app.create_job(
+        {
+            "pipeline": "ingest",
+            "book_slug": "treasure_island",
+            "title": "Treasure Island",
+        },
+        actor=alice,
+    )
+    assert status == 201
+    assert created["owner_user_id"] == alice.user_id
+    assert created["owner_username"] == "alice"
+
+    job_id = created["job_id"]
+
+    status, alice_jobs = app.list_jobs(actor=alice)
+    assert status == 200
+    assert [job["job_id"] for job in alice_jobs["jobs"]] == [job_id]
+
+    status, bob_jobs = app.list_jobs(actor=bob)
+    assert status == 200
+    assert bob_jobs["jobs"] == []
+
+    status, forbidden = app.get_job(job_id, actor=bob)
+    assert status == 403
+    assert forbidden["error"] == "Not authorized for this job"
+
+    status, admin_jobs = app.list_jobs(actor=admin)
+    assert status == 200
+    assert [job["job_id"] for job in admin_jobs["jobs"]] == [job_id]
+
+    status, system = app.system_status(actor=alice)
+    assert status == 403
+    assert system["error"] == "Admin access required"
+
+    status, system = app.system_status(actor=admin)
+    assert status == 200
+    assert system["store_backend"] == "JobStore"

@@ -89,3 +89,15 @@ def test_file_store_recovers_stale_running_jobs(tmp_path: Path) -> None:
     assert refreshed is not None
     assert refreshed.status == "queued"
     assert refreshed.options["_recovered_by"] == "worker-recovery"
+
+
+def test_file_store_can_upsert_and_lookup_users(tmp_path: Path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+
+    created = store.upsert_user(username="alice", role="admin", api_token="token-1")
+    fetched = store.get_user_by_token("token-1")
+
+    assert fetched is not None
+    assert fetched.user_id == created.user_id
+    assert fetched.username == "alice"
+    assert fetched.role == "admin"

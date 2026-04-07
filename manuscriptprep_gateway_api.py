@@ -18,10 +18,10 @@ import os
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 from urllib.parse import urlparse
 
-from manuscriptprep.api_models import JobCreateRequest, to_dict, utc_now_iso
+from manuscriptprep.api_models import JobCreateRequest, UserRecord, to_dict, utc_now_iso
 from manuscriptprep.job_store import BaseJobStore
 from manuscriptprep.service_registry import get_pipeline_definition, list_pipelines
 from manuscriptprep.store_factory import create_job_store
@@ -32,9 +32,38 @@ class GatewayAPI:
         self,
         store: BaseJobStore | None = None,
         runtime_root: Path | None = None,
+        auth_required: bool = False,
+        bootstrap_username: str | None = None,
+        bootstrap_token: str | None = None,
+        bootstrap_role: str = "admin",
     ) -> None:
         self.store = store or create_job_store(backend="file", jobs_root=Path("work/gateway_jobs"))
         self.runtime_root = runtime_root or getattr(self.store, "root", Path("work/gateway_jobs")) / "runtime"
+        self.auth_required = auth_required
+        if bootstrap_token:
+            username = bootstrap_username or "admin"
+            self.store.upsert_user(username=username, role=bootstrap_role, api_token=bootstrap_token)
+
+    def authenticate(self, token: str | None) -> Optional[UserRecord]:
+        if not token:
+            return None
+        return self.store.get_user_by_token(token)
+
+    def _require_actor(self, actor: Optional[UserRecord]) -> Tuple[bool, Tuple[int, Dict[str, Any]] | None]:
+        if not self.auth_required:
+            return True, None
+        if actor is None:
+            return False, (HTTPStatus.UNAUTHORIZED, {"error": "Authentication required"})
+        return True, None
+
+    def _can_access_job(self, actor: Optional[UserRecord], job_owner_user_id: Optional[str]) -> bool:
+        if not self.auth_required:
+            return True
+        if actor is None:
+            return False
+        if actor.role == "admin":
+            return True
+        return actor.user_id == job_owner_user_id
 
     def health(self) -> Tuple[int, Dict[str, Any]]:
         return HTTPStatus.OK, {"status": "ok", "service": "gateway-api", "timestamp": utc_now_iso()}
@@ -48,7 +77,12 @@ class GatewayAPI:
         }
         return (HTTPStatus.OK if ready else HTTPStatus.SERVICE_UNAVAILABLE), payload
 
-    def system_status(self) -> Tuple[int, Dict[str, Any]]:
+    def system_status(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        if actor is not None and actor.role != "admin":
+            return HTTPStatus.FORBIDDEN, {"error": "Admin access required"}
         workers = [to_dict(item) for item in self.store.list_worker_heartbeats()]
         return HTTPStatus.OK, {
             "service": "gateway-api",
@@ -59,22 +93,41 @@ class GatewayAPI:
             "workers": workers,
         }
 
-    def list_pipelines(self) -> Tuple[int, Dict[str, Any]]:
+    def list_pipelines(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
         return HTTPStatus.OK, {"pipelines": [to_dict(item) for item in list_pipelines()]}
 
-    def list_jobs(self) -> Tuple[int, Dict[str, Any]]:
-        return HTTPStatus.OK, {"jobs": [to_dict(item) for item in self.store.list_jobs()]}
+    def list_jobs(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        jobs = self.store.list_jobs()
+        if self.auth_required and actor is not None and actor.role != "admin":
+            jobs = [job for job in jobs if job.owner_user_id == actor.user_id]
+        return HTTPStatus.OK, {"jobs": [to_dict(item) for item in jobs]}
 
-    def get_job(self, job_id: str) -> Tuple[int, Dict[str, Any]]:
+    def get_job(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
         job = self.store.get_job(job_id)
         if job is None:
             return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
         return HTTPStatus.OK, to_dict(job)
 
-    def get_job_artifact(self, job_id: str, artifact_name: str) -> Tuple[int, Dict[str, Any]]:
+    def get_job_artifact(self, job_id: str, artifact_name: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
         job = self.store.get_job(job_id)
         if job is None:
             return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
 
         artifact = next((item for item in job.artifacts if item.name == artifact_name), None)
         if artifact is None:
@@ -101,7 +154,10 @@ class GatewayAPI:
                     payload["content"] = None
         return HTTPStatus.OK, payload
 
-    def create_job(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+    def create_job(self, payload: Dict[str, Any], actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
         try:
             request = JobCreateRequest(
                 pipeline=str(payload["pipeline"]),
@@ -109,6 +165,8 @@ class GatewayAPI:
                 title=payload.get("title"),
                 config_path=payload.get("config_path"),
                 input_path=payload.get("input_path"),
+                owner_user_id=(actor.user_id if actor else payload.get("owner_user_id")),
+                owner_username=(actor.username if actor else payload.get("owner_username")),
                 options=payload.get("options", {}) or {},
             )
         except KeyError as exc:
@@ -122,10 +180,15 @@ class GatewayAPI:
         job = self.store.create_job(request)
         return HTTPStatus.CREATED, to_dict(job)
 
-    def run_job(self, job_id: str) -> Tuple[int, Dict[str, Any]]:
+    def run_job(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
         job = self.store.get_job(job_id)
         if job is None:
             return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
         if job.status == "running":
             return HTTPStatus.ACCEPTED, to_dict(job)
         if job.status == "queued":
@@ -150,6 +213,15 @@ class GatewayAPI:
 
 class GatewayHandler(BaseHTTPRequestHandler):
     app: GatewayAPI
+
+    def _current_actor(self) -> Optional[UserRecord]:
+        auth_header = self.headers.get("Authorization", "")
+        token = None
+        if auth_header.startswith("Bearer "):
+            token = auth_header.removeprefix("Bearer ").strip()
+        if not token:
+            token = self.headers.get("X-API-Token")
+        return self.app.authenticate(token)
 
     def _write_json(self, status: int, payload: Dict[str, Any]) -> None:
         body = json.dumps(payload, indent=2, ensure_ascii=False).encode("utf-8")
@@ -181,17 +253,17 @@ class GatewayHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/v1/system/status":
-            status, payload = self.app.system_status()
+            status, payload = self.app.system_status(actor=self._current_actor())
             self._write_json(status, payload)
             return
 
         if path == "/v1/pipelines":
-            status, payload = self.app.list_pipelines()
+            status, payload = self.app.list_pipelines(actor=self._current_actor())
             self._write_json(status, payload)
             return
 
         if path == "/v1/jobs":
-            status, payload = self.app.list_jobs()
+            status, payload = self.app.list_jobs(actor=self._current_actor())
             self._write_json(status, payload)
             return
 
@@ -199,13 +271,13 @@ class GatewayHandler(BaseHTTPRequestHandler):
             parts = path.strip("/").split("/")
             if len(parts) == 5:
                 _, _, job_id, _, artifact_name = parts
-                status, payload = self.app.get_job_artifact(job_id, artifact_name)
+                status, payload = self.app.get_job_artifact(job_id, artifact_name, actor=self._current_actor())
                 self._write_json(status, payload)
                 return
 
         if path.startswith("/v1/jobs/"):
             job_id = path.rsplit("/", 1)[-1]
-            status, payload = self.app.get_job(job_id)
+            status, payload = self.app.get_job(job_id, actor=self._current_actor())
             self._write_json(status, payload)
             return
 
@@ -220,13 +292,13 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
                 return
 
-            status, response = self.app.create_job(payload)
+            status, response = self.app.create_job(payload, actor=self._current_actor())
             self._write_json(status, response)
             return
 
         if path.startswith("/v1/jobs/") and path.endswith("/run"):
             job_id = path.split("/")[-2]
-            status, response = self.app.run_job(job_id)
+            status, response = self.app.run_job(job_id, actor=self._current_actor())
             self._write_json(status, response)
             return
 
@@ -262,6 +334,22 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("MANUSCRIPTPREP_POSTGRES_SCHEMA", "public"),
         help="PostgreSQL schema used for gateway job tables",
     )
+    parser.add_argument(
+        "--auth-required",
+        action="store_true",
+        default=os.environ.get("MANUSCRIPTPREP_AUTH_REQUIRED", "").lower() in {"1", "true", "yes"},
+        help="Require API token authentication for /v1 routes",
+    )
+    parser.add_argument(
+        "--bootstrap-admin-username",
+        default=os.environ.get("MANUSCRIPTPREP_BOOTSTRAP_ADMIN_USERNAME", "admin"),
+        help="Bootstrap admin username used with --bootstrap-admin-token",
+    )
+    parser.add_argument(
+        "--bootstrap-admin-token",
+        default=os.environ.get("MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN"),
+        help="Bootstrap admin API token created on gateway startup",
+    )
     return parser.parse_args()
 
 
@@ -276,7 +364,13 @@ def main() -> int:
         postgres_schema=args.postgres_schema,
     )
     handler = GatewayHandler
-    handler.app = GatewayAPI(store=store, runtime_root=runtime_root)
+    handler.app = GatewayAPI(
+        store=store,
+        runtime_root=runtime_root,
+        auth_required=args.auth_required,
+        bootstrap_username=args.bootstrap_admin_username,
+        bootstrap_token=args.bootstrap_admin_token,
+    )
     server = ThreadingHTTPServer((args.host, args.port), handler)
     print(f"Gateway API listening on http://{args.host}:{args.port}")
     try:

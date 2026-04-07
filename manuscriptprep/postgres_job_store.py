@@ -8,8 +8,8 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Optional
 
-from manuscriptprep.api_models import JobCreateRequest, JobRecord, WorkerHeartbeat, utc_now_iso
-from manuscriptprep.job_store import BaseJobStore, _job_from_dict, create_job_record
+from manuscriptprep.api_models import JobCreateRequest, JobRecord, UserRecord, WorkerHeartbeat, utc_now_iso
+from manuscriptprep.job_store import BaseJobStore, _job_from_dict, _user_from_dict, create_job_record
 
 
 class PostgresJobStore(BaseJobStore):
@@ -59,6 +59,18 @@ class PostgresJobStore(BaseJobStore):
                     heartbeat_at TIMESTAMPTZ NOT NULL,
                     status TEXT NOT NULL,
                     last_job_id TEXT NULL
+                )
+                """
+            )
+            cur.execute(
+                f"""
+                CREATE TABLE IF NOT EXISTS {self.schema}.gateway_users (
+                    user_id TEXT PRIMARY KEY,
+                    username TEXT NOT NULL UNIQUE,
+                    role TEXT NOT NULL,
+                    api_token TEXT NOT NULL UNIQUE,
+                    created_at TIMESTAMPTZ NOT NULL,
+                    updated_at TIMESTAMPTZ NOT NULL
                 )
                 """
             )
@@ -257,3 +269,77 @@ class PostgresJobStore(BaseJobStore):
             return True
         except Exception:
             return False
+
+    def upsert_user(self, username: str, role: str, api_token: str) -> UserRecord:
+        now = utc_now_iso()
+        user = UserRecord(
+            user_id="",
+            username=username,
+            role=role,
+            api_token=api_token,
+            created_at=now,
+            updated_at=now,
+        )
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT user_id, created_at
+                FROM {self.schema}.gateway_users
+                WHERE api_token = %s OR username = %s
+                FOR UPDATE
+                """,
+                (api_token, username),
+            )
+            row = cur.fetchone()
+            if row is None:
+                from uuid import uuid4
+
+                user.user_id = str(uuid4())
+                cur.execute(
+                    f"""
+                    INSERT INTO {self.schema}.gateway_users
+                        (user_id, username, role, api_token, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
+                    """,
+                    (user.user_id, username, role, api_token, user.created_at, user.updated_at),
+                )
+            else:
+                user.user_id = row[0]
+                user.created_at = row[1].isoformat()
+                cur.execute(
+                    f"""
+                    UPDATE {self.schema}.gateway_users
+                    SET username = %s,
+                        role = %s,
+                        api_token = %s,
+                        updated_at = %s::timestamptz
+                    WHERE user_id = %s
+                    """,
+                    (username, role, api_token, user.updated_at, user.user_id),
+                )
+            conn.commit()
+        return _user_from_dict(asdict(user))
+
+    def get_user_by_token(self, api_token: str) -> Optional[UserRecord]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT user_id, username, role, api_token, created_at, updated_at
+                FROM {self.schema}.gateway_users
+                WHERE api_token = %s
+                """,
+                (api_token,),
+            )
+            row = cur.fetchone()
+        if row is None:
+            return None
+        return _user_from_dict(
+            {
+                "user_id": row[0],
+                "username": row[1],
+                "role": row[2],
+                "api_token": row[3],
+                "created_at": row[4].isoformat(),
+                "updated_at": row[5].isoformat(),
+            }
+        )

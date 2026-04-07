@@ -45,6 +45,12 @@ Operational endpoints:
 - `GET /ready`
 - `GET /v1/system/status`
 
+Authentication:
+
+- `GET /health` and `GET /ready` stay unauthenticated
+- `/v1/*` routes can require an API token with `Authorization: Bearer <token>` or `X-API-Token`
+- the compose stack now boots a default admin token for development via `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN`
+
 ---
 
 ## Test Workflow
@@ -252,6 +258,8 @@ The stack will use:
 
 - PostgreSQL database: `manuscriptprep`
 - PostgreSQL schema: `gateway`
+- API auth: enabled for `/v1/*`
+- Default development admin token: `dev-admin-token` unless `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN` is overridden
 
 For local non-container development, the gateway can still run with the file-backed store by default.
 
