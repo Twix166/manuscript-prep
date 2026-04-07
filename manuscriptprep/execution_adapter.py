@@ -228,6 +228,9 @@ class ExecutionAdapter:
             raise ValueError("Ingest jobs require title")
 
         workdir = job.options.get("workdir")
+        if not workdir and job.config_path:
+            cfg = load_config(job.config_path)
+            workdir = str(build_paths(cfg).workspace_root)
         if not workdir:
             raise ValueError("Ingest jobs require options.workdir")
 
@@ -274,6 +277,11 @@ class ExecutionAdapter:
     def _run_orchestrate(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         input_dir = job.options.get("input_dir")
         output_dir = job.options.get("output_dir")
+        if (not input_dir or not output_dir) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.chunks_root / str(job.book_slug))
+            output_dir = output_dir or str(paths.output_root / str(job.book_slug))
         if not input_dir or not output_dir:
             raise ValueError("Orchestrate jobs require options.input_dir and options.output_dir")
 
@@ -303,6 +311,13 @@ class ExecutionAdapter:
     def _run_merge(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         input_dir = job.options.get("input_dir")
         output_dir = job.options.get("output_dir")
+        chunk_manifest = job.options.get("chunk_manifest")
+        if (not input_dir or not output_dir or not chunk_manifest) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.output_root / str(job.book_slug))
+            output_dir = output_dir or str(paths.merged_root / str(job.book_slug))
+            chunk_manifest = chunk_manifest or str(paths.workspace_root / "manifests" / str(job.book_slug) / "chunk_manifest.json")
         if not input_dir or not output_dir:
             raise ValueError("Merge jobs require options.input_dir and options.output_dir")
 
@@ -318,8 +333,8 @@ class ExecutionAdapter:
             cmd.extend(["--config", str(job.config_path)])
         if job.book_slug:
             cmd.extend(["--book-slug", str(job.book_slug)])
-        if job.options.get("chunk_manifest"):
-            cmd.extend(["--chunk-manifest", str(job.options["chunk_manifest"])])
+        if chunk_manifest:
+            cmd.extend(["--chunk-manifest", str(chunk_manifest)])
 
         result = self._run_command(job, "merge", cmd, "Merger execution failed")
 
@@ -336,6 +351,12 @@ class ExecutionAdapter:
         input_dir = job.options.get("input_dir")
         output_dir = job.options.get("output_dir")
         model = job.options.get("model") or job.options.get("resolver_model") or job.options.get("model_name")
+        if (not input_dir or not output_dir or not model) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.merged_root / str(job.book_slug))
+            output_dir = output_dir or str(paths.resolved_root / str(job.book_slug))
+            model = model or str(cfg.require("models", "resolver"))
         if not input_dir or not output_dir:
             raise ValueError("Resolve jobs require options.input_dir and options.output_dir")
 
@@ -368,6 +389,11 @@ class ExecutionAdapter:
     def _run_report(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         input_dir = job.options.get("input_dir")
         output_path = job.options.get("output_path") or job.options.get("output")
+        if (not input_dir or not output_path) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.merged_root / str(job.book_slug))
+            output_path = output_path or str(paths.reports_root / f"{job.book_slug}_report.pdf")
         if not input_dir or not output_path:
             raise ValueError("Report jobs require options.input_dir and options.output_path")
 

@@ -97,6 +97,7 @@ class PostgresJobStore(BaseJobStore):
                     book_slug TEXT NOT NULL,
                     title TEXT NOT NULL,
                     source_path TEXT NOT NULL,
+                    file_size_bytes BIGINT NULL,
                     owner_user_id TEXT NULL,
                     owner_username TEXT NULL,
                     created_at TIMESTAMPTZ NOT NULL,
@@ -112,10 +113,23 @@ class PostgresJobStore(BaseJobStore):
                     config_path TEXT NOT NULL,
                     version TEXT NOT NULL,
                     checksum TEXT NOT NULL,
+                    metadata JSONB NOT NULL DEFAULT '{{}}'::jsonb,
                     created_at TIMESTAMPTZ NOT NULL,
                     updated_at TIMESTAMPTZ NOT NULL,
                     UNIQUE (name, version)
                 )
+                """
+            )
+            cur.execute(
+                f"""
+                ALTER TABLE {self.schema}.gateway_config_profiles
+                ADD COLUMN IF NOT EXISTS metadata JSONB NOT NULL DEFAULT '{{}}'::jsonb
+                """
+            )
+            cur.execute(
+                f"""
+                ALTER TABLE {self.schema}.gateway_manuscripts
+                ADD COLUMN IF NOT EXISTS file_size_bytes BIGINT NULL
                 """
             )
             cur.execute(
@@ -418,6 +432,7 @@ class PostgresJobStore(BaseJobStore):
         book_slug: str,
         title: str,
         source_path: str,
+        file_size_bytes: Optional[int],
         owner_user_id: Optional[str],
         owner_username: Optional[str],
     ) -> ManuscriptRecord:
@@ -441,25 +456,26 @@ class PostgresJobStore(BaseJobStore):
                 cur.execute(
                     f"""
                     INSERT INTO {self.schema}.gateway_manuscripts
-                        (manuscript_id, book_slug, title, source_path, owner_user_id, owner_username, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
+                        (manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
                     """,
-                    (manuscript_id, book_slug, title, source_path, owner_user_id, owner_username, created_at, now),
+                    (manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, now),
                 )
             else:
                 manuscript_id = row[0]
                 created_at = row[1].isoformat()
                 cur.execute(
                     f"""
-                    UPDATE {self.schema}.gateway_manuscripts
-                    SET title = %s,
-                        source_path = %s,
-                        owner_user_id = %s,
-                        owner_username = %s,
-                        updated_at = %s::timestamptz
-                    WHERE manuscript_id = %s
+                        UPDATE {self.schema}.gateway_manuscripts
+                        SET title = %s,
+                            source_path = %s,
+                            file_size_bytes = %s,
+                            owner_user_id = %s,
+                            owner_username = %s,
+                            updated_at = %s::timestamptz
+                        WHERE manuscript_id = %s
                     """,
-                    (title, source_path, owner_user_id, owner_username, now, manuscript_id),
+                    (title, source_path, file_size_bytes, owner_user_id, owner_username, now, manuscript_id),
                 )
             conn.commit()
         return _manuscript_from_dict(
@@ -468,6 +484,7 @@ class PostgresJobStore(BaseJobStore):
                 "book_slug": book_slug,
                 "title": title,
                 "source_path": source_path,
+                "file_size_bytes": file_size_bytes,
                 "owner_user_id": owner_user_id,
                 "owner_username": owner_username,
                 "created_at": created_at,
@@ -479,7 +496,7 @@ class PostgresJobStore(BaseJobStore):
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT manuscript_id, book_slug, title, source_path, owner_user_id, owner_username, created_at, updated_at
+                SELECT manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
                 FROM {self.schema}.gateway_manuscripts
                 WHERE manuscript_id = %s
                 """,
@@ -494,10 +511,11 @@ class PostgresJobStore(BaseJobStore):
                 "book_slug": row[1],
                 "title": row[2],
                 "source_path": row[3],
-                "owner_user_id": row[4],
-                "owner_username": row[5],
-                "created_at": row[6].isoformat(),
-                "updated_at": row[7].isoformat(),
+                "file_size_bytes": row[4],
+                "owner_user_id": row[5],
+                "owner_username": row[6],
+                "created_at": row[7].isoformat(),
+                "updated_at": row[8].isoformat(),
             }
         )
 
@@ -505,7 +523,7 @@ class PostgresJobStore(BaseJobStore):
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT manuscript_id, book_slug, title, source_path, owner_user_id, owner_username, created_at, updated_at
+                SELECT manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
                 FROM {self.schema}.gateway_manuscripts
                 ORDER BY created_at DESC
                 """
@@ -518,17 +536,27 @@ class PostgresJobStore(BaseJobStore):
                     "book_slug": row[1],
                     "title": row[2],
                     "source_path": row[3],
-                    "owner_user_id": row[4],
-                    "owner_username": row[5],
-                    "created_at": row[6].isoformat(),
-                    "updated_at": row[7].isoformat(),
+                    "file_size_bytes": row[4],
+                    "owner_user_id": row[5],
+                    "owner_username": row[6],
+                    "created_at": row[7].isoformat(),
+                    "updated_at": row[8].isoformat(),
                 }
             )
             for row in rows
         ]
 
-    def upsert_config_profile(self, *, name: str, config_path: str, version: str, checksum: str) -> ConfigProfileRecord:
+    def upsert_config_profile(
+        self,
+        *,
+        name: str,
+        config_path: str,
+        version: str,
+        checksum: str,
+        metadata: Optional[dict[str, object]] = None,
+    ) -> ConfigProfileRecord:
         now = utc_now_iso()
+        profile_metadata = dict(metadata or {})
         with self._connect(autocommit=False) as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
@@ -548,10 +576,10 @@ class PostgresJobStore(BaseJobStore):
                 cur.execute(
                     f"""
                     INSERT INTO {self.schema}.gateway_config_profiles
-                        (config_profile_id, name, config_path, version, checksum, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
+                        (config_profile_id, name, config_path, version, checksum, metadata, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s::jsonb, %s::timestamptz, %s::timestamptz)
                     """,
-                    (profile_id, name, config_path, version, checksum, created_at, now),
+                    (profile_id, name, config_path, version, checksum, json.dumps(profile_metadata, ensure_ascii=False), created_at, now),
                 )
             else:
                 profile_id = row[0]
@@ -561,10 +589,11 @@ class PostgresJobStore(BaseJobStore):
                     UPDATE {self.schema}.gateway_config_profiles
                     SET config_path = %s,
                         checksum = %s,
+                        metadata = %s::jsonb,
                         updated_at = %s::timestamptz
                     WHERE config_profile_id = %s
                     """,
-                    (config_path, checksum, now, profile_id),
+                    (config_path, checksum, json.dumps(profile_metadata, ensure_ascii=False), now, profile_id),
                 )
             conn.commit()
         return _config_profile_from_dict(
@@ -574,6 +603,7 @@ class PostgresJobStore(BaseJobStore):
                 "config_path": config_path,
                 "version": version,
                 "checksum": checksum,
+                "metadata": profile_metadata,
                 "created_at": created_at,
                 "updated_at": now,
             }
@@ -583,7 +613,7 @@ class PostgresJobStore(BaseJobStore):
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT config_profile_id, name, config_path, version, checksum, created_at, updated_at
+                SELECT config_profile_id, name, config_path, version, checksum, metadata, created_at, updated_at
                 FROM {self.schema}.gateway_config_profiles
                 WHERE config_profile_id = %s
                 """,
@@ -599,8 +629,9 @@ class PostgresJobStore(BaseJobStore):
                 "config_path": row[2],
                 "version": row[3],
                 "checksum": row[4],
-                "created_at": row[5].isoformat(),
-                "updated_at": row[6].isoformat(),
+                "metadata": row[5] if isinstance(row[5], dict) else json.loads(row[5]),
+                "created_at": row[6].isoformat(),
+                "updated_at": row[7].isoformat(),
             }
         )
 
@@ -608,7 +639,7 @@ class PostgresJobStore(BaseJobStore):
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT config_profile_id, name, config_path, version, checksum, created_at, updated_at
+                SELECT config_profile_id, name, config_path, version, checksum, metadata, created_at, updated_at
                 FROM {self.schema}.gateway_config_profiles
                 ORDER BY created_at DESC
                 """
@@ -622,8 +653,9 @@ class PostgresJobStore(BaseJobStore):
                     "config_path": row[2],
                     "version": row[3],
                     "checksum": row[4],
-                    "created_at": row[5].isoformat(),
-                    "updated_at": row[6].isoformat(),
+                    "metadata": row[5] if isinstance(row[5], dict) else json.loads(row[5]),
+                    "created_at": row[6].isoformat(),
+                    "updated_at": row[7].isoformat(),
                 }
             )
             for row in rows

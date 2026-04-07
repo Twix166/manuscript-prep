@@ -395,3 +395,134 @@ def test_gateway_api_manages_manuscripts_and_config_profiles(tmp_path) -> None:
     assert created["title"] == "Treasure Island"
     assert created["input_path"] == "/tmp/treasure-island.pdf"
     assert created["config_path"] == "/tmp/manuscriptprep.yaml"
+
+
+def test_gateway_api_uploads_and_registers_manuscripts(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    app = GatewayAPI(
+        store=store,
+        auth_required=True,
+        bootstrap_username="admin",
+        bootstrap_token="admin-token",
+    )
+    alice = store.upsert_user(username="alice", role="user", api_token="alice-token")
+
+    status, upload = app.upload_manuscript(filename="Novel Draft.pdf", body=b"%PDF-1.4 demo", actor=alice)
+    assert status == 201
+    assert upload["filename"] == "novel_draft.pdf"
+    assert upload["size_bytes"] == len(b"%PDF-1.4 demo")
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Novel Draft",
+            "source_path": upload["path"],
+            "file_size_bytes": upload["size_bytes"],
+        },
+        actor=alice,
+    )
+    assert status == 201
+    assert manuscript["book_slug"] == "novel_draft"
+    assert manuscript["file_size_bytes"] == len(b"%PDF-1.4 demo")
+
+
+def test_gateway_api_stage_jobs_can_derive_defaults_from_manuscript_and_config(tmp_path, sample_pdf, test_env) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    adapter = ExecutionAdapter(env=test_env)
+    worker = JobWorker(store=store, adapter=adapter, poll_interval=0.01)
+    app = GatewayAPI(store=store)
+
+    workspace_root = tmp_path / "workspace"
+    config_path = tmp_path / "manuscriptprep.yaml"
+    config_path.write_text(
+        "\n".join(
+            [
+                "project:",
+                "  name: manuscriptprep",
+                "paths:",
+                f"  repo_root: {tmp_path / 'repo'}",
+                f"  workspace_root: {workspace_root}",
+                f"  input_root: {workspace_root / 'input'}",
+                f"  extracted_root: {workspace_root / 'extracted'}",
+                f"  cleaned_root: {workspace_root / 'cleaned'}",
+                f"  chunks_root: {workspace_root / 'chunks'}",
+                f"  output_root: {workspace_root / 'out'}",
+                f"  merged_root: {workspace_root / 'merged'}",
+                f"  resolved_root: {workspace_root / 'resolved'}",
+                f"  reports_root: {workspace_root / 'reports'}",
+                f"  logs_root: {workspace_root / 'logs'}",
+                "models:",
+                "  structure: manuscriptprep-structure",
+                "  dialogue: manuscriptprep-dialogue",
+                "  entities: manuscriptprep-entities",
+                "  dossiers: manuscriptprep-dossiers",
+                "  resolver: manuscriptprep-resolver",
+                "ollama:",
+                "  host: http://127.0.0.1:11434",
+                "timeouts:",
+                "  idle_seconds: 180",
+                "  hard_seconds: 900",
+                "  retries: 2",
+                "  idle_timeout_backoff: 1.5",
+                "  max_idle_timeout_seconds: 600",
+                "  resolver_timeout_seconds: 180",
+                "chunking:",
+                "  target_words: 20",
+                "  min_words: 5",
+                "  max_words: 30",
+                "logging:",
+                "  level: INFO",
+                "  jsonl: true",
+                "  console: true",
+                "reporting:",
+                "  include_resolution: true",
+                "  max_biography_entries_per_dossier: 6",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    status, profile = app.create_config_profile(
+        {
+            "name": "ui-default",
+            "config_path": str(config_path),
+            "version": "v1",
+        }
+    )
+    assert status == 201
+    assert profile["metadata"]["models"]["resolver"] == "manuscriptprep-resolver"
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Treasure Island",
+            "book_slug": "treasure_island",
+            "source_path": str(sample_pdf),
+            "file_size_bytes": sample_pdf.stat().st_size,
+        }
+    )
+    assert status == 201
+
+    import os
+    old_path = os.environ.get("PATH", "")
+    os.environ["PATH"] = test_env["PATH"]
+    try:
+        for pipeline in ["ingest", "orchestrate", "merge", "resolve", "report"]:
+            status, created = app.create_job(
+                {
+                    "pipeline": pipeline,
+                    "manuscript_id": manuscript["manuscript_id"],
+                    "config_profile_id": profile["config_profile_id"],
+                }
+            )
+            assert status == 201
+            status, _queued = app.run_job(created["job_id"])
+            assert status == 202
+            assert worker.process_next_job() is True
+            status, completed = app.get_job(created["job_id"])
+            assert status == 200
+            assert completed["status"] == "succeeded"
+    finally:
+        os.environ["PATH"] = old_path
+
+    report_path = workspace_root / "reports" / "treasure_island_report.pdf"
+    assert report_path.exists()

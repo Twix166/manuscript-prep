@@ -24,6 +24,7 @@ class StageDefinition:
     kind: str
     description: str
     deterministic: bool
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -112,6 +113,7 @@ class ManuscriptRecord:
     book_slug: str
     title: str
     source_path: str
+    file_size_bytes: Optional[int]
     owner_user_id: Optional[str]
     owner_username: Optional[str]
     created_at: str
@@ -127,6 +129,7 @@ class ConfigProfileRecord:
     checksum: str
     created_at: str
     updated_at: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 def to_dict(obj: Any) -> Dict[str, Any]:

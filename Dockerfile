@@ -13,6 +13,6 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
 COPY . /app
 RUN chown -R manuscriptprep:manuscriptprep /app
 
-USER manuscriptprep
+ENTRYPOINT ["/bin/sh", "/app/docker-entrypoint.sh"]
 
 CMD ["python", "manuscriptprep_gateway_api.py", "--host", "0.0.0.0", "--port", "8765"]

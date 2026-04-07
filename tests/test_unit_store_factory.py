@@ -110,6 +110,7 @@ def test_file_store_can_upsert_manuscripts_and_config_profiles(tmp_path: Path) -
         book_slug="treasure_island",
         title="Treasure Island",
         source_path="/tmp/treasure-island.pdf",
+        file_size_bytes=1024,
         owner_user_id="user-1",
         owner_username="alice",
     )
@@ -118,12 +119,15 @@ def test_file_store_can_upsert_manuscripts_and_config_profiles(tmp_path: Path) -
         config_path="/tmp/config.yaml",
         version="v1",
         checksum="abc123",
+        metadata={"models": {"resolver": "manuscriptprep-resolver"}},
     )
 
     assert store.get_manuscript(manuscript.manuscript_id) is not None
     assert store.list_manuscripts()[0].book_slug == "treasure_island"
+    assert store.list_manuscripts()[0].file_size_bytes == 1024
     assert store.get_config_profile(profile.config_profile_id) is not None
     assert store.list_config_profiles()[0].name == "default"
+    assert store.list_config_profiles()[0].metadata["models"]["resolver"] == "manuscriptprep-resolver"
 
 
 def test_file_store_persists_artifact_index_on_job_update(tmp_path: Path) -> None:

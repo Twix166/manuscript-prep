@@ -20,10 +20,12 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from manuscriptprep.api_models import JobCreateRequest, UserRecord, to_dict, utc_now_iso
+from manuscriptprep.config import load_config
 from manuscriptprep.job_store import BaseJobStore
+from manuscriptprep.paths import build_paths
 from manuscriptprep.runtime_logging import emit_runtime_event
 from manuscriptprep.service_registry import get_pipeline_definition, list_pipelines
 from manuscriptprep.store_factory import create_job_store
@@ -42,10 +44,50 @@ class GatewayAPI:
     ) -> None:
         self.store = store or create_job_store(backend="file", jobs_root=Path("work/gateway_jobs"))
         self.runtime_root = runtime_root or getattr(self.store, "root", Path("work/gateway_jobs")) / "runtime"
+        self.upload_root = self.runtime_root.parent / "uploads"
+        self.upload_root.mkdir(parents=True, exist_ok=True)
         self.auth_required = auth_required
         if bootstrap_token:
             username = bootstrap_username or "admin"
             self.store.upsert_user(username=username, role=bootstrap_role, api_token=bootstrap_token)
+
+    def _slugify(self, value: str) -> str:
+        import re
+
+        text = value.lower()
+        text = re.sub(r"[^\w\s-]", "", text)
+        text = re.sub(r"[\s\-]+", "_", text)
+        text = re.sub(r"_+", "_", text)
+        return text.strip("_")
+
+    def _sanitize_filename(self, filename: str) -> str:
+        name = Path(filename).name
+        stem = self._slugify(Path(name).stem) or "manuscript"
+        suffix = Path(name).suffix or ".pdf"
+        return f"{stem}{suffix}"
+
+    def _config_profile_metadata(self, config_path: str) -> Dict[str, Any]:
+        try:
+            cfg = load_config(config_path)
+            paths = build_paths(cfg)
+        except Exception:
+            return {}
+        return {
+            "project": cfg.data.get("project", {}),
+            "models": cfg.data.get("models", {}),
+            "chunking": cfg.data.get("chunking", {}),
+            "timeouts": cfg.data.get("timeouts", {}),
+            "ollama": cfg.data.get("ollama", {}),
+            "reporting": cfg.data.get("reporting", {}),
+            "paths": {
+                "workspace_root": str(paths.workspace_root),
+                "chunks_root": str(paths.chunks_root),
+                "output_root": str(paths.output_root),
+                "merged_root": str(paths.merged_root),
+                "resolved_root": str(paths.resolved_root),
+                "reports_root": str(paths.reports_root),
+            },
+        }
 
     def authenticate(self, token: str | None) -> Optional[UserRecord]:
         if not token:
@@ -118,17 +160,36 @@ class GatewayAPI:
         allowed, error = self._require_actor(actor)
         if not allowed:
             return error
-        for field in ("book_slug", "title", "source_path"):
+        for field in ("title", "source_path"):
             if not payload.get(field):
                 return HTTPStatus.BAD_REQUEST, {"error": f"Missing required field: {field}"}
         manuscript = self.store.upsert_manuscript(
-            book_slug=str(payload["book_slug"]),
+            book_slug=str(payload.get("book_slug") or self._slugify(str(payload["title"])) or "manuscript"),
             title=str(payload["title"]),
             source_path=str(payload["source_path"]),
+            file_size_bytes=(int(payload["file_size_bytes"]) if payload.get("file_size_bytes") is not None else None),
             owner_user_id=actor.user_id if actor else payload.get("owner_user_id"),
             owner_username=actor.username if actor else payload.get("owner_username"),
         )
         return HTTPStatus.CREATED, to_dict(manuscript)
+
+    def upload_manuscript(self, *, filename: str, body: bytes, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        if not filename:
+            return HTTPStatus.BAD_REQUEST, {"error": "Missing required upload filename"}
+        safe_name = self._sanitize_filename(filename)
+        owner_dir = self.upload_root / (actor.user_id if actor else "anonymous")
+        owner_dir.mkdir(parents=True, exist_ok=True)
+        destination = owner_dir / safe_name
+        destination.write_bytes(body)
+        return HTTPStatus.CREATED, {
+            "filename": safe_name,
+            "path": str(destination),
+            "size_bytes": len(body),
+            "book_slug_guess": self._slugify(Path(safe_name).stem),
+        }
 
     def list_config_profiles(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
@@ -148,21 +209,32 @@ class GatewayAPI:
         checksum = payload.get("checksum")
         if not checksum:
             checksum = hashlib.sha256(str(payload["config_path"]).encode("utf-8")).hexdigest()
+        metadata = self._config_profile_metadata(str(payload["config_path"]))
         profile = self.store.upsert_config_profile(
             name=str(payload["name"]),
             config_path=str(payload["config_path"]),
             version=str(payload["version"]),
             checksum=str(checksum),
+            metadata=metadata,
         )
         return HTTPStatus.CREATED, to_dict(profile)
 
-    def list_jobs(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+    def list_jobs(
+        self,
+        actor: Optional[UserRecord] = None,
+        manuscript_id: Optional[str] = None,
+        pipeline: Optional[str] = None,
+    ) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
         if not allowed:
             return error
         jobs = self.store.list_jobs()
         if self.auth_required and actor is not None and actor.role != "admin":
             jobs = [job for job in jobs if job.owner_user_id == actor.user_id]
+        if manuscript_id:
+            jobs = [job for job in jobs if job.manuscript_id == manuscript_id]
+        if pipeline:
+            jobs = [job for job in jobs if job.pipeline == pipeline]
         return HTTPStatus.OK, {"jobs": [to_dict(item) for item in jobs]}
 
     def get_job(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
@@ -330,8 +402,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
             raise ValueError("JSON body must be an object")
         return data
 
+    def _read_raw_body(self) -> bytes:
+        content_length = int(self.headers.get("Content-Length", "0"))
+        return self.rfile.read(content_length) if content_length else b""
+
     def do_GET(self) -> None:  # noqa: N802
-        path = urlparse(self.path).path
+        parsed = urlparse(self.path)
+        path = parsed.path
+        query = parse_qs(parsed.query)
 
         if path in {"/", "/ui", "/ui/"} or path.startswith("/ui/"):
             try:
@@ -373,7 +451,11 @@ class GatewayHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/v1/jobs":
-            status, payload = self.app.list_jobs(actor=self._current_actor())
+            status, payload = self.app.list_jobs(
+                actor=self._current_actor(),
+                manuscript_id=(query.get("manuscript_id") or [None])[0],
+                pipeline=(query.get("pipeline") or [None])[0],
+            )
             self._write_json(status, payload)
             return
 
@@ -403,6 +485,15 @@ class GatewayHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if path == "/v1/uploads/manuscripts":
+            status, response = self.app.upload_manuscript(
+                filename=self.headers.get("X-Filename", ""),
+                body=self._read_raw_body(),
+                actor=self._current_actor(),
+            )
+            self._write_json(status, response)
+            return
+
         if path == "/v1/jobs":
             try:
                 payload = self._read_json_body()

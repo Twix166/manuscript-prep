@@ -39,11 +39,12 @@ services:
       - --port
       - "8765"
       - --runtime-root
-      - /app/work/gateway_jobs/runtime
+      - /app/runtime_data/runtime
     ports:
       - "${MANUSCRIPTPREP_GATEWAY_PORT:-8765}:8765"
     volumes:
       - .:/app
+      - manuscriptprep_runtime_data:/app/runtime_data
 
   worker:
     build:
@@ -61,9 +62,11 @@ services:
       - python
       - manuscriptprep_worker.py
       - --runtime-root
-      - /app/work/gateway_jobs/runtime
+      - /app/runtime_data/runtime
     volumes:
       - .:/app
+      - manuscriptprep_runtime_data:/app/runtime_data
 
 volumes:
   manuscriptprep_postgres_data:
+  manuscriptprep_runtime_data:

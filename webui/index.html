@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ManuscriptPrep Control Plane</title>
+    <title>ManuscriptPrep Pipeline Studio</title>
     <link rel="stylesheet" href="/ui/styles.css">
   </head>
   <body>
@@ -11,8 +11,8 @@
       <section class="hero">
         <div>
           <p class="eyebrow">ManuscriptPrep</p>
-          <h1>Control Plane</h1>
-          <p class="lede">Live view of jobs, manuscripts, config profiles, and artifacts from the gateway API.</p>
+          <h1>Pipeline Studio</h1>
+          <p class="lede">Upload a manuscript, choose a runtime profile, trigger each stage, and watch the pipeline move from ingest through report generation.</p>
         </div>
         <form id="auth-form" class="auth-panel">
           <label for="api-token">API token</label>
@@ -22,55 +22,99 @@
         </form>
       </section>
 
-      <section class="grid two">
-        <article class="panel">
-          <div class="panel-head">
-            <h2>System</h2>
-            <button data-refresh="system">Refresh</button>
-          </div>
-          <pre id="system-status">Connect to load system status.</pre>
-        </article>
-        <article class="panel">
-          <div class="panel-head">
-            <h2>Pipelines</h2>
-            <button data-refresh="pipelines">Refresh</button>
-          </div>
-          <ul id="pipeline-list" class="list"></ul>
-        </article>
-      </section>
-
       <section class="grid three">
         <article class="panel">
           <div class="panel-head">
-            <h2>Jobs</h2>
-            <button data-refresh="jobs">Refresh</button>
+            <h2>1. Upload</h2>
+            <button type="button" data-refresh="upload-context">Refresh</button>
+          </div>
+          <form id="upload-form" class="stack">
+            <label for="manuscript-title">Title</label>
+            <input id="manuscript-title" type="text" placeholder="Treasure Island">
+            <label for="manuscript-slug">Slug</label>
+            <input id="manuscript-slug" type="text" placeholder="Optional; generated from title if blank">
+            <label for="manuscript-file">PDF manuscript</label>
+            <input id="manuscript-file" type="file" accept=".pdf,application/pdf">
+            <button type="submit">Upload And Register Manuscript</button>
+            <p id="upload-status" class="muted">Choose a PDF to create a managed manuscript record.</p>
+          </form>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>2. Runtime Profile</h2>
+            <button type="button" data-refresh="config-profiles">Refresh</button>
+          </div>
+          <div class="stack">
+            <label for="config-profile-select">Config profile</label>
+            <select id="config-profile-select"></select>
+            <pre id="config-profile-detail">Select a config profile to inspect models, chunking, and timeouts.</pre>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>3. Manuscripts</h2>
+            <button type="button" data-refresh="manuscripts">Refresh</button>
+          </div>
+          <ul id="manuscript-list" class="list selectable"></ul>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Pipeline Overview</h2>
+            <button type="button" data-refresh="pipelines">Refresh</button>
+          </div>
+          <div id="pipeline-overview" class="pipeline-overview"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Selected Manuscript</h2>
+            <button type="button" data-refresh="selected-manuscript">Refresh</button>
+          </div>
+          <pre id="manuscript-detail">Select a manuscript to see pipeline-ready details.</pre>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Stage Control</h2>
+          <div class="panel-actions">
+            <button type="button" id="run-full-pipeline">Run Full Pipeline</button>
+            <button type="button" data-refresh="jobs">Refresh Status</button>
+          </div>
+        </div>
+        <div id="stage-board" class="stage-board"></div>
+        <p id="stage-action-status" class="muted">Select a manuscript and config profile, then trigger a stage or the full pipeline.</p>
+      </section>
+
+      <section class="grid two">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Live Status</h2>
+            <button type="button" data-refresh="system">Refresh</button>
+          </div>
+          <pre id="system-status">Connect to load gateway and worker status.</pre>
+        </article>
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Job Timeline</h2>
+            <button type="button" data-refresh="jobs">Refresh</button>
           </div>
           <ul id="job-list" class="list selectable"></ul>
-        </article>
-        <article class="panel">
-          <div class="panel-head">
-            <h2>Manuscripts</h2>
-            <button data-refresh="manuscripts">Refresh</button>
-          </div>
-          <ul id="manuscript-list" class="list"></ul>
-        </article>
-        <article class="panel">
-          <div class="panel-head">
-            <h2>Config Profiles</h2>
-            <button data-refresh="config-profiles">Refresh</button>
-          </div>
-          <ul id="config-profile-list" class="list"></ul>
         </article>
       </section>
 
       <section class="panel">
         <div class="panel-head">
           <h2>Selected Job</h2>
-          <button data-refresh="selected-job">Refresh</button>
+          <button type="button" data-refresh="selected-job">Refresh</button>
         </div>
         <div class="grid two">
-          <pre id="job-detail">Select a job to inspect details.</pre>
-          <pre id="job-artifacts">Artifact index appears here.</pre>
+          <pre id="job-detail">Choose a job to inspect stage timing, command lines, and errors.</pre>
+          <pre id="job-artifacts">Artifact index appears here, including checksums and output paths.</pre>
         </div>
       </section>
     </main>

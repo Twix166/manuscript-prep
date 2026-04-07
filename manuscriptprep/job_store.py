@@ -88,6 +88,7 @@ def _manuscript_from_dict(data: Dict) -> ManuscriptRecord:
         book_slug=data["book_slug"],
         title=data["title"],
         source_path=data["source_path"],
+        file_size_bytes=data.get("file_size_bytes"),
         owner_user_id=data.get("owner_user_id"),
         owner_username=data.get("owner_username"),
         created_at=data["created_at"],
@@ -102,6 +103,7 @@ def _config_profile_from_dict(data: Dict) -> ConfigProfileRecord:
         config_path=data["config_path"],
         version=data["version"],
         checksum=data["checksum"],
+        metadata=data.get("metadata", {}) or {},
         created_at=data["created_at"],
         updated_at=data["updated_at"],
     )
@@ -163,6 +165,7 @@ class BaseJobStore(ABC):
         book_slug: str,
         title: str,
         source_path: str,
+        file_size_bytes: Optional[int],
         owner_user_id: Optional[str],
         owner_username: Optional[str],
     ) -> ManuscriptRecord:
@@ -177,7 +180,15 @@ class BaseJobStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def upsert_config_profile(self, *, name: str, config_path: str, version: str, checksum: str) -> ConfigProfileRecord:
+    def upsert_config_profile(
+        self,
+        *,
+        name: str,
+        config_path: str,
+        version: str,
+        checksum: str,
+        metadata: Optional[Dict[str, object]] = None,
+    ) -> ConfigProfileRecord:
         raise NotImplementedError
 
     @abstractmethod
@@ -439,6 +450,7 @@ class JobStore(BaseJobStore):
         book_slug: str,
         title: str,
         source_path: str,
+        file_size_bytes: Optional[int],
         owner_user_id: Optional[str],
         owner_username: Optional[str],
     ) -> ManuscriptRecord:
@@ -458,6 +470,7 @@ class JobStore(BaseJobStore):
                     book_slug=book_slug,
                     title=title,
                     source_path=source_path,
+                    file_size_bytes=file_size_bytes,
                     owner_user_id=owner_user_id,
                     owner_username=owner_username,
                     created_at=existing.created_at,
@@ -469,6 +482,7 @@ class JobStore(BaseJobStore):
                     book_slug=book_slug,
                     title=title,
                     source_path=source_path,
+                    file_size_bytes=file_size_bytes,
                     owner_user_id=owner_user_id,
                     owner_username=owner_username,
                     created_at=now,
@@ -487,9 +501,18 @@ class JobStore(BaseJobStore):
         with self._lock:
             return [_manuscript_from_dict(asdict(item)) for item in self._manuscripts.values()]
 
-    def upsert_config_profile(self, *, name: str, config_path: str, version: str, checksum: str) -> ConfigProfileRecord:
+    def upsert_config_profile(
+        self,
+        *,
+        name: str,
+        config_path: str,
+        version: str,
+        checksum: str,
+        metadata: Optional[Dict[str, object]] = None,
+    ) -> ConfigProfileRecord:
         with self._lock:
             now = utc_now_iso()
+            profile_metadata = dict(metadata or {})
             existing = next(
                 (
                     item
@@ -505,6 +528,7 @@ class JobStore(BaseJobStore):
                     config_path=config_path,
                     version=version,
                     checksum=checksum,
+                    metadata=profile_metadata,
                     created_at=existing.created_at,
                     updated_at=now,
                 )
@@ -515,6 +539,7 @@ class JobStore(BaseJobStore):
                     config_path=config_path,
                     version=version,
                     checksum=checksum,
+                    metadata=profile_metadata,
                     created_at=now,
                     updated_at=now,
                 )

@@ -65,7 +65,9 @@ Artifact management:
 Web UI:
 
 - `GET /ui` serves a lightweight operator dashboard from the gateway
-- the dashboard can inspect system status, jobs, manuscripts, config profiles, and per-job artifact indexes
+- the dashboard now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
+- stage cards show pipeline substeps and the configured model names where applicable
+- the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads
 
 ---
 
@@ -267,6 +269,14 @@ docker compose up --build
 ```
 
 The gateway will be available on `http://127.0.0.1:8765` and PostgreSQL will be published on host port `5433` by default. The container-to-container database port remains `5432`.
+
+For the user-facing flow:
+
+1. Open `http://127.0.0.1:8765/ui`
+2. Enter the admin or user API token
+3. Upload a manuscript PDF
+4. Choose a config profile
+5. Trigger the full pipeline or individual stages and watch live status updates
 
 If those host ports conflict with your machine, override them when starting the stack:
 
