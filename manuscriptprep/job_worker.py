@@ -18,22 +18,33 @@ class JobWorker:
         adapter: ExecutionAdapter,
         worker_id: str | None = None,
         poll_interval: float = 1.0,
+        stale_after_seconds: int = 600,
     ) -> None:
         self.store = store
         self.adapter = adapter
         self.worker_id = worker_id or f"worker-{uuid.uuid4()}"
         self.poll_interval = poll_interval
+        self.stale_after_seconds = stale_after_seconds
+
+    def recover_stale_jobs(self) -> list[str]:
+        return self.store.recover_stale_running_jobs(
+            stale_after_seconds=self.stale_after_seconds,
+            recovery_worker_id=self.worker_id,
+        )
 
     def process_next_job(self) -> bool:
+        self.store.record_worker_heartbeat(self.worker_id, "idle")
         job = self.store.claim_next_job(self.worker_id)
         if job is None:
             return False
 
+        self.store.record_worker_heartbeat(self.worker_id, "running", last_job_id=job.job_id)
         try:
             updated_job, artifacts = self.adapter.run_job(job)
             updated_job.artifacts = artifacts
             updated_job.updated_at = utc_now_iso()
             self.store.update_job(updated_job)
+            self.store.record_worker_heartbeat(self.worker_id, "idle", last_job_id=job.job_id)
         except Exception as exc:
             failed = self.store.get_job(job.job_id) or job
             failed.status = "failed"
@@ -43,9 +54,11 @@ class JobWorker:
                 failed.stage_runs[0].finished_at = failed.updated_at
                 failed.stage_runs[0].error = str(exc)
             self.store.update_job(failed)
+            self.store.record_worker_heartbeat(self.worker_id, "idle", last_job_id=job.job_id)
         return True
 
     def run_forever(self) -> None:
+        self.recover_stale_jobs()
         while True:
             processed = self.process_next_job()
             if not processed:

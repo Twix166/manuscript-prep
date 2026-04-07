@@ -19,6 +19,15 @@ def test_gateway_api_exposes_health_pipelines_and_jobs(tmp_path) -> None:
     assert status == 200
     assert health["service"] == "gateway-api"
 
+    status, ready = app.ready()
+    assert status == 200
+    assert ready["status"] == "ready"
+
+    status, system = app.system_status()
+    assert status == 200
+    assert system["ready"] is True
+    assert system["queue"]["total"] == 0
+
     status, pipelines = app.list_pipelines()
     assert status == 200
     assert "manuscript-prep" in [item["pipeline"] for item in pipelines["pipelines"]]
@@ -84,6 +93,11 @@ def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_en
     assert persisted is not None
     assert persisted.status == "succeeded"
     assert persisted.artifacts[0].stage == "ingest"
+
+    status, system = app.system_status()
+    assert status == 200
+    assert system["queue"]["succeeded"] == 1
+    assert any(item["worker_id"] == worker.worker_id for item in system["workers"])
 
     status, artifact = app.get_job_artifact(job_id, "ingest_stdout")
     assert status == 200

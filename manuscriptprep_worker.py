@@ -51,6 +51,12 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("MANUSCRIPTPREP_WORKER_ID"),
         help="Optional explicit worker identifier",
     )
+    parser.add_argument(
+        "--stale-after-seconds",
+        type=int,
+        default=int(os.environ.get("MANUSCRIPTPREP_WORKER_STALE_AFTER_SECONDS", "600")),
+        help="Requeue running jobs older than this age when the worker starts",
+    )
     return parser.parse_args()
 
 
@@ -70,6 +76,7 @@ def main() -> int:
         adapter=adapter,
         worker_id=args.worker_id,
         poll_interval=args.poll_interval,
+        stale_after_seconds=args.stale_after_seconds,
     )
     print(f"ManuscriptPrep worker started: {worker.worker_id}")
     worker.run_forever()

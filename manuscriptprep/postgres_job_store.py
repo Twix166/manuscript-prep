@@ -8,7 +8,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Optional
 
-from manuscriptprep.api_models import JobCreateRequest, JobRecord, utc_now_iso
+from manuscriptprep.api_models import JobCreateRequest, JobRecord, WorkerHeartbeat, utc_now_iso
 from manuscriptprep.job_store import BaseJobStore, _job_from_dict, create_job_record
 
 
@@ -33,7 +33,8 @@ class PostgresJobStore(BaseJobStore):
         return self._psycopg.connect(self.database_url, autocommit=autocommit)
 
     def _ensure_schema(self) -> None:
-        with self._connect() as conn, conn.cursor() as cur:
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute("SELECT pg_advisory_xact_lock(hashtext(%s))", (f"{self.schema}.schema_bootstrap",))
             cur.execute(f"CREATE SCHEMA IF NOT EXISTS {self.schema}")
             cur.execute(
                 f"""
@@ -51,6 +52,17 @@ class PostgresJobStore(BaseJobStore):
                 ON {self.schema}.gateway_jobs (created_at DESC)
                 """
             )
+            cur.execute(
+                f"""
+                CREATE TABLE IF NOT EXISTS {self.schema}.gateway_workers (
+                    worker_id TEXT PRIMARY KEY,
+                    heartbeat_at TIMESTAMPTZ NOT NULL,
+                    status TEXT NOT NULL,
+                    last_job_id TEXT NULL
+                )
+                """
+            )
+            conn.commit()
 
     def _row_to_job(self, payload: Any) -> JobRecord:
         data = json.loads(payload) if isinstance(payload, str) else payload
@@ -141,3 +153,107 @@ class PostgresJobStore(BaseJobStore):
             )
             conn.commit()
             return self._row_to_job(asdict(job))
+
+    def record_worker_heartbeat(self, worker_id: str, status: str, last_job_id: Optional[str] = None) -> None:
+        heartbeat_at = utc_now_iso()
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                INSERT INTO {self.schema}.gateway_workers (worker_id, heartbeat_at, status, last_job_id)
+                VALUES (%s, %s::timestamptz, %s, %s)
+                ON CONFLICT (worker_id) DO UPDATE
+                SET heartbeat_at = EXCLUDED.heartbeat_at,
+                    status = EXCLUDED.status,
+                    last_job_id = EXCLUDED.last_job_id
+                """,
+                (worker_id, heartbeat_at, status, last_job_id),
+            )
+
+    def list_worker_heartbeats(self) -> list[WorkerHeartbeat]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT worker_id, status, heartbeat_at, last_job_id
+                FROM {self.schema}.gateway_workers
+                ORDER BY heartbeat_at DESC
+                """
+            )
+            rows = cur.fetchall()
+        return [
+            WorkerHeartbeat(
+                worker_id=row[0],
+                status=row[1],
+                heartbeat_at=row[2].isoformat(),
+                last_job_id=row[3],
+            )
+            for row in rows
+        ]
+
+    def queue_summary(self) -> dict[str, int]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT payload->>'status' AS status, COUNT(*)
+                FROM {self.schema}.gateway_jobs
+                GROUP BY payload->>'status'
+                """
+            )
+            rows = cur.fetchall()
+        summary: dict[str, int] = {"queued": 0, "running": 0, "succeeded": 0, "failed": 0, "cancelled": 0}
+        total = 0
+        for status, count in rows:
+            summary[str(status)] = int(count)
+            total += int(count)
+        summary["total"] = total
+        return summary
+
+    def recover_stale_running_jobs(self, stale_after_seconds: int, recovery_worker_id: str) -> list[str]:
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT job_id, payload
+                FROM {self.schema}.gateway_jobs
+                WHERE payload->>'status' = 'running'
+                  AND ((payload->'options'->>'_claimed_at')::timestamptz < (NOW() - (%s || ' seconds')::interval))
+                FOR UPDATE
+                """,
+                (str(stale_after_seconds),),
+            )
+            rows = cur.fetchall()
+            recovered: list[str] = []
+            for job_id, payload in rows:
+                job = self._row_to_job(payload)
+                job.status = "queued"
+                job.updated_at = utc_now_iso()
+                for stage in job.stage_runs:
+                    if stage.status == "running":
+                        stage.status = "pending"
+                        stage.started_at = None
+                        stage.finished_at = None
+                        stage.error = "Recovered from stale running state"
+                        break
+                job.options = {
+                    **job.options,
+                    "_recovered_by": recovery_worker_id,
+                    "_recovered_at": job.updated_at,
+                }
+                cur.execute(
+                    f"""
+                    UPDATE {self.schema}.gateway_jobs
+                    SET updated_at = %s::timestamptz, payload = %s::jsonb
+                    WHERE job_id = %s
+                    """,
+                    (job.updated_at, json.dumps(asdict(job), ensure_ascii=False), job_id),
+                )
+                recovered.append(job_id)
+            conn.commit()
+            return recovered
+
+    def is_ready(self) -> bool:
+        try:
+            with self._connect() as conn, conn.cursor() as cur:
+                cur.execute("SELECT 1")
+                cur.fetchone()
+            return True
+        except Exception:
+            return False

@@ -18,6 +18,7 @@ The current slices introduce:
 - execution adapters for `ingest`, `orchestrate`, `merge`, `resolve`, and `report`
 - a single gateway-managed `manuscript-prep` job that chains all stages locally
 - a `compose.yaml` stack that runs gateway, worker, and PostgreSQL together
+- readiness, system-status, queue summary, worker heartbeat, and stale-job recovery support
 
 The current scripts remain the execution backend while the API contract is
 established. The gateway now queues jobs while workers execute them against the
@@ -26,6 +27,8 @@ existing CLI implementations.
 ## Initial Gateway Endpoints
 
 - `GET /health`
+- `GET /ready`
+- `GET /v1/system/status`
 - `GET /v1/pipelines`
 - `GET /v1/jobs`
 - `POST /v1/jobs`

@@ -39,6 +39,26 @@ class GatewayAPI:
     def health(self) -> Tuple[int, Dict[str, Any]]:
         return HTTPStatus.OK, {"status": "ok", "service": "gateway-api", "timestamp": utc_now_iso()}
 
+    def ready(self) -> Tuple[int, Dict[str, Any]]:
+        ready = self.store.is_ready()
+        payload = {
+            "status": "ready" if ready else "not_ready",
+            "service": "gateway-api",
+            "timestamp": utc_now_iso(),
+        }
+        return (HTTPStatus.OK if ready else HTTPStatus.SERVICE_UNAVAILABLE), payload
+
+    def system_status(self) -> Tuple[int, Dict[str, Any]]:
+        workers = [to_dict(item) for item in self.store.list_worker_heartbeats()]
+        return HTTPStatus.OK, {
+            "service": "gateway-api",
+            "timestamp": utc_now_iso(),
+            "store_backend": self.store.__class__.__name__,
+            "ready": self.store.is_ready(),
+            "queue": self.store.queue_summary(),
+            "workers": workers,
+        }
+
     def list_pipelines(self) -> Tuple[int, Dict[str, Any]]:
         return HTTPStatus.OK, {"pipelines": [to_dict(item) for item in list_pipelines()]}
 
@@ -152,6 +172,16 @@ class GatewayHandler(BaseHTTPRequestHandler):
 
         if path == "/health":
             status, payload = self.app.health()
+            self._write_json(status, payload)
+            return
+
+        if path == "/ready":
+            status, payload = self.app.ready()
+            self._write_json(status, payload)
+            return
+
+        if path == "/v1/system/status":
+            status, payload = self.app.system_status()
             self._write_json(status, payload)
             return
 

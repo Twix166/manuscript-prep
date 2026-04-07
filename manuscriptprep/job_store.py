@@ -10,7 +10,7 @@ from threading import Lock
 from typing import Dict, List, Optional
 from uuid import uuid4
 
-from manuscriptprep.api_models import ArtifactRef, JobCreateRequest, JobRecord, StageRun, utc_now_iso
+from manuscriptprep.api_models import ArtifactRef, JobCreateRequest, JobRecord, StageRun, WorkerHeartbeat, utc_now_iso
 from manuscriptprep.service_registry import get_pipeline_definition
 
 
@@ -74,6 +74,26 @@ class BaseJobStore(ABC):
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
         raise NotImplementedError
 
+    @abstractmethod
+    def record_worker_heartbeat(self, worker_id: str, status: str, last_job_id: Optional[str] = None) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_worker_heartbeats(self) -> List[WorkerHeartbeat]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def queue_summary(self) -> Dict[str, int]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def recover_stale_running_jobs(self, stale_after_seconds: int, recovery_worker_id: str) -> List[str]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def is_ready(self) -> bool:
+        raise NotImplementedError
+
 
 class JobStore(BaseJobStore):
     def __init__(self, root: Path | None = None) -> None:
@@ -81,22 +101,36 @@ class JobStore(BaseJobStore):
         self.root.mkdir(parents=True, exist_ok=True)
         self._lock = Lock()
         self._jobs: Dict[str, JobRecord] = {}
+        self._workers: Dict[str, WorkerHeartbeat] = {}
         self._load_existing_jobs()
-
-    def _load_existing_jobs(self) -> None:
-        for path in sorted(self.root.glob("*.json")):
-            data = json.loads(path.read_text(encoding="utf-8"))
-            job = _job_from_dict(data)
-            self._jobs[job.job_id] = job
 
     def _job_path(self, job_id: str) -> Path:
         return self.root / f"{job_id}.json"
+
+    def _workers_path(self) -> Path:
+        return self.root / "_workers.json"
 
     def _persist(self, job: JobRecord) -> None:
         self._job_path(job.job_id).write_text(
             json.dumps(asdict(job), indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",
         )
+
+    def _persist_workers(self) -> None:
+        self._workers_path().write_text(
+            json.dumps([asdict(worker) for worker in self._workers.values()], indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
+    def _load_existing_jobs(self) -> None:
+        for path in sorted(self.root.glob("*.json")):
+            if path.name == "_workers.json":
+                data = json.loads(path.read_text(encoding="utf-8"))
+                self._workers = {item["worker_id"]: WorkerHeartbeat(**item) for item in data}
+                continue
+            data = json.loads(path.read_text(encoding="utf-8"))
+            job = _job_from_dict(data)
+            self._jobs[job.job_id] = job
 
     def create_job(self, request: JobCreateRequest) -> JobRecord:
         job = create_job_record(request)
@@ -145,3 +179,62 @@ class JobStore(BaseJobStore):
             self._jobs[job.job_id] = job
             self._persist(job)
             return _job_from_dict(asdict(job))
+
+    def record_worker_heartbeat(self, worker_id: str, status: str, last_job_id: Optional[str] = None) -> None:
+        with self._lock:
+            self._workers[worker_id] = WorkerHeartbeat(
+                worker_id=worker_id,
+                status=status,
+                heartbeat_at=utc_now_iso(),
+                last_job_id=last_job_id,
+            )
+            self._persist_workers()
+
+    def list_worker_heartbeats(self) -> List[WorkerHeartbeat]:
+        with self._lock:
+            return [WorkerHeartbeat(**asdict(worker)) for worker in self._workers.values()]
+
+    def queue_summary(self) -> Dict[str, int]:
+        with self._lock:
+            summary: Dict[str, int] = {"queued": 0, "running": 0, "succeeded": 0, "failed": 0, "cancelled": 0}
+            for job in self._jobs.values():
+                summary[job.status] = summary.get(job.status, 0) + 1
+            summary["total"] = len(self._jobs)
+            return summary
+
+    def recover_stale_running_jobs(self, stale_after_seconds: int, recovery_worker_id: str) -> List[str]:
+        from datetime import datetime, timezone
+
+        recovered: List[str] = []
+        now = datetime.now(timezone.utc)
+        with self._lock:
+            for job in self._jobs.values():
+                if job.status != "running":
+                    continue
+                claimed_at = job.options.get("_claimed_at")
+                if not claimed_at:
+                    continue
+                claimed_dt = datetime.fromisoformat(str(claimed_at))
+                age = (now - claimed_dt).total_seconds()
+                if age < stale_after_seconds:
+                    continue
+                job.status = "queued"
+                job.updated_at = utc_now_iso()
+                for stage in job.stage_runs:
+                    if stage.status == "running":
+                        stage.status = "pending"
+                        stage.started_at = None
+                        stage.finished_at = None
+                        stage.error = "Recovered from stale running state"
+                        break
+                job.options = {
+                    **job.options,
+                    "_recovered_by": recovery_worker_id,
+                    "_recovered_at": job.updated_at,
+                }
+                self._persist(job)
+                recovered.append(job.job_id)
+        return recovered
+
+    def is_ready(self) -> bool:
+        return True

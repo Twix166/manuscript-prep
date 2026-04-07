@@ -39,6 +39,12 @@ Notes:
 - `manuscriptprep_worker.py` is the execution worker. It claims queued jobs and runs them outside the gateway process.
 - `manuscriptprep_orchestrator_tui_refactored.py` can now also run in gateway-client mode with `--gateway-url` while preserving the existing direct local orchestration mode.
 
+Operational endpoints:
+
+- `GET /health`
+- `GET /ready`
+- `GET /v1/system/status`
+
 ---
 
 ## Test Workflow

@@ -80,6 +80,14 @@ class JobRecord:
     artifacts: List[ArtifactRef] = field(default_factory=list)
 
 
+@dataclass
+class WorkerHeartbeat:
+    worker_id: str
+    status: str
+    heartbeat_at: str
+    last_job_id: Optional[str] = None
+
+
 def to_dict(obj: Any) -> Dict[str, Any]:
     return asdict(obj)
 
