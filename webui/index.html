@@ -117,6 +117,27 @@
           <pre id="job-artifacts">Artifact index appears here, including checksums and output paths.</pre>
         </div>
       </section>
+
+      <dialog id="artifact-viewer" class="artifact-viewer">
+        <div class="artifact-shell">
+          <div class="panel-head artifact-head">
+            <div>
+              <p class="eyebrow">Ingest Results</p>
+              <h2 id="artifact-viewer-title">Artifact Viewer</h2>
+            </div>
+            <button type="button" id="artifact-viewer-close" class="ghost-button">Close</button>
+          </div>
+          <p id="artifact-viewer-status" class="muted">Loading ingest results...</p>
+          <div id="artifact-viewer-summary" class="artifact-summary"></div>
+          <div class="artifact-tabs">
+            <button type="button" class="artifact-tab active" data-artifact-tab="classification">Classification</button>
+            <button type="button" class="artifact-tab" data-artifact-tab="extract">Extract</button>
+            <button type="button" class="artifact-tab" data-artifact-tab="clean">Clean</button>
+            <button type="button" class="artifact-tab" data-artifact-tab="chunking">Chunking</button>
+          </div>
+          <div id="artifact-viewer-panels" class="artifact-panels"></div>
+        </div>
+      </dialog>
     </main>
 
     <script src="/ui/app.js"></script>

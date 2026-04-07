@@ -18,6 +18,10 @@ const state = {
   selectedManuscriptId: null,
   selectedConfigProfileId: null,
   selectedJobId: null,
+  artifactViewer: {
+    jobId: null,
+    tab: "classification",
+  },
 };
 
 const els = {
@@ -41,6 +45,12 @@ const els = {
   jobDetail: document.getElementById("job-detail"),
   jobArtifacts: document.getElementById("job-artifacts"),
   runFullPipeline: document.getElementById("run-full-pipeline"),
+  artifactViewer: document.getElementById("artifact-viewer"),
+  artifactViewerTitle: document.getElementById("artifact-viewer-title"),
+  artifactViewerStatus: document.getElementById("artifact-viewer-status"),
+  artifactViewerSummary: document.getElementById("artifact-viewer-summary"),
+  artifactViewerPanels: document.getElementById("artifact-viewer-panels"),
+  artifactViewerClose: document.getElementById("artifact-viewer-close"),
 };
 
 function currentHeaders(extra = {}) {
@@ -100,6 +110,192 @@ function selectedJob() {
 
 function latestJobForPipeline(pipeline) {
   return state.jobs.find((job) => job.pipeline === pipeline) || null;
+}
+
+function prettyLabel(value) {
+  return String(value || "n/a")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+function truncateText(value, maxLength = 5000) {
+  const text = String(value || "");
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return `${text.slice(0, maxLength)}\n\n... truncated ...`;
+}
+
+function setArtifactTab(tab) {
+  state.artifactViewer.tab = tab;
+  for (const button of document.querySelectorAll("[data-artifact-tab]")) {
+    button.classList.toggle("active", button.getAttribute("data-artifact-tab") === tab);
+  }
+  for (const panel of els.artifactViewerPanels.querySelectorAll(".artifact-panel")) {
+    panel.classList.toggle("active", panel.getAttribute("data-artifact-panel") === tab);
+  }
+}
+
+function ingestSummaryCards(ingestManifest = {}, chunkManifest = {}) {
+  const extraction = ingestManifest.extraction || {};
+  const cleaning = ingestManifest.cleaning || {};
+  const chunking = chunkManifest.summary || {};
+  const classification = ingestManifest.classification || {};
+  return [
+    {
+      title: "Classification",
+      body: classification.mode || classification.pdf_type || classification.type || "Unknown",
+    },
+    {
+      title: "Pages",
+      body: extraction.page_count || ingestManifest.page_count || "n/a",
+    },
+    {
+      title: "Clean Words",
+      body: cleaning.word_count || chunking.total_words || "n/a",
+    },
+    {
+      title: "Chunks",
+      body: chunking.chunk_count || (Array.isArray(chunkManifest.chunks) ? chunkManifest.chunks.length : "n/a"),
+    },
+  ];
+}
+
+function renderArtifactSummary(cards) {
+  els.artifactViewerSummary.innerHTML = "";
+  for (const card of cards) {
+    const article = document.createElement("article");
+    article.className = "artifact-card";
+    article.innerHTML = `
+      <p class="eyebrow">${card.title}</p>
+      <h3>${card.body}</h3>
+    `;
+    els.artifactViewerSummary.appendChild(article);
+  }
+}
+
+function renderArtifactPanels({ ingestManifest, rawText, cleanText, chunkManifest }) {
+  const classification = ingestManifest.classification || ingestManifest.pdf_analysis || ingestManifest;
+  const extraction = ingestManifest.extraction || ingestManifest.text_extraction || {};
+  const cleaning = ingestManifest.cleaning || {};
+  const chunks = Array.isArray(chunkManifest.chunks) ? chunkManifest.chunks : [];
+  const chunkLines = chunks.slice(0, 20).map((chunk) => {
+    const label = chunk.chunk_id || chunk.id || "chunk";
+    const words = chunk.word_count || chunk.words || "n/a";
+    const title = chunk.title || chunk.heading || "";
+    return `${label} | ${words} words${title ? ` | ${title}` : ""}`;
+  });
+  els.artifactViewerPanels.innerHTML = "";
+
+  const panelDefinitions = [
+    {
+      tab: "classification",
+      title: "Classification",
+      description: "How the PDF was classified before extraction and chunking.",
+      blocks: [JSON.stringify(classification, null, 2)],
+    },
+    {
+      tab: "extract",
+      title: "Extract",
+      description: "Extraction metadata and a preview of the raw text pulled from the PDF.",
+      blocks: [JSON.stringify(extraction, null, 2), truncateText(rawText)],
+    },
+    {
+      tab: "clean",
+      title: "Clean",
+      description: "Normalization and cleaning output before orchestration.",
+      blocks: [JSON.stringify(cleaning, null, 2), truncateText(cleanText)],
+    },
+    {
+      tab: "chunking",
+      title: "Chunking",
+      description: "Chunk manifest summary and the first chunk records from ingest.",
+      blocks: [JSON.stringify(chunkManifest.summary || {}, null, 2), JSON.stringify(chunks.slice(0, 10), null, 2)],
+      chunkLines,
+    },
+  ];
+
+  for (const definition of panelDefinitions) {
+    const section = document.createElement("section");
+    section.className = "artifact-panel";
+    section.setAttribute("data-artifact-panel", definition.tab);
+
+    const heading = document.createElement("h3");
+    heading.textContent = definition.title;
+    section.appendChild(heading);
+
+    const description = document.createElement("p");
+    description.className = "meta";
+    description.textContent = definition.description;
+    section.appendChild(description);
+
+    if (definition.chunkLines) {
+      const chunkCard = document.createElement("div");
+      chunkCard.className = "artifact-card";
+      const chunkHeading = document.createElement("h3");
+      chunkHeading.textContent = "Chunk Index";
+      chunkCard.appendChild(chunkHeading);
+      const chunkList = document.createElement("ol");
+      chunkList.className = "artifact-list";
+      if (definition.chunkLines.length) {
+        for (const line of definition.chunkLines) {
+          const item = document.createElement("li");
+          item.textContent = line;
+          chunkList.appendChild(item);
+        }
+      } else {
+        const item = document.createElement("li");
+        item.textContent = "No chunks found";
+        chunkList.appendChild(item);
+      }
+      chunkCard.appendChild(chunkList);
+      section.appendChild(chunkCard);
+    }
+
+    for (const block of definition.blocks) {
+      const pre = document.createElement("pre");
+      pre.textContent = block;
+      section.appendChild(pre);
+    }
+
+    els.artifactViewerPanels.appendChild(section);
+  }
+  setArtifactTab(state.artifactViewer.tab);
+}
+
+async function openIngestViewer(jobId) {
+  try {
+    state.artifactViewer.jobId = jobId;
+    els.artifactViewerTitle.textContent = "Ingest Results";
+    els.artifactViewerStatus.textContent = "Loading classification, extract, clean, and chunking results...";
+    els.artifactViewerSummary.innerHTML = "";
+    els.artifactViewerPanels.innerHTML = "";
+    els.artifactViewer.showModal();
+    const names = ["ingest_manifest", "raw_text", "clean_text", "chunk_manifest"];
+    const [job, ...artifactPayloads] = await Promise.all([
+      fetchJson(`/v1/jobs/${jobId}`),
+      ...names.map((name) => fetchJson(`/v1/jobs/${jobId}/artifacts/${name}`)),
+    ]);
+    const byName = Object.fromEntries(artifactPayloads.map((payload) => [payload.artifact.name, payload]));
+    const ingestManifest = byName.ingest_manifest?.content || {};
+    const chunkManifest = byName.chunk_manifest?.content || {};
+    const rawText = byName.raw_text?.preview || "";
+    const cleanText = byName.clean_text?.preview || "";
+    els.artifactViewerTitle.textContent = `${job.title || job.book_slug || "Ingest"} Results`;
+    els.artifactViewerStatus.textContent = `Showing ingest outputs for job ${job.job_id}.`;
+    renderArtifactSummary(ingestSummaryCards(ingestManifest, chunkManifest));
+    renderArtifactPanels({ ingestManifest, rawText, cleanText, chunkManifest });
+  } catch (error) {
+    els.artifactViewerStatus.textContent = error.message;
+    els.artifactViewerPanels.innerHTML = "";
+    const section = document.createElement("section");
+    section.className = "artifact-panel active";
+    section.setAttribute("data-artifact-panel", "classification");
+    const pre = document.createElement("pre");
+    pre.textContent = error.message;
+    section.appendChild(pre);
+    els.artifactViewerPanels.appendChild(section);
+  }
 }
 
 function resolveModelRefs(stage) {
@@ -236,9 +432,19 @@ function renderStageBoard() {
       <p class="meta"><strong>Substeps:</strong> ${(stage.metadata.substeps || []).join(", ") || "n/a"}</p>
       <p class="meta"><strong>Models:</strong> ${models.length ? models.join(", ") : "Deterministic stage"}</p>
       <p class="meta"><strong>Last update:</strong> ${latestJob ? formatDate(latestJob.updated_at) : "n/a"}</p>
-      <button type="button" data-run-stage="${stage.name}">Run ${stageLabels[stage.name] || stage.name}</button>
+      <div class="stage-card-actions">
+        <button type="button" data-run-stage="${stage.name}">Run ${stageLabels[stage.name] || stage.name}</button>
+      </div>
     `;
     card.querySelector("button").addEventListener("click", () => triggerPipeline(stage.name));
+    if (stage.name === "ingest" && latestJob && latestJob.status === "succeeded") {
+      const viewButton = document.createElement("button");
+      viewButton.type = "button";
+      viewButton.className = "secondary-button";
+      viewButton.textContent = "View Ingest Results";
+      viewButton.addEventListener("click", () => openIngestViewer(latestJob.job_id));
+      card.querySelector(".stage-card-actions").appendChild(viewButton);
+    }
     els.stageBoard.appendChild(card);
   }
 }
@@ -276,6 +482,10 @@ async function refreshSelectedJob() {
     ]);
     els.jobDetail.textContent = JSON.stringify(freshJob, null, 2);
     els.jobArtifacts.textContent = JSON.stringify(artifacts, null, 2);
+    if (freshJob.pipeline === "ingest" && freshJob.status === "succeeded") {
+      const viewLine = "\n\n[UI] Use the \"View Ingest Results\" button in the ingest stage card to inspect classification, extract, clean, and chunking.";
+      els.jobArtifacts.textContent += viewLine;
+    }
   } catch (error) {
     els.jobDetail.textContent = error.message;
     els.jobArtifacts.textContent = error.message;
@@ -388,6 +598,15 @@ els.uploadForm.addEventListener("submit", async (event) => {
 });
 
 els.runFullPipeline.addEventListener("click", () => triggerPipeline("manuscript-prep"));
+els.artifactViewerClose.addEventListener("click", () => els.artifactViewer.close());
+els.artifactViewer.addEventListener("click", (event) => {
+  if (event.target === els.artifactViewer) {
+    els.artifactViewer.close();
+  }
+});
+for (const button of document.querySelectorAll("[data-artifact-tab]")) {
+  button.addEventListener("click", () => setArtifactTab(button.getAttribute("data-artifact-tab")));
+}
 
 for (const button of document.querySelectorAll("[data-refresh]")) {
   button.addEventListener("click", async () => {
