@@ -30,6 +30,9 @@ services:
       MANUSCRIPTPREP_AUTH_REQUIRED: "true"
       MANUSCRIPTPREP_BOOTSTRAP_ADMIN_USERNAME: ${MANUSCRIPTPREP_BOOTSTRAP_ADMIN_USERNAME:-admin}
       MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN: ${MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN:-dev-admin-token}
+      MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_NAME: ${MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_NAME:-studio-default}
+      MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_PATH: ${MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_PATH:-/app/config/manuscriptprep.compose.yaml}
+      MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_VERSION: ${MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_VERSION:-v1}
       PYTHONUNBUFFERED: "1"
     command:
       - python
@@ -45,6 +48,8 @@ services:
     volumes:
       - .:/app
       - manuscriptprep_runtime_data:/app/runtime_data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   worker:
     build:
@@ -66,6 +71,8 @@ services:
     volumes:
       - .:/app
       - manuscriptprep_runtime_data:/app/runtime_data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   manuscriptprep_postgres_data:

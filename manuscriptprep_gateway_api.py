@@ -41,6 +41,9 @@ class GatewayAPI:
         bootstrap_username: str | None = None,
         bootstrap_token: str | None = None,
         bootstrap_role: str = "admin",
+        bootstrap_config_profile_name: str | None = None,
+        bootstrap_config_profile_path: str | None = None,
+        bootstrap_config_profile_version: str = "v1",
     ) -> None:
         self.store = store or create_job_store(backend="file", jobs_root=Path("work/gateway_jobs"))
         self.runtime_root = runtime_root or getattr(self.store, "root", Path("work/gateway_jobs")) / "runtime"
@@ -50,6 +53,15 @@ class GatewayAPI:
         if bootstrap_token:
             username = bootstrap_username or "admin"
             self.store.upsert_user(username=username, role=bootstrap_role, api_token=bootstrap_token)
+        if bootstrap_config_profile_name and bootstrap_config_profile_path:
+            checksum = hashlib.sha256(str(bootstrap_config_profile_path).encode("utf-8")).hexdigest()
+            self.store.upsert_config_profile(
+                name=bootstrap_config_profile_name,
+                config_path=bootstrap_config_profile_path,
+                version=bootstrap_config_profile_version,
+                checksum=checksum,
+                metadata=self._config_profile_metadata(bootstrap_config_profile_path),
+            )
 
     def _slugify(self, value: str) -> str:
         import re
@@ -579,6 +591,21 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN"),
         help="Bootstrap admin API token created on gateway startup",
     )
+    parser.add_argument(
+        "--bootstrap-config-profile-name",
+        default=os.environ.get("MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_NAME"),
+        help="Optional config profile name to bootstrap on gateway startup",
+    )
+    parser.add_argument(
+        "--bootstrap-config-profile-path",
+        default=os.environ.get("MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_PATH"),
+        help="Optional config profile path to bootstrap on gateway startup",
+    )
+    parser.add_argument(
+        "--bootstrap-config-profile-version",
+        default=os.environ.get("MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_VERSION", "v1"),
+        help="Version label for the bootstrapped config profile",
+    )
     return parser.parse_args()
 
 
@@ -599,6 +626,9 @@ def main() -> int:
         auth_required=args.auth_required,
         bootstrap_username=args.bootstrap_admin_username,
         bootstrap_token=args.bootstrap_admin_token,
+        bootstrap_config_profile_name=args.bootstrap_config_profile_name,
+        bootstrap_config_profile_path=args.bootstrap_config_profile_path,
+        bootstrap_config_profile_version=args.bootstrap_config_profile_version,
     )
     server = ThreadingHTTPServer((args.host, args.port), handler)
     emit_runtime_event(

@@ -1,0 +1,49 @@
+project:
+  name: manuscriptprep
+  environment: compose
+
+paths:
+  repo_root: /app
+  workspace_root: /app/runtime_data/manuscriptprep
+  input_root: /app/runtime_data/manuscriptprep/input
+  extracted_root: /app/runtime_data/manuscriptprep/extracted
+  cleaned_root: /app/runtime_data/manuscriptprep/cleaned
+  chunks_root: /app/runtime_data/manuscriptprep/chunks
+  output_root: /app/runtime_data/manuscriptprep/out
+  merged_root: /app/runtime_data/manuscriptprep/merged
+  resolved_root: /app/runtime_data/manuscriptprep/resolved
+  reports_root: /app/runtime_data/manuscriptprep/reports
+  logs_root: /app/runtime_data/manuscriptprep/logs
+
+models:
+  structure: manuscriptprep-structure
+  dialogue: manuscriptprep-dialogue
+  entities: manuscriptprep-entities
+  dossiers: manuscriptprep-dossiers
+  resolver: manuscriptprep-resolver
+
+ollama:
+  host: http://host.docker.internal:11434
+  command: ollama
+
+timeouts:
+  idle_seconds: 180
+  hard_seconds: 900
+  retries: 2
+  idle_timeout_backoff: 1.5
+  max_idle_timeout_seconds: 600
+  resolver_timeout_seconds: 180
+
+chunking:
+  target_words: 1200
+  min_words: 800
+  max_words: 1500
+
+reporting:
+  include_resolution: true
+  max_biography_entries_per_dossier: 6
+
+logging:
+  level: INFO
+  jsonl: true
+  console: true

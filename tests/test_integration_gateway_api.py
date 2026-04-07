@@ -526,3 +526,68 @@ def test_gateway_api_stage_jobs_can_derive_defaults_from_manuscript_and_config(t
 
     report_path = workspace_root / "reports" / "treasure_island_report.pdf"
     assert report_path.exists()
+
+
+def test_gateway_api_bootstraps_default_config_profile(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    config_path = tmp_path / "compose.yaml"
+    config_path.write_text(
+        "\n".join(
+            [
+                "project:",
+                "  name: manuscriptprep",
+                "paths:",
+                f"  repo_root: {tmp_path / 'repo'}",
+                f"  workspace_root: {tmp_path / 'workspace'}",
+                f"  input_root: {tmp_path / 'workspace' / 'input'}",
+                f"  extracted_root: {tmp_path / 'workspace' / 'extracted'}",
+                f"  cleaned_root: {tmp_path / 'workspace' / 'cleaned'}",
+                f"  chunks_root: {tmp_path / 'workspace' / 'chunks'}",
+                f"  output_root: {tmp_path / 'workspace' / 'out'}",
+                f"  merged_root: {tmp_path / 'workspace' / 'merged'}",
+                f"  resolved_root: {tmp_path / 'workspace' / 'resolved'}",
+                f"  reports_root: {tmp_path / 'workspace' / 'reports'}",
+                f"  logs_root: {tmp_path / 'workspace' / 'logs'}",
+                "models:",
+                "  structure: manuscriptprep-structure",
+                "  dialogue: manuscriptprep-dialogue",
+                "  entities: manuscriptprep-entities",
+                "  dossiers: manuscriptprep-dossiers",
+                "  resolver: manuscriptprep-resolver",
+                "ollama:",
+                "  host: http://127.0.0.1:11434",
+                "timeouts:",
+                "  idle_seconds: 180",
+                "  hard_seconds: 900",
+                "  retries: 2",
+                "  idle_timeout_backoff: 1.5",
+                "  max_idle_timeout_seconds: 600",
+                "  resolver_timeout_seconds: 180",
+                "chunking:",
+                "  target_words: 1200",
+                "  min_words: 800",
+                "  max_words: 1500",
+                "logging:",
+                "  level: INFO",
+                "  jsonl: true",
+                "  console: true",
+                "reporting:",
+                "  include_resolution: true",
+                "  max_biography_entries_per_dossier: 6",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    app = GatewayAPI(
+        store=store,
+        bootstrap_config_profile_name="studio-default",
+        bootstrap_config_profile_path=str(config_path),
+        bootstrap_config_profile_version="v1",
+    )
+
+    status, profiles = app.list_config_profiles()
+    assert status == 200
+    assert profiles["config_profiles"][0]["name"] == "studio-default"
+    assert profiles["config_profiles"][0]["metadata"]["models"]["resolver"] == "manuscriptprep-resolver"

@@ -68,6 +68,7 @@ Web UI:
 - the dashboard now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
 - stage cards show pipeline substeps and the configured model names where applicable
 - the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads
+- the compose images now include the PDF/OCR toolchain (`pdftotext`, `pdfinfo`, `ocrmypdf`, `tesseract`, `ghostscript`) needed for ingest
 
 ---
 
@@ -277,6 +278,8 @@ For the user-facing flow:
 3. Upload a manuscript PDF
 4. Choose a config profile
 5. Trigger the full pipeline or individual stages and watch live status updates
+
+For compose-based analysis, the container-safe config uses `http://host.docker.internal:11434` for Ollama. On Linux, `compose.yaml` maps that hostname to the Docker host automatically.
 
 If those host ports conflict with your machine, override them when starting the stack:
 
