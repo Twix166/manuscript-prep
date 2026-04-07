@@ -103,6 +103,11 @@ def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_en
     assert status == 200
     assert artifact["exists"] is True
     assert "preview" in artifact
+    assert "sha256" in artifact["artifact"]["metadata"]
+
+    status, artifact_index = app.list_job_artifact_index(job_id)
+    assert status == 200
+    assert {item["name"] for item in artifact_index["artifacts"]} >= {"ingest_stdout", "ingest_stderr", "ingest_command"}
 
 
 def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) -> None:

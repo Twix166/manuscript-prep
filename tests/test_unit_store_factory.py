@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from manuscriptprep.api_models import JobCreateRequest
+from manuscriptprep.api_models import ArtifactRef, JobCreateRequest
 from manuscriptprep.job_store import JobStore
 from manuscriptprep.store_factory import create_job_store
 
@@ -124,3 +124,25 @@ def test_file_store_can_upsert_manuscripts_and_config_profiles(tmp_path: Path) -
     assert store.list_manuscripts()[0].book_slug == "treasure_island"
     assert store.get_config_profile(profile.config_profile_id) is not None
     assert store.list_config_profiles()[0].name == "default"
+
+
+def test_file_store_persists_artifact_index_on_job_update(tmp_path: Path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    created = store.create_job(JobCreateRequest(pipeline="ingest", book_slug="treasure_island"))
+    refreshed = store.get_job(created.job_id)
+    assert refreshed is not None
+    refreshed.artifacts = [
+        ArtifactRef(
+            name="artifact-a",
+            path="/tmp/a.txt",
+            kind="text",
+            stage="ingest",
+            metadata={"sha256": "abc"},
+        )
+    ]
+    store.update_job(refreshed)
+
+    artifacts = store.list_job_artifacts(created.job_id)
+
+    assert len(artifacts) == 1
+    assert artifacts[0].metadata["sha256"] == "abc"

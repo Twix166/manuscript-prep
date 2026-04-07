@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from manuscriptprep.api_models import (
+    ArtifactRef,
     ConfigProfileRecord,
     JobCreateRequest,
     JobRecord,
@@ -117,6 +118,17 @@ class PostgresJobStore(BaseJobStore):
                 )
                 """
             )
+            cur.execute(
+                f"""
+                CREATE TABLE IF NOT EXISTS {self.schema}.gateway_artifacts (
+                    job_id TEXT NOT NULL,
+                    artifact_name TEXT NOT NULL,
+                    payload JSONB NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    PRIMARY KEY (job_id, artifact_name)
+                )
+                """
+            )
             conn.commit()
 
     def _row_to_job(self, payload: Any) -> JobRecord:
@@ -157,7 +169,7 @@ class PostgresJobStore(BaseJobStore):
 
     def update_job(self, job: JobRecord) -> JobRecord:
         payload = json.dumps(asdict(job), ensure_ascii=False)
-        with self._connect() as conn, conn.cursor() as cur:
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
                 UPDATE {self.schema}.gateway_jobs
@@ -166,6 +178,19 @@ class PostgresJobStore(BaseJobStore):
                 """,
                 (job.updated_at, payload, job.job_id),
             )
+            cur.execute(
+                f"DELETE FROM {self.schema}.gateway_artifacts WHERE job_id = %s",
+                (job.job_id,),
+            )
+            for artifact in job.artifacts:
+                cur.execute(
+                    f"""
+                    INSERT INTO {self.schema}.gateway_artifacts (job_id, artifact_name, payload)
+                    VALUES (%s, %s, %s::jsonb)
+                    """,
+                    (job.job_id, artifact.name, json.dumps(asdict(artifact), ensure_ascii=False)),
+                )
+            conn.commit()
         return self._row_to_job(asdict(job))
 
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
@@ -603,3 +628,17 @@ class PostgresJobStore(BaseJobStore):
             )
             for row in rows
         ]
+
+    def list_job_artifacts(self, job_id: str) -> list[ArtifactRef]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT payload
+                FROM {self.schema}.gateway_artifacts
+                WHERE job_id = %s
+                ORDER BY artifact_name ASC
+                """,
+                (job_id,),
+            )
+            rows = cur.fetchall()
+        return [ArtifactRef(**(json.loads(row[0]) if isinstance(row[0], str) else row[0])) for row in rows]

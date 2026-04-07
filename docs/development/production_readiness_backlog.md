@@ -110,6 +110,11 @@ Suggested deliverables:
 - artifact storage adapter
 - retention policy docs
 
+Status:
+- implemented a local artifact-store adapter with checksum enrichment
+- implemented a central artifact metadata index in the gateway store
+- exposed a job artifact index endpoint for artifact inspection
+
 ## P5: Deployment and Security Hardening
 
 Goal: turn the compose stack into a secure deployable baseline.

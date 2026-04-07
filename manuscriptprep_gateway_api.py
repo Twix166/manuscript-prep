@@ -209,6 +209,18 @@ class GatewayAPI:
                     payload["content"] = None
         return HTTPStatus.OK, payload
 
+    def list_job_artifact_index(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
+        artifacts = self.store.list_job_artifacts(job_id)
+        return HTTPStatus.OK, {"job_id": job_id, "artifacts": [to_dict(item) for item in artifacts]}
+
     def create_job(self, payload: Dict[str, Any], actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
         if not allowed:
@@ -352,6 +364,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
             if len(parts) == 5:
                 _, _, job_id, _, artifact_name = parts
                 status, payload = self.app.get_job_artifact(job_id, artifact_name, actor=self._current_actor())
+                self._write_json(status, payload)
+                return
+
+        if path.startswith("/v1/jobs/") and path.endswith("/artifacts"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 4:
+                _, _, job_id, _ = parts
+                status, payload = self.app.list_job_artifact_index(job_id, actor=self._current_actor())
                 self._write_json(status, payload)
                 return
 

@@ -57,6 +57,11 @@ Managed records:
 - `POST /v1/config-profiles` and `GET /v1/config-profiles`
 - jobs can now reference `manuscript_id` and `config_profile_id` instead of repeating source/config paths on every request
 
+Artifact management:
+
+- `GET /v1/jobs/{job_id}/artifacts` returns the persisted artifact index for a job
+- artifacts produced by workers are now enriched with `sha256`, `bytes`, and `storage_backend` metadata
+
 ---
 
 ## Test Workflow

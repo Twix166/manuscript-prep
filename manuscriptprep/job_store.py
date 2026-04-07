@@ -188,6 +188,10 @@ class BaseJobStore(ABC):
     def list_config_profiles(self) -> List[ConfigProfileRecord]:
         raise NotImplementedError
 
+    @abstractmethod
+    def list_job_artifacts(self, job_id: str) -> List[ArtifactRef]:
+        raise NotImplementedError
+
 
 class JobStore(BaseJobStore):
     def __init__(self, root: Path | None = None) -> None:
@@ -199,6 +203,7 @@ class JobStore(BaseJobStore):
         self._users: Dict[str, UserRecord] = {}
         self._manuscripts: Dict[str, ManuscriptRecord] = {}
         self._config_profiles: Dict[str, ConfigProfileRecord] = {}
+        self._artifact_index: Dict[str, List[ArtifactRef]] = {}
         self._load_existing_jobs()
 
     def _job_path(self, job_id: str) -> Path:
@@ -215,6 +220,9 @@ class JobStore(BaseJobStore):
 
     def _config_profiles_path(self) -> Path:
         return self.root / "_config_profiles.json"
+
+    def _artifact_index_path(self) -> Path:
+        return self.root / "_artifact_index.json"
 
     def _persist(self, job: JobRecord) -> None:
         self._job_path(job.job_id).write_text(
@@ -246,6 +254,16 @@ class JobStore(BaseJobStore):
             encoding="utf-8",
         )
 
+    def _persist_artifact_index(self) -> None:
+        serializable = {
+            job_id: [asdict(item) for item in artifacts]
+            for job_id, artifacts in self._artifact_index.items()
+        }
+        self._artifact_index_path().write_text(
+            json.dumps(serializable, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
     def _load_existing_jobs(self) -> None:
         for path in sorted(self.root.glob("*.json")):
             if path.name == "_workers.json":
@@ -263,6 +281,13 @@ class JobStore(BaseJobStore):
             if path.name == "_config_profiles.json":
                 data = json.loads(path.read_text(encoding="utf-8"))
                 self._config_profiles = {item["config_profile_id"]: _config_profile_from_dict(item) for item in data}
+                continue
+            if path.name == "_artifact_index.json":
+                data = json.loads(path.read_text(encoding="utf-8"))
+                self._artifact_index = {
+                    job_id: [ArtifactRef(**item) for item in items]
+                    for job_id, items in data.items()
+                }
                 continue
             data = json.loads(path.read_text(encoding="utf-8"))
             job = _job_from_dict(data)
@@ -289,6 +314,8 @@ class JobStore(BaseJobStore):
         with self._lock:
             self._jobs[job.job_id] = job
             self._persist(job)
+            self._artifact_index[job.job_id] = [ArtifactRef(**asdict(item)) for item in job.artifacts]
+            self._persist_artifact_index()
             return _job_from_dict(asdict(job))
 
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
@@ -503,3 +530,7 @@ class JobStore(BaseJobStore):
     def list_config_profiles(self) -> List[ConfigProfileRecord]:
         with self._lock:
             return [_config_profile_from_dict(asdict(item)) for item in self._config_profiles.values()]
+
+    def list_job_artifacts(self, job_id: str) -> List[ArtifactRef]:
+        with self._lock:
+            return [ArtifactRef(**asdict(item)) for item in self._artifact_index.get(job_id, [])]

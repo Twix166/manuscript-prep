@@ -6,6 +6,7 @@ import time
 import uuid
 from pathlib import Path
 
+from manuscriptprep.artifact_store import LocalArtifactStore
 from manuscriptprep.api_models import utc_now_iso
 from manuscriptprep.execution_adapter import ExecutionAdapter
 from manuscriptprep.job_store import BaseJobStore
@@ -19,12 +20,14 @@ class JobWorker:
         worker_id: str | None = None,
         poll_interval: float = 1.0,
         stale_after_seconds: int = 600,
+        artifact_store: LocalArtifactStore | None = None,
     ) -> None:
         self.store = store
         self.adapter = adapter
         self.worker_id = worker_id or f"worker-{uuid.uuid4()}"
         self.poll_interval = poll_interval
         self.stale_after_seconds = stale_after_seconds
+        self.artifact_store = artifact_store or LocalArtifactStore()
 
     def recover_stale_jobs(self) -> list[str]:
         return self.store.recover_stale_running_jobs(
@@ -41,7 +44,7 @@ class JobWorker:
         self.store.record_worker_heartbeat(self.worker_id, "running", last_job_id=job.job_id)
         try:
             updated_job, artifacts = self.adapter.run_job(job)
-            updated_job.artifacts = artifacts
+            updated_job.artifacts = self.artifact_store.register(artifacts)
             updated_job.updated_at = utc_now_iso()
             self.store.update_job(updated_job)
             self.store.record_worker_heartbeat(self.worker_id, "idle", last_job_id=job.job_id)
