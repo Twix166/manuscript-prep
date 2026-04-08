@@ -66,6 +66,7 @@ Web UI:
 
 - `GET /ui` serves a lightweight operator dashboard from the gateway
 - the dashboard now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
+- the main dashboard panels now summarize config, manuscript, system, job, and artifact state in human-readable text instead of raw JSON dumps
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
 - successful ingest runs now expose a dedicated manuscript-scoped results page for classification, extraction metadata, the full raw text, the full cleaned text, and the full chunk list, preloaded from the current UI session for reliable display
 - the ingest results page now includes direct download buttons for raw text, clean text, chunk manifest, and ingest manifest

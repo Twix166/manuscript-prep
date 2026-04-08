@@ -217,6 +217,147 @@ function formatDate(value) {
   return new Date(value).toLocaleString();
 }
 
+function formatBytes(value) {
+  const bytes = Number(value);
+  if (!Number.isFinite(bytes) || bytes < 0) {
+    return "n/a";
+  }
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatList(items) {
+  return Array.isArray(items) && items.length ? items.join(", ") : "n/a";
+}
+
+function stageSummaryLines(stageRuns) {
+  return (stageRuns || []).map((stage) => {
+    const finished = stage.finished_at ? ` | finished ${formatDate(stage.finished_at)}` : "";
+    const error = stage.error ? ` | error: ${stage.error}` : "";
+    return `- ${stageLabels[stage.name] || stage.name}: ${stage.status}${finished}${error}`;
+  });
+}
+
+function renderConfigProfileSummary(profile) {
+  if (!profile) {
+    return "No config profile selected.";
+  }
+  const metadata = profile.metadata || {};
+  const models = metadata.models || {};
+  const chunking = metadata.chunking || {};
+  const timeouts = metadata.timeouts || {};
+  const paths = metadata.paths || {};
+  return [
+    `${profile.name}@${profile.version}`,
+    "",
+    `Models`,
+    `- Structure: ${models.structure || "n/a"}`,
+    `- Dialogue: ${models.dialogue || "n/a"}`,
+    `- Entities: ${models.entities || "n/a"}`,
+    `- Dossiers: ${models.dossiers || "n/a"}`,
+    `- Resolver: ${models.resolver || "n/a"}`,
+    "",
+    `Chunking`,
+    `- Target words: ${chunking.target_words || "n/a"}`,
+    `- Min words: ${chunking.min_words || "n/a"}`,
+    `- Max words: ${chunking.max_words || "n/a"}`,
+    "",
+    `Timeouts`,
+    `- Idle: ${timeouts.idle_seconds || "n/a"} s`,
+    `- Hard: ${timeouts.hard_seconds || "n/a"} s`,
+    `- Retries: ${timeouts.retries || 0}`,
+    "",
+    `Workspace`,
+    `- Root: ${paths.workspace_root || "n/a"}`,
+    `- Output: ${paths.output_root || "n/a"}`,
+    `- Reports: ${paths.reports_root || "n/a"}`,
+  ].join("\n");
+}
+
+function renderManuscriptSummary(manuscript) {
+  if (!manuscript) {
+    return "Select a manuscript to see pipeline-ready details.";
+  }
+  const latestIngest = manuscript.latest_ingest;
+  return [
+    `${manuscript.title}`,
+    "",
+    `Slug: ${manuscript.book_slug}`,
+    `Size: ${formatBytes(manuscript.file_size_bytes)}`,
+    `Created: ${formatDate(manuscript.created_at)}`,
+    `Updated: ${formatDate(manuscript.updated_at)}`,
+    `Source file: ${manuscript.source_path}`,
+    "",
+    `Latest ingest`,
+    latestIngest
+      ? `- Status: ${latestIngest.status}
+- Started: ${formatDate(latestIngest.started_at)}
+- Finished: ${formatDate(latestIngest.finished_at)}
+- Job: ${latestIngest.job_id}${latestIngest.error ? `\n- Error: ${latestIngest.error}` : ""}`
+      : "- Not run yet",
+  ].join("\n");
+}
+
+function renderSystemSummary(payload) {
+  const queue = payload.queue || {};
+  const workers = payload.workers || [];
+  const workerLines = workers.length
+    ? workers.map((worker) => `- ${worker.worker_id}: ${worker.status} | heartbeat ${formatDate(worker.heartbeat_at)}${worker.last_job_id ? ` | last job ${worker.last_job_id}` : ""}`)
+    : ["- No workers reporting yet"];
+  return [
+    `Gateway`,
+    `- Store backend: ${payload.store_backend || "n/a"}`,
+    `- Ready: ${payload.ready ? "yes" : "no"}`,
+    `- Updated: ${formatDate(payload.timestamp)}`,
+    "",
+    `Queue`,
+    `- Queued: ${queue.queued || 0}`,
+    `- Running: ${queue.running || 0}`,
+    `- Succeeded: ${queue.succeeded || 0}`,
+    `- Failed: ${queue.failed || 0}`,
+    `- Cancelled: ${queue.cancelled || 0}`,
+    `- Total: ${queue.total || 0}`,
+    "",
+    `Workers`,
+    ...workerLines,
+  ].join("\n");
+}
+
+function renderJobSummary(job) {
+  const stageLines = stageSummaryLines(job.stage_runs);
+  const command = job.stage_runs?.find((stage) => stage.command && stage.command.length)?.command?.join(" ");
+  return [
+    `${stageLabels[job.pipeline] || job.pipeline} Job`,
+    "",
+    `Status: ${job.status}`,
+    `Book: ${job.title || job.book_slug || "n/a"}`,
+    `Created: ${formatDate(job.created_at)}`,
+    `Updated: ${formatDate(job.updated_at)}`,
+    `Config profile: ${job.config_profile_id || "n/a"}`,
+    command ? `Command: ${command}` : "Command: n/a",
+    "",
+    `Stages`,
+    ...(stageLines.length ? stageLines : ["- No stage data yet"]),
+  ].join("\n");
+}
+
+function renderArtifactSummary(artifactIndex) {
+  const artifacts = artifactIndex.artifacts || [];
+  if (!artifacts.length) {
+    return "No artifacts for this job yet.";
+  }
+  return artifacts.map((artifact) => {
+    const bytes = artifact.metadata?.bytes ? ` | ${formatBytes(artifact.metadata.bytes)}` : "";
+    const exists = artifact.metadata?.exists === false ? "missing" : "ready";
+    return `- ${artifact.name} (${artifact.stage || "job"} | ${artifact.kind} | ${exists}${bytes})`;
+  }).join("\n");
+}
+
 function renderConfigProfiles() {
   els.configProfileSelect.innerHTML = "";
   for (const profile of state.configProfiles) {
@@ -231,9 +372,7 @@ function renderConfigProfiles() {
     els.configProfileSelect.value = state.selectedConfigProfileId;
   }
   const profile = selectedConfigProfile();
-  els.configProfileDetail.textContent = profile
-    ? JSON.stringify(profile, null, 2)
-    : "No config profile selected.";
+  els.configProfileDetail.textContent = renderConfigProfileSummary(profile);
 }
 
 function renderManuscripts() {
@@ -270,18 +409,7 @@ function renderManuscripts() {
   }
   els.selectedManuscriptTitle.value = manuscript.title;
   els.selectedManuscriptSlug.value = manuscript.book_slug;
-  els.manuscriptDetail.textContent = JSON.stringify(
-    {
-      manuscript_id: manuscript.manuscript_id,
-      title: manuscript.title,
-      book_slug: manuscript.book_slug,
-      source_path: manuscript.source_path,
-      file_size_bytes: manuscript.file_size_bytes,
-      latest_ingest: manuscript.latest_ingest,
-    },
-    null,
-    2,
-  );
+  els.manuscriptDetail.textContent = renderManuscriptSummary(manuscript);
 }
 
 function resolveModelRefs(stage) {
@@ -429,8 +557,8 @@ async function refreshSelectedJob() {
       fetchJson(`/v1/jobs/${job.job_id}`),
       fetchJson(`/v1/jobs/${job.job_id}/artifacts`),
     ]);
-    els.jobDetail.textContent = JSON.stringify(freshJob, null, 2);
-    els.jobArtifacts.textContent = JSON.stringify(artifacts, null, 2);
+    els.jobDetail.textContent = renderJobSummary(freshJob);
+    els.jobArtifacts.textContent = renderArtifactSummary(artifacts);
     renderJobDownloads(freshJob, artifacts);
   } catch (error) {
     els.jobDetail.textContent = error.message;
@@ -442,7 +570,7 @@ async function refreshSelectedJob() {
 async function refreshSystem() {
   try {
     const payload = await fetchJson("/v1/system/status");
-    els.systemStatus.textContent = JSON.stringify(payload, null, 2);
+    els.systemStatus.textContent = renderSystemSummary(payload);
     els.authStatus.textContent = "Connected";
   } catch (error) {
     els.systemStatus.textContent = error.message;
