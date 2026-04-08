@@ -69,6 +69,7 @@ Web UI:
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
 - successful ingest runs now expose a dedicated manuscript-scoped results page for classification, extraction metadata, the full raw text, the full cleaned text, and the full chunk list, preloaded from the current UI session for reliable display
 - the ingest results page now includes direct download buttons for raw text, clean text, chunk manifest, and ingest manifest
+- the selected-job panel now exposes direct downloads for later-stage artifacts such as orchestrator logs, merged/resolved JSON, and the final report PDF
 - stage cards show pipeline substeps and the configured model names where applicable
 - the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads
 - the compose images now include the PDF/OCR toolchain (`pdftotext`, `pdfinfo`, `ocrmypdf`, `tesseract`, `ghostscript`) needed for ingest

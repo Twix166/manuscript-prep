@@ -45,6 +45,7 @@ const els = {
   jobList: document.getElementById("job-list"),
   jobDetail: document.getElementById("job-detail"),
   jobArtifacts: document.getElementById("job-artifacts"),
+  jobDownloads: document.getElementById("job-downloads"),
   runFullPipeline: document.getElementById("run-full-pipeline"),
 };
 
@@ -89,6 +90,103 @@ async function postBinary(path, filename, file) {
     throw new Error(data.error || `Request failed for ${path}`);
   }
   return data;
+}
+
+async function downloadJobArtifact(jobId, artifactName) {
+  const response = await fetch(`/v1/jobs/${encodeURIComponent(jobId)}/artifacts/${encodeURIComponent(artifactName)}/download`, {
+    headers: currentHeaders(),
+  });
+  if (!response.ok) {
+    let message = `Download failed for ${artifactName}`;
+    try {
+      const payload = await response.json();
+      message = payload.error || message;
+    } catch {
+      // fall back
+    }
+    throw new Error(message);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename="([^"]+)"/);
+  const filename = match ? match[1] : artifactName;
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function artifactButtonLabel(name) {
+  const labels = {
+    orchestrator_log: "Download Orchestrator Log",
+    book_merged: "Download Merged Book",
+    merge_report: "Download Merge Report",
+    conflict_report: "Download Conflict Report",
+    book_resolved: "Download Resolved Book",
+    resolution_map: "Download Resolution Map",
+    resolution_report: "Download Resolution Report",
+    report_pdf: "Download Report PDF",
+    ingest_stdout: "Download Ingest Stdout",
+    orchestrate_stdout: "Download Orchestrate Stdout",
+    merge_stdout: "Download Merge Stdout",
+    resolve_stdout: "Download Resolve Stdout",
+    report_stdout: "Download Report Stdout",
+  };
+  return labels[name] || `Download ${name.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}`;
+}
+
+function renderJobDownloads(job, artifactIndex) {
+  els.jobDownloads.innerHTML = "";
+  const downloadable = artifactIndex.artifacts.filter((artifact) => {
+    const kind = artifact.kind || "";
+    const exists = artifact.metadata?.exists;
+    return exists !== false && !["directory"].includes(kind);
+  });
+  const preferredOrder = [
+    "book_merged",
+    "merge_report",
+    "conflict_report",
+    "book_resolved",
+    "resolution_map",
+    "resolution_report",
+    "report_pdf",
+    "orchestrator_log",
+  ];
+  downloadable.sort((left, right) => {
+    const leftIndex = preferredOrder.indexOf(left.name);
+    const rightIndex = preferredOrder.indexOf(right.name);
+    if (leftIndex === -1 && rightIndex === -1) return left.name.localeCompare(right.name);
+    if (leftIndex === -1) return 1;
+    if (rightIndex === -1) return -1;
+    return leftIndex - rightIndex;
+  });
+  for (const artifact of downloadable) {
+    if (job.pipeline === "ingest" && ["raw_text", "clean_text", "chunk_manifest", "ingest_manifest"].includes(artifact.name)) {
+      continue;
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondary-button";
+    button.textContent = artifactButtonLabel(artifact.name);
+    button.addEventListener("click", async () => {
+      try {
+        await downloadJobArtifact(job.job_id, artifact.name);
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
+    });
+    els.jobDownloads.appendChild(button);
+  }
+  if (!els.jobDownloads.children.length) {
+    const muted = document.createElement("span");
+    muted.className = "muted";
+    muted.textContent = "No downloadable artifacts for the selected job yet.";
+    els.jobDownloads.appendChild(muted);
+  }
 }
 
 function selectedManuscript() {
@@ -323,6 +421,7 @@ function renderJobs() {
 async function refreshSelectedJob() {
   const job = selectedJob();
   if (!job) {
+    els.jobDownloads.innerHTML = "";
     return;
   }
   try {
@@ -332,9 +431,11 @@ async function refreshSelectedJob() {
     ]);
     els.jobDetail.textContent = JSON.stringify(freshJob, null, 2);
     els.jobArtifacts.textContent = JSON.stringify(artifacts, null, 2);
+    renderJobDownloads(freshJob, artifacts);
   } catch (error) {
     els.jobDetail.textContent = error.message;
     els.jobArtifacts.textContent = error.message;
+    els.jobDownloads.innerHTML = "";
   }
 }
 
