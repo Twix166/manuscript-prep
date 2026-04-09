@@ -138,6 +138,27 @@ def test_gateway_api_can_cancel_jobs(tmp_path) -> None:
     assert system["queue"]["cancel_requested"] == 1
 
 
+def test_job_worker_finalizes_stale_cancel_requested_jobs(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    worker = JobWorker(store=store, adapter=ExecutionAdapter(), poll_interval=0.01, cancel_grace_seconds=0)
+
+    status, created = GatewayAPI(store=store).create_job({"pipeline": "orchestrate", "book_slug": "treasure_island", "title": "Treasure Island"})
+    assert status == 201
+    running = store.get_job(created["job_id"])
+    assert running is not None
+    running.status = "cancel_requested"
+    running.stage_runs[0].status = "running"
+    running.options["_cancel_requested_at"] = "2026-04-09T09:59:00+00:00"
+    store.update_job(running)
+
+    worker.recover_stale_jobs()
+
+    refreshed = store.get_job(created["job_id"])
+    assert refreshed is not None
+    assert refreshed.status == "cancelled"
+    assert refreshed.stage_runs[0].status == "cancelled"
+
+
 def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

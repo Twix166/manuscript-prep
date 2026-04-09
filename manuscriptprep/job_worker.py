@@ -20,6 +20,7 @@ class JobWorker:
         worker_id: str | None = None,
         poll_interval: float = 1.0,
         stale_after_seconds: int = 600,
+        cancel_grace_seconds: int = 15,
         artifact_store: LocalArtifactStore | None = None,
     ) -> None:
         self.store = store
@@ -27,13 +28,21 @@ class JobWorker:
         self.worker_id = worker_id or f"worker-{uuid.uuid4()}"
         self.poll_interval = poll_interval
         self.stale_after_seconds = stale_after_seconds
+        self.cancel_grace_seconds = cancel_grace_seconds
         self.artifact_store = artifact_store or LocalArtifactStore()
+        self.adapter.cancel_check = self._should_cancel_job
+
+    def _should_cancel_job(self, job_id: str) -> bool:
+        job = self.store.get_job(job_id)
+        return job is not None and job.status == "cancel_requested"
 
     def recover_stale_jobs(self) -> list[str]:
-        return self.store.recover_stale_running_jobs(
+        recovered = self.store.recover_stale_running_jobs(
             stale_after_seconds=self.stale_after_seconds,
             recovery_worker_id=self.worker_id,
         )
+        self.store.finalize_stale_cancel_requests(self.cancel_grace_seconds)
+        return recovered
 
     def process_next_job(self) -> bool:
         self.recover_stale_jobs()

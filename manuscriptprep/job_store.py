@@ -151,6 +151,10 @@ class BaseJobStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def finalize_stale_cancel_requests(self, stale_after_seconds: int) -> List[str]:
+        raise NotImplementedError
+
+    @abstractmethod
     def is_ready(self) -> bool:
         raise NotImplementedError
 
@@ -467,6 +471,35 @@ class JobStore(BaseJobStore):
                 self._persist(job)
                 recovered.append(job.job_id)
         return recovered
+
+    def finalize_stale_cancel_requests(self, stale_after_seconds: int) -> List[str]:
+        from datetime import datetime, timezone
+
+        finalized: List[str] = []
+        now = datetime.now(timezone.utc)
+        with self._lock:
+            for job in self._jobs.values():
+                if job.status != "cancel_requested":
+                    continue
+                requested_at = job.options.get("_cancel_requested_at") or job.updated_at
+                try:
+                    requested_dt = datetime.fromisoformat(str(requested_at))
+                except ValueError:
+                    requested_dt = now
+                age = (now - requested_dt).total_seconds()
+                if age < stale_after_seconds:
+                    continue
+                job.status = "cancelled"
+                job.updated_at = utc_now_iso()
+                for stage in job.stage_runs:
+                    if stage.status == "running":
+                        stage.status = "cancelled"
+                        stage.finished_at = job.updated_at
+                        stage.error = stage.error or "Cancelled by housekeeping"
+                        break
+                self._persist(job)
+                finalized.append(job.job_id)
+        return finalized
 
     def is_ready(self) -> bool:
         return True

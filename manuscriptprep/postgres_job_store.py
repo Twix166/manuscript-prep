@@ -403,6 +403,45 @@ class PostgresJobStore(BaseJobStore):
             conn.commit()
             return recovered
 
+    def finalize_stale_cancel_requests(self, stale_after_seconds: int) -> list[str]:
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT job_id, payload
+                FROM {self.schema}.gateway_jobs
+                WHERE payload->>'status' = 'cancel_requested'
+                  AND COALESCE(
+                        (payload->'options'->>'_cancel_requested_at')::timestamptz,
+                        updated_at
+                      ) < (NOW() - (%s || ' seconds')::interval)
+                FOR UPDATE
+                """,
+                (str(stale_after_seconds),),
+            )
+            rows = cur.fetchall()
+            finalized: list[str] = []
+            for job_id, payload in rows:
+                job = self._row_to_job(payload)
+                job.status = "cancelled"
+                job.updated_at = utc_now_iso()
+                for stage in job.stage_runs:
+                    if stage.status == "running":
+                        stage.status = "cancelled"
+                        stage.finished_at = job.updated_at
+                        stage.error = stage.error or "Cancelled by housekeeping"
+                        break
+                cur.execute(
+                    f"""
+                    UPDATE {self.schema}.gateway_jobs
+                    SET updated_at = %s::timestamptz, payload = %s::jsonb
+                    WHERE job_id = %s
+                    """,
+                    (job.updated_at, json.dumps(asdict(job), ensure_ascii=False), job_id),
+                )
+                finalized.append(job_id)
+            conn.commit()
+            return finalized
+
     def is_ready(self) -> bool:
         try:
             with self._connect() as conn, conn.cursor() as cur:
