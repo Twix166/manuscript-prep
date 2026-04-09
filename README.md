@@ -81,6 +81,7 @@ Web UI:
   - `Pipeline` for the stage workflow panels
   - `Jobs` for `Job Timeline` and `Selected Job`
 - the `Upload Manuscript` panel now lives on the `Manuscripts` page above `Your Manuscripts`, so new users can start from the manuscript workspace while advanced users can jump straight to the pipeline page
+- the pipeline stages are now numbered `1-5`, since upload is handled on the `Manuscripts` page rather than inside the pipeline stage flow
 - the pipeline workspace is intentionally simplified so the stage cards are the only stage-summary surface; there is no separate description-card layer above them
 - manuscript upload now lives inside the pipeline workspace as the first step before ingest, rather than as a separate sidebar panel
 - the pipeline workflow now behaves like an accordion: upload plus each stage are collapsible, and the next logical step for the selected manuscript is expanded by default
@@ -104,6 +105,7 @@ Web UI:
 - live chunk numbering now follows the actual chunk id, so `chunk_007` is shown as `Chunk 8/...` rather than being inferred from completed-count math
 - jobs now show their full Job ID in the timeline and selected-job panel, and queued/running jobs can be cancelled from the UI while the worker continuously performs stale-job housekeeping between polls
 - the job timeline now uses colored status pills so queued, running, paused, cancelled, and failed jobs are easier to scan at a glance
+- the `Ingest` stage now shows the currently selected manuscript and includes a `Choose Manuscript` popup so users can switch the active manuscript from inside the workflow
 - stage cards now prefer active work first, then the latest successful run, and otherwise fall back to `not-started`; cancelled and failed jobs still remain visible in the timeline for auditability
 - stage cards show pipeline substeps and the configured model names where applicable
 - the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads

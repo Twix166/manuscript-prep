@@ -508,6 +508,10 @@ h3 {
   cursor: pointer;
 }
 
+#manuscript-picker-list li {
+  cursor: pointer;
+}
+
 @media (max-width: 1100px) {
   .workspace-middle,
   .auth-columns,

@@ -8,7 +8,7 @@ const stageLabels = {
   resolve: "Resolution",
   report: "Report",
 };
-const stageOrder = ["upload", "ingest", "orchestrate", "merge", "resolve", "report"];
+const stageOrder = ["ingest", "orchestrate", "merge", "resolve", "report"];
 
 const state = {
   token: localStorage.getItem(storageKey) || "",
@@ -86,6 +86,10 @@ const els = {
   analysisChunkList: document.getElementById("analysis-chunk-list"),
   analysisChunkTitle: document.getElementById("analysis-chunk-title"),
   analysisChunkDetail: document.getElementById("analysis-chunk-detail"),
+  manuscriptPickerModal: document.getElementById("manuscript-picker-modal"),
+  manuscriptPickerClose: document.getElementById("manuscript-picker-close"),
+  manuscriptPickerSummary: document.getElementById("manuscript-picker-summary"),
+  manuscriptPickerList: document.getElementById("manuscript-picker-list"),
 };
 
 function currentHeaders(extra = {}) {
@@ -314,6 +318,40 @@ function syncManuscriptDrafts() {
     }
   }
   state.manuscriptDrafts = nextDrafts;
+}
+
+function renderManuscriptPicker() {
+  els.manuscriptPickerList.innerHTML = "";
+  if (!state.manuscripts.length) {
+    els.manuscriptPickerList.innerHTML = '<li class="muted">No manuscripts are available yet</li>';
+    return;
+  }
+  for (const manuscript of state.manuscripts) {
+    const li = document.createElement("li");
+    li.className = manuscript.manuscript_id === state.selectedManuscriptId ? "selected" : "";
+    li.innerHTML = `
+      <strong>${escapeHtml(manuscript.title)}</strong>
+      <span class="meta">${escapeHtml(manuscript.book_slug)}</span>
+    `;
+    li.addEventListener("click", async () => {
+      state.selectedManuscriptId = manuscript.manuscript_id;
+      state.selectedJobId = null;
+      renderManuscriptPicker();
+      renderManuscripts();
+      renderStageBoard();
+      await refreshJobs();
+      els.manuscriptPickerModal.close();
+      els.stageActionStatus.textContent = `Selected manuscript: ${manuscript.title}`;
+    });
+    els.manuscriptPickerList.appendChild(li);
+  }
+}
+
+function openManuscriptPicker() {
+  renderManuscriptPicker();
+  if (!els.manuscriptPickerModal.open) {
+    els.manuscriptPickerModal.showModal();
+  }
 }
 
 function formatDate(value) {
@@ -969,6 +1007,7 @@ function renderStageBoard() {
   const expandedKey = workflowExpansionKey();
 
   for (const stage of fullPipeline.stages) {
+    const manuscript = selectedManuscript();
     const latestJob = latestStageCardJobForPipeline(stage.name);
     const stageStatus = latestJob ? latestJob.status : "not-started";
     const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
@@ -1051,6 +1090,7 @@ function renderStageBoard() {
         <p class="meta">${stage.description}</p>
       </summary>
       <div class="workflow-step-body">
+        ${stage.name === "ingest" ? `<p class="meta"><strong>Selected manuscript:</strong> ${manuscript ? `${escapeHtml(manuscript.title)} (${escapeHtml(manuscript.book_slug)})` : "none selected"}</p>` : ""}
         <p class="meta"><strong>Substeps:</strong> ${(stage.metadata.substeps || []).join(", ") || "n/a"}</p>
         <p class="meta"><strong>Models:</strong> ${models.length ? models.join(", ") : "Deterministic stage"}</p>
         <p class="meta"><strong>Last update:</strong> ${latestJob ? formatDate(latestJob.updated_at) : "n/a"}</p>
@@ -1067,6 +1107,14 @@ function renderStageBoard() {
       viewButton.textContent = "Open Ingest Results";
       viewButton.addEventListener("click", openLatestIngestResults);
       actionRow.appendChild(viewButton);
+    }
+    if (stage.name === "ingest") {
+      const chooseButton = document.createElement("button");
+      chooseButton.type = "button";
+      chooseButton.className = "secondary-button";
+      chooseButton.textContent = "Choose Manuscript";
+      chooseButton.addEventListener("click", openManuscriptPicker);
+      actionRow.appendChild(chooseButton);
     }
     if (stage.name === "orchestrate" && latestJob) {
       const detailButton = document.createElement("button");
@@ -1427,6 +1475,18 @@ els.analysisDetailModal.addEventListener("click", (event) => {
     event.clientY <= rect.bottom;
   if (!withinDialog) {
     els.analysisDetailModal.close();
+  }
+});
+els.manuscriptPickerClose.addEventListener("click", () => els.manuscriptPickerModal.close());
+els.manuscriptPickerModal.addEventListener("click", (event) => {
+  const rect = els.manuscriptPickerModal.getBoundingClientRect();
+  const withinDialog =
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right &&
+    event.clientY >= rect.top &&
+    event.clientY <= rect.bottom;
+  if (!withinDialog) {
+    els.manuscriptPickerModal.close();
   }
 });
 
