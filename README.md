@@ -81,8 +81,10 @@ Web UI:
 - the pipeline workflow now behaves like an accordion: upload plus each stage are collapsible, and the next logical step for the selected manuscript is expanded by default
 - the main workspace layout is now arranged as:
   - top row: `Your Manuscripts` beside the selected manuscript overview
-  - middle row: `Pipeline Workspace` in a wider left column, with `Workspace Status`, `Job Timeline`, and manuscript-management controls in the right rail
+  - middle row: `Pipeline Workspace` in a wider left column, with `Workspace Status` and `Job Timeline` in the right rail
   - bottom row: a full-width `Selected Job` panel
+- manuscript save/remove controls now live inline in the `Your Manuscripts` list, with save disabled until a title or slug is changed and remove protected by a confirmation prompt
+- the workflow steps are now explicitly numbered `1-6` so progress through the pipeline is easier to scan
 - the main dashboard panels now summarize config, manuscript, system, job, and artifact state in human-readable text instead of raw JSON dumps
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
 - the layout is now organized around multiple managed manuscripts, with stage controls and job history scoped to the selected manuscript

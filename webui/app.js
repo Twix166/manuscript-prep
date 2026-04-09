@@ -8,6 +8,7 @@ const stageLabels = {
   resolve: "Resolution",
   report: "Report",
 };
+const stageOrder = ["upload", "ingest", "orchestrate", "merge", "resolve", "report"];
 
 const state = {
   token: localStorage.getItem(storageKey) || "",
@@ -56,11 +57,7 @@ const els = {
   workspaceManuscriptTitle: document.getElementById("workspace-manuscript-title"),
   workspaceManuscriptSubtitle: document.getElementById("workspace-manuscript-subtitle"),
   manuscriptDetail: document.getElementById("manuscript-detail"),
-  selectedManuscriptTitle: document.getElementById("selected-manuscript-title"),
-  selectedManuscriptSlug: document.getElementById("selected-manuscript-slug"),
-  saveManuscript: document.getElementById("save-manuscript"),
   openIngestResults: document.getElementById("open-ingest-results"),
-  deleteManuscript: document.getElementById("delete-manuscript"),
   stageBoard: document.getElementById("stage-board"),
   stageActionStatus: document.getElementById("stage-action-status"),
   systemStatus: document.getElementById("system-status"),
@@ -248,6 +245,11 @@ function workflowExpansionKey() {
   return fullPipeline.stages[fullPipeline.stages.length - 1]?.name || "report";
 }
 
+function stepNumber(stepName) {
+  const index = stageOrder.indexOf(stepName);
+  return index === -1 ? "?" : String(index + 1);
+}
+
 function formatDate(value) {
   if (!value) {
     return "n/a";
@@ -267,6 +269,15 @@ function formatBytes(value) {
     return `${(bytes / 1024).toFixed(1)} KB`;
   }
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function stageSummaryLines(stageRuns) {
@@ -596,18 +607,33 @@ function renderManuscripts() {
     els.workspaceManuscriptTitle.textContent = "Choose a manuscript";
     els.workspaceManuscriptSubtitle.textContent = "Upload a manuscript to begin.";
     els.manuscriptDetail.textContent = "Upload and register a manuscript to begin.";
-    els.selectedManuscriptTitle.value = "";
-    els.selectedManuscriptSlug.value = "";
     return;
   }
   for (const manuscript of state.manuscripts) {
     const latestIngest = manuscript.latest_ingest;
+    const safeTitle = escapeHtml(manuscript.title);
+    const safeSlug = escapeHtml(manuscript.book_slug);
     const li = document.createElement("li");
+    li.dataset.manuscriptId = manuscript.manuscript_id;
     li.className = manuscript.manuscript_id === state.selectedManuscriptId ? "selected" : "";
     li.innerHTML = `
-      <strong>${manuscript.title}</strong>
-      <span>${manuscript.book_slug}</span><br>
-      <span class="meta">Ingest: ${latestIngest ? `${latestIngest.status} at ${formatDate(latestIngest.finished_at || latestIngest.updated_at)}` : "not run yet"}</span>
+      <div class="manuscript-row">
+        <div class="manuscript-row-head">
+          <div>
+            <strong>${safeTitle}</strong>
+            <span>${safeSlug}</span><br>
+            <span class="meta">Ingest: ${latestIngest ? `${latestIngest.status} at ${formatDate(latestIngest.finished_at || latestIngest.updated_at)}` : "not run yet"}</span>
+          </div>
+          <div class="manuscript-row-actions">
+            <button type="button" class="secondary-button" data-save-manuscript="${manuscript.manuscript_id}" disabled>Save</button>
+            <button type="button" class="danger-button" data-delete-manuscript="${manuscript.manuscript_id}">Remove</button>
+          </div>
+        </div>
+        <div class="manuscript-row-fields">
+          <input type="text" data-manuscript-title="${manuscript.manuscript_id}" value="${safeTitle}" aria-label="Title for ${safeTitle}">
+          <input type="text" data-manuscript-slug="${manuscript.manuscript_id}" value="${safeSlug}" aria-label="Slug for ${safeTitle}">
+        </div>
+      </div>
     `;
     li.addEventListener("click", async () => {
       state.selectedManuscriptId = manuscript.manuscript_id;
@@ -615,6 +641,51 @@ function renderManuscripts() {
       renderManuscripts();
       await refreshJobs();
       renderStageBoard();
+    });
+    const titleInput = li.querySelector(`[data-manuscript-title="${manuscript.manuscript_id}"]`);
+    const slugInput = li.querySelector(`[data-manuscript-slug="${manuscript.manuscript_id}"]`);
+    const saveButton = li.querySelector(`[data-save-manuscript="${manuscript.manuscript_id}"]`);
+    const deleteButton = li.querySelector(`[data-delete-manuscript="${manuscript.manuscript_id}"]`);
+    const syncDirtyState = () => {
+      const dirty = titleInput.value.trim() !== manuscript.title || slugInput.value.trim() !== manuscript.book_slug;
+      saveButton.disabled = !dirty;
+    };
+    titleInput.addEventListener("click", (event) => event.stopPropagation());
+    slugInput.addEventListener("click", (event) => event.stopPropagation());
+    titleInput.addEventListener("input", syncDirtyState);
+    slugInput.addEventListener("input", syncDirtyState);
+    saveButton.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      try {
+        const updated = await sendJson("PUT", `/v1/manuscripts/${manuscript.manuscript_id}`, {
+          title: titleInput.value.trim(),
+          book_slug: slugInput.value.trim(),
+        });
+        state.selectedManuscriptId = updated.manuscript_id;
+        els.stageActionStatus.textContent = `Manuscript updated: ${updated.title}`;
+        await refreshManuscripts();
+        await refreshJobs();
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
+    });
+    deleteButton.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      if (!window.confirm(`Remove manuscript ${manuscript.title}?`)) {
+        return;
+      }
+      try {
+        await sendJson("DELETE", `/v1/manuscripts/${manuscript.manuscript_id}`);
+        els.stageActionStatus.textContent = `Removed manuscript: ${manuscript.title}`;
+        if (state.selectedManuscriptId === manuscript.manuscript_id) {
+          state.selectedManuscriptId = null;
+          state.selectedJobId = null;
+        }
+        await refreshManuscripts();
+        await refreshJobs();
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
     });
     els.manuscriptList.appendChild(li);
   }
@@ -625,8 +696,6 @@ function renderManuscripts() {
   }
   els.workspaceManuscriptTitle.textContent = manuscript.title;
   els.workspaceManuscriptSubtitle.textContent = `Working on ${manuscript.book_slug}. Jobs and stage controls below apply only to this manuscript.`;
-  els.selectedManuscriptTitle.value = manuscript.title;
-  els.selectedManuscriptSlug.value = manuscript.book_slug;
   els.manuscriptDetail.textContent = renderManuscriptSummary(manuscript);
 }
 
@@ -701,7 +770,7 @@ function renderStageBoard() {
       <div class="workflow-step-head">
         <div>
           <p class="eyebrow">workspace</p>
-          <h3>Upload Manuscript</h3>
+          <h3>${stepNumber("upload")}. Upload Manuscript</h3>
         </div>
         <span class="status-pill">${uploadStatus}</span>
       </div>
@@ -744,7 +813,7 @@ function renderStageBoard() {
         <div class="workflow-step-head">
           <div>
             <p class="eyebrow">${stage.kind}</p>
-            <h3>${stageLabels[stage.name] || stage.name}</h3>
+            <h3>${stepNumber(stage.name)}. ${stageLabels[stage.name] || stage.name}</h3>
           </div>
           <span class="status-pill">${stageStatus}</span>
         </div>
@@ -1070,47 +1139,6 @@ els.configProfileSelect.addEventListener("change", () => {
   state.selectedConfigProfileId = els.configProfileSelect.value;
   renderConfigProfiles();
   renderStageBoard();
-});
-
-els.saveManuscript.addEventListener("click", async () => {
-  const manuscript = selectedManuscript();
-  if (!manuscript) {
-    els.stageActionStatus.textContent = "Select a manuscript first.";
-    return;
-  }
-  try {
-    const updated = await sendJson("PUT", `/v1/manuscripts/${manuscript.manuscript_id}`, {
-      title: els.selectedManuscriptTitle.value.trim(),
-      book_slug: els.selectedManuscriptSlug.value.trim(),
-    });
-    state.selectedManuscriptId = updated.manuscript_id;
-    els.stageActionStatus.textContent = `Manuscript updated: ${updated.title}`;
-    await refreshManuscripts();
-    await refreshJobs();
-  } catch (error) {
-    els.stageActionStatus.textContent = error.message;
-  }
-});
-
-els.deleteManuscript.addEventListener("click", async () => {
-  const manuscript = selectedManuscript();
-  if (!manuscript) {
-    els.stageActionStatus.textContent = "Select a manuscript first.";
-    return;
-  }
-  if (!window.confirm(`Remove manuscript ${manuscript.title}?`)) {
-    return;
-  }
-  try {
-    await sendJson("DELETE", `/v1/manuscripts/${manuscript.manuscript_id}`);
-    els.stageActionStatus.textContent = `Removed manuscript: ${manuscript.title}`;
-    state.selectedManuscriptId = null;
-    state.selectedJobId = null;
-    await refreshManuscripts();
-    await refreshJobs();
-  } catch (error) {
-    els.stageActionStatus.textContent = error.message;
-  }
 });
 
 els.openIngestResults.addEventListener("click", openLatestIngestResults);

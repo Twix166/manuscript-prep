@@ -341,6 +341,29 @@ h3 {
   margin-bottom: 4px;
 }
 
+.manuscript-row {
+  display: grid;
+  gap: 10px;
+}
+
+.manuscript-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.manuscript-row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.manuscript-row-fields {
+  display: grid;
+  gap: 8px;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;
