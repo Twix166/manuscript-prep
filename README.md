@@ -93,7 +93,7 @@ Web UI:
 - the selected-job panel now exposes direct downloads for later-stage artifacts such as orchestrator logs, merged/resolved JSON, and the final report PDF
 - running categorisation and analysis jobs now expose live chunk progress in the UI, including current chunk, pass, model, step, retry/timeout state, and recent progress events
 - the categorisation and analysis stage card now also shows live throughput in `tok/s` when the orchestrator reports it
-- stage cards now expose direct `Run`, `Pause`, `Resume`, `Stop`, and `Detail` controls, with `Run` disabled while the current stage job is already active
+- stage cards now expose a single stateful `Run`/`Pause` primary control, plus `Stop` and `Detail`, so the active action stays compact and easier to scan
 - categorisation and analysis jobs now expose a `Detail` viewer that opens processed chunks in a modal and summarizes structure, dialogue, entities, dossiers, and per-chunk timing without dropping users into raw JSON
 - categorisation and analysis runs now resume after interruption by skipping chunks that already have complete per-chunk outputs on disk and continuing from the next unfinished chunk
 - live chunk numbering now follows the actual chunk id, so `chunk_007` is shown as `Chunk 8/...` rather than being inferred from completed-count math

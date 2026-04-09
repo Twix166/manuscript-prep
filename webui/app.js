@@ -1001,41 +1001,44 @@ function renderStageBoard() {
     }
     const actionRow = document.createElement("div");
     actionRow.className = "stage-card-actions";
-    const runButton = document.createElement("button");
-    runButton.type = "button";
-    runButton.textContent = `Run ${stageLabels[stage.name] || stage.name}`;
-    runButton.disabled = Boolean(latestJob && ["queued", "running", "cancel_requested", "pause_requested"].includes(latestJob.status));
-    runButton.addEventListener("click", () => triggerPipeline(stage.name));
-
-    const pauseButton = document.createElement("button");
-    pauseButton.type = "button";
-    pauseButton.className = "secondary-button";
-    pauseButton.textContent = stageStatus === "pause_requested" ? "Pausing" : "Pause";
-    pauseButton.disabled = !latestJob || !["queued", "running"].includes(stageStatus);
-    pauseButton.addEventListener("click", async () => {
-      try {
-        await pauseJob(latestJob.job_id);
-        els.stageActionStatus.textContent = `Pause requested for job ${latestJob.job_id}`;
-        await refreshJobs();
-      } catch (error) {
-        els.stageActionStatus.textContent = error.message;
-      }
-    });
-
-    const resumeButton = document.createElement("button");
-    resumeButton.type = "button";
-    resumeButton.className = "secondary-button";
-    resumeButton.textContent = "Resume";
-    resumeButton.disabled = !latestJob || stageStatus !== "paused";
-    resumeButton.addEventListener("click", async () => {
-      try {
-        await resumeJob(latestJob.job_id);
-        els.stageActionStatus.textContent = `Resumed job ${latestJob.job_id}`;
-        await refreshJobs();
-      } catch (error) {
-        els.stageActionStatus.textContent = error.message;
-      }
-    });
+    const runPauseButton = document.createElement("button");
+    runPauseButton.type = "button";
+    if (!latestJob || ["not-started", "failed", "cancelled", "succeeded"].includes(stageStatus)) {
+      runPauseButton.textContent = "Run";
+      runPauseButton.disabled = false;
+      runPauseButton.addEventListener("click", () => triggerPipeline(stage.name));
+    } else if (["queued", "running"].includes(stageStatus)) {
+      runPauseButton.textContent = "Pause";
+      runPauseButton.disabled = false;
+      runPauseButton.addEventListener("click", async () => {
+        try {
+          await pauseJob(latestJob.job_id);
+          els.stageActionStatus.textContent = `Pause requested for job ${latestJob.job_id}`;
+          await refreshJobs();
+        } catch (error) {
+          els.stageActionStatus.textContent = error.message;
+        }
+      });
+    } else if (stageStatus === "paused") {
+      runPauseButton.textContent = "Run";
+      runPauseButton.disabled = false;
+      runPauseButton.addEventListener("click", async () => {
+        try {
+          await resumeJob(latestJob.job_id);
+          els.stageActionStatus.textContent = `Resumed job ${latestJob.job_id}`;
+          await refreshJobs();
+        } catch (error) {
+          els.stageActionStatus.textContent = error.message;
+        }
+      });
+    } else if (["pause_requested", "cancel_requested"].includes(stageStatus)) {
+      runPauseButton.textContent = stageStatus === "pause_requested" ? "Pausing" : "Stopping";
+      runPauseButton.disabled = true;
+    } else {
+      runPauseButton.textContent = "Run";
+      runPauseButton.disabled = false;
+      runPauseButton.addEventListener("click", () => triggerPipeline(stage.name));
+    }
 
     const stopButton = document.createElement("button");
     stopButton.type = "button";
@@ -1052,9 +1055,7 @@ function renderStageBoard() {
       }
     });
 
-    actionRow.appendChild(runButton);
-    actionRow.appendChild(pauseButton);
-    actionRow.appendChild(resumeButton);
+    actionRow.appendChild(runPauseButton);
     actionRow.appendChild(stopButton);
 
     card.innerHTML = `
