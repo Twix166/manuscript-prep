@@ -1054,6 +1054,16 @@ def test_gateway_api_upload_detects_supported_manuscript_formats(tmp_path) -> No
     assert status == 201
     assert mobi_upload["detected_format"] == "mobi"
 
+    status, txt_upload = app.upload_manuscript(
+        filename="Novel Draft.txt",
+        body=b"Plain text manuscript",
+        content_type="text/plain",
+        actor=alice,
+    )
+    assert status == 201
+    assert txt_upload["detected_format"] == "txt"
+    assert txt_upload["detected_label"] == "Plain Text"
+
 
 def test_gateway_api_upload_rejects_unsupported_manuscript_formats(tmp_path) -> None:
     store = JobStore(root=tmp_path / "jobs")
@@ -1066,9 +1076,9 @@ def test_gateway_api_upload_rejects_unsupported_manuscript_formats(tmp_path) -> 
     alice = store.upsert_user(username="alice", role="user", api_token="alice-token")
 
     status, payload = app.upload_manuscript(
-        filename="Novel Draft.txt",
-        body=b"plain text draft",
-        content_type="text/plain",
+        filename="Novel Draft.rtf",
+        body=b"{\\rtf1\\ansi plain text draft}",
+        content_type="application/rtf",
         actor=alice,
     )
     assert status == 400

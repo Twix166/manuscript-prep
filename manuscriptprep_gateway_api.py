@@ -109,6 +109,7 @@ class GatewayAPI:
             ".mobi": "mobi",
             ".azw": "azw",
             ".azw3": "azw3",
+            ".txt": "txt",
         }
         mime_map = {
             "application/pdf": "pdf",
@@ -117,6 +118,7 @@ class GatewayAPI:
             "application/vnd.oasis.opendocument.text": "odt",
             "application/x-mobipocket-ebook": "mobi",
             "application/vnd.amazon.ebook": extension_map.get(suffix, "azw3"),
+            "text/plain": "txt",
         }
 
         if body.startswith(b"%PDF"):
@@ -147,6 +149,7 @@ class GatewayAPI:
             "mobi": "Kindle / Mobipocket",
             "azw": "Kindle / AZW",
             "azw3": "Kindle / AZW3",
+            "txt": "Plain Text",
         }
         return detected, label_map.get(detected)
 
@@ -479,7 +482,7 @@ class GatewayAPI:
         )
         if detected_format is None:
             return HTTPStatus.BAD_REQUEST, {
-                "error": "Unsupported manuscript format. Use PDF, DOCX, EPUB, ODT, MOBI, AZW, or AZW3.",
+                "error": "Unsupported manuscript format. Use PDF, DOCX, EPUB, ODT, MOBI, AZW, AZW3, or TXT.",
             }
         safe_name = self._sanitize_filename(filename)
         owner_dir = self.upload_root / (actor.user_id if actor else "anonymous")

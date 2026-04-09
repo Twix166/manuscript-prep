@@ -55,7 +55,7 @@ const els = {
   profileDetail: document.getElementById("profile-detail"),
   toggleAdminMode: document.getElementById("toggle-admin-mode"),
   logoutButton: document.getElementById("logout-button"),
-  uploadForm: document.getElementById("upload-form"),
+  uploadForm: document.getElementById("upload-form-inline"),
   uploadStatus: document.getElementById("upload-status"),
   manuscriptTitle: document.getElementById("manuscript-title"),
   manuscriptSlug: document.getElementById("manuscript-slug"),
@@ -141,6 +141,7 @@ async function postBinary(path, filename, file) {
     ".mobi": "application/x-mobipocket-ebook",
     ".azw": "application/vnd.amazon.ebook",
     ".azw3": "application/vnd.amazon.ebook",
+    ".txt": "text/plain",
   };
   const response = await fetch(path, {
     method: "POST",
