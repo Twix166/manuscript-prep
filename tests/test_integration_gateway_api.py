@@ -974,10 +974,17 @@ def test_gateway_api_uploads_and_registers_manuscripts(tmp_path) -> None:
     )
     alice = store.upsert_user(username="alice", role="user", api_token="alice-token")
 
-    status, upload = app.upload_manuscript(filename="Novel Draft.pdf", body=b"%PDF-1.4 demo", actor=alice)
+    status, upload = app.upload_manuscript(
+        filename="Novel Draft.pdf",
+        body=b"%PDF-1.4 demo",
+        content_type="application/pdf",
+        actor=alice,
+    )
     assert status == 201
     assert upload["filename"] == "novel_draft.pdf"
     assert upload["size_bytes"] == len(b"%PDF-1.4 demo")
+    assert upload["detected_format"] == "pdf"
+    assert upload["detected_label"] == "Portable Document Format"
 
     status, manuscript = app.create_manuscript(
         {
@@ -990,6 +997,82 @@ def test_gateway_api_uploads_and_registers_manuscripts(tmp_path) -> None:
     assert status == 201
     assert manuscript["book_slug"] == "novel_draft"
     assert manuscript["file_size_bytes"] == len(b"%PDF-1.4 demo")
+
+
+def test_gateway_api_upload_detects_supported_manuscript_formats(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    app = GatewayAPI(
+        store=store,
+        auth_required=True,
+        bootstrap_username="admin",
+        bootstrap_token="admin-token",
+    )
+    alice = store.upsert_user(username="alice", role="user", api_token="alice-token")
+
+    status, docx_upload = app.upload_manuscript(
+        filename="Novel Draft.docx",
+        body=(
+            b"PK\x03\x04"
+            b"demo-docx"
+        ),
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        actor=alice,
+    )
+    assert status == 201
+    assert docx_upload["detected_format"] == "docx"
+
+    status, epub_upload = app.upload_manuscript(
+        filename="Novel Draft.epub",
+        body=(
+            b"PK\x03\x04"
+            b"demo-epub"
+        ),
+        content_type="application/epub+zip",
+        actor=alice,
+    )
+    assert status == 201
+    assert epub_upload["detected_format"] == "epub"
+
+    status, odt_upload = app.upload_manuscript(
+        filename="Novel Draft.odt",
+        body=(
+            b"PK\x03\x04"
+            b"demo-odt"
+        ),
+        content_type="application/vnd.oasis.opendocument.text",
+        actor=alice,
+    )
+    assert status == 201
+    assert odt_upload["detected_format"] == "odt"
+
+    status, mobi_upload = app.upload_manuscript(
+        filename="Novel Draft.mobi",
+        body=(b"\x00" * 64) + b"BOOKMOBI" + b"demo",
+        content_type="application/x-mobipocket-ebook",
+        actor=alice,
+    )
+    assert status == 201
+    assert mobi_upload["detected_format"] == "mobi"
+
+
+def test_gateway_api_upload_rejects_unsupported_manuscript_formats(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    app = GatewayAPI(
+        store=store,
+        auth_required=True,
+        bootstrap_username="admin",
+        bootstrap_token="admin-token",
+    )
+    alice = store.upsert_user(username="alice", role="user", api_token="alice-token")
+
+    status, payload = app.upload_manuscript(
+        filename="Novel Draft.txt",
+        body=b"plain text draft",
+        content_type="text/plain",
+        actor=alice,
+    )
+    assert status == 400
+    assert "Unsupported manuscript format" in payload["error"]
 
 
 def test_gateway_api_stage_jobs_can_derive_defaults_from_manuscript_and_config(tmp_path, sample_pdf, test_env) -> None:

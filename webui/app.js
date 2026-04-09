@@ -22,6 +22,7 @@ const state = {
   jobProgressById: {},
   analysisDetailsByJobId: {},
   manuscriptDrafts: {},
+  workflowExpansionByManuscript: {},
   selectedManuscriptId: null,
   selectedConfigProfileId: null,
   selectedJobId: null,
@@ -131,10 +132,20 @@ async function sendJson(method, path, payload = null) {
 }
 
 async function postBinary(path, filename, file) {
+  const extension = filename.includes(".") ? `.${filename.split(".").pop().toLowerCase()}` : "";
+  const contentTypeByExtension = {
+    ".pdf": "application/pdf",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".epub": "application/epub+zip",
+    ".odt": "application/vnd.oasis.opendocument.text",
+    ".mobi": "application/x-mobipocket-ebook",
+    ".azw": "application/vnd.amazon.ebook",
+    ".azw3": "application/vnd.amazon.ebook",
+  };
   const response = await fetch(path, {
     method: "POST",
     headers: currentHeaders({
-      "Content-Type": file.type || "application/pdf",
+      "Content-Type": file.type || contentTypeByExtension[extension] || "application/octet-stream",
       "X-Filename": filename,
     }),
     body: file,
@@ -267,6 +278,10 @@ function latestIngestForSelectedManuscript() {
 
 function workflowExpansionKey() {
   const manuscript = selectedManuscript();
+  const manuscriptKey = manuscript?.manuscript_id || "__none__";
+  if (Object.prototype.hasOwnProperty.call(state.workflowExpansionByManuscript, manuscriptKey)) {
+    return state.workflowExpansionByManuscript[manuscriptKey];
+  }
   if (!manuscript) {
     return "ingest";
   }
@@ -284,6 +299,11 @@ function workflowExpansionKey() {
     }
   }
   return fullPipeline.stages[fullPipeline.stages.length - 1]?.name || "report";
+}
+
+function setWorkflowExpansion(stageName) {
+  const manuscriptKey = selectedManuscript()?.manuscript_id || "__none__";
+  state.workflowExpansionByManuscript[manuscriptKey] = stageName;
 }
 
 function stepNumber(stepName) {
@@ -1019,6 +1039,21 @@ function renderStageBoard() {
     if (expandedKey === stage.name) {
       card.open = true;
     }
+    card.addEventListener("toggle", () => {
+      if (card.open) {
+        setWorkflowExpansion(stage.name);
+        for (const sibling of els.stageBoard.querySelectorAll("details.workflow-step")) {
+          if (sibling !== card) {
+            sibling.open = false;
+          }
+        }
+      } else {
+        const manuscriptKey = selectedManuscript()?.manuscript_id || "__none__";
+        if (state.workflowExpansionByManuscript[manuscriptKey] === stage.name) {
+          setWorkflowExpansion(null);
+        }
+      }
+    });
     const actionRow = document.createElement("div");
     actionRow.className = "stage-card-actions";
     const runPauseButton = document.createElement("button");
@@ -1345,13 +1380,13 @@ function attachUploadFormHandler() {
     const slug = els.manuscriptSlug.value.trim();
     const file = els.manuscriptFile.files[0];
     if (!title || !file) {
-      els.uploadStatus.textContent = "Title and PDF file are required.";
+      els.uploadStatus.textContent = "Title and manuscript file are required.";
       return;
     }
     try {
       els.uploadStatus.textContent = "Uploading manuscript...";
       const upload = await postBinary("/v1/uploads/manuscripts", file.name, file);
-      els.uploadStatus.textContent = "Registering manuscript...";
+      els.uploadStatus.textContent = `Detected ${upload.detected_label || upload.detected_format || "manuscript"}; registering manuscript...`;
       const manuscript = await sendJson("POST", "/v1/manuscripts", {
         title,
         book_slug: slug || upload.book_slug_guess,
@@ -1359,7 +1394,7 @@ function attachUploadFormHandler() {
         file_size_bytes: upload.size_bytes,
       });
       state.selectedManuscriptId = manuscript.manuscript_id;
-      els.uploadStatus.textContent = `Manuscript registered: ${manuscript.title}`;
+      els.uploadStatus.textContent = `Manuscript registered: ${manuscript.title} (${upload.detected_label || upload.detected_format || "document"})`;
       els.uploadForm.reset();
       await refreshManuscripts();
       await refreshJobs();

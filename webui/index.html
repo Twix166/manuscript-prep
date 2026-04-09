@@ -94,10 +94,10 @@
                     <input id="manuscript-title" type="text" placeholder="Treasure Island">
                     <label for="manuscript-slug">Slug</label>
                     <input id="manuscript-slug" type="text" placeholder="Optional; generated from title if blank">
-                    <label for="manuscript-file">PDF manuscript</label>
-                    <input id="manuscript-file" type="file" accept=".pdf,application/pdf">
+                    <label for="manuscript-file">Manuscript file</label>
+                    <input id="manuscript-file" type="file" accept=".pdf,.docx,.epub,.odt,.mobi,.azw,.azw3,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/vnd.oasis.opendocument.text,application/x-mobipocket-ebook">
                     <button type="submit">Upload And Register</button>
-                    <p id="upload-status" class="muted">Upload a PDF to create a managed manuscript record.</p>
+                    <p id="upload-status" class="muted">Upload a manuscript in PDF, DOCX, EPUB, ODT, MOBI, AZW, or AZW3 format to create a managed manuscript record.</p>
                   </form>
                 </article>
 
@@ -114,7 +114,8 @@
               <article class="panel manuscript-hero-panel">
                 <div class="panel-head">
                   <div>
-                    <h2 id="workspace-manuscript-title">Choose a manuscript</h2>
+                    <h2>Active Manuscript</h2>
+                    <h3 id="workspace-manuscript-title" class="panel-subtitle">Choose a manuscript</h3>
                     <p id="workspace-manuscript-subtitle" class="muted">Each manuscript has its own ingest, analysis, merge, resolution, and report history.</p>
                   </div>
                   <div class="panel-actions wrap">

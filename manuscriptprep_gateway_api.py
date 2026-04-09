@@ -16,9 +16,11 @@ import argparse
 import mimetypes
 import hashlib
 import hmac
+import io
 import json
 import os
 import secrets
+import zipfile
 from collections import Counter
 from datetime import datetime
 from http import HTTPStatus
@@ -89,6 +91,64 @@ class GatewayAPI:
         stem = self._slugify(Path(name).stem) or "manuscript"
         suffix = Path(name).suffix or ".pdf"
         return f"{stem}{suffix}"
+
+    def _detect_manuscript_format(
+        self,
+        *,
+        filename: str,
+        body: bytes,
+        content_type: str | None = None,
+    ) -> tuple[str | None, str | None]:
+        suffix = Path(filename).suffix.lower()
+        content_type = (content_type or "").split(";", 1)[0].strip().lower()
+        extension_map = {
+            ".pdf": "pdf",
+            ".docx": "docx",
+            ".epub": "epub",
+            ".odt": "odt",
+            ".mobi": "mobi",
+            ".azw": "azw",
+            ".azw3": "azw3",
+        }
+        mime_map = {
+            "application/pdf": "pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+            "application/epub+zip": "epub",
+            "application/vnd.oasis.opendocument.text": "odt",
+            "application/x-mobipocket-ebook": "mobi",
+            "application/vnd.amazon.ebook": extension_map.get(suffix, "azw3"),
+        }
+
+        if body.startswith(b"%PDF"):
+            return "pdf", "Portable Document Format"
+        if b"BOOKMOBI" in body[:256]:
+            return extension_map.get(suffix, "mobi"), "Kindle / Mobipocket"
+        if body.startswith(b"PK"):
+            try:
+                with zipfile.ZipFile(io.BytesIO(body)) as archive:
+                    names = set(archive.namelist())
+                    if "word/document.xml" in names:
+                        return "docx", "Microsoft Word Document"
+                    if "mimetype" in names:
+                        mimetype_value = archive.read("mimetype").decode("utf-8", errors="ignore").strip()
+                        if mimetype_value == "application/epub+zip":
+                            return "epub", "EPUB Ebook"
+                        if mimetype_value == "application/vnd.oasis.opendocument.text":
+                            return "odt", "OpenDocument Text"
+            except zipfile.BadZipFile:
+                pass
+
+        detected = extension_map.get(suffix) or mime_map.get(content_type)
+        label_map = {
+            "pdf": "Portable Document Format",
+            "docx": "Microsoft Word Document",
+            "epub": "EPUB Ebook",
+            "odt": "OpenDocument Text",
+            "mobi": "Kindle / Mobipocket",
+            "azw": "Kindle / AZW",
+            "azw3": "Kindle / AZW3",
+        }
+        return detected, label_map.get(detected)
 
     def _config_profile_metadata(self, config_path: str) -> Dict[str, Any]:
         try:
@@ -399,12 +459,28 @@ class GatewayAPI:
             **artifacts,
         }
 
-    def upload_manuscript(self, *, filename: str, body: bytes, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+    def upload_manuscript(
+        self,
+        *,
+        filename: str,
+        body: bytes,
+        content_type: str | None = None,
+        actor: Optional[UserRecord] = None,
+    ) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
         if not allowed:
             return error
         if not filename:
             return HTTPStatus.BAD_REQUEST, {"error": "Missing required upload filename"}
+        detected_format, detected_label = self._detect_manuscript_format(
+            filename=filename,
+            body=body,
+            content_type=content_type,
+        )
+        if detected_format is None:
+            return HTTPStatus.BAD_REQUEST, {
+                "error": "Unsupported manuscript format. Use PDF, DOCX, EPUB, ODT, MOBI, AZW, or AZW3.",
+            }
         safe_name = self._sanitize_filename(filename)
         owner_dir = self.upload_root / (actor.user_id if actor else "anonymous")
         owner_dir.mkdir(parents=True, exist_ok=True)
@@ -415,6 +491,9 @@ class GatewayAPI:
             "path": str(destination),
             "size_bytes": len(body),
             "book_slug_guess": self._slugify(Path(safe_name).stem),
+            "detected_format": detected_format,
+            "detected_label": detected_label,
+            "content_type": content_type,
         }
 
     def list_config_profiles(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
@@ -1141,6 +1220,7 @@ class GatewayHandler(BaseHTTPRequestHandler):
             status, response = self.app.upload_manuscript(
                 filename=self.headers.get("X-Filename", ""),
                 body=self._read_raw_body(),
+                content_type=self.headers.get("Content-Type", ""),
                 actor=self._current_actor(),
             )
             self._write_json(status, response)

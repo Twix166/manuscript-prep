@@ -18,6 +18,8 @@ def test_get_web_asset_serves_index() -> None:
     assert b"Set the admin password" in body
     assert b"Open Admin Interface" in body
     assert b"analysis-detail-modal" in body
+    assert b"Active Manuscript" in body
+    assert b"DOCX, EPUB, ODT, MOBI, AZW, or AZW3" in body
 
 
 def test_get_web_asset_serves_javascript() -> None:

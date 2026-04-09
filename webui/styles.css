@@ -83,6 +83,11 @@ h3 {
   font-family: "IBM Plex Serif", Georgia, serif;
 }
 
+.panel-subtitle {
+  font-size: 1.15rem;
+  margin-top: 6px;
+}
+
 .lede,
 .muted,
 .meta {
