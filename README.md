@@ -80,6 +80,7 @@ Web UI:
   - `Manuscripts` for `Your Manuscripts`, the active manuscript overview, runtime profile, and `Workspace Status`
   - `Pipeline` for the stage workflow panels
   - `Jobs` for `Job Timeline` and `Selected Job`
+- the `Upload Manuscript` panel now lives on the `Manuscripts` page above `Your Manuscripts`, so new users can start from the manuscript workspace while advanced users can jump straight to the pipeline page
 - the pipeline workspace is intentionally simplified so the stage cards are the only stage-summary surface; there is no separate description-card layer above them
 - manuscript upload now lives inside the pipeline workspace as the first step before ingest, rather than as a separate sidebar panel
 - the pipeline workflow now behaves like an accordion: upload plus each stage are collapsible, and the next logical step for the selected manuscript is expanded by default

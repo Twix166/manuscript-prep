@@ -264,11 +264,11 @@ function latestIngestForSelectedManuscript() {
 function workflowExpansionKey() {
   const manuscript = selectedManuscript();
   if (!manuscript) {
-    return "upload";
+    return "ingest";
   }
   const fullPipeline = state.pipelines.find((item) => item.pipeline === "manuscript-prep");
   if (!fullPipeline) {
-    return "upload";
+    return "ingest";
   }
   for (const stage of fullPipeline.stages) {
     const latestJob = latestStageCardJobForPipeline(stage.name);
@@ -968,45 +968,6 @@ function renderStageBoard() {
   }
   const expandedKey = workflowExpansionKey();
 
-  const uploadStep = document.createElement("details");
-  uploadStep.className = "workflow-step";
-  if (expandedKey === "upload") {
-    uploadStep.open = true;
-  }
-  const manuscript = selectedManuscript();
-  const uploadStatus = manuscript ? "ready" : "not-started";
-  uploadStep.innerHTML = `
-    <summary>
-      <div class="workflow-step-head">
-        <div>
-          <p class="eyebrow">workspace</p>
-          <h3>${stepNumber("upload")}. Upload Manuscript</h3>
-        </div>
-        <span class="status-pill">${uploadStatus}</span>
-      </div>
-      <p class="meta">${manuscript ? `Current manuscript: ${manuscript.title}` : "Upload a manuscript PDF to start a new pipeline."}</p>
-    </summary>
-    <div class="workflow-step-body">
-      <form id="upload-form-inline" class="stack">
-        <label for="manuscript-title">Title</label>
-        <input id="manuscript-title" type="text" placeholder="Treasure Island">
-        <label for="manuscript-slug">Slug</label>
-        <input id="manuscript-slug" type="text" placeholder="Optional; generated from title if blank">
-        <label for="manuscript-file">PDF manuscript</label>
-        <input id="manuscript-file" type="file" accept=".pdf,application/pdf">
-        <button type="submit">Upload And Register</button>
-        <p id="upload-status" class="muted">Upload a PDF to create a managed manuscript record.</p>
-      </form>
-    </div>
-  `;
-  els.stageBoard.appendChild(uploadStep);
-  els.uploadForm = document.getElementById("upload-form-inline");
-  els.uploadStatus = document.getElementById("upload-status");
-  els.manuscriptTitle = document.getElementById("manuscript-title");
-  els.manuscriptSlug = document.getElementById("manuscript-slug");
-  els.manuscriptFile = document.getElementById("manuscript-file");
-  attachUploadFormHandler();
-
   for (const stage of fullPipeline.stages) {
     const latestJob = latestStageCardJobForPipeline(stage.name);
     const stageStatus = latestJob ? latestJob.status : "not-started";
@@ -1487,6 +1448,8 @@ setInterval(() => {
     refreshJobs();
   }
 }, autoRefreshMs);
+
+attachUploadFormHandler();
 
 renderProfileSummary();
 resetWorkspaceState();

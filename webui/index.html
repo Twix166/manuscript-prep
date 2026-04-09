@@ -84,14 +84,32 @@
         <section class="workspace-main">
           <section id="page-manuscripts" class="workspace-page">
             <section class="workspace-top grid two">
-              <article class="panel sidebar-panel">
-                <div class="panel-head">
-                  <h2>Your Manuscripts</h2>
-                  <button type="button" data-refresh="manuscripts">Refresh</button>
-                </div>
-                <p class="muted">Select a manuscript to inspect its stage history and run the pipeline for that manuscript only.</p>
-                <ul id="manuscript-list" class="list selectable"></ul>
-              </article>
+              <div class="stack">
+                <article class="panel sidebar-panel">
+                  <div class="panel-head">
+                    <h2>Upload Manuscript</h2>
+                  </div>
+                  <form id="upload-form-inline" class="stack">
+                    <label for="manuscript-title">Title</label>
+                    <input id="manuscript-title" type="text" placeholder="Treasure Island">
+                    <label for="manuscript-slug">Slug</label>
+                    <input id="manuscript-slug" type="text" placeholder="Optional; generated from title if blank">
+                    <label for="manuscript-file">PDF manuscript</label>
+                    <input id="manuscript-file" type="file" accept=".pdf,application/pdf">
+                    <button type="submit">Upload And Register</button>
+                    <p id="upload-status" class="muted">Upload a PDF to create a managed manuscript record.</p>
+                  </form>
+                </article>
+
+                <article class="panel sidebar-panel">
+                  <div class="panel-head">
+                    <h2>Your Manuscripts</h2>
+                    <button type="button" data-refresh="manuscripts">Refresh</button>
+                  </div>
+                  <p class="muted">Select a manuscript to inspect its stage history and run the pipeline for that manuscript only.</p>
+                  <ul id="manuscript-list" class="list selectable"></ul>
+                </article>
+              </div>
 
               <article class="panel manuscript-hero-panel">
                 <div class="panel-head">
