@@ -284,7 +284,7 @@ For the user-facing flow:
 4. Choose a config profile
 5. Trigger the full pipeline or individual stages and watch live status updates
 
-For compose-based analysis, the container-safe config uses `http://host.docker.internal:11434` for Ollama. On Linux, `compose.yaml` maps that hostname to the Docker host automatically.
+For compose-based analysis, the container-safe config uses `http://host.docker.internal:11434` for Ollama, and the canonical orchestrator now streams generation through that configured host instead of requiring a local `ollama run` subprocess inside the container. On Linux, `compose.yaml` maps that hostname to the Docker host automatically.
 
 If those host ports conflict with your machine, override them when starting the stack:
 

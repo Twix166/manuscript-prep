@@ -32,6 +32,7 @@ import json
 import os
 import queue
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -69,6 +70,7 @@ class RuntimeConfig:
     entities_model: str = "manuscriptprep-entities"
     dossiers_model: str = "manuscriptprep-dossiers"
     ollama_bin: str = "ollama"
+    ollama_host: Optional[str] = None
     retries: int = 1
     on_failure: str = "skip"
     idle_timeout: int = 180
@@ -286,6 +288,7 @@ def build_runtime_config(args: argparse.Namespace, config_data: Dict[str, Any]) 
         entities_model=args.entities_model or models.get("entities", "manuscriptprep-entities"),
         dossiers_model=args.dossiers_model or models.get("dossiers", "manuscriptprep-dossiers"),
         ollama_bin=args.ollama_bin or ollama_cfg.get("command", "ollama"),
+        ollama_host=str(ollama_cfg.get("host")).rstrip("/") if ollama_cfg.get("host") else None,
         retries=args.retries if args.retries is not None else int(timeouts.get("retries", 1)),
         on_failure=args.on_failure or "skip",
         idle_timeout=args.idle_timeout if args.idle_timeout is not None else int(timeouts.get("idle_seconds", 180)),
@@ -587,6 +590,21 @@ def run_ollama_streaming(
     if live is not None:
         live.update(render_tui(state), refresh=True)
 
+    if runtime.ollama_host and shutil.which(runtime.ollama_bin) is None:
+        return run_ollama_http_streaming(
+            runtime=runtime,
+            model=model,
+            prompt_text=prompt_text,
+            state=state,
+            live=live,
+            logger=logger,
+            chunk_name=chunk_name,
+            pass_name=pass_name,
+            attempt=attempt,
+            idle_timeout=idle_timeout,
+            hard_timeout=hard_timeout,
+        )
+
     proc = subprocess.Popen(
         [runtime.ollama_bin, "run", model],
         stdin=subprocess.PIPE,
@@ -762,6 +780,136 @@ def run_ollama_streaming(
             "stderr_chars": len(stderr_text),
             "duration_seconds": model_elapsed,
             "idle_timeout_s": idle_timeout,
+        },
+    )
+
+    return stdout_text
+
+
+def run_ollama_http_streaming(
+    *,
+    runtime: RuntimeConfig,
+    model: str,
+    prompt_text: str,
+    state: TUIState,
+    live: Optional[Live],
+    logger: JsonlLogger,
+    chunk_name: str,
+    pass_name: str,
+    attempt: int,
+    idle_timeout: int,
+    hard_timeout: int,
+) -> str:
+    started_at = time.time()
+    state.current_step = "connecting to ollama host"
+    if live is not None:
+        live.update(render_tui(state), refresh=True)
+
+    payload = json.dumps({"model": model, "prompt": prompt_text, "stream": True}).encode("utf-8")
+    req = urllib_request.Request(
+        f"{runtime.ollama_host}/api/generate",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    collected_stdout: List[str] = []
+    timeout = max(idle_timeout, 1) if idle_timeout > 0 else max(hard_timeout, 1) if hard_timeout > 0 else 60
+
+    try:
+        with urllib_request.urlopen(req, timeout=timeout) as resp:
+            for raw_line in resp:
+                now = time.time()
+                if hard_timeout > 0 and (now - started_at) > hard_timeout:
+                    logger.emit(
+                        level="ERROR",
+                        event_type="pass_hard_timeout",
+                        message="Hard timeout reached while streaming Ollama HTTP response",
+                        chunk=chunk_name,
+                        pass_name=pass_name,
+                        step=state.current_step,
+                        model=model,
+                        attempt=attempt,
+                        extra={"elapsed_s": now - started_at, "idle_timeout_s": idle_timeout},
+                    )
+                    raise HardTimeoutError(
+                        f"Hard timeout exceeded for {pass_name} on {chunk_name} after {hard_timeout}s"
+                    )
+
+                line = raw_line.decode("utf-8").strip()
+                if not line:
+                    continue
+                event = json.loads(line)
+                if event.get("error"):
+                    raise RuntimeError(f"Ollama API error for model '{model}': {event['error']}")
+
+                chunk_text = str(event.get("response") or "")
+                if chunk_text:
+                    collected_stdout.append(chunk_text)
+                    state.append_stdout(chunk_text)
+                    state.current_step = "streaming model output"
+                    state.stdout_token_count += approx_token_count(chunk_text)
+                    maybe_real_tps = extract_tps_from_text(chunk_text)
+                    if maybe_real_tps is not None:
+                        state.real_tps = maybe_real_tps
+                    if state.pass_started_at is not None and state.real_tps is None:
+                        elapsed = max(time.time() - state.pass_started_at, 0.001)
+                        state.estimated_tps = state.stdout_token_count / elapsed
+                    if live is not None:
+                        live.update(render_tui(state), refresh=True)
+
+                if event.get("done"):
+                    break
+    except TimeoutError as exc:
+        logger.emit(
+            level="ERROR",
+            event_type="pass_idle_timeout",
+            message="Idle timeout reached while waiting for Ollama HTTP response",
+            chunk=chunk_name,
+            pass_name=pass_name,
+            step=state.current_step,
+            model=model,
+            attempt=attempt,
+            extra={"idle_timeout_s": idle_timeout},
+        )
+        raise IdleTimeoutError(
+            f"Idle timeout exceeded for {pass_name} on {chunk_name} after {idle_timeout}s with no output"
+        ) from exc
+    except urllib_error.URLError as exc:
+        raise RuntimeError(f"Unable to reach Ollama host '{runtime.ollama_host}': {exc}") from exc
+
+    stdout_text = "".join(collected_stdout).strip()
+    if not stdout_text:
+        logger.emit(
+            level="ERROR",
+            event_type="empty_output",
+            message="Model returned empty stdout via Ollama HTTP API",
+            chunk=chunk_name,
+            pass_name=pass_name,
+            step=state.current_step,
+            model=model,
+            attempt=attempt,
+            extra={"duration_seconds": time.time() - started_at},
+        )
+        raise RuntimeError(f"Empty output from model '{model}'")
+
+    logger.emit(
+        level="INFO",
+        event_type="model_completed",
+        message="Model completed successfully via Ollama HTTP API",
+        chunk=chunk_name,
+        pass_name=pass_name,
+        step="model complete",
+        model=model,
+        attempt=attempt,
+        extra={
+            "estimated_tps": state.estimated_tps,
+            "reported_tps": state.real_tps,
+            "stdout_chars": len(stdout_text),
+            "stderr_chars": 0,
+            "duration_seconds": time.time() - started_at,
+            "idle_timeout_s": idle_timeout,
+            "ollama_host": runtime.ollama_host,
         },
     )
 
