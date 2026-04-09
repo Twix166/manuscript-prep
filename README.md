@@ -77,6 +77,8 @@ Web UI:
 - admin users still land in the normal user workspace first, and can open an admin interface from the profile menu when they need platform-level visibility
 - the workspace now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
 - the pipeline workspace is intentionally simplified so the stage cards are the only stage-summary surface; there is no separate description-card layer above them
+- manuscript upload now lives inside the pipeline workspace as the first step before ingest, rather than as a separate sidebar panel
+- the pipeline workflow now behaves like an accordion: upload plus each stage are collapsible, and the next logical step for the selected manuscript is expanded by default
 - the main dashboard panels now summarize config, manuscript, system, job, and artifact state in human-readable text instead of raw JSON dumps
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
 - the layout is now organized around multiple managed manuscripts, with stage controls and job history scoped to the selected manuscript

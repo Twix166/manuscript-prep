@@ -227,6 +227,27 @@ function latestIngestForSelectedManuscript() {
   return manuscript ? manuscript.latest_ingest || null : null;
 }
 
+function workflowExpansionKey() {
+  const manuscript = selectedManuscript();
+  if (!manuscript) {
+    return "upload";
+  }
+  const fullPipeline = state.pipelines.find((item) => item.pipeline === "manuscript-prep");
+  if (!fullPipeline) {
+    return "upload";
+  }
+  for (const stage of fullPipeline.stages) {
+    const latestJob = latestStageCardJobForPipeline(stage.name);
+    if (latestJob && ["queued", "running", "cancel_requested"].includes(latestJob.status)) {
+      return stage.name;
+    }
+    if (!latestJob || latestJob.status !== "succeeded") {
+      return stage.name;
+    }
+  }
+  return fullPipeline.stages[fullPipeline.stages.length - 1]?.name || "report";
+}
+
 function formatDate(value) {
   if (!value) {
     return "n/a";
@@ -666,29 +687,77 @@ function renderStageBoard() {
   if (!fullPipeline) {
     return;
   }
+  const expandedKey = workflowExpansionKey();
+
+  const uploadStep = document.createElement("details");
+  uploadStep.className = "workflow-step";
+  if (expandedKey === "upload") {
+    uploadStep.open = true;
+  }
+  const manuscript = selectedManuscript();
+  const uploadStatus = manuscript ? "ready" : "not-started";
+  uploadStep.innerHTML = `
+    <summary>
+      <div class="workflow-step-head">
+        <div>
+          <p class="eyebrow">workspace</p>
+          <h3>Upload Manuscript</h3>
+        </div>
+        <span class="status-pill">${uploadStatus}</span>
+      </div>
+      <p class="meta">${manuscript ? `Current manuscript: ${manuscript.title}` : "Upload a manuscript PDF to start a new pipeline."}</p>
+    </summary>
+    <div class="workflow-step-body">
+      <form id="upload-form-inline" class="stack">
+        <label for="manuscript-title">Title</label>
+        <input id="manuscript-title" type="text" placeholder="Treasure Island">
+        <label for="manuscript-slug">Slug</label>
+        <input id="manuscript-slug" type="text" placeholder="Optional; generated from title if blank">
+        <label for="manuscript-file">PDF manuscript</label>
+        <input id="manuscript-file" type="file" accept=".pdf,application/pdf">
+        <button type="submit">Upload And Register</button>
+        <p id="upload-status" class="muted">Upload a PDF to create a managed manuscript record.</p>
+      </form>
+    </div>
+  `;
+  els.stageBoard.appendChild(uploadStep);
+  els.uploadForm = document.getElementById("upload-form-inline");
+  els.uploadStatus = document.getElementById("upload-status");
+  els.manuscriptTitle = document.getElementById("manuscript-title");
+  els.manuscriptSlug = document.getElementById("manuscript-slug");
+  els.manuscriptFile = document.getElementById("manuscript-file");
+  attachUploadFormHandler();
+
   for (const stage of fullPipeline.stages) {
     const latestJob = latestStageCardJobForPipeline(stage.name);
     const stageStatus = latestJob ? latestJob.status : "not-started";
     const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
     const compactProgress = stage.name === "orchestrate" ? renderCompactStageProgress(progress) : "";
     const models = resolveModelRefs(stage);
-    const card = document.createElement("article");
-    card.className = `stage-card status-${stageStatus}`;
+    const card = document.createElement("details");
+    card.className = `workflow-step stage-card status-${stageStatus}`;
+    if (expandedKey === stage.name) {
+      card.open = true;
+    }
     card.innerHTML = `
-      <div class="stage-card-head">
-        <div>
-          <p class="eyebrow">${stage.kind}</p>
-          <h3>${stageLabels[stage.name] || stage.name}</h3>
+      <summary>
+        <div class="workflow-step-head">
+          <div>
+            <p class="eyebrow">${stage.kind}</p>
+            <h3>${stageLabels[stage.name] || stage.name}</h3>
+          </div>
+          <span class="status-pill">${stageStatus}</span>
         </div>
-        <span class="status-pill">${stageStatus}</span>
-      </div>
-      <p>${stage.description}</p>
-      <p class="meta"><strong>Substeps:</strong> ${(stage.metadata.substeps || []).join(", ") || "n/a"}</p>
-      <p class="meta"><strong>Models:</strong> ${models.length ? models.join(", ") : "Deterministic stage"}</p>
-      <p class="meta"><strong>Last update:</strong> ${latestJob ? formatDate(latestJob.updated_at) : "n/a"}</p>
-      ${compactProgress ? `<p class="meta"><strong>Live progress:</strong> ${compactProgress}</p>` : ""}
-      <div class="stage-card-actions">
-        <button type="button" data-run-stage="${stage.name}">Run ${stageLabels[stage.name] || stage.name}</button>
+        <p class="meta">${stage.description}</p>
+      </summary>
+      <div class="workflow-step-body">
+        <p class="meta"><strong>Substeps:</strong> ${(stage.metadata.substeps || []).join(", ") || "n/a"}</p>
+        <p class="meta"><strong>Models:</strong> ${models.length ? models.join(", ") : "Deterministic stage"}</p>
+        <p class="meta"><strong>Last update:</strong> ${latestJob ? formatDate(latestJob.updated_at) : "n/a"}</p>
+        ${compactProgress ? `<p class="meta"><strong>Live progress:</strong> ${compactProgress}</p>` : ""}
+        <div class="stage-card-actions">
+          <button type="button" data-run-stage="${stage.name}">Run ${stageLabels[stage.name] || stage.name}</button>
+        </div>
       </div>
     `;
     card.querySelector("button").addEventListener("click", () => triggerPipeline(stage.name));
@@ -895,6 +964,41 @@ async function handleAuthSuccess(payload, message) {
   await refreshAll();
 }
 
+function attachUploadFormHandler() {
+  if (!els.uploadForm || els.uploadForm.dataset.bound === "true") {
+    return;
+  }
+  els.uploadForm.dataset.bound = "true";
+  els.uploadForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const title = els.manuscriptTitle.value.trim();
+    const slug = els.manuscriptSlug.value.trim();
+    const file = els.manuscriptFile.files[0];
+    if (!title || !file) {
+      els.uploadStatus.textContent = "Title and PDF file are required.";
+      return;
+    }
+    try {
+      els.uploadStatus.textContent = "Uploading manuscript...";
+      const upload = await postBinary("/v1/uploads/manuscripts", file.name, file);
+      els.uploadStatus.textContent = "Registering manuscript...";
+      const manuscript = await sendJson("POST", "/v1/manuscripts", {
+        title,
+        book_slug: slug || upload.book_slug_guess,
+        source_path: upload.path,
+        file_size_bytes: upload.size_bytes,
+      });
+      state.selectedManuscriptId = manuscript.manuscript_id;
+      els.uploadStatus.textContent = `Manuscript registered: ${manuscript.title}`;
+      els.uploadForm.reset();
+      await refreshManuscripts();
+      await refreshJobs();
+    } catch (error) {
+      els.uploadStatus.textContent = error.message;
+    }
+  });
+}
+
 els.setupForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
@@ -966,35 +1070,6 @@ els.configProfileSelect.addEventListener("change", () => {
   state.selectedConfigProfileId = els.configProfileSelect.value;
   renderConfigProfiles();
   renderStageBoard();
-});
-
-els.uploadForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const title = els.manuscriptTitle.value.trim();
-  const slug = els.manuscriptSlug.value.trim();
-  const file = els.manuscriptFile.files[0];
-  if (!title || !file) {
-    els.uploadStatus.textContent = "Title and PDF file are required.";
-    return;
-  }
-  try {
-    els.uploadStatus.textContent = "Uploading manuscript...";
-    const upload = await postBinary("/v1/uploads/manuscripts", file.name, file);
-    els.uploadStatus.textContent = "Registering manuscript...";
-    const manuscript = await sendJson("POST", "/v1/manuscripts", {
-      title,
-      book_slug: slug || upload.book_slug_guess,
-      source_path: upload.path,
-      file_size_bytes: upload.size_bytes,
-    });
-    state.selectedManuscriptId = manuscript.manuscript_id;
-    els.uploadStatus.textContent = `Manuscript registered: ${manuscript.title}`;
-    els.uploadForm.reset();
-    await refreshManuscripts();
-    await refreshJobs();
-  } catch (error) {
-    els.uploadStatus.textContent = error.message;
-  }
 });
 
 els.saveManuscript.addEventListener("click", async () => {

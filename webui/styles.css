@@ -132,7 +132,6 @@ h3 {
 }
 
 .stack,
-.pipeline-overview,
 .stage-board,
 .list,
 .panel-actions.wrap {
@@ -253,8 +252,8 @@ h3 {
 }
 
 .list li,
-.stage-summary,
-.stage-card {
+.stage-card,
+.workflow-step {
   background: white;
   border: 1px solid var(--accent-soft);
   border-radius: 16px;
@@ -281,8 +280,45 @@ h3 {
 }
 
 .stage-card p,
-.stage-summary p {
+.workflow-step p {
   margin: 10px 0 0;
+}
+
+.workflow-accordion {
+  display: grid;
+  gap: 12px;
+}
+
+.workflow-step {
+  padding: 0;
+  overflow: hidden;
+}
+
+.workflow-step summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px;
+}
+
+.workflow-step summary::-webkit-details-marker {
+  display: none;
+}
+
+.workflow-step[open] summary {
+  border-bottom: 1px solid var(--accent-soft);
+}
+
+.workflow-step-body {
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.workflow-step-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .list li strong {
