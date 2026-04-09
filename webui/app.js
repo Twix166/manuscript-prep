@@ -217,10 +217,15 @@ function latestStageCardJobForPipeline(pipeline) {
   if (!jobs.length) {
     return null;
   }
-  if (jobs[0].status !== "cancelled") {
-    return jobs[0];
+  const active = jobs.find((job) => ["queued", "running", "cancel_requested"].includes(job.status));
+  if (active) {
+    return active;
   }
-  return jobs.find((job) => job.status !== "cancelled") || null;
+  const succeeded = jobs.find((job) => job.status === "succeeded");
+  if (succeeded) {
+    return succeeded;
+  }
+  return null;
 }
 
 function latestIngestForSelectedManuscript() {
