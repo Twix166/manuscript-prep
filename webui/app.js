@@ -26,6 +26,7 @@ const state = {
   selectedConfigProfileId: null,
   selectedJobId: null,
   selectedAnalysisChunkId: null,
+  currentPage: "manuscripts",
 };
 
 const els = {
@@ -45,6 +46,10 @@ const els = {
   registerPassword: document.getElementById("register-password"),
   registerStatus: document.getElementById("register-status"),
   refreshWorkspace: document.getElementById("refresh-workspace"),
+  pageButtons: Array.from(document.querySelectorAll("[data-page]")),
+  pageManuscripts: document.getElementById("page-manuscripts"),
+  pagePipeline: document.getElementById("page-pipeline"),
+  pageJobs: document.getElementById("page-jobs"),
   profileSummary: document.getElementById("profile-summary"),
   profileDetail: document.getElementById("profile-detail"),
   toggleAdminMode: document.getElementById("toggle-admin-mode"),
@@ -166,6 +171,7 @@ function resetWorkspaceState() {
   state.selectedConfigProfileId = null;
   state.selectedJobId = null;
   state.selectedAnalysisChunkId = null;
+  state.currentPage = "manuscripts";
   els.manuscriptList.innerHTML = "";
   els.stageBoard.innerHTML = "";
   els.jobList.innerHTML = "";
@@ -202,6 +208,20 @@ function renderAdminMode() {
   els.toggleAdminMode.classList.remove("hidden");
   els.toggleAdminMode.textContent = state.adminMode ? "Back To User Workspace" : "Open Admin Interface";
   els.adminConsole.classList.toggle("hidden", !state.adminMode);
+}
+
+function renderCurrentPage() {
+  const pageMap = {
+    manuscripts: els.pageManuscripts,
+    pipeline: els.pagePipeline,
+    jobs: els.pageJobs,
+  };
+  for (const [page, element] of Object.entries(pageMap)) {
+    element.classList.toggle("hidden", state.currentPage !== page);
+  }
+  for (const button of els.pageButtons) {
+    button.classList.toggle("active", button.dataset.page === state.currentPage);
+  }
 }
 
 function selectedManuscript() {
@@ -1112,9 +1132,14 @@ function renderJobs() {
     const li = document.createElement("li");
     li.className = job.job_id === state.selectedJobId ? "selected" : "";
     li.innerHTML = `
-      <strong>${stageLabels[job.pipeline] || job.pipeline}</strong>
-      <span class="meta">Job ID: ${job.job_id}</span><br>
-      <span class="meta">Status: ${job.status} | Updated: ${formatDate(job.updated_at)}</span>
+      <div class="job-list-item">
+        <div class="job-list-head">
+          <strong>${stageLabels[job.pipeline] || job.pipeline}</strong>
+          <span class="status-chip status-${job.status}">${job.status.replaceAll("_", " ")}</span>
+        </div>
+        <span class="meta">Job ID: ${job.job_id}</span>
+        <span class="meta">Updated: ${formatDate(job.updated_at)}</span>
+      </div>
     `;
     li.addEventListener("click", async (event) => {
       if (event.target instanceof HTMLElement && event.target.closest("button")) {
@@ -1274,6 +1299,7 @@ async function refreshAll() {
     const me = await fetchJson("/v1/auth/me");
     state.currentUser = me.user;
     renderProfileSummary();
+    renderCurrentPage();
     showAppShell();
     await Promise.all([refreshConfigProfiles(), refreshManuscripts(), refreshPipelines()]);
     await refreshJobs();
@@ -1400,6 +1426,13 @@ els.toggleAdminMode.addEventListener("click", async () => {
 });
 
 els.refreshWorkspace.addEventListener("click", refreshAll);
+
+for (const button of els.pageButtons) {
+  button.addEventListener("click", () => {
+    state.currentPage = button.dataset.page;
+    renderCurrentPage();
+  });
+}
 
 els.configProfileSelect.addEventListener("change", () => {
   state.selectedConfigProfileId = els.configProfileSelect.value;

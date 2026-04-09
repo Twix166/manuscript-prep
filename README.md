@@ -76,6 +76,10 @@ Web UI:
 - authenticated users land in a manuscript-first workspace with profile controls in the top-right header
 - admin users still land in the normal user workspace first, and can open an admin interface from the profile menu when they need platform-level visibility
 - the workspace now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
+- the workspace is now split into three user-facing pages:
+  - `Manuscripts` for `Your Manuscripts`, the active manuscript overview, runtime profile, and `Workspace Status`
+  - `Pipeline` for the stage workflow panels
+  - `Jobs` for `Job Timeline` and `Selected Job`
 - the pipeline workspace is intentionally simplified so the stage cards are the only stage-summary surface; there is no separate description-card layer above them
 - manuscript upload now lives inside the pipeline workspace as the first step before ingest, rather than as a separate sidebar panel
 - the pipeline workflow now behaves like an accordion: upload plus each stage are collapsible, and the next logical step for the selected manuscript is expanded by default
@@ -98,6 +102,7 @@ Web UI:
 - categorisation and analysis runs now resume after interruption by skipping chunks that already have complete per-chunk outputs on disk and continuing from the next unfinished chunk
 - live chunk numbering now follows the actual chunk id, so `chunk_007` is shown as `Chunk 8/...` rather than being inferred from completed-count math
 - jobs now show their full Job ID in the timeline and selected-job panel, and queued/running jobs can be cancelled from the UI while the worker continuously performs stale-job housekeeping between polls
+- the job timeline now uses colored status pills so queued, running, paused, cancelled, and failed jobs are easier to scan at a glance
 - stage cards now prefer active work first, then the latest successful run, and otherwise fall back to `not-started`; cancelled and failed jobs still remain visible in the timeline for auditability
 - stage cards show pipeline substeps and the configured model names where applicable
 - the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads

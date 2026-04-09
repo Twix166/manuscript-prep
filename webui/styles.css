@@ -196,21 +196,27 @@ h3 {
   min-width: 0;
 }
 
+.workspace-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.workspace-nav button.active {
+  background: var(--accent);
+  color: white;
+  border-color: transparent;
+}
+
+.workspace-page,
+.workspace-single {
+  display: grid;
+  gap: 20px;
+}
+
 .workspace-top {
   align-items: start;
-}
-
-.workspace-middle {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-
-.workspace-rail {
-  display: grid;
-  gap: 20px;
-  align-content: start;
 }
 
 .pipeline-panel,
@@ -339,6 +345,53 @@ h3 {
 .list li strong {
   display: block;
   margin-bottom: 4px;
+}
+
+.job-list-item {
+  display: grid;
+  gap: 8px;
+}
+
+.job-list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: capitalize;
+  background: #f1ece4;
+}
+
+.status-chip.status-succeeded {
+  background: rgba(45, 119, 87, 0.14);
+  color: var(--success);
+}
+
+.status-chip.status-running {
+  background: rgba(35, 95, 156, 0.14);
+  color: var(--running);
+}
+
+.status-chip.status-failed,
+.status-chip.status-cancelled {
+  background: rgba(152, 47, 47, 0.14);
+  color: var(--failed);
+}
+
+.status-chip.status-queued,
+.status-chip.status-pending,
+.status-chip.status-paused,
+.status-chip.status-pause_requested,
+.status-chip.status-cancel_requested {
+  background: rgba(173, 123, 26, 0.14);
+  color: var(--pending);
 }
 
 .manuscript-row {

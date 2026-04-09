@@ -74,54 +74,51 @@
         </div>
       </header>
 
+      <nav class="workspace-nav" aria-label="Workspace pages">
+        <button type="button" class="ghost-button" data-page="manuscripts">Manuscripts</button>
+        <button type="button" class="ghost-button" data-page="pipeline">Pipeline</button>
+        <button type="button" class="ghost-button" data-page="jobs">Jobs</button>
+      </nav>
+
       <section class="workspace-shell">
         <section class="workspace-main">
-          <section class="workspace-top grid two">
-            <article class="panel sidebar-panel">
-              <div class="panel-head">
-                <h2>Your Manuscripts</h2>
-                <button type="button" data-refresh="manuscripts">Refresh</button>
-              </div>
-              <p class="muted">Select a manuscript to inspect its stage history and run the pipeline for that manuscript only.</p>
-              <ul id="manuscript-list" class="list selectable"></ul>
-            </article>
+          <section id="page-manuscripts" class="workspace-page">
+            <section class="workspace-top grid two">
+              <article class="panel sidebar-panel">
+                <div class="panel-head">
+                  <h2>Your Manuscripts</h2>
+                  <button type="button" data-refresh="manuscripts">Refresh</button>
+                </div>
+                <p class="muted">Select a manuscript to inspect its stage history and run the pipeline for that manuscript only.</p>
+                <ul id="manuscript-list" class="list selectable"></ul>
+              </article>
 
-            <article class="panel manuscript-hero-panel">
-              <div class="panel-head">
-                <div>
-                  <h2 id="workspace-manuscript-title">Choose a manuscript</h2>
-                  <p id="workspace-manuscript-subtitle" class="muted">Each manuscript has its own ingest, analysis, merge, resolution, and report history.</p>
+              <article class="panel manuscript-hero-panel">
+                <div class="panel-head">
+                  <div>
+                    <h2 id="workspace-manuscript-title">Choose a manuscript</h2>
+                    <p id="workspace-manuscript-subtitle" class="muted">Each manuscript has its own ingest, analysis, merge, resolution, and report history.</p>
+                  </div>
+                  <div class="panel-actions wrap">
+                    <button type="button" id="run-full-pipeline">Run Full Pipeline</button>
+                    <button type="button" id="open-ingest-results" class="secondary-button">Open Ingest Results</button>
+                  </div>
                 </div>
-                <div class="panel-actions wrap">
-                  <button type="button" id="run-full-pipeline">Run Full Pipeline</button>
-                  <button type="button" id="open-ingest-results" class="secondary-button">Open Ingest Results</button>
+                <div class="grid two">
+                  <div>
+                    <h3>Manuscript Details</h3>
+                    <div id="manuscript-detail" class="summary-block">Select a manuscript to see pipeline-ready details.</div>
+                  </div>
+                  <div class="stack">
+                    <label for="config-profile-select">Runtime profile</label>
+                    <select id="config-profile-select"></select>
+                    <div id="config-profile-detail" class="summary-block">Select a config profile to inspect models, chunking, and timeouts.</div>
+                  </div>
                 </div>
-              </div>
-              <div class="grid two">
-                <div>
-                  <h3>Manuscript Details</h3>
-                  <div id="manuscript-detail" class="summary-block">Select a manuscript to see pipeline-ready details.</div>
-                </div>
-                <div class="stack">
-                  <label for="config-profile-select">Runtime profile</label>
-                  <select id="config-profile-select"></select>
-                  <div id="config-profile-detail" class="summary-block">Select a config profile to inspect models, chunking, and timeouts.</div>
-                </div>
-              </div>
-            </article>
-          </section>
+              </article>
+            </section>
 
-          <section class="workspace-middle">
-            <article class="panel pipeline-panel">
-              <div class="panel-head">
-                <h2>Pipeline Workspace</h2>
-                <button type="button" data-refresh="pipelines">Refresh</button>
-              </div>
-              <div id="stage-board" class="stage-board"></div>
-              <p id="stage-action-status" class="muted">Select a manuscript and config profile, then trigger a stage or the full pipeline.</p>
-            </article>
-
-            <aside class="workspace-rail">
+            <section class="workspace-single">
               <article class="panel">
                 <div class="panel-head">
                   <h2>Workspace Status</h2>
@@ -129,7 +126,24 @@
                 </div>
                 <div id="system-status" class="summary-block">Sign in to load workspace status.</div>
               </article>
+            </section>
+          </section>
 
+          <section id="page-pipeline" class="workspace-page hidden">
+            <section class="workspace-single">
+              <article class="panel pipeline-panel">
+                <div class="panel-head">
+                  <h2>Pipeline Workspace</h2>
+                  <button type="button" data-refresh="pipelines">Refresh</button>
+                </div>
+                <div id="stage-board" class="stage-board"></div>
+                <p id="stage-action-status" class="muted">Select a manuscript and config profile, then trigger a stage or the full pipeline.</p>
+              </article>
+            </section>
+          </section>
+
+          <section id="page-jobs" class="workspace-page hidden">
+            <section class="workspace-single">
               <article class="panel">
                 <div class="panel-head">
                   <h2>Job Timeline</h2>
@@ -137,7 +151,23 @@
                 </div>
                 <ul id="job-list" class="list selectable"></ul>
               </article>
-            </aside>
+          </section>
+
+            <article class="panel workspace-bottom">
+              <div class="panel-head">
+                <h2>Selected Job</h2>
+                <div class="panel-actions wrap">
+                  <button type="button" id="cancel-selected-job" class="danger-button">Cancel Job</button>
+                  <button type="button" data-refresh="selected-job">Refresh</button>
+                </div>
+              </div>
+              <div class="panel-actions wrap" id="job-downloads"></div>
+              <div class="grid three">
+                <div id="job-detail" class="summary-block">Choose a job to inspect stage timing, command lines, and errors.</div>
+                <div id="job-progress" class="summary-block">Live chunk progress appears here for categorisation and analysis jobs.</div>
+                <div id="job-artifacts" class="summary-block">Artifact index appears here, including checksums and output paths.</div>
+              </div>
+            </article>
           </section>
 
           <section id="admin-console" class="panel hidden">
@@ -153,22 +183,6 @@
               <div id="admin-interface-note" class="summary-block">Admin mode is intended for platform oversight. Your manuscript workflow remains available above.</div>
             </div>
           </section>
-
-          <article class="panel workspace-bottom">
-            <div class="panel-head">
-              <h2>Selected Job</h2>
-              <div class="panel-actions wrap">
-                <button type="button" id="cancel-selected-job" class="danger-button">Cancel Job</button>
-                <button type="button" data-refresh="selected-job">Refresh</button>
-              </div>
-            </div>
-            <div class="panel-actions wrap" id="job-downloads"></div>
-            <div class="grid three">
-              <div id="job-detail" class="summary-block">Choose a job to inspect stage timing, command lines, and errors.</div>
-              <div id="job-progress" class="summary-block">Live chunk progress appears here for categorisation and analysis jobs.</div>
-              <div id="job-artifacts" class="summary-block">Artifact index appears here, including checksums and output paths.</div>
-            </div>
-          </article>
         </section>
       </section>
     </main>
