@@ -132,6 +132,10 @@ class BaseJobStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def pause_job(self, job_id: str, reason: str = "Paused by user") -> Optional[JobRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
         raise NotImplementedError
 
@@ -356,7 +360,15 @@ class JobStore(BaseJobStore):
             self._persist_artifact_index()
             return _job_from_dict(asdict(job))
 
-    def cancel_job(self, job_id: str, reason: str = "Cancelled by user") -> Optional[JobRecord]:
+    def _request_control_state(
+        self,
+        job_id: str,
+        *,
+        reason: str,
+        requested_status: str,
+        terminal_status: str,
+        requested_at_key: str,
+    ) -> Optional[JobRecord]:
         with self._lock:
             job = self._jobs.get(job_id)
             if job is None:
@@ -366,28 +378,47 @@ class JobStore(BaseJobStore):
 
             now = utc_now_iso()
             active_stage = next((stage for stage in job.stage_runs if stage.status == "running"), None)
-            if job.status == "queued":
-                job.status = "cancelled"
+            if job.status in {"queued", "paused"}:
+                job.status = terminal_status
                 if active_stage is None and job.stage_runs:
                     active_stage = job.stage_runs[0]
                 if active_stage is not None:
-                    active_stage.status = "cancelled"
+                    active_stage.status = terminal_status
                     active_stage.finished_at = now
                     active_stage.error = reason
             else:
-                job.status = "cancel_requested"
+                job.status = requested_status
                 if active_stage is not None:
                     active_stage.error = reason
 
             job.updated_at = now
             job.options = {
                 **job.options,
-                "_cancel_requested_at": now,
+                requested_at_key: now,
                 "_cancel_reason": reason,
+                "_control_target_status": terminal_status,
             }
             self._jobs[job.job_id] = job
             self._persist(job)
             return _job_from_dict(asdict(job))
+
+    def cancel_job(self, job_id: str, reason: str = "Cancelled by user") -> Optional[JobRecord]:
+        return self._request_control_state(
+            job_id,
+            reason=reason,
+            requested_status="cancel_requested",
+            terminal_status="cancelled",
+            requested_at_key="_cancel_requested_at",
+        )
+
+    def pause_job(self, job_id: str, reason: str = "Paused by user") -> Optional[JobRecord]:
+        return self._request_control_state(
+            job_id,
+            reason=reason,
+            requested_status="pause_requested",
+            terminal_status="paused",
+            requested_at_key="_pause_requested_at",
+        )
 
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
         with self._lock:
@@ -433,6 +464,8 @@ class JobStore(BaseJobStore):
             summary: Dict[str, int] = {
                 "queued": 0,
                 "running": 0,
+                "paused": 0,
+                "pause_requested": 0,
                 "cancel_requested": 0,
                 "succeeded": 0,
                 "failed": 0,
@@ -484,9 +517,13 @@ class JobStore(BaseJobStore):
         now = datetime.now(timezone.utc)
         with self._lock:
             for job in self._jobs.values():
-                if job.status != "cancel_requested":
+                if job.status not in {"cancel_requested", "pause_requested"}:
                     continue
-                requested_at = job.options.get("_cancel_requested_at") or job.updated_at
+                requested_at = (
+                    job.options.get("_pause_requested_at")
+                    or job.options.get("_cancel_requested_at")
+                    or job.updated_at
+                )
                 try:
                     requested_dt = datetime.fromisoformat(str(requested_at))
                 except ValueError:
@@ -494,13 +531,14 @@ class JobStore(BaseJobStore):
                 age = (now - requested_dt).total_seconds()
                 if age < stale_after_seconds:
                     continue
-                job.status = "cancelled"
+                target_status = str(job.options.get("_control_target_status") or "cancelled")
+                job.status = target_status
                 job.updated_at = utc_now_iso()
                 for stage in job.stage_runs:
                     if stage.status == "running":
-                        stage.status = "cancelled"
+                        stage.status = target_status
                         stage.finished_at = job.updated_at
-                        stage.error = stage.error or "Cancelled by housekeeping"
+                        stage.error = stage.error or ("Paused by housekeeping" if target_status == "paused" else "Cancelled by housekeeping")
                         break
                 self._persist(job)
                 finalized.append(job.job_id)

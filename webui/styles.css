@@ -390,7 +390,9 @@ h3 {
 }
 
 .status-queued .status-pill,
+.status-paused .status-pill,
 .status-pending .status-pill,
+.status-pause_requested .status-pill,
 .status-cancel_requested .status-pill {
   background: rgba(173, 123, 26, 0.14);
   color: var(--pending);

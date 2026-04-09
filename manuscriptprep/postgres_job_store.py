@@ -214,7 +214,15 @@ class PostgresJobStore(BaseJobStore):
             conn.commit()
         return self._row_to_job(asdict(job))
 
-    def cancel_job(self, job_id: str, reason: str = "Cancelled by user") -> Optional[JobRecord]:
+    def _request_control_state(
+        self,
+        job_id: str,
+        *,
+        reason: str,
+        requested_status: str,
+        terminal_status: str,
+        requested_at_key: str,
+    ) -> Optional[JobRecord]:
         with self._connect(autocommit=False) as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
@@ -237,24 +245,25 @@ class PostgresJobStore(BaseJobStore):
 
             now = utc_now_iso()
             active_stage = next((stage for stage in job.stage_runs if stage.status == "running"), None)
-            if job.status == "queued":
-                job.status = "cancelled"
+            if job.status in {"queued", "paused"}:
+                job.status = terminal_status
                 if active_stage is None and job.stage_runs:
                     active_stage = job.stage_runs[0]
                 if active_stage is not None:
-                    active_stage.status = "cancelled"
+                    active_stage.status = terminal_status
                     active_stage.finished_at = now
                     active_stage.error = reason
             else:
-                job.status = "cancel_requested"
+                job.status = requested_status
                 if active_stage is not None:
                     active_stage.error = reason
 
             job.updated_at = now
             job.options = {
                 **job.options,
-                "_cancel_requested_at": now,
+                requested_at_key: now,
                 "_cancel_reason": reason,
+                "_control_target_status": terminal_status,
             }
             cur.execute(
                 f"""
@@ -266,6 +275,24 @@ class PostgresJobStore(BaseJobStore):
             )
             conn.commit()
             return self._row_to_job(asdict(job))
+
+    def cancel_job(self, job_id: str, reason: str = "Cancelled by user") -> Optional[JobRecord]:
+        return self._request_control_state(
+            job_id,
+            reason=reason,
+            requested_status="cancel_requested",
+            terminal_status="cancelled",
+            requested_at_key="_cancel_requested_at",
+        )
+
+    def pause_job(self, job_id: str, reason: str = "Paused by user") -> Optional[JobRecord]:
+        return self._request_control_state(
+            job_id,
+            reason=reason,
+            requested_status="pause_requested",
+            terminal_status="paused",
+            requested_at_key="_pause_requested_at",
+        )
 
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
         with self._connect(autocommit=False) as conn, conn.cursor() as cur:
@@ -357,6 +384,8 @@ class PostgresJobStore(BaseJobStore):
             "queued": 0,
             "running": 0,
             "cancel_requested": 0,
+            "pause_requested": 0,
+            "paused": 0,
             "succeeded": 0,
             "failed": 0,
             "cancelled": 0,
@@ -416,8 +445,9 @@ class PostgresJobStore(BaseJobStore):
                 f"""
                 SELECT job_id, payload
                 FROM {self.schema}.gateway_jobs
-                WHERE payload->>'status' = 'cancel_requested'
+                WHERE payload->>'status' IN ('cancel_requested', 'pause_requested')
                   AND COALESCE(
+                        (payload->'options'->>'_pause_requested_at')::timestamptz,
                         (payload->'options'->>'_cancel_requested_at')::timestamptz,
                         updated_at
                       ) < (NOW() - (%s || ' seconds')::interval)
@@ -429,13 +459,14 @@ class PostgresJobStore(BaseJobStore):
             finalized: list[str] = []
             for job_id, payload in rows:
                 job = self._row_to_job(payload)
-                job.status = "cancelled"
+                target_status = str(job.options.get("_control_target_status") or "cancelled")
+                job.status = target_status
                 job.updated_at = utc_now_iso()
                 for stage in job.stage_runs:
                     if stage.status == "running":
-                        stage.status = "cancelled"
+                        stage.status = target_status
                         stage.finished_at = job.updated_at
-                        stage.error = stage.error or "Cancelled by housekeeping"
+                        stage.error = stage.error or ("Paused by housekeeping" if target_status == "paused" else "Cancelled by housekeeping")
                         break
                 cur.execute(
                     f"""

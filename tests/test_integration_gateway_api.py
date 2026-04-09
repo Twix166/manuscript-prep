@@ -214,6 +214,35 @@ def test_gateway_api_can_cancel_jobs(tmp_path) -> None:
     assert system["queue"]["cancel_requested"] == 1
 
 
+def test_gateway_api_can_pause_and_resume_jobs(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    app = GatewayAPI(store=store)
+
+    status, created = app.create_job({"pipeline": "orchestrate", "book_slug": "treasure_island", "title": "Treasure Island"})
+    assert status == 201
+    running = app.store.get_job(created["job_id"])
+    assert running is not None
+    running.status = "running"
+    running.stage_runs[0].status = "running"
+    app.store.update_job(running)
+
+    status, pause_requested = app.pause_job(created["job_id"])
+    assert status == 202
+    assert pause_requested["status"] == "pause_requested"
+    assert pause_requested["stage_runs"][0]["error"] == "Paused by user"
+
+    paused = store.get_job(created["job_id"])
+    assert paused is not None
+    paused.status = "paused"
+    paused.stage_runs[0].status = "paused"
+    store.update_job(paused)
+
+    status, resumed = app.run_job(created["job_id"])
+    assert status == 202
+    assert resumed["status"] == "queued"
+    assert resumed["stage_runs"][0]["status"] == "pending"
+
+
 def test_job_worker_finalizes_stale_cancel_requested_jobs(tmp_path) -> None:
     store = JobStore(root=tmp_path / "jobs")
     worker = JobWorker(store=store, adapter=ExecutionAdapter(), poll_interval=0.01, cancel_grace_seconds=0)
@@ -233,6 +262,28 @@ def test_job_worker_finalizes_stale_cancel_requested_jobs(tmp_path) -> None:
     assert refreshed is not None
     assert refreshed.status == "cancelled"
     assert refreshed.stage_runs[0].status == "cancelled"
+
+
+def test_job_worker_finalizes_stale_pause_requested_jobs(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    worker = JobWorker(store=store, adapter=ExecutionAdapter(), poll_interval=0.01, cancel_grace_seconds=0)
+
+    status, created = GatewayAPI(store=store).create_job({"pipeline": "orchestrate", "book_slug": "treasure_island", "title": "Treasure Island"})
+    assert status == 201
+    running = store.get_job(created["job_id"])
+    assert running is not None
+    running.status = "pause_requested"
+    running.stage_runs[0].status = "running"
+    running.options["_pause_requested_at"] = "2026-04-09T09:59:00+00:00"
+    running.options["_control_target_status"] = "paused"
+    store.update_job(running)
+
+    worker.recover_stale_jobs()
+
+    refreshed = store.get_job(created["job_id"])
+    assert refreshed is not None
+    assert refreshed.status == "paused"
+    assert refreshed.stage_runs[0].status == "paused"
 
 
 def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results(tmp_path, sample_pdf, test_env) -> None:
@@ -383,7 +434,7 @@ def test_gateway_api_exposes_orchestrate_progress_from_log(tmp_path) -> None:
     assert progress["available"] is True
     assert progress["chunks_total"] == 3
     assert progress["current_chunk"] == "chunk_001"
-    assert progress["current_chunk_index"] == 1
+    assert progress["current_chunk_index"] == 2
     assert progress["current_pass"] == "dialogue"
     assert progress["current_pass_index"] == 2
     assert progress["current_model"] == "manuscriptprep-dialogue"

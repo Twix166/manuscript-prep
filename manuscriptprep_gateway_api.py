@@ -26,6 +26,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
+import re
 
 from manuscriptprep.api_models import (
     JobCreateRequest,
@@ -481,6 +482,14 @@ class GatewayAPI:
     def _pass_order(self) -> list[str]:
         return ["structure", "dialogue", "entities", "dossiers"]
 
+    def _chunk_index_from_name(self, chunk_name: Optional[str]) -> Optional[int]:
+        if not chunk_name:
+            return None
+        match = re.search(r"(\d+)$", str(chunk_name))
+        if not match:
+            return None
+        return int(match.group(1)) + 1
+
     def _resolve_orchestrate_output_dir(self, job) -> Optional[Path]:
         output_dir = job.options.get("output_dir")
         if not output_dir and job.config_path and job.book_slug:
@@ -683,7 +692,7 @@ class GatewayAPI:
 
         progress["current_chunk"] = current_chunk
         if current_chunk:
-            progress["current_chunk_index"] = progress["chunks_completed"] + 1
+            progress["current_chunk_index"] = self._chunk_index_from_name(current_chunk) or (progress["chunks_completed"] + 1)
         elif progress["chunks_completed"] and total_chunks and progress["chunks_completed"] >= total_chunks:
             progress["current_chunk_index"] = total_chunks
 
@@ -898,6 +907,21 @@ class GatewayAPI:
             return HTTPStatus.ACCEPTED, to_dict(job)
         if job.status == "queued":
             return HTTPStatus.ACCEPTED, to_dict(job)
+        if job.status == "paused":
+            job.status = "queued"
+            job.updated_at = utc_now_iso()
+            for stage in job.stage_runs:
+                if stage.status != "succeeded":
+                    stage.status = "pending"
+                    stage.finished_at = None
+                    stage.error = None
+            job.options = {
+                key: value
+                for key, value in job.options.items()
+                if key not in {"_pause_requested_at", "_cancel_requested_at", "_cancel_reason", "_control_target_status", "_worker_id", "_claimed_at"}
+            }
+            job = self.store.update_job(job)
+            return HTTPStatus.ACCEPTED, to_dict(job)
         if job.status in {"succeeded", "failed", "cancelled"}:
             job.status = "queued"
             job.updated_at = utc_now_iso()
@@ -925,6 +949,20 @@ class GatewayAPI:
         if not self._can_access_job(actor, job.owner_user_id):
             return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
         updated = self.store.cancel_job(job_id)
+        if updated is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        return HTTPStatus.ACCEPTED, to_dict(updated)
+
+    def pause_job(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
+        updated = self.store.pause_job(job_id)
         if updated is None:
             return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
         return HTTPStatus.ACCEPTED, to_dict(updated)
@@ -1178,6 +1216,12 @@ class GatewayHandler(BaseHTTPRequestHandler):
         if path.startswith("/v1/jobs/") and path.endswith("/cancel"):
             job_id = path.split("/")[-2]
             status, response = self.app.cancel_job(job_id, actor=self._current_actor())
+            self._write_json(status, response)
+            return
+
+        if path.startswith("/v1/jobs/") and path.endswith("/pause"):
+            job_id = path.split("/")[-2]
+            status, response = self.app.pause_job(job_id, actor=self._current_actor())
             self._write_json(status, response)
             return
 

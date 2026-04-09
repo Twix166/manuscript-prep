@@ -221,9 +221,13 @@ function latestStageCardJobForPipeline(pipeline) {
   if (!jobs.length) {
     return null;
   }
-  const active = jobs.find((job) => ["queued", "running", "cancel_requested"].includes(job.status));
+  const active = jobs.find((job) => ["queued", "running", "cancel_requested", "pause_requested"].includes(job.status));
   if (active) {
     return active;
+  }
+  const paused = jobs.find((job) => job.status === "paused");
+  if (paused) {
+    return paused;
   }
   const succeeded = jobs.find((job) => job.status === "succeeded");
   if (succeeded) {
@@ -248,7 +252,7 @@ function workflowExpansionKey() {
   }
   for (const stage of fullPipeline.stages) {
     const latestJob = latestStageCardJobForPipeline(stage.name);
-    if (latestJob && ["queued", "running", "cancel_requested"].includes(latestJob.status)) {
+    if (latestJob && ["queued", "running", "cancel_requested", "pause_requested", "paused"].includes(latestJob.status)) {
       return stage.name;
     }
     if (!latestJob || latestJob.status !== "succeeded") {
@@ -511,6 +515,10 @@ function renderCompactStageProgress(progress) {
   }
   const throughput = progress.reported_tps || progress.estimated_tps;
   return `Chunk ${progress.current_chunk_index || "?"}/${progress.chunks_total || "?"}: ${progress.current_chunk} | Pass ${progress.current_pass_index || "?"}/4: ${progress.current_pass || "starting"} | ${progress.current_step || "working"}${throughput ? ` | ${throughput} tok/s` : ""}`;
+}
+
+async function pauseJob(jobId) {
+  return sendJson("POST", `/v1/jobs/${encodeURIComponent(jobId)}/pause`, {});
 }
 
 function stringifyFlag(value) {
@@ -913,6 +921,10 @@ async function triggerPipeline(pipeline) {
   }
 }
 
+async function resumeJob(jobId) {
+  return sendJson("POST", `/v1/jobs/${encodeURIComponent(jobId)}/run`, {});
+}
+
 async function openLatestIngestResults() {
   const manuscript = selectedManuscript();
   if (!manuscript || !manuscript.latest_ingest) {
@@ -987,6 +999,64 @@ function renderStageBoard() {
     if (expandedKey === stage.name) {
       card.open = true;
     }
+    const actionRow = document.createElement("div");
+    actionRow.className = "stage-card-actions";
+    const runButton = document.createElement("button");
+    runButton.type = "button";
+    runButton.textContent = `Run ${stageLabels[stage.name] || stage.name}`;
+    runButton.disabled = Boolean(latestJob && ["queued", "running", "cancel_requested", "pause_requested"].includes(latestJob.status));
+    runButton.addEventListener("click", () => triggerPipeline(stage.name));
+
+    const pauseButton = document.createElement("button");
+    pauseButton.type = "button";
+    pauseButton.className = "secondary-button";
+    pauseButton.textContent = stageStatus === "pause_requested" ? "Pausing" : "Pause";
+    pauseButton.disabled = !latestJob || !["queued", "running"].includes(stageStatus);
+    pauseButton.addEventListener("click", async () => {
+      try {
+        await pauseJob(latestJob.job_id);
+        els.stageActionStatus.textContent = `Pause requested for job ${latestJob.job_id}`;
+        await refreshJobs();
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
+    });
+
+    const resumeButton = document.createElement("button");
+    resumeButton.type = "button";
+    resumeButton.className = "secondary-button";
+    resumeButton.textContent = "Resume";
+    resumeButton.disabled = !latestJob || stageStatus !== "paused";
+    resumeButton.addEventListener("click", async () => {
+      try {
+        await resumeJob(latestJob.job_id);
+        els.stageActionStatus.textContent = `Resumed job ${latestJob.job_id}`;
+        await refreshJobs();
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
+    });
+
+    const stopButton = document.createElement("button");
+    stopButton.type = "button";
+    stopButton.className = "danger-button";
+    stopButton.textContent = stageStatus === "cancel_requested" ? "Stopping" : "Stop";
+    stopButton.disabled = !latestJob || ["cancel_requested", "pause_requested", "succeeded", "failed", "cancelled", "not-started"].includes(stageStatus);
+    stopButton.addEventListener("click", async () => {
+      try {
+        await cancelJob(latestJob.job_id);
+        els.stageActionStatus.textContent = `Stop requested for job ${latestJob.job_id}`;
+        await refreshJobs();
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
+    });
+
+    actionRow.appendChild(runButton);
+    actionRow.appendChild(pauseButton);
+    actionRow.appendChild(resumeButton);
+    actionRow.appendChild(stopButton);
+
     card.innerHTML = `
       <summary>
         <div class="workflow-step-head">
@@ -1004,19 +1074,17 @@ function renderStageBoard() {
         <p class="meta"><strong>Last update:</strong> ${latestJob ? formatDate(latestJob.updated_at) : "n/a"}</p>
         ${throughput ? `<p class="meta"><strong>Throughput:</strong> ${throughput} tok/s</p>` : ""}
         ${compactProgress ? `<p class="meta"><strong>Live progress:</strong> ${compactProgress}</p>` : ""}
-        <div class="stage-card-actions">
-          <button type="button" data-run-stage="${stage.name}">Run ${stageLabels[stage.name] || stage.name}</button>
-        </div>
+        <div class="stage-card-actions" data-stage-actions="${stage.name}"></div>
       </div>
     `;
-    card.querySelector("button").addEventListener("click", () => triggerPipeline(stage.name));
+    card.querySelector(`[data-stage-actions="${stage.name}"]`).replaceWith(actionRow);
     if (stage.name === "ingest" && latestIngestForSelectedManuscript()) {
       const viewButton = document.createElement("button");
       viewButton.type = "button";
       viewButton.className = "secondary-button";
       viewButton.textContent = "Open Ingest Results";
       viewButton.addEventListener("click", openLatestIngestResults);
-      card.querySelector(".stage-card-actions").appendChild(viewButton);
+      actionRow.appendChild(viewButton);
     }
     if (stage.name === "orchestrate" && latestJob) {
       const detailButton = document.createElement("button");
@@ -1024,7 +1092,7 @@ function renderStageBoard() {
       detailButton.className = "secondary-button";
       detailButton.textContent = "Detail";
       detailButton.addEventListener("click", () => openAnalysisDetails(latestJob));
-      card.querySelector(".stage-card-actions").appendChild(detailButton);
+      actionRow.appendChild(detailButton);
     }
     els.stageBoard.appendChild(card);
   }
