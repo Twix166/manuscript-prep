@@ -165,6 +165,107 @@ def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results
     assert "treasure_island" in ingest_results["ingest_manifest"]["artifact"]["path"]
 
 
+def test_gateway_api_exposes_orchestrate_progress_from_log(tmp_path) -> None:
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"))
+    input_dir = tmp_path / "chunks"
+    output_dir = tmp_path / "out"
+    input_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for index in range(1, 4):
+        (input_dir / f"chunk_{index:03d}.txt").write_text(f"chunk {index}\n", encoding="utf-8")
+
+    status, created = app.create_job(
+        {
+            "pipeline": "orchestrate",
+            "book_slug": "treasure_island",
+            "options": {
+                "input_dir": str(input_dir),
+                "output_dir": str(output_dir),
+            },
+        }
+    )
+    assert status == 201
+
+    persisted = app.store.get_job(created["job_id"])
+    assert persisted is not None
+    persisted.created_at = "2026-04-09T09:59:00+00:00"
+    persisted.updated_at = "2026-04-09T09:59:00+00:00"
+    persisted.status = "running"
+    persisted.stage_runs[0].status = "running"
+    persisted.stage_runs[0].started_at = "2026-04-09T09:59:30+00:00"
+    app.store.update_job(persisted)
+
+    log_path = output_dir / "orchestrator.log.jsonl"
+    log_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "timestamp": "2026-04-09T10:00:00+00:00",
+                        "event_type": "chunk_start",
+                        "message": "Processing chunk",
+                        "chunk": "chunk_001",
+                        "step": "loading excerpt",
+                    }
+                ),
+                json.dumps(
+                    {
+                        "timestamp": "2026-04-09T10:00:10+00:00",
+                        "event_type": "pass_start",
+                        "message": "Starting pass",
+                        "chunk": "chunk_001",
+                        "pass": "structure",
+                        "step": "starting structure",
+                        "model": "manuscriptprep-structure",
+                        "attempt": 1,
+                        "idle_timeout_s": 180,
+                    }
+                ),
+                json.dumps(
+                    {
+                        "timestamp": "2026-04-09T10:01:30+00:00",
+                        "event_type": "pass_success",
+                        "message": "Pass completed successfully",
+                        "chunk": "chunk_001",
+                        "pass": "structure",
+                        "step": "completed structure",
+                        "model": "manuscriptprep-structure",
+                        "attempt": 1,
+                        "reported_tps": 44.2,
+                    }
+                ),
+                json.dumps(
+                    {
+                        "timestamp": "2026-04-09T10:01:31+00:00",
+                        "event_type": "pass_start",
+                        "message": "Starting pass",
+                        "chunk": "chunk_001",
+                        "pass": "dialogue",
+                        "step": "starting dialogue",
+                        "model": "manuscriptprep-dialogue",
+                        "attempt": 1,
+                        "idle_timeout_s": 180,
+                    }
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    status, progress = app.get_job_progress(created["job_id"])
+    assert status == 200
+    assert progress["available"] is True
+    assert progress["chunks_total"] == 3
+    assert progress["current_chunk"] == "chunk_001"
+    assert progress["current_chunk_index"] == 1
+    assert progress["current_pass"] == "dialogue"
+    assert progress["current_pass_index"] == 2
+    assert progress["current_model"] == "manuscriptprep-dialogue"
+    assert progress["reported_tps"] == 44.2
+    assert progress["recent_events"]
+
+
 def test_gateway_api_ingest_artifacts_follow_manuscript_slug(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

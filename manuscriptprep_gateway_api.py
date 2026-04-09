@@ -17,6 +17,8 @@ import mimetypes
 import hashlib
 import json
 import os
+from collections import Counter
+from datetime import datetime
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -352,6 +354,185 @@ class GatewayAPI:
             jobs = [job for job in jobs if job.pipeline == pipeline]
         return HTTPStatus.OK, {"jobs": [to_dict(item) for item in jobs]}
 
+    def _resolve_orchestrate_progress_paths(self, job) -> Tuple[Optional[Path], Optional[Path]]:
+        input_dir = job.options.get("input_dir")
+        output_dir = job.options.get("output_dir")
+        log_path: Optional[Path] = None
+        if (not input_dir or not output_dir) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.chunks_root / str(job.book_slug))
+            output_dir = output_dir or str(paths.output_root / str(job.book_slug))
+            logs_root = cfg.data.get("paths", {}).get("logs_root")
+            if logs_root:
+                log_path = Path(str(logs_root)).expanduser() / "orchestrator.log.jsonl"
+        if not input_dir or not output_dir:
+            return None, None
+        return Path(str(input_dir)), (log_path or (Path(str(output_dir)) / "orchestrator.log.jsonl"))
+
+    def _pass_order(self) -> list[str]:
+        return ["structure", "dialogue", "entities", "dossiers"]
+
+    def _build_orchestrate_progress(self, job) -> Dict[str, Any]:
+        input_dir, log_path = self._resolve_orchestrate_progress_paths(job)
+        total_chunks = 0
+        if input_dir and input_dir.exists():
+            total_chunks = len([item for item in input_dir.glob("*.txt") if item.is_file()])
+
+        progress: Dict[str, Any] = {
+            "job_id": job.job_id,
+            "pipeline": job.pipeline,
+            "available": bool(log_path and log_path.exists()),
+            "chunks_total": total_chunks,
+            "chunks_completed": 0,
+            "chunks_failed": 0,
+            "current_chunk": None,
+            "current_chunk_index": None,
+            "chunk_percent": 0.0,
+            "current_pass": None,
+            "current_pass_index": None,
+            "pass_percent": 0.0,
+            "current_step": None,
+            "current_model": None,
+            "current_attempt": None,
+            "current_idle_timeout_s": None,
+            "idle_backoffs": 0,
+            "reported_tps": None,
+            "estimated_tps": None,
+            "last_event_type": None,
+            "last_event_at": None,
+            "recent_events": [],
+        }
+        if not log_path or not log_path.exists():
+            return progress
+
+        lower_bound = None
+        try:
+            lower_bound = datetime.fromisoformat(job.created_at)
+        except ValueError:
+            lower_bound = None
+        orchestrate_stage = next((stage for stage in job.stage_runs if stage.name == "orchestrate"), None)
+        if orchestrate_stage and orchestrate_stage.started_at:
+            try:
+                stage_started_at = datetime.fromisoformat(orchestrate_stage.started_at)
+            except ValueError:
+                stage_started_at = None
+            if stage_started_at is not None and (lower_bound is None or stage_started_at > lower_bound):
+                lower_bound = stage_started_at
+
+        pass_order = self._pass_order()
+        chunk_starts: list[str] = []
+        counts = Counter()
+        recent_events: list[Dict[str, Any]] = []
+        latest_for_chunk: Dict[str, Any] = {}
+
+        with log_path.open("r", encoding="utf-8") as handle:
+            for raw_line in handle:
+                line = raw_line.strip()
+                if not line:
+                    continue
+                try:
+                    event = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if lower_bound is not None and event.get("timestamp"):
+                    try:
+                        event_ts = datetime.fromisoformat(str(event["timestamp"]))
+                    except ValueError:
+                        event_ts = None
+                    if event_ts is not None and event_ts < lower_bound:
+                        continue
+                event_type = event.get("event_type")
+                chunk = event.get("chunk")
+                if event_type == "chunk_start" and chunk:
+                    chunk_starts.append(chunk)
+                if event_type in {"chunk_success", "chunk_failure"}:
+                    counts[event_type] += 1
+                if chunk:
+                    latest_for_chunk[chunk] = event
+                recent_events.append(
+                    {
+                        "timestamp": event.get("timestamp"),
+                        "event_type": event_type,
+                        "chunk": chunk,
+                        "pass": event.get("pass"),
+                        "step": event.get("step"),
+                        "message": event.get("message"),
+                    }
+                )
+                if len(recent_events) > 8:
+                    recent_events = recent_events[-8:]
+
+                progress["last_event_type"] = event_type
+                progress["last_event_at"] = event.get("timestamp")
+                if event.get("step"):
+                    progress["current_step"] = event.get("step")
+                if event.get("model"):
+                    progress["current_model"] = event.get("model")
+                if event.get("attempt") is not None:
+                    progress["current_attempt"] = event.get("attempt")
+                if event.get("idle_timeout_s") is not None:
+                    progress["current_idle_timeout_s"] = event.get("idle_timeout_s")
+                if event.get("idle_timeout_failures_for_pass") is not None:
+                    progress["idle_backoffs"] = event.get("idle_timeout_failures_for_pass")
+                if event.get("reported_tps") is not None:
+                    progress["reported_tps"] = event.get("reported_tps")
+                if event.get("estimated_tps") is not None:
+                    progress["estimated_tps"] = event.get("estimated_tps")
+                if event.get("pass") in pass_order:
+                    progress["current_pass"] = event.get("pass")
+
+        progress["chunks_completed"] = counts["chunk_success"]
+        progress["chunks_failed"] = counts["chunk_failure"]
+        progress["recent_events"] = recent_events
+
+        current_chunk = None
+        for chunk_name in reversed(chunk_starts):
+            last_for_chunk = latest_for_chunk.get(chunk_name, {})
+            if last_for_chunk.get("event_type") not in {"chunk_success", "chunk_failure"}:
+                current_chunk = chunk_name
+                break
+        if current_chunk is None and chunk_starts:
+            current_chunk = chunk_starts[-1]
+
+        progress["current_chunk"] = current_chunk
+        if current_chunk:
+            progress["current_chunk_index"] = progress["chunks_completed"] + 1
+        elif progress["chunks_completed"] and total_chunks and progress["chunks_completed"] >= total_chunks:
+            progress["current_chunk_index"] = total_chunks
+
+        if total_chunks > 0:
+            if current_chunk and progress["current_chunk_index"]:
+                progress["chunk_percent"] = round((progress["current_chunk_index"] - 1) / total_chunks * 100, 1)
+            else:
+                progress["chunk_percent"] = round(progress["chunks_completed"] / total_chunks * 100, 1)
+
+        if progress["current_pass"] in pass_order:
+            progress["current_pass_index"] = pass_order.index(progress["current_pass"]) + 1
+            progress["pass_percent"] = round((progress["current_pass_index"] - 1) / len(pass_order) * 100, 1)
+
+        return progress
+
+    def get_job_progress(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
+
+        if job.pipeline == "orchestrate":
+            return HTTPStatus.OK, self._build_orchestrate_progress(job)
+
+        return HTTPStatus.OK, {
+            "job_id": job.job_id,
+            "pipeline": job.pipeline,
+            "available": False,
+            "message": "Live chunk progress is currently available for categorisation and analysis jobs only.",
+        }
+
     def get_job(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
         if not allowed:
@@ -638,6 +819,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
             if len(parts) == 4:
                 _, _, job_id, _ = parts
                 status, payload = self.app.list_job_artifact_index(job_id, actor=self._current_actor())
+                self._write_json(status, payload)
+                return
+
+        if path.startswith("/v1/jobs/") and path.endswith("/progress"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 4:
+                _, _, job_id, _ = parts
+                status, payload = self.app.get_job_progress(job_id, actor=self._current_actor())
                 self._write_json(status, payload)
                 return
 

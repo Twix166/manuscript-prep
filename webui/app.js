@@ -15,6 +15,7 @@ const state = {
   manuscripts: [],
   configProfiles: [],
   jobs: [],
+  jobProgressById: {},
   selectedManuscriptId: null,
   selectedConfigProfileId: null,
   selectedJobId: null,
@@ -44,6 +45,7 @@ const els = {
   systemStatus: document.getElementById("system-status"),
   jobList: document.getElementById("job-list"),
   jobDetail: document.getElementById("job-detail"),
+  jobProgress: document.getElementById("job-progress"),
   jobArtifacts: document.getElementById("job-artifacts"),
   jobDownloads: document.getElementById("job-downloads"),
   runFullPipeline: document.getElementById("run-full-pipeline"),
@@ -346,6 +348,56 @@ function renderJobSummary(job) {
   ].join("\n");
 }
 
+function renderJobProgressSummary(progress) {
+  if (!progress || progress.available === false) {
+    return progress?.message || "Live chunk progress appears here for categorisation and analysis jobs.";
+  }
+
+  const currentChunk = progress.current_chunk
+    ? `${progress.current_chunk} (${progress.current_chunk_index || "?"} of ${progress.chunks_total || "?"})`
+    : progress.chunks_total
+      ? `${progress.chunks_completed || 0} of ${progress.chunks_total} chunks completed`
+      : "Waiting for the first chunk";
+  const currentPass = progress.current_pass
+    ? `${progress.current_pass} (${progress.current_pass_index || "?"} of 4)`
+    : "Waiting for the first pass";
+  const throughput = progress.reported_tps || progress.estimated_tps;
+  const recentEvents = Array.isArray(progress.recent_events) && progress.recent_events.length
+    ? progress.recent_events.slice(-5).map((event) => (
+      `- ${formatDate(event.timestamp)} | ${event.chunk || "-"} | ${event.pass || "-"} | ${event.message || event.event_type || "-"}`
+    ))
+    : ["- No progress events yet"];
+
+  return [
+    `Live Chunk Progress`,
+    "",
+    `Chunk`,
+    `- Current: ${currentChunk}`,
+    `- Completed: ${progress.chunks_completed || 0}`,
+    `- Failed: ${progress.chunks_failed || 0}`,
+    `- Overall progress: ${progress.chunk_percent ?? 0}%`,
+    "",
+    `Pass`,
+    `- Current: ${currentPass}`,
+    `- Step: ${progress.current_step || "n/a"}`,
+    `- Model: ${progress.current_model || "n/a"}`,
+    `- Attempt: ${progress.current_attempt || "n/a"}`,
+    `- Throughput: ${throughput ? `${throughput} tok/s` : "n/a"}`,
+    `- Idle timeout: ${progress.current_idle_timeout_s || "n/a"} s`,
+    `- Idle backoffs: ${progress.idle_backoffs || 0}`,
+    "",
+    `Recent events`,
+    ...recentEvents,
+  ].join("\n");
+}
+
+function renderCompactStageProgress(progress) {
+  if (!progress || progress.available === false || !progress.current_chunk) {
+    return "";
+  }
+  return `Chunk ${progress.current_chunk_index || "?"}/${progress.chunks_total || "?"}: ${progress.current_chunk} | Pass ${progress.current_pass_index || "?"}/4: ${progress.current_pass || "starting"} | ${progress.current_step || "working"}`;
+}
+
 function renderArtifactSummary(artifactIndex) {
   const artifacts = artifactIndex.artifacts || [];
   if (!artifacts.length) {
@@ -493,6 +545,8 @@ function renderStageBoard() {
   for (const stage of fullPipeline.stages) {
     const latestJob = latestJobForPipeline(stage.name);
     const stageStatus = latestJob ? latestJob.status : "not-started";
+    const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
+    const compactProgress = stage.name === "orchestrate" ? renderCompactStageProgress(progress) : "";
     const models = resolveModelRefs(stage);
     const card = document.createElement("article");
     card.className = `stage-card status-${stageStatus}`;
@@ -508,6 +562,7 @@ function renderStageBoard() {
       <p class="meta"><strong>Substeps:</strong> ${(stage.metadata.substeps || []).join(", ") || "n/a"}</p>
       <p class="meta"><strong>Models:</strong> ${models.length ? models.join(", ") : "Deterministic stage"}</p>
       <p class="meta"><strong>Last update:</strong> ${latestJob ? formatDate(latestJob.updated_at) : "n/a"}</p>
+      ${compactProgress ? `<p class="meta"><strong>Live progress:</strong> ${compactProgress}</p>` : ""}
       <div class="stage-card-actions">
         <button type="button" data-run-stage="${stage.name}">Run ${stageLabels[stage.name] || stage.name}</button>
       </div>
@@ -530,6 +585,7 @@ function renderJobs() {
   if (!state.jobs.length) {
     els.jobList.innerHTML = '<li class="muted">No jobs for the selected manuscript yet</li>';
     els.jobDetail.textContent = "Run a stage to generate job details.";
+    els.jobProgress.textContent = "Live chunk progress appears here for categorisation and analysis jobs.";
     els.jobArtifacts.textContent = "Artifact index will appear after a stage produces output.";
     return;
   }
@@ -550,18 +606,24 @@ async function refreshSelectedJob() {
   const job = selectedJob();
   if (!job) {
     els.jobDownloads.innerHTML = "";
+    els.jobProgress.textContent = "Live chunk progress appears here for categorisation and analysis jobs.";
     return;
   }
   try {
-    const [freshJob, artifacts] = await Promise.all([
+    const [freshJob, artifacts, progress] = await Promise.all([
       fetchJson(`/v1/jobs/${job.job_id}`),
       fetchJson(`/v1/jobs/${job.job_id}/artifacts`),
+      fetchJson(`/v1/jobs/${job.job_id}/progress`),
     ]);
+    state.jobProgressById[freshJob.job_id] = progress;
     els.jobDetail.textContent = renderJobSummary(freshJob);
+    els.jobProgress.textContent = renderJobProgressSummary(progress);
     els.jobArtifacts.textContent = renderArtifactSummary(artifacts);
     renderJobDownloads(freshJob, artifacts);
+    renderStageBoard();
   } catch (error) {
     els.jobDetail.textContent = error.message;
+    els.jobProgress.textContent = error.message;
     els.jobArtifacts.textContent = error.message;
     els.jobDownloads.innerHTML = "";
   }
