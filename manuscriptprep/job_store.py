@@ -79,6 +79,7 @@ def _user_from_dict(data: Dict) -> UserRecord:
         api_token=data["api_token"],
         created_at=data["created_at"],
         updated_at=data["updated_at"],
+        password_hash=data.get("password_hash"),
     )
 
 
@@ -159,11 +160,15 @@ class BaseJobStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def upsert_user(self, username: str, role: str, api_token: str) -> UserRecord:
+    def upsert_user(self, username: str, role: str, api_token: str, password_hash: Optional[str] = None) -> UserRecord:
         raise NotImplementedError
 
     @abstractmethod
     def get_user_by_token(self, api_token: str) -> Optional[UserRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_user_by_username(self, username: str) -> Optional[UserRecord]:
         raise NotImplementedError
 
     @abstractmethod
@@ -504,10 +509,12 @@ class JobStore(BaseJobStore):
     def is_ready(self) -> bool:
         return True
 
-    def upsert_user(self, username: str, role: str, api_token: str) -> UserRecord:
+    def upsert_user(self, username: str, role: str, api_token: str, password_hash: Optional[str] = None) -> UserRecord:
         with self._lock:
             now = utc_now_iso()
             existing = self._users.get(api_token)
+            if existing is None:
+                existing = next((user for user in self._users.values() if user.username == username), None)
             if existing is not None:
                 user = UserRecord(
                     user_id=existing.user_id,
@@ -516,6 +523,7 @@ class JobStore(BaseJobStore):
                     api_token=api_token,
                     created_at=existing.created_at,
                     updated_at=now,
+                    password_hash=password_hash if password_hash is not None else existing.password_hash,
                 )
             else:
                 user = UserRecord(
@@ -525,7 +533,11 @@ class JobStore(BaseJobStore):
                     api_token=api_token,
                     created_at=now,
                     updated_at=now,
+                    password_hash=password_hash,
                 )
+            for token, existing_user in list(self._users.items()):
+                if existing_user.user_id == user.user_id and token != api_token:
+                    del self._users[token]
             self._users[api_token] = user
             self._persist_users()
             return _user_from_dict(asdict(user))
@@ -533,6 +545,11 @@ class JobStore(BaseJobStore):
     def get_user_by_token(self, api_token: str) -> Optional[UserRecord]:
         with self._lock:
             user = self._users.get(api_token)
+            return _user_from_dict(asdict(user)) if user is not None else None
+
+    def get_user_by_username(self, username: str) -> Optional[UserRecord]:
+        with self._lock:
+            user = next((item for item in self._users.values() if item.username == username), None)
             return _user_from_dict(asdict(user)) if user is not None else None
 
     def upsert_manuscript(

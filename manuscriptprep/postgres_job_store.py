@@ -85,9 +85,16 @@ class PostgresJobStore(BaseJobStore):
                     username TEXT NOT NULL UNIQUE,
                     role TEXT NOT NULL,
                     api_token TEXT NOT NULL UNIQUE,
+                    password_hash TEXT NULL,
                     created_at TIMESTAMPTZ NOT NULL,
                     updated_at TIMESTAMPTZ NOT NULL
                 )
+                """
+            )
+            cur.execute(
+                f"""
+                ALTER TABLE {self.schema}.gateway_users
+                ADD COLUMN IF NOT EXISTS password_hash TEXT NULL
                 """
             )
             cur.execute(
@@ -451,7 +458,7 @@ class PostgresJobStore(BaseJobStore):
         except Exception:
             return False
 
-    def upsert_user(self, username: str, role: str, api_token: str) -> UserRecord:
+    def upsert_user(self, username: str, role: str, api_token: str, password_hash: Optional[str] = None) -> UserRecord:
         now = utc_now_iso()
         user = UserRecord(
             user_id="",
@@ -460,11 +467,12 @@ class PostgresJobStore(BaseJobStore):
             api_token=api_token,
             created_at=now,
             updated_at=now,
+            password_hash=password_hash,
         )
         with self._connect(autocommit=False) as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT user_id, created_at
+                SELECT user_id, created_at, password_hash
                 FROM {self.schema}.gateway_users
                 WHERE api_token = %s OR username = %s
                 FOR UPDATE
@@ -479,24 +487,26 @@ class PostgresJobStore(BaseJobStore):
                 cur.execute(
                     f"""
                     INSERT INTO {self.schema}.gateway_users
-                        (user_id, username, role, api_token, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
+                        (user_id, username, role, api_token, password_hash, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
                     """,
-                    (user.user_id, username, role, api_token, user.created_at, user.updated_at),
+                    (user.user_id, username, role, api_token, password_hash, user.created_at, user.updated_at),
                 )
             else:
                 user.user_id = row[0]
                 user.created_at = row[1].isoformat()
+                user.password_hash = password_hash if password_hash is not None else row[2]
                 cur.execute(
                     f"""
                     UPDATE {self.schema}.gateway_users
                     SET username = %s,
                         role = %s,
                         api_token = %s,
+                        password_hash = %s,
                         updated_at = %s::timestamptz
                     WHERE user_id = %s
                     """,
-                    (username, role, api_token, user.updated_at, user.user_id),
+                    (username, role, api_token, user.password_hash, user.updated_at, user.user_id),
                 )
             conn.commit()
         return _user_from_dict(asdict(user))
@@ -505,7 +515,7 @@ class PostgresJobStore(BaseJobStore):
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT user_id, username, role, api_token, created_at, updated_at
+                SELECT user_id, username, role, api_token, created_at, updated_at, password_hash
                 FROM {self.schema}.gateway_users
                 WHERE api_token = %s
                 """,
@@ -522,6 +532,32 @@ class PostgresJobStore(BaseJobStore):
                 "api_token": row[3],
                 "created_at": row[4].isoformat(),
                 "updated_at": row[5].isoformat(),
+                "password_hash": row[6],
+            }
+        )
+
+    def get_user_by_username(self, username: str) -> Optional[UserRecord]:
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT user_id, username, role, api_token, created_at, updated_at, password_hash
+                FROM {self.schema}.gateway_users
+                WHERE username = %s
+                """,
+                (username,),
+            )
+            row = cur.fetchone()
+        if row is None:
+            return None
+        return _user_from_dict(
+            {
+                "user_id": row[0],
+                "username": row[1],
+                "role": row[2],
+                "api_token": row[3],
+                "created_at": row[4].isoformat(),
+                "updated_at": row[5].isoformat(),
+                "password_hash": row[6],
             }
         )
 

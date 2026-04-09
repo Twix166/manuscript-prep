@@ -15,8 +15,10 @@ from __future__ import annotations
 import argparse
 import mimetypes
 import hashlib
+import hmac
 import json
 import os
+import secrets
 from collections import Counter
 from datetime import datetime
 from http import HTTPStatus
@@ -114,6 +116,71 @@ class GatewayAPI:
         if not token:
             return None
         return self.store.get_user_by_token(token)
+
+    def _serialize_user(self, user: UserRecord) -> Dict[str, Any]:
+        return {
+            "user_id": user.user_id,
+            "username": user.username,
+            "role": user.role,
+            "created_at": user.created_at,
+            "updated_at": user.updated_at,
+        }
+
+    def _hash_password(self, password: str, *, iterations: int = 390_000) -> str:
+        salt = secrets.token_hex(16)
+        digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt), iterations)
+        return f"pbkdf2_sha256${iterations}${salt}${digest.hex()}"
+
+    def _verify_password(self, password: str, password_hash: str | None) -> bool:
+        if not password_hash:
+            return False
+        try:
+            algorithm, iteration_text, salt_hex, digest_hex = password_hash.split("$", 3)
+            if algorithm != "pbkdf2_sha256":
+                return False
+            iterations = int(iteration_text)
+            expected = bytes.fromhex(digest_hex)
+            candidate = hashlib.pbkdf2_hmac(
+                "sha256",
+                password.encode("utf-8"),
+                bytes.fromhex(salt_hex),
+                iterations,
+            )
+            return hmac.compare_digest(candidate, expected)
+        except (ValueError, TypeError):
+            return False
+
+    def register_user(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        username = str(payload.get("username", "")).strip()
+        password = str(payload.get("password", ""))
+        if len(username) < 3:
+            return HTTPStatus.BAD_REQUEST, {"error": "username must be at least 3 characters"}
+        if len(password) < 8:
+            return HTTPStatus.BAD_REQUEST, {"error": "password must be at least 8 characters"}
+        existing = self.store.get_user_by_username(username)
+        if existing is not None:
+            return HTTPStatus.CONFLICT, {"error": "username is already registered"}
+        api_token = secrets.token_urlsafe(32)
+        user = self.store.upsert_user(
+            username=username,
+            role="user",
+            api_token=api_token,
+            password_hash=self._hash_password(password),
+        )
+        return HTTPStatus.CREATED, {"user": self._serialize_user(user), "api_token": user.api_token}
+
+    def login_user(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        username = str(payload.get("username", "")).strip()
+        password = str(payload.get("password", ""))
+        user = self.store.get_user_by_username(username)
+        if user is None or not self._verify_password(password, user.password_hash):
+            return HTTPStatus.UNAUTHORIZED, {"error": "Invalid username or password"}
+        return HTTPStatus.OK, {"user": self._serialize_user(user), "api_token": user.api_token}
+
+    def current_user(self, actor: Optional[UserRecord]) -> Tuple[int, Dict[str, Any]]:
+        if actor is None:
+            return HTTPStatus.UNAUTHORIZED, {"error": "Authentication required"}
+        return HTTPStatus.OK, {"user": self._serialize_user(actor)}
 
     def _require_actor(self, actor: Optional[UserRecord]) -> Tuple[bool, Tuple[int, Dict[str, Any]] | None]:
         if not self.auth_required:
@@ -780,6 +847,11 @@ class GatewayHandler(BaseHTTPRequestHandler):
             self._write_json(status, payload)
             return
 
+        if path == "/v1/auth/me":
+            status, payload = self.app.current_user(actor=self._current_actor())
+            self._write_json(status, payload)
+            return
+
         if path == "/v1/pipelines":
             status, payload = self.app.list_pipelines(actor=self._current_actor())
             self._write_json(status, payload)
@@ -860,6 +932,26 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 body=self._read_raw_body(),
                 actor=self._current_actor(),
             )
+            self._write_json(status, response)
+            return
+
+        if path == "/v1/auth/register":
+            try:
+                payload = self._read_json_body()
+            except (json.JSONDecodeError, ValueError) as exc:
+                self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                return
+            status, response = self.app.register_user(payload)
+            self._write_json(status, response)
+            return
+
+        if path == "/v1/auth/login":
+            try:
+                payload = self._read_json_body()
+            except (json.JSONDecodeError, ValueError) as exc:
+                self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                return
+            status, response = self.app.login_user(payload)
             self._write_json(status, response)
             return
 

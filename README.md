@@ -48,8 +48,12 @@ Operational endpoints:
 Authentication:
 
 - `GET /health` and `GET /ready` stay unauthenticated
-- `/v1/*` routes can require an API token with `Authorization: Bearer <token>` or `X-API-Token`
-- the compose stack now boots a default admin token for development via `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN`
+- `/v1/*` routes can require bearer-token auth with `Authorization: Bearer <token>` or `X-API-Token`
+- the gateway now also exposes user-facing auth endpoints:
+  - `POST /v1/auth/register`
+  - `POST /v1/auth/login`
+  - `GET /v1/auth/me`
+- the compose stack still boots a default admin token for development via `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN`
 
 Managed records:
 
@@ -64,10 +68,12 @@ Artifact management:
 
 Web UI:
 
-- `GET /ui` serves a lightweight operator dashboard from the gateway
-- the dashboard now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
+- `GET /ui` now serves a user-facing pipeline studio with a login/register landing page
+- authenticated users land in a manuscript-first workspace with profile controls in the top-right header
+- the workspace now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
 - the main dashboard panels now summarize config, manuscript, system, job, and artifact state in human-readable text instead of raw JSON dumps
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
+- the layout is now organized around multiple managed manuscripts, with stage controls and job history scoped to the selected manuscript
 - successful ingest runs now expose a dedicated manuscript-scoped results page for classification, extraction metadata, the full raw text, the full cleaned text, and the full chunk list, preloaded from the current UI session for reliable display
 - the ingest results page now includes direct download buttons for raw text, clean text, chunk manifest, and ingest manifest
 - the selected-job panel now exposes direct downloads for later-stage artifacts such as orchestrator logs, merged/resolved JSON, and the final report PDF
@@ -282,10 +288,11 @@ The gateway will be available on `http://127.0.0.1:8765` and PostgreSQL will be 
 For the user-facing flow:
 
 1. Open `http://127.0.0.1:8765/ui`
-2. Enter the admin or user API token
-3. Upload a manuscript PDF
-4. Choose a config profile
-5. Trigger the full pipeline or individual stages and watch live status updates
+2. Register a new account or log in with an existing account
+3. Upload one or more manuscript PDFs
+4. Select a manuscript from the workspace sidebar
+5. Choose a config profile
+6. Trigger the full pipeline or individual stages and watch live status updates
 
 For compose-based analysis, the container-safe config uses `http://host.docker.internal:11434` for Ollama, and the canonical orchestrator now streams generation through that configured host instead of requiring a local `ollama run` subprocess inside the container. On Linux, `compose.yaml` maps that hostname to the Docker host automatically.
 
@@ -300,7 +307,8 @@ The stack will use:
 - PostgreSQL database: `manuscriptprep`
 - PostgreSQL schema: `gateway`
 - API auth: enabled for `/v1/*`
-- Default development admin token: `dev-admin-token` unless `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN` is overridden
+- default self-service user registration through the gateway auth endpoints
+- default development admin token: `dev-admin-token` unless `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN` is overridden
 - environment-driven database credentials and admin token, with examples in `.env.example`
 - non-root `manuscriptprep` user inside the gateway and worker containers
 

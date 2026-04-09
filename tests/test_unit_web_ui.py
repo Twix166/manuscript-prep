@@ -13,6 +13,8 @@ def test_get_web_asset_serves_index() -> None:
 
     assert content_type.startswith("text/html")
     assert b"ManuscriptPrep Pipeline Studio" in body
+    assert b"Welcome back" in body
+    assert b"Create Account" in body
 
 
 def test_get_web_asset_serves_javascript() -> None:

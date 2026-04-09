@@ -11,6 +11,7 @@ const stageLabels = {
 
 const state = {
   token: localStorage.getItem(storageKey) || "",
+  currentUser: null,
   pipelines: [],
   manuscripts: [],
   configProfiles: [],
@@ -22,9 +23,20 @@ const state = {
 };
 
 const els = {
-  authForm: document.getElementById("auth-form"),
-  apiToken: document.getElementById("api-token"),
-  authStatus: document.getElementById("auth-status"),
+  authScreen: document.getElementById("auth-screen"),
+  appShell: document.getElementById("app-shell"),
+  loginForm: document.getElementById("login-form"),
+  loginUsername: document.getElementById("login-username"),
+  loginPassword: document.getElementById("login-password"),
+  loginStatus: document.getElementById("login-status"),
+  registerForm: document.getElementById("register-form"),
+  registerUsername: document.getElementById("register-username"),
+  registerPassword: document.getElementById("register-password"),
+  registerStatus: document.getElementById("register-status"),
+  refreshWorkspace: document.getElementById("refresh-workspace"),
+  profileSummary: document.getElementById("profile-summary"),
+  profileDetail: document.getElementById("profile-detail"),
+  logoutButton: document.getElementById("logout-button"),
   uploadForm: document.getElementById("upload-form"),
   uploadStatus: document.getElementById("upload-status"),
   manuscriptTitle: document.getElementById("manuscript-title"),
@@ -33,6 +45,8 @@ const els = {
   configProfileSelect: document.getElementById("config-profile-select"),
   configProfileDetail: document.getElementById("config-profile-detail"),
   manuscriptList: document.getElementById("manuscript-list"),
+  workspaceManuscriptTitle: document.getElementById("workspace-manuscript-title"),
+  workspaceManuscriptSubtitle: document.getElementById("workspace-manuscript-subtitle"),
   manuscriptDetail: document.getElementById("manuscript-detail"),
   selectedManuscriptTitle: document.getElementById("selected-manuscript-title"),
   selectedManuscriptSlug: document.getElementById("selected-manuscript-slug"),
@@ -60,13 +74,25 @@ function currentHeaders(extra = {}) {
   return headers;
 }
 
-async function fetchJson(path) {
-  const response = await fetch(path, { headers: currentHeaders() });
-  const payload = await response.json();
+async function parseJsonResponse(response, fallbackPath) {
+  let payload = {};
+  try {
+    payload = await response.json();
+  } catch {
+    payload = {};
+  }
   if (!response.ok) {
-    throw new Error(payload.error || `Request failed for ${path}`);
+    const error = new Error(payload.error || `Request failed for ${fallbackPath}`);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
   }
   return payload;
+}
+
+async function fetchJson(path) {
+  const response = await fetch(path, { headers: currentHeaders() });
+  return parseJsonResponse(response, path);
 }
 
 async function sendJson(method, path, payload = null) {
@@ -75,125 +101,59 @@ async function sendJson(method, path, payload = null) {
     headers: currentHeaders({ "Content-Type": "application/json" }),
     body: payload ? JSON.stringify(payload) : null,
   });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || `Request failed for ${path}`);
-  }
-  return data;
+  return parseJsonResponse(response, path);
 }
 
 async function postBinary(path, filename, file) {
   const response = await fetch(path, {
     method: "POST",
-    headers: currentHeaders({ "Content-Type": file.type || "application/pdf", "X-Filename": filename }),
+    headers: currentHeaders({
+      "Content-Type": file.type || "application/pdf",
+      "X-Filename": filename,
+    }),
     body: file,
   });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || `Request failed for ${path}`);
+  return parseJsonResponse(response, path);
+}
+
+function persistToken(token) {
+  state.token = token;
+  if (token) {
+    localStorage.setItem(storageKey, token);
+  } else {
+    localStorage.removeItem(storageKey);
   }
-  return data;
 }
 
-async function downloadJobArtifact(jobId, artifactName) {
-  const response = await fetch(`/v1/jobs/${encodeURIComponent(jobId)}/artifacts/${encodeURIComponent(artifactName)}/download`, {
-    headers: currentHeaders(),
-  });
-  if (!response.ok) {
-    let message = `Download failed for ${artifactName}`;
-    try {
-      const payload = await response.json();
-      message = payload.error || message;
-    } catch {
-      // fall back
-    }
-    throw new Error(message);
-  }
-  const blob = await response.blob();
-  const disposition = response.headers.get("Content-Disposition") || "";
-  const match = disposition.match(/filename="([^"]+)"/);
-  const filename = match ? match[1] : artifactName;
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+function showAuthScreen() {
+  els.authScreen.classList.remove("hidden");
+  els.appShell.classList.add("hidden");
 }
 
-async function cancelJob(jobId) {
-  return sendJson("POST", `/v1/jobs/${encodeURIComponent(jobId)}/cancel`, {});
+function showAppShell() {
+  els.authScreen.classList.add("hidden");
+  els.appShell.classList.remove("hidden");
 }
 
-function artifactButtonLabel(name) {
-  const labels = {
-    orchestrator_log: "Download Orchestrator Log",
-    book_merged: "Download Merged Book",
-    merge_report: "Download Merge Report",
-    conflict_report: "Download Conflict Report",
-    book_resolved: "Download Resolved Book",
-    resolution_map: "Download Resolution Map",
-    resolution_report: "Download Resolution Report",
-    report_pdf: "Download Report PDF",
-    ingest_stdout: "Download Ingest Stdout",
-    orchestrate_stdout: "Download Orchestrate Stdout",
-    merge_stdout: "Download Merge Stdout",
-    resolve_stdout: "Download Resolve Stdout",
-    report_stdout: "Download Report Stdout",
-  };
-  return labels[name] || `Download ${name.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}`;
-}
-
-function renderJobDownloads(job, artifactIndex) {
+function resetWorkspaceState() {
+  state.currentUser = null;
+  state.pipelines = [];
+  state.manuscripts = [];
+  state.configProfiles = [];
+  state.jobs = [];
+  state.jobProgressById = {};
+  state.selectedManuscriptId = null;
+  state.selectedConfigProfileId = null;
+  state.selectedJobId = null;
+  els.manuscriptList.innerHTML = "";
+  els.pipelineOverview.innerHTML = "";
+  els.stageBoard.innerHTML = "";
+  els.jobList.innerHTML = "";
   els.jobDownloads.innerHTML = "";
-  const downloadable = artifactIndex.artifacts.filter((artifact) => {
-    const kind = artifact.kind || "";
-    const exists = artifact.metadata?.exists;
-    return exists !== false && !["directory"].includes(kind);
-  });
-  const preferredOrder = [
-    "book_merged",
-    "merge_report",
-    "conflict_report",
-    "book_resolved",
-    "resolution_map",
-    "resolution_report",
-    "report_pdf",
-    "orchestrator_log",
-  ];
-  downloadable.sort((left, right) => {
-    const leftIndex = preferredOrder.indexOf(left.name);
-    const rightIndex = preferredOrder.indexOf(right.name);
-    if (leftIndex === -1 && rightIndex === -1) return left.name.localeCompare(right.name);
-    if (leftIndex === -1) return 1;
-    if (rightIndex === -1) return -1;
-    return leftIndex - rightIndex;
-  });
-  for (const artifact of downloadable) {
-    if (job.pipeline === "ingest" && ["raw_text", "clean_text", "chunk_manifest", "ingest_manifest"].includes(artifact.name)) {
-      continue;
-    }
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "secondary-button";
-    button.textContent = artifactButtonLabel(artifact.name);
-    button.addEventListener("click", async () => {
-      try {
-        await downloadJobArtifact(job.job_id, artifact.name);
-      } catch (error) {
-        els.stageActionStatus.textContent = error.message;
-      }
-    });
-    els.jobDownloads.appendChild(button);
-  }
-  if (!els.jobDownloads.children.length) {
-    const muted = document.createElement("span");
-    muted.className = "muted";
-    muted.textContent = "No downloadable artifacts for the selected job yet.";
-    els.jobDownloads.appendChild(muted);
-  }
+  els.jobDetail.textContent = "Choose a job to inspect stage timing, command lines, and errors.";
+  els.jobProgress.textContent = "Live chunk progress appears here for categorisation and analysis jobs.";
+  els.jobArtifacts.textContent = "Artifact index appears here, including checksums and output paths.";
+  els.systemStatus.textContent = "Sign in to load workspace status.";
 }
 
 function selectedManuscript() {
@@ -206,10 +166,6 @@ function selectedConfigProfile() {
 
 function selectedJob() {
   return state.jobs.find((item) => item.job_id === state.selectedJobId) || null;
-}
-
-function latestJobForPipeline(pipeline) {
-  return state.jobs.find((job) => job.pipeline === pipeline) || null;
 }
 
 function latestStageCardJobForPipeline(pipeline) {
@@ -252,10 +208,6 @@ function formatBytes(value) {
     return `${(bytes / 1024).toFixed(1)} KB`;
   }
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatList(items) {
-  return Array.isArray(items) && items.length ? items.join(", ") : "n/a";
 }
 
 function stageSummaryLines(stageRuns) {
@@ -326,6 +278,22 @@ function renderManuscriptSummary(manuscript) {
   ].join("\n");
 }
 
+function renderProfileSummary() {
+  if (!state.currentUser) {
+    els.profileSummary.textContent = "Profile";
+    els.profileDetail.textContent = "Profile details load after sign-in.";
+    return;
+  }
+  els.profileSummary.textContent = state.currentUser.username;
+  els.profileDetail.textContent = [
+    `${state.currentUser.username}`,
+    "",
+    `Role: ${state.currentUser.role}`,
+    `Created: ${formatDate(state.currentUser.created_at)}`,
+    `Updated: ${formatDate(state.currentUser.updated_at)}`,
+  ].join("\n");
+}
+
 function renderSystemSummary(payload) {
   const queue = payload.queue || {};
   const workers = payload.workers || [];
@@ -333,7 +301,7 @@ function renderSystemSummary(payload) {
     ? workers.map((worker) => `- ${worker.worker_id}: ${worker.status} | heartbeat ${formatDate(worker.heartbeat_at)}${worker.last_job_id ? ` | last job ${worker.last_job_id}` : ""}`)
     : ["- No workers reporting yet"];
   return [
-    `Gateway`,
+    `System`,
     `- Store backend: ${payload.store_backend || "n/a"}`,
     `- Ready: ${payload.ready ? "yes" : "no"}`,
     `- Updated: ${formatDate(payload.timestamp)}`,
@@ -349,6 +317,19 @@ function renderSystemSummary(payload) {
     "",
     `Workers`,
     ...workerLines,
+  ].join("\n");
+}
+
+function renderUserWorkspaceSummary() {
+  return [
+    `Workspace`,
+    `- User: ${state.currentUser?.username || "n/a"}`,
+    `- Role: ${state.currentUser?.role || "n/a"}`,
+    `- Manuscripts: ${state.manuscripts.length}`,
+    `- Config profiles: ${state.configProfiles.length}`,
+    `- Selected manuscript jobs: ${state.jobs.length}`,
+    "",
+    `System details are visible to admin users. You can still upload manuscripts, run stages, and manage your pipeline from here.`,
   ].join("\n");
 }
 
@@ -375,7 +356,6 @@ function renderJobProgressSummary(progress) {
   if (!progress || progress.available === false) {
     return progress?.message || "Live chunk progress appears here for categorisation and analysis jobs.";
   }
-
   const currentChunk = progress.current_chunk
     ? `${progress.current_chunk} (${progress.current_chunk_index || "?"} of ${progress.chunks_total || "?"})`
     : progress.chunks_total
@@ -386,11 +366,8 @@ function renderJobProgressSummary(progress) {
     : "Waiting for the first pass";
   const throughput = progress.reported_tps || progress.estimated_tps;
   const recentEvents = Array.isArray(progress.recent_events) && progress.recent_events.length
-    ? progress.recent_events.slice(-5).map((event) => (
-      `- ${formatDate(event.timestamp)} | ${event.chunk || "-"} | ${event.pass || "-"} | ${event.message || event.event_type || "-"}`
-    ))
+    ? progress.recent_events.slice(-5).map((event) => `- ${formatDate(event.timestamp)} | ${event.chunk || "-"} | ${event.pass || "-"} | ${event.message || event.event_type || "-"}`)
     : ["- No progress events yet"];
-
   return [
     `Live Chunk Progress`,
     "",
@@ -433,6 +410,107 @@ function renderArtifactSummary(artifactIndex) {
   }).join("\n");
 }
 
+function artifactButtonLabel(name) {
+  const labels = {
+    orchestrator_log: "Download Orchestrator Log",
+    book_merged: "Download Merged Book",
+    merge_report: "Download Merge Report",
+    conflict_report: "Download Conflict Report",
+    book_resolved: "Download Resolved Book",
+    resolution_map: "Download Resolution Map",
+    resolution_report: "Download Resolution Report",
+    report_pdf: "Download Report PDF",
+    ingest_stdout: "Download Ingest Stdout",
+    orchestrate_stdout: "Download Orchestrate Stdout",
+    merge_stdout: "Download Merge Stdout",
+    resolve_stdout: "Download Resolve Stdout",
+    report_stdout: "Download Report Stdout",
+  };
+  return labels[name] || `Download ${name.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}`;
+}
+
+async function downloadJobArtifact(jobId, artifactName) {
+  const response = await fetch(`/v1/jobs/${encodeURIComponent(jobId)}/artifacts/${encodeURIComponent(artifactName)}/download`, {
+    headers: currentHeaders(),
+  });
+  if (!response.ok) {
+    let message = `Download failed for ${artifactName}`;
+    try {
+      const payload = await response.json();
+      message = payload.error || message;
+    } catch {
+      // ignore
+    }
+    throw new Error(message);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename="([^"]+)"/);
+  const filename = match ? match[1] : artifactName;
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function cancelJob(jobId) {
+  return sendJson("POST", `/v1/jobs/${encodeURIComponent(jobId)}/cancel`, {});
+}
+
+function renderJobDownloads(job, artifactIndex) {
+  els.jobDownloads.innerHTML = "";
+  const downloadable = artifactIndex.artifacts.filter((artifact) => {
+    const kind = artifact.kind || "";
+    const exists = artifact.metadata?.exists;
+    return exists !== false && !["directory"].includes(kind);
+  });
+  const preferredOrder = [
+    "book_merged",
+    "merge_report",
+    "conflict_report",
+    "book_resolved",
+    "resolution_map",
+    "resolution_report",
+    "report_pdf",
+    "orchestrator_log",
+  ];
+  downloadable.sort((left, right) => {
+    const leftIndex = preferredOrder.indexOf(left.name);
+    const rightIndex = preferredOrder.indexOf(right.name);
+    if (leftIndex === -1 && rightIndex === -1) return left.name.localeCompare(right.name);
+    if (leftIndex === -1) return 1;
+    if (rightIndex === -1) return -1;
+    return leftIndex - rightIndex;
+  });
+  for (const artifact of downloadable) {
+    if (job.pipeline === "ingest" && ["raw_text", "clean_text", "chunk_manifest", "ingest_manifest"].includes(artifact.name)) {
+      continue;
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondary-button";
+    button.textContent = artifactButtonLabel(artifact.name);
+    button.addEventListener("click", async () => {
+      try {
+        await downloadJobArtifact(job.job_id, artifact.name);
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
+    });
+    els.jobDownloads.appendChild(button);
+  }
+  if (!els.jobDownloads.children.length) {
+    const muted = document.createElement("span");
+    muted.className = "muted";
+    muted.textContent = "No downloadable artifacts for the selected job yet.";
+    els.jobDownloads.appendChild(muted);
+  }
+}
+
 function renderConfigProfiles() {
   els.configProfileSelect.innerHTML = "";
   for (const profile of state.configProfiles) {
@@ -454,6 +532,8 @@ function renderManuscripts() {
   els.manuscriptList.innerHTML = "";
   if (!state.manuscripts.length) {
     els.manuscriptList.innerHTML = '<li class="muted">No manuscripts yet</li>';
+    els.workspaceManuscriptTitle.textContent = "Choose a manuscript";
+    els.workspaceManuscriptSubtitle.textContent = "Upload a manuscript to begin.";
     els.manuscriptDetail.textContent = "Upload and register a manuscript to begin.";
     els.selectedManuscriptTitle.value = "";
     els.selectedManuscriptSlug.value = "";
@@ -482,6 +562,8 @@ function renderManuscripts() {
     els.manuscriptDetail.textContent = "Select a manuscript to see pipeline-ready details.";
     return;
   }
+  els.workspaceManuscriptTitle.textContent = manuscript.title;
+  els.workspaceManuscriptSubtitle.textContent = `Working on ${manuscript.book_slug}. Jobs and stage controls below apply only to this manuscript.`;
   els.selectedManuscriptTitle.value = manuscript.title;
   els.selectedManuscriptSlug.value = manuscript.book_slug;
   els.manuscriptDetail.textContent = renderManuscriptSummary(manuscript);
@@ -536,7 +618,7 @@ async function triggerPipeline(pipeline) {
     });
     await sendJson("POST", `/v1/jobs/${created.job_id}/run`, {});
     state.selectedJobId = created.job_id;
-    els.stageActionStatus.textContent = `${pipeline} job queued: ${created.job_id}`;
+    els.stageActionStatus.textContent = `${stageLabels[pipeline] || pipeline} job queued: ${created.job_id}`;
     await refreshJobs();
     await refreshManuscripts();
   } catch (error) {
@@ -684,13 +766,19 @@ async function refreshSelectedJob() {
 }
 
 async function refreshSystem() {
+  if (!state.currentUser) {
+    els.systemStatus.textContent = "Sign in to load workspace status.";
+    return;
+  }
   try {
     const payload = await fetchJson("/v1/system/status");
     els.systemStatus.textContent = renderSystemSummary(payload);
-    els.authStatus.textContent = "Connected";
   } catch (error) {
+    if (error.status === 403) {
+      els.systemStatus.textContent = renderUserWorkspaceSummary();
+      return;
+    }
     els.systemStatus.textContent = error.message;
-    els.authStatus.textContent = error.message;
   }
 }
 
@@ -734,27 +822,85 @@ async function refreshJobs() {
   if (!state.selectedJobId && state.jobs.length) {
     state.selectedJobId = state.jobs[0].job_id;
   }
+  if (state.selectedJobId && !selectedJob()) {
+    state.selectedJobId = state.jobs[0]?.job_id || null;
+  }
   renderJobs();
   renderStageBoard();
   await refreshSelectedJob();
 }
 
 async function refreshAll() {
+  if (!state.token) {
+    showAuthScreen();
+    return;
+  }
   try {
-    await Promise.all([refreshSystem(), refreshConfigProfiles(), refreshManuscripts(), refreshPipelines()]);
+    const me = await fetchJson("/v1/auth/me");
+    state.currentUser = me.user;
+    renderProfileSummary();
+    showAppShell();
+    await Promise.all([refreshConfigProfiles(), refreshManuscripts(), refreshPipelines()]);
     await refreshJobs();
+    await refreshSystem();
   } catch (error) {
-    els.authStatus.textContent = error.message;
+    persistToken("");
+    resetWorkspaceState();
+    els.loginStatus.textContent = error.message;
+    showAuthScreen();
   }
 }
 
-els.apiToken.value = state.token;
-els.authForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  state.token = els.apiToken.value.trim();
-  localStorage.setItem(storageKey, state.token);
+async function handleAuthSuccess(payload, message) {
+  persistToken(payload.api_token);
+  state.currentUser = payload.user;
+  renderProfileSummary();
+  els.loginStatus.textContent = message;
+  els.registerStatus.textContent = message;
+  showAppShell();
   await refreshAll();
+}
+
+els.loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    els.loginStatus.textContent = "Signing in...";
+    const payload = await sendJson("POST", "/v1/auth/login", {
+      username: els.loginUsername.value.trim(),
+      password: els.loginPassword.value,
+    });
+    await handleAuthSuccess(payload, `Signed in as ${payload.user.username}.`);
+    els.loginForm.reset();
+  } catch (error) {
+    els.loginStatus.textContent = error.message;
+  }
 });
+
+els.registerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    els.registerStatus.textContent = "Creating account...";
+    const payload = await sendJson("POST", "/v1/auth/register", {
+      username: els.registerUsername.value.trim(),
+      password: els.registerPassword.value,
+    });
+    await handleAuthSuccess(payload, `Account created for ${payload.user.username}.`);
+    els.registerForm.reset();
+  } catch (error) {
+    els.registerStatus.textContent = error.message;
+  }
+});
+
+els.logoutButton.addEventListener("click", () => {
+  persistToken("");
+  resetWorkspaceState();
+  renderProfileSummary();
+  showAuthScreen();
+  els.loginStatus.textContent = "Signed out.";
+  els.registerStatus.textContent = "Create a new account or sign back in.";
+});
+
+els.refreshWorkspace.addEventListener("click", refreshAll);
 
 els.configProfileSelect.addEventListener("change", () => {
   state.selectedConfigProfileId = els.configProfileSelect.value;
@@ -855,7 +1001,7 @@ for (const button of document.querySelectorAll("[data-refresh]")) {
     const target = button.getAttribute("data-refresh");
     if (target === "system") await refreshSystem();
     if (target === "pipelines") await refreshPipelines();
-    if (target === "manuscripts" || target === "upload-context" || target === "selected-manuscript") await refreshManuscripts();
+    if (target === "manuscripts" || target === "selected-manuscript") await refreshManuscripts();
     if (target === "config-profiles") await refreshConfigProfiles();
     if (target === "jobs" || target === "selected-job") await refreshJobs();
   });
@@ -869,5 +1015,7 @@ setInterval(() => {
   }
 }, autoRefreshMs);
 
+renderProfileSummary();
+resetWorkspaceState();
 refreshAll();
 els.cancelSelectedJob.disabled = true;

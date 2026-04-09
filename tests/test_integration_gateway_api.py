@@ -47,6 +47,38 @@ def test_gateway_api_exposes_health_pipelines_and_jobs(tmp_path) -> None:
     assert len(jobs["jobs"]) == 1
 
 
+def test_gateway_api_registers_logs_in_and_returns_current_user(tmp_path) -> None:
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"), auth_required=True)
+
+    status, registered = app.register_user({"username": "alice", "password": "supersecret1"})
+    assert status == 201
+    assert registered["user"]["username"] == "alice"
+    assert registered["api_token"]
+
+    stored = app.store.get_user_by_username("alice")
+    assert stored is not None
+    assert stored.password_hash is not None
+    assert stored.password_hash != "supersecret1"
+
+    status, duplicate = app.register_user({"username": "alice", "password": "supersecret1"})
+    assert status == 409
+    assert duplicate["error"] == "username is already registered"
+
+    status, invalid = app.login_user({"username": "alice", "password": "wrongpass"})
+    assert status == 401
+    assert invalid["error"] == "Invalid username or password"
+
+    status, logged_in = app.login_user({"username": "alice", "password": "supersecret1"})
+    assert status == 200
+    actor = app.authenticate(logged_in["api_token"])
+    assert actor is not None
+
+    status, me = app.current_user(actor)
+    assert status == 200
+    assert me["user"]["username"] == "alice"
+    assert "api_token" not in me["user"]
+
+
 def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

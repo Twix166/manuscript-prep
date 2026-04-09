@@ -105,6 +105,7 @@ class UserRecord:
     api_token: str
     created_at: str
     updated_at: str
+    password_hash: Optional[str] = None
 
 
 @dataclass
