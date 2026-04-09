@@ -186,13 +186,6 @@ h3 {
   z-index: 20;
 }
 
-.workspace-shell {
-  display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
-  gap: 20px;
-}
-
-.workspace-sidebar,
 .workspace-main {
   display: grid;
   gap: 20px;
@@ -200,6 +193,28 @@ h3 {
 }
 
 .workspace-main {
+  min-width: 0;
+}
+
+.workspace-top {
+  align-items: start;
+}
+
+.workspace-middle {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.workspace-rail {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+.pipeline-panel,
+.workspace-bottom {
   min-width: 0;
 }
 
@@ -377,7 +392,7 @@ h3 {
 }
 
 @media (max-width: 1100px) {
-  .workspace-shell,
+  .workspace-middle,
   .auth-columns,
   .grid.two,
   .grid.three {

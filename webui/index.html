@@ -75,44 +75,44 @@
       </header>
 
       <section class="workspace-shell">
-        <aside class="workspace-sidebar">
-          <article class="panel sidebar-panel">
-            <div class="panel-head">
-              <h2>Your Manuscripts</h2>
-              <button type="button" data-refresh="manuscripts">Refresh</button>
-            </div>
-            <p class="muted">Select a manuscript to inspect its stage history and run the pipeline for that manuscript only.</p>
-            <ul id="manuscript-list" class="list selectable"></ul>
-          </article>
-        </aside>
-
         <section class="workspace-main">
-          <article class="panel manuscript-hero-panel">
-            <div class="panel-head">
-              <div>
-                <h2 id="workspace-manuscript-title">Choose a manuscript</h2>
-                <p id="workspace-manuscript-subtitle" class="muted">Each manuscript has its own ingest, analysis, merge, resolution, and report history.</p>
+          <section class="workspace-top grid two">
+            <article class="panel sidebar-panel">
+              <div class="panel-head">
+                <h2>Your Manuscripts</h2>
+                <button type="button" data-refresh="manuscripts">Refresh</button>
               </div>
-              <div class="panel-actions wrap">
-                <button type="button" id="run-full-pipeline">Run Full Pipeline</button>
-                <button type="button" id="open-ingest-results" class="secondary-button">Open Ingest Results</button>
-              </div>
-            </div>
-            <div class="grid two">
-              <div>
-                <h3>Manuscript Details</h3>
-                <div id="manuscript-detail" class="summary-block">Select a manuscript to see pipeline-ready details.</div>
-              </div>
-              <div class="stack">
-                <label for="config-profile-select">Runtime profile</label>
-                <select id="config-profile-select"></select>
-                <div id="config-profile-detail" class="summary-block">Select a config profile to inspect models, chunking, and timeouts.</div>
-              </div>
-            </div>
-          </article>
+              <p class="muted">Select a manuscript to inspect its stage history and run the pipeline for that manuscript only.</p>
+              <ul id="manuscript-list" class="list selectable"></ul>
+            </article>
 
-          <section class="grid two workspace-split">
-            <article class="panel">
+            <article class="panel manuscript-hero-panel">
+              <div class="panel-head">
+                <div>
+                  <h2 id="workspace-manuscript-title">Choose a manuscript</h2>
+                  <p id="workspace-manuscript-subtitle" class="muted">Each manuscript has its own ingest, analysis, merge, resolution, and report history.</p>
+                </div>
+                <div class="panel-actions wrap">
+                  <button type="button" id="run-full-pipeline">Run Full Pipeline</button>
+                  <button type="button" id="open-ingest-results" class="secondary-button">Open Ingest Results</button>
+                </div>
+              </div>
+              <div class="grid two">
+                <div>
+                  <h3>Manuscript Details</h3>
+                  <div id="manuscript-detail" class="summary-block">Select a manuscript to see pipeline-ready details.</div>
+                </div>
+                <div class="stack">
+                  <label for="config-profile-select">Runtime profile</label>
+                  <select id="config-profile-select"></select>
+                  <div id="config-profile-detail" class="summary-block">Select a config profile to inspect models, chunking, and timeouts.</div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="workspace-middle">
+            <article class="panel pipeline-panel">
               <div class="panel-head">
                 <h2>Pipeline Workspace</h2>
                 <button type="button" data-refresh="pipelines">Refresh</button>
@@ -121,39 +121,40 @@
               <p id="stage-action-status" class="muted">Select a manuscript and config profile, then trigger a stage or the full pipeline.</p>
             </article>
 
-            <article class="panel">
-              <div class="panel-head">
-                <h2>Manage Manuscript</h2>
-                <button type="button" data-refresh="selected-manuscript">Refresh</button>
-              </div>
-              <div class="stack">
-                <label for="selected-manuscript-title">Title</label>
-                <input id="selected-manuscript-title" type="text" placeholder="Treasure Island">
-                <label for="selected-manuscript-slug">Slug</label>
-                <input id="selected-manuscript-slug" type="text" placeholder="treasure_island">
-                <div class="panel-actions wrap">
-                  <button type="button" id="save-manuscript">Save Manuscript</button>
-                  <button type="button" id="delete-manuscript" class="danger-button">Remove Manuscript</button>
+            <aside class="workspace-rail">
+              <article class="panel">
+                <div class="panel-head">
+                  <h2>Workspace Status</h2>
+                  <button type="button" data-refresh="system">Refresh</button>
                 </div>
-              </div>
-            </article>
-          </section>
+                <div id="system-status" class="summary-block">Sign in to load workspace status.</div>
+              </article>
 
-          <section class="grid two workspace-split">
-            <article class="panel">
-              <div class="panel-head">
-                <h2>Job Timeline</h2>
-                <button type="button" data-refresh="jobs">Refresh</button>
-              </div>
-              <ul id="job-list" class="list selectable"></ul>
-            </article>
-            <article class="panel">
-              <div class="panel-head">
-                <h2>Workspace Status</h2>
-                <button type="button" data-refresh="system">Refresh</button>
-              </div>
-              <div id="system-status" class="summary-block">Sign in to load workspace status.</div>
-            </article>
+              <article class="panel">
+                <div class="panel-head">
+                  <h2>Job Timeline</h2>
+                  <button type="button" data-refresh="jobs">Refresh</button>
+                </div>
+                <ul id="job-list" class="list selectable"></ul>
+              </article>
+
+              <article class="panel">
+                <div class="panel-head">
+                  <h2>Manage Manuscript</h2>
+                  <button type="button" data-refresh="selected-manuscript">Refresh</button>
+                </div>
+                <div class="stack">
+                  <label for="selected-manuscript-title">Title</label>
+                  <input id="selected-manuscript-title" type="text" placeholder="Treasure Island">
+                  <label for="selected-manuscript-slug">Slug</label>
+                  <input id="selected-manuscript-slug" type="text" placeholder="treasure_island">
+                  <div class="panel-actions wrap">
+                    <button type="button" id="save-manuscript">Save Manuscript</button>
+                    <button type="button" id="delete-manuscript" class="danger-button">Remove Manuscript</button>
+                  </div>
+                </div>
+              </article>
+            </aside>
           </section>
 
           <section id="admin-console" class="panel hidden">
@@ -170,7 +171,7 @@
             </div>
           </section>
 
-          <article class="panel">
+          <article class="panel workspace-bottom">
             <div class="panel-head">
               <h2>Selected Job</h2>
               <div class="panel-actions wrap">
