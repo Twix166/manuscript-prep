@@ -212,6 +212,17 @@ function latestJobForPipeline(pipeline) {
   return state.jobs.find((job) => job.pipeline === pipeline) || null;
 }
 
+function latestStageCardJobForPipeline(pipeline) {
+  const jobs = state.jobs.filter((job) => job.pipeline === pipeline);
+  if (!jobs.length) {
+    return null;
+  }
+  if (jobs[0].status !== "cancelled") {
+    return jobs[0];
+  }
+  return jobs.find((job) => job.status !== "cancelled") || null;
+}
+
 function latestIngestForSelectedManuscript() {
   const manuscript = selectedManuscript();
   return manuscript ? manuscript.latest_ingest || null : null;
@@ -550,7 +561,7 @@ function renderStageBoard() {
     return;
   }
   for (const stage of fullPipeline.stages) {
-    const latestJob = latestJobForPipeline(stage.name);
+    const latestJob = latestStageCardJobForPipeline(stage.name);
     const stageStatus = latestJob ? latestJob.status : "not-started";
     const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
     const compactProgress = stage.name === "orchestrate" ? renderCompactStageProgress(progress) : "";

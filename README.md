@@ -73,6 +73,7 @@ Web UI:
 - the selected-job panel now exposes direct downloads for later-stage artifacts such as orchestrator logs, merged/resolved JSON, and the final report PDF
 - running categorisation and analysis jobs now expose live chunk progress in the UI, including current chunk, pass, model, step, retry/timeout state, and recent progress events
 - jobs now show their full Job ID in the timeline and selected-job panel, and queued/running jobs can be cancelled from the UI while the worker continuously performs stale-job housekeeping between polls
+- once a cancellation completes, the stage card falls back to the previous meaningful state or `not-started`, while the cancelled job remains visible in the timeline for auditability
 - stage cards show pipeline substeps and the configured model names where applicable
 - the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads
 - the compose images now include the PDF/OCR toolchain (`pdftotext`, `pdfinfo`, `ocrmypdf`, `tesseract`, `ghostscript`) needed for ingest
