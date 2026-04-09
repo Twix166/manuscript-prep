@@ -693,6 +693,7 @@ function renderManuscripts() {
     slugInput.addEventListener("click", (event) => event.stopPropagation());
     titleInput.addEventListener("input", syncDirtyState);
     slugInput.addEventListener("input", syncDirtyState);
+    syncDirtyState();
     saveButton.addEventListener("click", async (event) => {
       event.stopPropagation();
       try {
