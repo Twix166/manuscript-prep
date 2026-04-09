@@ -20,6 +20,7 @@ const state = {
   configProfiles: [],
   jobs: [],
   jobProgressById: {},
+  manuscriptDrafts: {},
   selectedManuscriptId: null,
   selectedConfigProfileId: null,
   selectedJobId: null,
@@ -150,6 +151,7 @@ function resetWorkspaceState() {
   state.configProfiles = [];
   state.jobs = [];
   state.jobProgressById = {};
+  state.manuscriptDrafts = {};
   state.selectedManuscriptId = null;
   state.selectedConfigProfileId = null;
   state.selectedJobId = null;
@@ -248,6 +250,35 @@ function workflowExpansionKey() {
 function stepNumber(stepName) {
   const index = stageOrder.indexOf(stepName);
   return index === -1 ? "?" : String(index + 1);
+}
+
+function manuscriptDraft(manuscript) {
+  const draft = state.manuscriptDrafts[manuscript.manuscript_id];
+  if (!draft) {
+    return {
+      title: manuscript.title,
+      book_slug: manuscript.book_slug,
+    };
+  }
+  return {
+    title: draft.title,
+    book_slug: draft.book_slug,
+  };
+}
+
+function syncManuscriptDrafts() {
+  const nextDrafts = {};
+  for (const manuscript of state.manuscripts) {
+    const existing = state.manuscriptDrafts[manuscript.manuscript_id];
+    if (!existing) {
+      continue;
+    }
+    const dirty = existing.title !== manuscript.title || existing.book_slug !== manuscript.book_slug;
+    if (dirty) {
+      nextDrafts[manuscript.manuscript_id] = existing;
+    }
+  }
+  state.manuscriptDrafts = nextDrafts;
 }
 
 function formatDate(value) {
@@ -611,8 +642,9 @@ function renderManuscripts() {
   }
   for (const manuscript of state.manuscripts) {
     const latestIngest = manuscript.latest_ingest;
-    const safeTitle = escapeHtml(manuscript.title);
-    const safeSlug = escapeHtml(manuscript.book_slug);
+    const draft = manuscriptDraft(manuscript);
+    const safeTitle = escapeHtml(draft.title);
+    const safeSlug = escapeHtml(draft.book_slug);
     const li = document.createElement("li");
     li.dataset.manuscriptId = manuscript.manuscript_id;
     li.className = manuscript.manuscript_id === state.selectedManuscriptId ? "selected" : "";
@@ -647,8 +679,15 @@ function renderManuscripts() {
     const saveButton = li.querySelector(`[data-save-manuscript="${manuscript.manuscript_id}"]`);
     const deleteButton = li.querySelector(`[data-delete-manuscript="${manuscript.manuscript_id}"]`);
     const syncDirtyState = () => {
+      state.manuscriptDrafts[manuscript.manuscript_id] = {
+        title: titleInput.value,
+        book_slug: slugInput.value,
+      };
       const dirty = titleInput.value.trim() !== manuscript.title || slugInput.value.trim() !== manuscript.book_slug;
       saveButton.disabled = !dirty;
+      if (!dirty) {
+        delete state.manuscriptDrafts[manuscript.manuscript_id];
+      }
     };
     titleInput.addEventListener("click", (event) => event.stopPropagation());
     slugInput.addEventListener("click", (event) => event.stopPropagation());
@@ -661,6 +700,7 @@ function renderManuscripts() {
           title: titleInput.value.trim(),
           book_slug: slugInput.value.trim(),
         });
+        delete state.manuscriptDrafts[manuscript.manuscript_id];
         state.selectedManuscriptId = updated.manuscript_id;
         els.stageActionStatus.textContent = `Manuscript updated: ${updated.title}`;
         await refreshManuscripts();
@@ -676,6 +716,7 @@ function renderManuscripts() {
       }
       try {
         await sendJson("DELETE", `/v1/manuscripts/${manuscript.manuscript_id}`);
+        delete state.manuscriptDrafts[manuscript.manuscript_id];
         els.stageActionStatus.textContent = `Removed manuscript: ${manuscript.title}`;
         if (state.selectedManuscriptId === manuscript.manuscript_id) {
           state.selectedManuscriptId = null;
@@ -968,6 +1009,7 @@ async function refreshConfigProfiles() {
 async function refreshManuscripts() {
   const payload = await fetchJson("/v1/manuscripts");
   state.manuscripts = payload.manuscripts;
+  syncManuscriptDrafts();
   if (!state.selectedManuscriptId && state.manuscripts.length) {
     state.selectedManuscriptId = state.manuscripts[0].manuscript_id;
   }
