@@ -114,6 +114,7 @@ class ManuscriptRecord:
     book_slug: str
     title: str
     source_path: str
+    document_type: Optional[str]
     file_size_bytes: Optional[int]
     owner_user_id: Optional[str]
     owner_username: Optional[str]

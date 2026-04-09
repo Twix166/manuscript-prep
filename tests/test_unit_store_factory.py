@@ -110,6 +110,7 @@ def test_file_store_can_upsert_manuscripts_and_config_profiles(tmp_path: Path) -
         book_slug="treasure_island",
         title="Treasure Island",
         source_path="/tmp/treasure-island.pdf",
+        document_type="pdf",
         file_size_bytes=1024,
         owner_user_id="user-1",
         owner_username="alice",
@@ -124,6 +125,7 @@ def test_file_store_can_upsert_manuscripts_and_config_profiles(tmp_path: Path) -
 
     assert store.get_manuscript(manuscript.manuscript_id) is not None
     assert store.list_manuscripts()[0].book_slug == "treasure_island"
+    assert store.list_manuscripts()[0].document_type == "pdf"
     assert store.list_manuscripts()[0].file_size_bytes == 1024
     assert store.get_config_profile(profile.config_profile_id) is not None
     assert store.list_config_profiles()[0].name == "default"
@@ -150,3 +152,17 @@ def test_file_store_persists_artifact_index_on_job_update(tmp_path: Path) -> Non
 
     assert len(artifacts) == 1
     assert artifacts[0].metadata["sha256"] == "abc"
+
+
+def test_file_store_can_filter_job_claims_by_pipeline(tmp_path: Path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    ingest_job = store.create_job(JobCreateRequest(pipeline="ingest", book_slug="book_a"))
+    orchestrate_job = store.create_job(JobCreateRequest(pipeline="orchestrate", book_slug="book_b"))
+
+    claimed_ingest = store.claim_next_job("worker-ingest", include_pipelines=["ingest"])
+    claimed_general = store.claim_next_job("worker-general", exclude_pipelines=["ingest"])
+
+    assert claimed_ingest is not None
+    assert claimed_ingest.job_id == ingest_job.job_id
+    assert claimed_general is not None
+    assert claimed_general.job_id == orchestrate_job.job_id

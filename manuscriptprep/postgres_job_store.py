@@ -104,12 +104,19 @@ class PostgresJobStore(BaseJobStore):
                     book_slug TEXT NOT NULL,
                     title TEXT NOT NULL,
                     source_path TEXT NOT NULL,
+                    document_type TEXT NULL,
                     file_size_bytes BIGINT NULL,
                     owner_user_id TEXT NULL,
                     owner_username TEXT NULL,
                     created_at TIMESTAMPTZ NOT NULL,
                     updated_at TIMESTAMPTZ NOT NULL
                 )
+                """
+            )
+            cur.execute(
+                f"""
+                ALTER TABLE {self.schema}.gateway_manuscripts
+                ADD COLUMN IF NOT EXISTS document_type TEXT NULL
                 """
             )
             cur.execute(
@@ -294,17 +301,32 @@ class PostgresJobStore(BaseJobStore):
             requested_at_key="_pause_requested_at",
         )
 
-    def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
+    def claim_next_job(
+        self,
+        worker_id: str,
+        *,
+        include_pipelines: Optional[list[str]] = None,
+        exclude_pipelines: Optional[list[str]] = None,
+    ) -> Optional[JobRecord]:
+        filters: list[str] = ["payload->>'status' = 'queued'"]
+        params: list[object] = []
+        if include_pipelines:
+            filters.append("payload->>'pipeline' = ANY(%s)")
+            params.append(include_pipelines)
+        if exclude_pipelines:
+            filters.append("NOT (payload->>'pipeline' = ANY(%s))")
+            params.append(exclude_pipelines)
         with self._connect(autocommit=False) as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
                 SELECT job_id, payload
                 FROM {self.schema}.gateway_jobs
-                WHERE payload->>'status' = 'queued'
+                WHERE {' AND '.join(filters)}
                 ORDER BY created_at ASC
                 FOR UPDATE SKIP LOCKED
                 LIMIT 1
-                """
+                """,
+                params,
             )
             row = cur.fetchone()
             if row is None:
@@ -598,6 +620,7 @@ class PostgresJobStore(BaseJobStore):
         book_slug: str,
         title: str,
         source_path: str,
+        document_type: Optional[str],
         file_size_bytes: Optional[int],
         owner_user_id: Optional[str],
         owner_username: Optional[str],
@@ -622,10 +645,10 @@ class PostgresJobStore(BaseJobStore):
                 cur.execute(
                     f"""
                     INSERT INTO {self.schema}.gateway_manuscripts
-                        (manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
+                        (manuscript_id, book_slug, title, source_path, document_type, file_size_bytes, owner_user_id, owner_username, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s::timestamptz, %s::timestamptz)
                     """,
-                    (manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, now),
+                    (manuscript_id, book_slug, title, source_path, document_type, file_size_bytes, owner_user_id, owner_username, created_at, now),
                 )
             else:
                 manuscript_id = row[0]
@@ -635,13 +658,14 @@ class PostgresJobStore(BaseJobStore):
                         UPDATE {self.schema}.gateway_manuscripts
                         SET title = %s,
                             source_path = %s,
+                            document_type = %s,
                             file_size_bytes = %s,
                             owner_user_id = %s,
                             owner_username = %s,
                             updated_at = %s::timestamptz
                         WHERE manuscript_id = %s
                     """,
-                    (title, source_path, file_size_bytes, owner_user_id, owner_username, now, manuscript_id),
+                    (title, source_path, document_type, file_size_bytes, owner_user_id, owner_username, now, manuscript_id),
                 )
             conn.commit()
         return _manuscript_from_dict(
@@ -650,6 +674,7 @@ class PostgresJobStore(BaseJobStore):
                 "book_slug": book_slug,
                 "title": title,
                 "source_path": source_path,
+                "document_type": document_type,
                 "file_size_bytes": file_size_bytes,
                 "owner_user_id": owner_user_id,
                 "owner_username": owner_username,
@@ -662,7 +687,7 @@ class PostgresJobStore(BaseJobStore):
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
+                SELECT manuscript_id, book_slug, title, source_path, document_type, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
                 FROM {self.schema}.gateway_manuscripts
                 WHERE manuscript_id = %s
                 """,
@@ -677,11 +702,12 @@ class PostgresJobStore(BaseJobStore):
                 "book_slug": row[1],
                 "title": row[2],
                 "source_path": row[3],
-                "file_size_bytes": row[4],
-                "owner_user_id": row[5],
-                "owner_username": row[6],
-                "created_at": row[7].isoformat(),
-                "updated_at": row[8].isoformat(),
+                "document_type": row[4],
+                "file_size_bytes": row[5],
+                "owner_user_id": row[6],
+                "owner_username": row[7],
+                "created_at": row[8].isoformat(),
+                "updated_at": row[9].isoformat(),
             }
         )
 
@@ -689,7 +715,7 @@ class PostgresJobStore(BaseJobStore):
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
+                SELECT manuscript_id, book_slug, title, source_path, document_type, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
                 FROM {self.schema}.gateway_manuscripts
                 ORDER BY created_at DESC
                 """
@@ -702,11 +728,12 @@ class PostgresJobStore(BaseJobStore):
                     "book_slug": row[1],
                     "title": row[2],
                     "source_path": row[3],
-                    "file_size_bytes": row[4],
-                    "owner_user_id": row[5],
-                    "owner_username": row[6],
-                    "created_at": row[7].isoformat(),
-                    "updated_at": row[8].isoformat(),
+                    "document_type": row[4],
+                    "file_size_bytes": row[5],
+                    "owner_user_id": row[6],
+                    "owner_username": row[7],
+                    "created_at": row[8].isoformat(),
+                    "updated_at": row[9].isoformat(),
                 }
             )
             for row in rows
@@ -722,7 +749,7 @@ class PostgresJobStore(BaseJobStore):
         with self._connect(autocommit=False) as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT manuscript_id, book_slug, title, source_path, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
+                SELECT manuscript_id, book_slug, title, source_path, document_type, file_size_bytes, owner_user_id, owner_username, created_at, updated_at
                 FROM {self.schema}.gateway_manuscripts
                 WHERE manuscript_id = %s
                 FOR UPDATE
@@ -753,10 +780,11 @@ class PostgresJobStore(BaseJobStore):
                     "book_slug": next_book_slug,
                     "title": next_title,
                     "source_path": row[3],
-                    "file_size_bytes": row[4],
-                    "owner_user_id": row[5],
-                    "owner_username": row[6],
-                    "created_at": row[7].isoformat(),
+                    "document_type": row[4],
+                    "file_size_bytes": row[5],
+                    "owner_user_id": row[6],
+                    "owner_username": row[7],
+                    "created_at": row[8].isoformat(),
                     "updated_at": now,
                 }
             )

@@ -385,6 +385,7 @@ class GatewayAPI:
             book_slug=str(payload.get("book_slug") or self._slugify(str(payload["title"])) or "manuscript"),
             title=str(payload["title"]),
             source_path=str(payload["source_path"]),
+            document_type=(str(payload["document_type"]).strip().lower() if payload.get("document_type") else None),
             file_size_bytes=(int(payload["file_size_bytes"]) if payload.get("file_size_bytes") is not None else None),
             owner_user_id=actor.user_id if actor else payload.get("owner_user_id"),
             owner_username=actor.username if actor else payload.get("owner_username"),

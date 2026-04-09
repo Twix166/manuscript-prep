@@ -80,6 +80,7 @@ Web UI:
   - `Manuscripts` for `Your Manuscripts`, the active manuscript overview, runtime profile, and `Workspace Status`
   - `Pipeline` for the stage workflow panels
   - `Jobs` for `Job Timeline` and `Selected Job`
+- the `Your Manuscripts` list now shows a document-type pill for each manuscript, and the `Pipeline` page has its own manuscript selector so users can switch context without leaving the workflow view
 - the `Upload Manuscript` panel now lives on the `Manuscripts` page above `Your Manuscripts`, so new users can start from the manuscript workspace while advanced users can jump straight to the pipeline page
 - the pipeline stages are now numbered `1-5`, since upload is handled on the `Manuscripts` page rather than inside the pipeline stage flow
 - the pipeline workspace is intentionally simplified so the stage cards are the only stage-summary surface; there is no separate description-card layer above them
@@ -109,6 +110,7 @@ Web UI:
 - stage cards now prefer active work first, then the latest successful run, and otherwise fall back to `not-started`; cancelled and failed jobs still remain visible in the timeline for auditability
 - stage cards show pipeline substeps and the configured model names where applicable
 - the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads
+- the compose stack now runs a dedicated `ingest-worker` alongside the general worker so ingest jobs can run in parallel with longer analysis jobs instead of waiting behind them in the same queue lane
 - the compose images now include the PDF/OCR toolchain (`pdftotext`, `pdfinfo`, `ocrmypdf`, `tesseract`, `ghostscript`) needed for ingest
 
 ---

@@ -990,12 +990,14 @@ def test_gateway_api_uploads_and_registers_manuscripts(tmp_path) -> None:
         {
             "title": "Novel Draft",
             "source_path": upload["path"],
+            "document_type": upload["detected_format"],
             "file_size_bytes": upload["size_bytes"],
         },
         actor=alice,
     )
     assert status == 201
     assert manuscript["book_slug"] == "novel_draft"
+    assert manuscript["document_type"] == "pdf"
     assert manuscript["file_size_bytes"] == len(b"%PDF-1.4 demo")
 
 

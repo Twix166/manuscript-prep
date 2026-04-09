@@ -60,6 +60,7 @@ const els = {
   manuscriptTitle: document.getElementById("manuscript-title"),
   manuscriptSlug: document.getElementById("manuscript-slug"),
   manuscriptFile: document.getElementById("manuscript-file"),
+  pipelineManuscriptSelect: document.getElementById("pipeline-manuscript-select"),
   configProfileSelect: document.getElementById("config-profile-select"),
   configProfileDetail: document.getElementById("config-profile-detail"),
   manuscriptList: document.getElementById("manuscript-list"),
@@ -458,6 +459,7 @@ function renderManuscriptSummary(manuscript) {
     `${manuscript.title}`,
     "",
     `Slug: ${manuscript.book_slug}`,
+    `Document type: ${formatDocumentType(manuscript.document_type)}`,
     `Size: ${formatBytes(manuscript.file_size_bytes)}`,
     `Created: ${formatDate(manuscript.created_at)}`,
     `Updated: ${formatDate(manuscript.updated_at)}`,
@@ -471,6 +473,23 @@ function renderManuscriptSummary(manuscript) {
 - Job: ${latestIngest.job_id}${latestIngest.error ? `\n- Error: ${latestIngest.error}` : ""}`
       : "- Not run yet",
   ].join("\n");
+}
+
+function formatDocumentType(documentType) {
+  const labels = {
+    pdf: "PDF",
+    docx: "DOCX",
+    epub: "EPUB",
+    odt: "ODT",
+    mobi: "MOBI",
+    azw: "AZW",
+    azw3: "AZW3",
+    txt: "TXT",
+  };
+  if (!documentType) {
+    return "Unknown";
+  }
+  return labels[String(documentType).toLowerCase()] || String(documentType).toUpperCase();
 }
 
 function renderProfileSummary() {
@@ -854,6 +873,29 @@ function renderConfigProfiles() {
   els.configProfileDetail.textContent = renderConfigProfileSummary(profile);
 }
 
+function renderPipelineManuscriptSelect() {
+  if (!els.pipelineManuscriptSelect) {
+    return;
+  }
+  els.pipelineManuscriptSelect.innerHTML = "";
+  if (!state.manuscripts.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No manuscripts available";
+    els.pipelineManuscriptSelect.appendChild(option);
+    els.pipelineManuscriptSelect.disabled = true;
+    return;
+  }
+  els.pipelineManuscriptSelect.disabled = false;
+  for (const manuscript of state.manuscripts) {
+    const option = document.createElement("option");
+    option.value = manuscript.manuscript_id;
+    option.textContent = `${manuscript.title} (${formatDocumentType(manuscript.document_type)})`;
+    option.selected = manuscript.manuscript_id === state.selectedManuscriptId;
+    els.pipelineManuscriptSelect.appendChild(option);
+  }
+}
+
 function renderManuscripts() {
   els.manuscriptList.innerHTML = "";
   if (!state.manuscripts.length) {
@@ -876,7 +918,8 @@ function renderManuscripts() {
         <div class="manuscript-row-head">
           <div>
             <strong>${safeTitle}</strong>
-            <span>${safeSlug}</span><br>
+            <span>${safeSlug}</span>
+            <span class="status-chip status-type">${formatDocumentType(manuscript.document_type)}</span><br>
             <span class="meta">Ingest: ${latestIngest ? `${latestIngest.status} at ${formatDate(latestIngest.finished_at || latestIngest.updated_at)}` : "not run yet"}</span>
           </div>
           <div class="manuscript-row-actions">
@@ -894,6 +937,7 @@ function renderManuscripts() {
       state.selectedManuscriptId = manuscript.manuscript_id;
       state.selectedJobId = null;
       renderManuscripts();
+      renderPipelineManuscriptSelect();
       await refreshJobs();
       renderStageBoard();
     });
@@ -1303,6 +1347,7 @@ async function refreshManuscripts() {
     state.selectedManuscriptId = state.manuscripts[0]?.manuscript_id || null;
   }
   renderManuscripts();
+  renderPipelineManuscriptSelect();
   renderStageBoard();
 }
 
@@ -1331,6 +1376,7 @@ async function refreshJobs() {
   }
   renderJobs();
   renderStageBoard();
+  renderPipelineManuscriptSelect();
   await refreshSelectedJob();
 }
 
@@ -1392,6 +1438,7 @@ function attachUploadFormHandler() {
         title,
         book_slug: slug || upload.book_slug_guess,
         source_path: upload.path,
+        document_type: upload.detected_format,
         file_size_bytes: upload.size_bytes,
       });
       state.selectedManuscriptId = manuscript.manuscript_id;
@@ -1483,6 +1530,15 @@ els.configProfileSelect.addEventListener("change", () => {
   state.selectedConfigProfileId = els.configProfileSelect.value;
   renderConfigProfiles();
   renderStageBoard();
+});
+
+els.pipelineManuscriptSelect.addEventListener("change", async () => {
+  state.selectedManuscriptId = els.pipelineManuscriptSelect.value || null;
+  state.selectedJobId = null;
+  renderManuscripts();
+  renderPipelineManuscriptSelect();
+  renderStageBoard();
+  await refreshJobs();
 });
 
 els.openIngestResults.addEventListener("click", openLatestIngestResults);

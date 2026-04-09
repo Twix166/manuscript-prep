@@ -399,6 +399,13 @@ h3 {
   color: var(--pending);
 }
 
+.status-chip.status-type {
+  background: rgba(35, 95, 156, 0.12);
+  color: var(--running);
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
 .manuscript-row {
   display: grid;
   gap: 10px;

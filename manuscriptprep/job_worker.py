@@ -22,6 +22,8 @@ class JobWorker:
         stale_after_seconds: int = 600,
         cancel_grace_seconds: int = 15,
         artifact_store: LocalArtifactStore | None = None,
+        include_pipelines: list[str] | None = None,
+        exclude_pipelines: list[str] | None = None,
     ) -> None:
         self.store = store
         self.adapter = adapter
@@ -30,6 +32,8 @@ class JobWorker:
         self.stale_after_seconds = stale_after_seconds
         self.cancel_grace_seconds = cancel_grace_seconds
         self.artifact_store = artifact_store or LocalArtifactStore()
+        self.include_pipelines = include_pipelines or []
+        self.exclude_pipelines = exclude_pipelines or []
         self.adapter.cancel_check = self._should_cancel_job
 
     def _should_cancel_job(self, job_id: str) -> bool:
@@ -47,7 +51,11 @@ class JobWorker:
     def process_next_job(self) -> bool:
         self.recover_stale_jobs()
         self.store.record_worker_heartbeat(self.worker_id, "idle")
-        job = self.store.claim_next_job(self.worker_id)
+        job = self.store.claim_next_job(
+            self.worker_id,
+            include_pipelines=self.include_pipelines or None,
+            exclude_pipelines=self.exclude_pipelines or None,
+        )
         if job is None:
             return False
 

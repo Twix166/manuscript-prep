@@ -89,6 +89,7 @@ def _manuscript_from_dict(data: Dict) -> ManuscriptRecord:
         book_slug=data["book_slug"],
         title=data["title"],
         source_path=data["source_path"],
+        document_type=data.get("document_type"),
         file_size_bytes=data.get("file_size_bytes"),
         owner_user_id=data.get("owner_user_id"),
         owner_username=data.get("owner_username"),
@@ -136,7 +137,13 @@ class BaseJobStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
+    def claim_next_job(
+        self,
+        worker_id: str,
+        *,
+        include_pipelines: Optional[List[str]] = None,
+        exclude_pipelines: Optional[List[str]] = None,
+    ) -> Optional[JobRecord]:
         raise NotImplementedError
 
     @abstractmethod
@@ -182,6 +189,7 @@ class BaseJobStore(ABC):
         book_slug: str,
         title: str,
         source_path: str,
+        document_type: Optional[str],
         file_size_bytes: Optional[int],
         owner_user_id: Optional[str],
         owner_username: Optional[str],
@@ -420,10 +428,22 @@ class JobStore(BaseJobStore):
             requested_at_key="_pause_requested_at",
         )
 
-    def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
+    def claim_next_job(
+        self,
+        worker_id: str,
+        *,
+        include_pipelines: Optional[List[str]] = None,
+        exclude_pipelines: Optional[List[str]] = None,
+    ) -> Optional[JobRecord]:
         with self._lock:
             queued_jobs = sorted(
-                (job for job in self._jobs.values() if job.status == "queued"),
+                (
+                    job
+                    for job in self._jobs.values()
+                    if job.status == "queued"
+                    and (not include_pipelines or job.pipeline in include_pipelines)
+                    and (not exclude_pipelines or job.pipeline not in exclude_pipelines)
+                ),
                 key=lambda item: item.created_at,
             )
             if not queued_jobs:
@@ -596,6 +616,7 @@ class JobStore(BaseJobStore):
         book_slug: str,
         title: str,
         source_path: str,
+        document_type: Optional[str],
         file_size_bytes: Optional[int],
         owner_user_id: Optional[str],
         owner_username: Optional[str],
@@ -616,6 +637,7 @@ class JobStore(BaseJobStore):
                     book_slug=book_slug,
                     title=title,
                     source_path=source_path,
+                    document_type=document_type or existing.document_type,
                     file_size_bytes=file_size_bytes,
                     owner_user_id=owner_user_id,
                     owner_username=owner_username,
@@ -628,6 +650,7 @@ class JobStore(BaseJobStore):
                     book_slug=book_slug,
                     title=title,
                     source_path=source_path,
+                    document_type=document_type,
                     file_size_bytes=file_size_bytes,
                     owner_user_id=owner_user_id,
                     owner_username=owner_username,
@@ -663,6 +686,7 @@ class JobStore(BaseJobStore):
                 book_slug=book_slug or manuscript.book_slug,
                 title=title or manuscript.title,
                 source_path=manuscript.source_path,
+                document_type=manuscript.document_type,
                 file_size_bytes=manuscript.file_size_bytes,
                 owner_user_id=manuscript.owner_user_id,
                 owner_username=manuscript.owner_username,

@@ -20,6 +20,7 @@ def test_get_web_asset_serves_index() -> None:
     assert b"analysis-detail-modal" in body
     assert b"Active Manuscript" in body
     assert b"DOCX, EPUB, ODT, MOBI, AZW, AZW3, or TXT" in body
+    assert b"pipeline-manuscript-select" in body
 
 
 def test_get_web_asset_serves_javascript() -> None:

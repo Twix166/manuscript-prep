@@ -58,6 +58,18 @@ def parse_args() -> argparse.Namespace:
         default=int(os.environ.get("MANUSCRIPTPREP_WORKER_STALE_AFTER_SECONDS", "600")),
         help="Requeue running jobs older than this age when the worker starts",
     )
+    parser.add_argument(
+        "--include-pipeline",
+        action="append",
+        default=[],
+        help="Only claim jobs for the named pipeline; may be repeated",
+    )
+    parser.add_argument(
+        "--exclude-pipeline",
+        action="append",
+        default=[],
+        help="Do not claim jobs for the named pipeline; may be repeated",
+    )
     return parser.parse_args()
 
 
@@ -78,6 +90,8 @@ def main() -> int:
         worker_id=args.worker_id,
         poll_interval=args.poll_interval,
         stale_after_seconds=args.stale_after_seconds,
+        include_pipelines=args.include_pipeline,
+        exclude_pipelines=args.exclude_pipeline,
     )
     emit_runtime_event(
         "worker",
@@ -85,6 +99,8 @@ def main() -> int:
         worker_id=worker.worker_id,
         poll_interval=args.poll_interval,
         stale_after_seconds=args.stale_after_seconds,
+        include_pipelines=args.include_pipeline,
+        exclude_pipelines=args.exclude_pipeline,
         store_backend=store.__class__.__name__,
     )
     worker.run_forever()

@@ -68,6 +68,33 @@ services:
       - manuscriptprep_worker.py
       - --runtime-root
       - /app/runtime_data/runtime
+      - --exclude-pipeline
+      - ingest
+    volumes:
+      - .:/app
+      - manuscriptprep_runtime_data:/app/runtime_data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ingest-worker:
+    build:
+      context: .
+    container_name: manuscriptprep-ingest-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MANUSCRIPTPREP_STORE_BACKEND: postgres
+      MANUSCRIPTPREP_DATABASE_URL: postgresql://${MANUSCRIPTPREP_POSTGRES_USER:-manuscriptprep}:${MANUSCRIPTPREP_POSTGRES_PASSWORD:-manuscriptprep}@postgres:5432/${MANUSCRIPTPREP_POSTGRES_DB:-manuscriptprep}
+      MANUSCRIPTPREP_POSTGRES_SCHEMA: ${MANUSCRIPTPREP_POSTGRES_SCHEMA:-gateway}
+      PYTHONUNBUFFERED: "1"
+    command:
+      - python
+      - manuscriptprep_worker.py
+      - --runtime-root
+      - /app/runtime_data/runtime
+      - --include-pipeline
+      - ingest
     volumes:
       - .:/app
       - manuscriptprep_runtime_data:/app/runtime_data
