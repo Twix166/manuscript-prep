@@ -254,13 +254,18 @@ function selectedJob() {
 }
 
 function latestStageCardJobForPipeline(pipeline) {
-  const jobs = state.jobs.filter((job) => job.pipeline === pipeline);
+  const jobs = state.jobs
+    .filter((job) => job.pipeline === pipeline)
+    .slice()
+    .sort((left, right) => String(right.updated_at || "").localeCompare(String(left.updated_at || "")));
   if (!jobs.length) {
     return null;
   }
-  const active = jobs.find((job) => ["queued", "running", "cancel_requested", "pause_requested"].includes(job.status));
-  if (active) {
-    return active;
+  for (const status of ["running", "pause_requested", "cancel_requested", "queued"]) {
+    const match = jobs.find((job) => job.status === status);
+    if (match) {
+      return match;
+    }
   }
   const paused = jobs.find((job) => job.status === "paused");
   if (paused) {
@@ -1161,11 +1166,14 @@ function renderStageBoard() {
     card.innerHTML = `
       <summary>
         <div class="workflow-step-head">
-          <div>
+          <div class="workflow-step-title">
             <p class="eyebrow">${stage.kind}</p>
             <h3>${stepNumber(stage.name)}. ${stageLabels[stage.name] || stage.name}</h3>
           </div>
-          <span class="status-pill">${stageStatus}</span>
+          <div class="workflow-step-controls">
+            <div class="stage-card-actions" data-stage-actions="${stage.name}"></div>
+            <span class="status-pill">${stageStatus}</span>
+          </div>
         </div>
         <p class="meta">${stage.description}</p>
       </summary>
@@ -1176,10 +1184,14 @@ function renderStageBoard() {
         <p class="meta"><strong>Last update:</strong> ${latestJob ? formatDate(latestJob.updated_at) : "n/a"}</p>
         ${throughput ? `<p class="meta"><strong>Throughput:</strong> ${throughput} tok/s</p>` : ""}
         ${compactProgress ? `<p class="meta"><strong>Live progress:</strong> ${compactProgress}</p>` : ""}
-        <div class="stage-card-actions" data-stage-actions="${stage.name}"></div>
       </div>
     `;
     card.querySelector(`[data-stage-actions="${stage.name}"]`).replaceWith(actionRow);
+    for (const button of actionRow.querySelectorAll("button")) {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+    }
     if (stage.name === "ingest" && latestIngestForSelectedManuscript()) {
       const viewButton = document.createElement("button");
       viewButton.type = "button";

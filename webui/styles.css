@@ -347,6 +347,22 @@ h3 {
   gap: 12px;
 }
 
+.workflow-step-title {
+  min-width: 0;
+}
+
+.workflow-step-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.workflow-step-controls .stage-card-actions {
+  justify-content: flex-end;
+}
+
 .list li strong {
   display: block;
   margin-bottom: 4px;
