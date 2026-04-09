@@ -61,7 +61,6 @@ const els = {
   saveManuscript: document.getElementById("save-manuscript"),
   openIngestResults: document.getElementById("open-ingest-results"),
   deleteManuscript: document.getElementById("delete-manuscript"),
-  pipelineOverview: document.getElementById("pipeline-overview"),
   stageBoard: document.getElementById("stage-board"),
   stageActionStatus: document.getElementById("stage-action-status"),
   systemStatus: document.getElementById("system-status"),
@@ -158,7 +157,6 @@ function resetWorkspaceState() {
   state.selectedConfigProfileId = null;
   state.selectedJobId = null;
   els.manuscriptList.innerHTML = "";
-  els.pipelineOverview.innerHTML = "";
   els.stageBoard.innerHTML = "";
   els.jobList.innerHTML = "";
   els.jobDownloads.innerHTML = "";
@@ -620,27 +618,6 @@ function resolveModelRefs(stage) {
   });
 }
 
-function renderPipelineOverview() {
-  els.pipelineOverview.innerHTML = "";
-  const fullPipeline = state.pipelines.find((item) => item.pipeline === "manuscript-prep");
-  if (!fullPipeline) {
-    els.pipelineOverview.textContent = "Pipeline metadata unavailable.";
-    return;
-  }
-  for (const stage of fullPipeline.stages) {
-    const card = document.createElement("article");
-    card.className = "stage-summary";
-    const models = resolveModelRefs(stage);
-    card.innerHTML = `
-      <h3>${stageLabels[stage.name] || stage.name}</h3>
-      <p>${stage.description}</p>
-      <p class="meta">Substeps: ${(stage.metadata.substeps || []).join(", ") || "n/a"}</p>
-      <p class="meta">Models: ${models.length ? models.join(", ") : "Deterministic stage"}</p>
-    `;
-    els.pipelineOverview.appendChild(card);
-  }
-}
-
 async function triggerPipeline(pipeline) {
   const manuscript = selectedManuscript();
   const profile = selectedConfigProfile();
@@ -840,7 +817,6 @@ async function refreshSystem() {
 async function refreshPipelines() {
   const payload = await fetchJson("/v1/pipelines");
   state.pipelines = payload.pipelines;
-  renderPipelineOverview();
   renderStageBoard();
 }
 
@@ -848,7 +824,6 @@ async function refreshConfigProfiles() {
   const payload = await fetchJson("/v1/config-profiles");
   state.configProfiles = payload.config_profiles;
   renderConfigProfiles();
-  renderPipelineOverview();
   renderStageBoard();
 }
 
@@ -990,7 +965,6 @@ els.refreshWorkspace.addEventListener("click", refreshAll);
 els.configProfileSelect.addEventListener("change", () => {
   state.selectedConfigProfileId = els.configProfileSelect.value;
   renderConfigProfiles();
-  renderPipelineOverview();
   renderStageBoard();
 });
 
