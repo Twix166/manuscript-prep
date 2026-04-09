@@ -7,8 +7,10 @@ import os
 import re
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 from manuscriptprep.api_models import ArtifactRef, JobRecord, utc_now_iso
 from manuscriptprep.config import load_config
@@ -28,6 +30,10 @@ class CommandExecution:
     stderr: str
 
 
+class JobCancelledError(RuntimeError):
+    pass
+
+
 class ExecutionAdapter:
     def __init__(
         self,
@@ -35,11 +41,13 @@ class ExecutionAdapter:
         python_bin: str | None = None,
         env: dict[str, str] | None = None,
         runtime_root: Path | None = None,
+        cancel_check: Callable[[str], bool] | None = None,
     ) -> None:
         self.repo_root = repo_root or REPO_ROOT
         self.python_bin = python_bin or sys.executable
         self.env = env or os.environ.copy()
         self.runtime_root = (runtime_root or (self.repo_root / "work" / "gateway_jobs" / "runtime")).expanduser()
+        self.cancel_check = cancel_check or (lambda _job_id: False)
 
     def run_job(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         if job.pipeline == "manuscript-prep":
@@ -108,22 +116,37 @@ class ExecutionAdapter:
         stdout_path = runtime_dir / "stdout.txt"
         stderr_path = runtime_dir / "stderr.txt"
         command_path = runtime_dir / "command.json"
-        result = subprocess.run(
-            cmd,
-            cwd=str(self.repo_root),
-            env=self.env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        stdout_path.write_text(result.stdout, encoding="utf-8")
-        stderr_path.write_text(result.stderr, encoding="utf-8")
+        with stdout_path.open("w", encoding="utf-8") as stdout_handle, stderr_path.open("w", encoding="utf-8") as stderr_handle:
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(self.repo_root),
+                env=self.env,
+                stdout=stdout_handle,
+                stderr=stderr_handle,
+                text=True,
+            )
+            cancelled = False
+            while proc.poll() is None:
+                if self.cancel_check(job.job_id):
+                    cancelled = True
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                        proc.wait()
+                    break
+                time.sleep(0.5)
+            return_code = proc.wait()
+
+        stdout_text = stdout_path.read_text(encoding="utf-8")
+        stderr_text = stderr_path.read_text(encoding="utf-8")
         command_path.write_text(
             json.dumps(
                 {
                     "stage": stage_name,
                     "cwd": str(self.repo_root),
-                    "exit_code": result.returncode,
+                    "exit_code": return_code,
                     "command": cmd,
                 },
                 indent=2,
@@ -131,15 +154,17 @@ class ExecutionAdapter:
             + "\n",
             encoding="utf-8",
         )
-        if result.returncode != 0:
-            raise RuntimeError(result.stderr.strip() or result.stdout.strip() or error_message)
+        if cancelled:
+            raise JobCancelledError(job.options.get("_cancel_reason") or "Cancelled by user")
+        if return_code != 0:
+            raise RuntimeError(stderr_text.strip() or stdout_text.strip() or error_message)
         return CommandExecution(
-            exit_code=result.returncode,
+            exit_code=return_code,
             stdout_path=stdout_path,
             stderr_path=stderr_path,
             command_path=command_path,
-            stdout=result.stdout,
-            stderr=result.stderr,
+            stdout=stdout_text,
+            stderr=stderr_text,
         )
 
     def _mark_stage_running(self, job: JobRecord, stage_name: str) -> None:
@@ -175,6 +200,18 @@ class ExecutionAdapter:
         for stage in updated.stage_runs:
             if stage.name == stage_name:
                 stage.status = "failed"
+                stage.finished_at = updated.updated_at
+                stage.error = message
+                break
+        return updated
+
+    def _mark_stage_cancelled(self, job: JobRecord, stage_name: str, message: str) -> JobRecord:
+        updated = job
+        updated.status = "cancelled"
+        updated.updated_at = utc_now_iso()
+        for stage in updated.stage_runs:
+            if stage.name == stage_name:
+                stage.status = "cancelled"
                 stage.finished_at = updated.updated_at
                 stage.error = message
                 break
@@ -257,7 +294,10 @@ class ExecutionAdapter:
         if job.options.get("force_ocr"):
             cmd.append("--force-ocr")
 
-        result = self._run_command(job, "ingest", cmd, "Ingest execution failed")
+        try:
+            result = self._run_command(job, "ingest", cmd, "Ingest execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "ingest", str(exc)), []
 
         book_slug = job.book_slug or self._slugify(job.title or "")
         workdir_path = Path(str(workdir))
@@ -301,7 +341,10 @@ class ExecutionAdapter:
         if job.book_slug:
             cmd.extend(["--book-slug", str(job.book_slug)])
 
-        result = self._run_command(job, "orchestrate", cmd, "Orchestrator execution failed")
+        try:
+            result = self._run_command(job, "orchestrate", cmd, "Orchestrator execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "orchestrate", str(exc)), []
 
         out_root = Path(str(output_dir))
         artifacts = self._record_stage_execution(job, "orchestrate", cmd, result) + [
@@ -338,7 +381,10 @@ class ExecutionAdapter:
         if chunk_manifest:
             cmd.extend(["--chunk-manifest", str(chunk_manifest)])
 
-        result = self._run_command(job, "merge", cmd, "Merger execution failed")
+        try:
+            result = self._run_command(job, "merge", cmd, "Merger execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "merge", str(exc)), []
 
         merged_root = Path(str(output_dir))
         artifacts = self._record_stage_execution(job, "merge", cmd, result) + [
@@ -377,7 +423,10 @@ class ExecutionAdapter:
         if model:
             cmd.extend(["--model", str(model)])
 
-        result = self._run_command(job, "resolve", cmd, "Resolver execution failed")
+        try:
+            result = self._run_command(job, "resolve", cmd, "Resolver execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "resolve", str(exc)), []
 
         resolved_root = Path(str(output_dir))
         artifacts = self._record_stage_execution(job, "resolve", cmd, result) + [
@@ -416,7 +465,10 @@ class ExecutionAdapter:
         if job.options.get("subtitle"):
             cmd.extend(["--subtitle", str(job.options["subtitle"])])
 
-        result = self._run_command(job, "report", cmd, "Report execution failed")
+        try:
+            result = self._run_command(job, "report", cmd, "Report execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "report", str(exc)), []
 
         report_path = Path(str(output_path))
         artifacts = self._record_stage_execution(job, "report", cmd, result) + [
@@ -451,6 +503,9 @@ class ExecutionAdapter:
             ingest_job, artifacts = self._run_ingest(ingest_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[0] = ingest_job.stage_runs[0]
+            if ingest_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "ingest", str(exc))
             raise
@@ -473,6 +528,9 @@ class ExecutionAdapter:
             orch_job, artifacts = self._run_orchestrate(orch_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[1] = orch_job.stage_runs[0]
+            if orch_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "orchestrate", str(exc))
             raise
@@ -496,6 +554,9 @@ class ExecutionAdapter:
             merge_job, artifacts = self._run_merge(merge_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[2] = merge_job.stage_runs[0]
+            if merge_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "merge", str(exc))
             raise
@@ -519,6 +580,9 @@ class ExecutionAdapter:
             resolve_job, artifacts = self._run_resolve(resolve_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[3] = resolve_job.stage_runs[0]
+            if resolve_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "resolve", str(exc))
             raise
@@ -541,6 +605,9 @@ class ExecutionAdapter:
             report_job, artifacts = self._run_report(report_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[4] = report_job.stage_runs[0]
+            if report_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "report", str(exc))
             raise

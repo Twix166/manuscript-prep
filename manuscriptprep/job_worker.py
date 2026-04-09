@@ -36,6 +36,7 @@ class JobWorker:
         )
 
     def process_next_job(self) -> bool:
+        self.recover_stale_jobs()
         self.store.record_worker_heartbeat(self.worker_id, "idle")
         job = self.store.claim_next_job(self.worker_id)
         if job is None:
@@ -50,10 +51,13 @@ class JobWorker:
             self.store.record_worker_heartbeat(self.worker_id, "idle", last_job_id=job.job_id)
         except Exception as exc:
             failed = self.store.get_job(job.job_id) or job
-            failed.status = "failed"
+            if failed.status == "cancel_requested":
+                failed.status = "cancelled"
+            else:
+                failed.status = "failed"
             failed.updated_at = utc_now_iso()
             if all(stage.error is None for stage in failed.stage_runs) and failed.stage_runs:
-                failed.stage_runs[0].status = "failed"
+                failed.stage_runs[0].status = "cancelled" if failed.status == "cancelled" else "failed"
                 failed.stage_runs[0].finished_at = failed.updated_at
                 failed.stage_runs[0].error = str(exc)
             self.store.update_job(failed)
@@ -61,8 +65,8 @@ class JobWorker:
         return True
 
     def run_forever(self) -> None:
-        self.recover_stale_jobs()
         while True:
             processed = self.process_next_job()
             if not processed:
+                self.recover_stale_jobs()
                 time.sleep(self.poll_interval)

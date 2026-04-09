@@ -207,6 +207,59 @@ class PostgresJobStore(BaseJobStore):
             conn.commit()
         return self._row_to_job(asdict(job))
 
+    def cancel_job(self, job_id: str, reason: str = "Cancelled by user") -> Optional[JobRecord]:
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT payload
+                FROM {self.schema}.gateway_jobs
+                WHERE job_id = %s
+                FOR UPDATE
+                """,
+                (job_id,),
+            )
+            row = cur.fetchone()
+            if row is None:
+                conn.commit()
+                return None
+
+            job = self._row_to_job(row[0])
+            if job.status in {"succeeded", "failed", "cancelled"}:
+                conn.commit()
+                return job
+
+            now = utc_now_iso()
+            active_stage = next((stage for stage in job.stage_runs if stage.status == "running"), None)
+            if job.status == "queued":
+                job.status = "cancelled"
+                if active_stage is None and job.stage_runs:
+                    active_stage = job.stage_runs[0]
+                if active_stage is not None:
+                    active_stage.status = "cancelled"
+                    active_stage.finished_at = now
+                    active_stage.error = reason
+            else:
+                job.status = "cancel_requested"
+                if active_stage is not None:
+                    active_stage.error = reason
+
+            job.updated_at = now
+            job.options = {
+                **job.options,
+                "_cancel_requested_at": now,
+                "_cancel_reason": reason,
+            }
+            cur.execute(
+                f"""
+                UPDATE {self.schema}.gateway_jobs
+                SET updated_at = %s::timestamptz, payload = %s::jsonb
+                WHERE job_id = %s
+                """,
+                (job.updated_at, json.dumps(asdict(job), ensure_ascii=False), job.job_id),
+            )
+            conn.commit()
+            return self._row_to_job(asdict(job))
+
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
         with self._connect(autocommit=False) as conn, conn.cursor() as cur:
             cur.execute(
@@ -293,7 +346,14 @@ class PostgresJobStore(BaseJobStore):
                 """
             )
             rows = cur.fetchall()
-        summary: dict[str, int] = {"queued": 0, "running": 0, "succeeded": 0, "failed": 0, "cancelled": 0}
+        summary: dict[str, int] = {
+            "queued": 0,
+            "running": 0,
+            "cancel_requested": 0,
+            "succeeded": 0,
+            "failed": 0,
+            "cancelled": 0,
+        }
         total = 0
         for status, count in rows:
             summary[str(status)] = int(count)

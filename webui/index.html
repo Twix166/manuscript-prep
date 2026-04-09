@@ -121,7 +121,10 @@
       <section class="panel">
         <div class="panel-head">
           <h2>Selected Job</h2>
-          <button type="button" data-refresh="selected-job">Refresh</button>
+          <div class="panel-actions">
+            <button type="button" id="cancel-selected-job" class="danger-button">Cancel Job</button>
+            <button type="button" data-refresh="selected-job">Refresh</button>
+          </div>
         </div>
         <div class="panel-actions wrap" id="job-downloads"></div>
         <div class="grid three">

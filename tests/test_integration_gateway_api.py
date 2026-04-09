@@ -110,6 +110,34 @@ def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_en
     assert {item["name"] for item in artifact_index["artifacts"]} >= {"ingest_stdout", "ingest_stderr", "ingest_command"}
 
 
+def test_gateway_api_can_cancel_jobs(tmp_path) -> None:
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"))
+
+    status, created = app.create_job({"pipeline": "ingest", "book_slug": "treasure_island", "title": "Treasure Island"})
+    assert status == 201
+
+    status, cancelled = app.cancel_job(created["job_id"])
+    assert status == 202
+    assert cancelled["status"] == "cancelled"
+
+    status, created = app.create_job({"pipeline": "orchestrate", "book_slug": "treasure_island", "title": "Treasure Island"})
+    assert status == 201
+    running = app.store.get_job(created["job_id"])
+    assert running is not None
+    running.status = "running"
+    running.stage_runs[0].status = "running"
+    app.store.update_job(running)
+
+    status, cancel_requested = app.cancel_job(created["job_id"])
+    assert status == 202
+    assert cancel_requested["status"] == "cancel_requested"
+    assert cancel_requested["stage_runs"][0]["error"] == "Cancelled by user"
+
+    status, system = app.system_status()
+    assert status == 200
+    assert system["queue"]["cancel_requested"] == 1
+
+
 def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

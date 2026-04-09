@@ -688,6 +688,20 @@ class GatewayAPI:
             return HTTPStatus.ACCEPTED, to_dict(job)
         return HTTPStatus.ACCEPTED, to_dict(job)
 
+    def cancel_job(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
+        updated = self.store.cancel_job(job_id)
+        if updated is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        return HTTPStatus.ACCEPTED, to_dict(updated)
+
 
 class GatewayHandler(BaseHTTPRequestHandler):
     app: GatewayAPI
@@ -883,6 +897,12 @@ class GatewayHandler(BaseHTTPRequestHandler):
         if path.startswith("/v1/jobs/") and path.endswith("/run"):
             job_id = path.split("/")[-2]
             status, response = self.app.run_job(job_id, actor=self._current_actor())
+            self._write_json(status, response)
+            return
+
+        if path.startswith("/v1/jobs/") and path.endswith("/cancel"):
+            job_id = path.split("/")[-2]
+            status, response = self.app.cancel_job(job_id, actor=self._current_actor())
             self._write_json(status, response)
             return
 

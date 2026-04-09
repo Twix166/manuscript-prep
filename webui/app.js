@@ -48,6 +48,7 @@ const els = {
   jobProgress: document.getElementById("job-progress"),
   jobArtifacts: document.getElementById("job-artifacts"),
   jobDownloads: document.getElementById("job-downloads"),
+  cancelSelectedJob: document.getElementById("cancel-selected-job"),
   runFullPipeline: document.getElementById("run-full-pipeline"),
 };
 
@@ -120,6 +121,10 @@ async function downloadJobArtifact(jobId, artifactName) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+async function cancelJob(jobId) {
+  return sendJson("POST", `/v1/jobs/${encodeURIComponent(jobId)}/cancel`, {});
 }
 
 function artifactButtonLabel(name) {
@@ -320,6 +325,7 @@ function renderSystemSummary(payload) {
     `Queue`,
     `- Queued: ${queue.queued || 0}`,
     `- Running: ${queue.running || 0}`,
+    `- Cancel requested: ${queue.cancel_requested || 0}`,
     `- Succeeded: ${queue.succeeded || 0}`,
     `- Failed: ${queue.failed || 0}`,
     `- Cancelled: ${queue.cancelled || 0}`,
@@ -336,6 +342,7 @@ function renderJobSummary(job) {
   return [
     `${stageLabels[job.pipeline] || job.pipeline} Job`,
     "",
+    `Job ID: ${job.job_id}`,
     `Status: ${job.status}`,
     `Book: ${job.title || job.book_slug || "n/a"}`,
     `Created: ${formatDate(job.created_at)}`,
@@ -592,12 +599,40 @@ function renderJobs() {
   for (const job of state.jobs) {
     const li = document.createElement("li");
     li.className = job.job_id === state.selectedJobId ? "selected" : "";
-    li.textContent = `${job.pipeline} | ${job.status} | ${formatDate(job.updated_at)}`;
-    li.addEventListener("click", async () => {
+    li.innerHTML = `
+      <strong>${stageLabels[job.pipeline] || job.pipeline}</strong>
+      <span class="meta">Job ID: ${job.job_id}</span><br>
+      <span class="meta">Status: ${job.status} | Updated: ${formatDate(job.updated_at)}</span>
+    `;
+    li.addEventListener("click", async (event) => {
+      if (event.target instanceof HTMLElement && event.target.closest("button")) {
+        return;
+      }
       state.selectedJobId = job.job_id;
       renderJobs();
       await refreshSelectedJob();
     });
+    if (["queued", "running", "cancel_requested"].includes(job.status)) {
+      const actions = document.createElement("div");
+      actions.className = "panel-actions";
+      const cancelButton = document.createElement("button");
+      cancelButton.type = "button";
+      cancelButton.className = "danger-button";
+      cancelButton.textContent = job.status === "cancel_requested" ? "Cancellation Requested" : "Cancel Job";
+      cancelButton.disabled = job.status === "cancel_requested";
+      cancelButton.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        try {
+          await cancelJob(job.job_id);
+          els.stageActionStatus.textContent = `Cancellation requested for job ${job.job_id}`;
+          await refreshJobs();
+        } catch (error) {
+          els.stageActionStatus.textContent = error.message;
+        }
+      });
+      actions.appendChild(cancelButton);
+      li.appendChild(actions);
+    }
     els.jobList.appendChild(li);
   }
 }
@@ -607,6 +642,7 @@ async function refreshSelectedJob() {
   if (!job) {
     els.jobDownloads.innerHTML = "";
     els.jobProgress.textContent = "Live chunk progress appears here for categorisation and analysis jobs.";
+    els.cancelSelectedJob.disabled = true;
     return;
   }
   try {
@@ -620,12 +656,14 @@ async function refreshSelectedJob() {
     els.jobProgress.textContent = renderJobProgressSummary(progress);
     els.jobArtifacts.textContent = renderArtifactSummary(artifacts);
     renderJobDownloads(freshJob, artifacts);
+    els.cancelSelectedJob.disabled = !["queued", "running", "cancel_requested"].includes(freshJob.status);
     renderStageBoard();
   } catch (error) {
     els.jobDetail.textContent = error.message;
     els.jobProgress.textContent = error.message;
     els.jobArtifacts.textContent = error.message;
     els.jobDownloads.innerHTML = "";
+    els.cancelSelectedJob.disabled = true;
   }
 }
 
@@ -780,6 +818,20 @@ els.deleteManuscript.addEventListener("click", async () => {
 });
 
 els.openIngestResults.addEventListener("click", openLatestIngestResults);
+els.cancelSelectedJob.addEventListener("click", async () => {
+  const job = selectedJob();
+  if (!job) {
+    els.stageActionStatus.textContent = "Select a job first.";
+    return;
+  }
+  try {
+    await cancelJob(job.job_id);
+    els.stageActionStatus.textContent = `Cancellation requested for job ${job.job_id}`;
+    await refreshJobs();
+  } catch (error) {
+    els.stageActionStatus.textContent = error.message;
+  }
+});
 els.runFullPipeline.addEventListener("click", () => triggerPipeline("manuscript-prep"));
 
 for (const button of document.querySelectorAll("[data-refresh]")) {
@@ -802,3 +854,4 @@ setInterval(() => {
 }, autoRefreshMs);
 
 refreshAll();
+els.cancelSelectedJob.disabled = true;

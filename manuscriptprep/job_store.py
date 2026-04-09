@@ -127,6 +127,10 @@ class BaseJobStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def cancel_job(self, job_id: str, reason: str = "Cancelled by user") -> Optional[JobRecord]:
+        raise NotImplementedError
+
+    @abstractmethod
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
         raise NotImplementedError
 
@@ -343,6 +347,39 @@ class JobStore(BaseJobStore):
             self._persist_artifact_index()
             return _job_from_dict(asdict(job))
 
+    def cancel_job(self, job_id: str, reason: str = "Cancelled by user") -> Optional[JobRecord]:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None:
+                return None
+            if job.status in {"succeeded", "failed", "cancelled"}:
+                return _job_from_dict(asdict(job))
+
+            now = utc_now_iso()
+            active_stage = next((stage for stage in job.stage_runs if stage.status == "running"), None)
+            if job.status == "queued":
+                job.status = "cancelled"
+                if active_stage is None and job.stage_runs:
+                    active_stage = job.stage_runs[0]
+                if active_stage is not None:
+                    active_stage.status = "cancelled"
+                    active_stage.finished_at = now
+                    active_stage.error = reason
+            else:
+                job.status = "cancel_requested"
+                if active_stage is not None:
+                    active_stage.error = reason
+
+            job.updated_at = now
+            job.options = {
+                **job.options,
+                "_cancel_requested_at": now,
+                "_cancel_reason": reason,
+            }
+            self._jobs[job.job_id] = job
+            self._persist(job)
+            return _job_from_dict(asdict(job))
+
     def claim_next_job(self, worker_id: str) -> Optional[JobRecord]:
         with self._lock:
             queued_jobs = sorted(
@@ -384,7 +421,14 @@ class JobStore(BaseJobStore):
 
     def queue_summary(self) -> Dict[str, int]:
         with self._lock:
-            summary: Dict[str, int] = {"queued": 0, "running": 0, "succeeded": 0, "failed": 0, "cancelled": 0}
+            summary: Dict[str, int] = {
+                "queued": 0,
+                "running": 0,
+                "cancel_requested": 0,
+                "succeeded": 0,
+                "failed": 0,
+                "cancelled": 0,
+            }
             for job in self._jobs.values():
                 summary[job.status] = summary.get(job.status, 0) + 1
             summary["total"] = len(self._jobs)
