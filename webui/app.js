@@ -12,6 +12,8 @@ const stageLabels = {
 const state = {
   token: localStorage.getItem(storageKey) || "",
   currentUser: null,
+  authSetup: null,
+  adminMode: false,
   pipelines: [],
   manuscripts: [],
   configProfiles: [],
@@ -25,6 +27,11 @@ const state = {
 const els = {
   authScreen: document.getElementById("auth-screen"),
   appShell: document.getElementById("app-shell"),
+  authColumns: document.querySelector(".auth-columns"),
+  setupForm: document.getElementById("setup-form"),
+  setupUsername: document.getElementById("setup-username"),
+  setupPassword: document.getElementById("setup-password"),
+  setupStatus: document.getElementById("setup-status"),
   loginForm: document.getElementById("login-form"),
   loginUsername: document.getElementById("login-username"),
   loginPassword: document.getElementById("login-password"),
@@ -36,6 +43,7 @@ const els = {
   refreshWorkspace: document.getElementById("refresh-workspace"),
   profileSummary: document.getElementById("profile-summary"),
   profileDetail: document.getElementById("profile-detail"),
+  toggleAdminMode: document.getElementById("toggle-admin-mode"),
   logoutButton: document.getElementById("logout-button"),
   uploadForm: document.getElementById("upload-form"),
   uploadStatus: document.getElementById("upload-status"),
@@ -57,6 +65,9 @@ const els = {
   stageBoard: document.getElementById("stage-board"),
   stageActionStatus: document.getElementById("stage-action-status"),
   systemStatus: document.getElementById("system-status"),
+  adminConsole: document.getElementById("admin-console"),
+  adminSystemStatus: document.getElementById("admin-system-status"),
+  adminInterfaceNote: document.getElementById("admin-interface-note"),
   jobList: document.getElementById("job-list"),
   jobDetail: document.getElementById("job-detail"),
   jobProgress: document.getElementById("job-progress"),
@@ -137,6 +148,7 @@ function showAppShell() {
 
 function resetWorkspaceState() {
   state.currentUser = null;
+  state.adminMode = false;
   state.pipelines = [];
   state.manuscripts = [];
   state.configProfiles = [];
@@ -154,6 +166,34 @@ function resetWorkspaceState() {
   els.jobProgress.textContent = "Live chunk progress appears here for categorisation and analysis jobs.";
   els.jobArtifacts.textContent = "Artifact index appears here, including checksums and output paths.";
   els.systemStatus.textContent = "Sign in to load workspace status.";
+  els.adminSystemStatus.textContent = "Switch to admin mode from the profile menu to load system-wide status.";
+  els.adminInterfaceNote.textContent = "Admin mode is intended for platform oversight. Your manuscript workflow remains available above.";
+  els.adminConsole.classList.add("hidden");
+}
+
+async function refreshSetupState() {
+  const payload = await fetchJson("/v1/auth/setup-state");
+  state.authSetup = payload;
+  els.setupUsername.value = payload.admin_username || "admin";
+  if (payload.needs_admin_setup) {
+    els.setupForm.classList.remove("hidden");
+    els.authColumns.classList.add("hidden");
+  } else {
+    els.setupForm.classList.add("hidden");
+    els.authColumns.classList.remove("hidden");
+  }
+}
+
+function renderAdminMode() {
+  const canAdmin = state.currentUser?.role === "admin";
+  if (!canAdmin) {
+    els.toggleAdminMode.classList.add("hidden");
+    els.adminConsole.classList.add("hidden");
+    return;
+  }
+  els.toggleAdminMode.classList.remove("hidden");
+  els.toggleAdminMode.textContent = state.adminMode ? "Back To User Workspace" : "Open Admin Interface";
+  els.adminConsole.classList.toggle("hidden", !state.adminMode);
 }
 
 function selectedManuscript() {
@@ -282,6 +322,7 @@ function renderProfileSummary() {
   if (!state.currentUser) {
     els.profileSummary.textContent = "Profile";
     els.profileDetail.textContent = "Profile details load after sign-in.";
+    els.toggleAdminMode.classList.add("hidden");
     return;
   }
   els.profileSummary.textContent = state.currentUser.username;
@@ -292,6 +333,7 @@ function renderProfileSummary() {
     `Created: ${formatDate(state.currentUser.created_at)}`,
     `Updated: ${formatDate(state.currentUser.updated_at)}`,
   ].join("\n");
+  renderAdminMode();
 }
 
 function renderSystemSummary(payload) {
@@ -772,7 +814,20 @@ async function refreshSystem() {
   }
   try {
     const payload = await fetchJson("/v1/system/status");
-    els.systemStatus.textContent = renderSystemSummary(payload);
+    const rendered = renderSystemSummary(payload);
+    if (state.currentUser.role === "admin") {
+      els.systemStatus.textContent = state.adminMode
+        ? "Admin mode is active. See the Admin Interface panel below for system-wide status."
+        : renderUserWorkspaceSummary();
+      els.adminSystemStatus.textContent = rendered;
+      els.adminInterfaceNote.textContent = [
+        "Admin Interface",
+        "- Use this mode for queue, worker, and persistence oversight.",
+        "- The manuscript workflow above remains active while admin mode is open.",
+      ].join("\n");
+    } else {
+      els.systemStatus.textContent = rendered;
+    }
   } catch (error) {
     if (error.status === 403) {
       els.systemStatus.textContent = renderUserWorkspaceSummary();
@@ -832,6 +887,7 @@ async function refreshJobs() {
 
 async function refreshAll() {
   if (!state.token) {
+    await refreshSetupState();
     showAuthScreen();
     return;
   }
@@ -847,6 +903,7 @@ async function refreshAll() {
     persistToken("");
     resetWorkspaceState();
     els.loginStatus.textContent = error.message;
+    await refreshSetupState();
     showAuthScreen();
   }
 }
@@ -854,12 +911,31 @@ async function refreshAll() {
 async function handleAuthSuccess(payload, message) {
   persistToken(payload.api_token);
   state.currentUser = payload.user;
+  state.adminMode = false;
   renderProfileSummary();
   els.loginStatus.textContent = message;
   els.registerStatus.textContent = message;
+  els.setupStatus.textContent = message;
   showAppShell();
   await refreshAll();
 }
+
+els.setupForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    els.setupStatus.textContent = "Setting admin password...";
+    const payload = await sendJson("POST", "/v1/auth/bootstrap-admin", {
+      username: els.setupUsername.value.trim(),
+      password: els.setupPassword.value,
+    });
+    await refreshSetupState();
+    await handleAuthSuccess(payload, `Admin setup complete for ${payload.user.username}.`);
+    els.setupForm.reset();
+    els.setupUsername.value = payload.user.username;
+  } catch (error) {
+    els.setupStatus.textContent = error.message;
+  }
+});
 
 els.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -898,6 +974,15 @@ els.logoutButton.addEventListener("click", () => {
   showAuthScreen();
   els.loginStatus.textContent = "Signed out.";
   els.registerStatus.textContent = "Create a new account or sign back in.";
+  refreshSetupState().catch(() => {
+    // keep signed-out screen even if setup probe fails
+  });
+});
+
+els.toggleAdminMode.addEventListener("click", async () => {
+  state.adminMode = !state.adminMode;
+  renderAdminMode();
+  await refreshSystem();
 });
 
 els.refreshWorkspace.addEventListener("click", refreshAll);

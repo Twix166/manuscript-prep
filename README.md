@@ -53,6 +53,9 @@ Authentication:
   - `POST /v1/auth/register`
   - `POST /v1/auth/login`
   - `GET /v1/auth/me`
+- the gateway also exposes first-run auth bootstrap endpoints:
+  - `GET /v1/auth/setup-state`
+  - `POST /v1/auth/bootstrap-admin`
 - the compose stack still boots a default admin token for development via `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN`
 
 Managed records:
@@ -69,7 +72,9 @@ Artifact management:
 Web UI:
 
 - `GET /ui` now serves a user-facing pipeline studio with a login/register landing page
+- on first run, the UI shows an out-of-box setup step that asks you to set the admin password before normal user registration is enabled
 - authenticated users land in a manuscript-first workspace with profile controls in the top-right header
+- admin users still land in the normal user workspace first, and can open an admin interface from the profile menu when they need platform-level visibility
 - the workspace now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
 - the main dashboard panels now summarize config, manuscript, system, job, and artifact state in human-readable text instead of raw JSON dumps
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
@@ -288,11 +293,12 @@ The gateway will be available on `http://127.0.0.1:8765` and PostgreSQL will be 
 For the user-facing flow:
 
 1. Open `http://127.0.0.1:8765/ui`
-2. Register a new account or log in with an existing account
-3. Upload one or more manuscript PDFs
-4. Select a manuscript from the workspace sidebar
-5. Choose a config profile
-6. Trigger the full pipeline or individual stages and watch live status updates
+2. If this is the first run, complete the one-time admin password setup
+3. Log in as admin or register a normal user account
+4. Upload one or more manuscript PDFs
+5. Select a manuscript from the workspace sidebar
+6. Choose a config profile
+7. Trigger the full pipeline or individual stages and watch live status updates
 
 For compose-based analysis, the container-safe config uses `http://host.docker.internal:11434` for Ollama, and the canonical orchestrator now streams generation through that configured host instead of requiring a local `ollama run` subprocess inside the container. On Linux, `compose.yaml` maps that hostname to the Docker host automatically.
 

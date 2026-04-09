@@ -15,6 +15,8 @@ def test_get_web_asset_serves_index() -> None:
     assert b"ManuscriptPrep Pipeline Studio" in body
     assert b"Welcome back" in body
     assert b"Create Account" in body
+    assert b"Set the admin password" in body
+    assert b"Open Admin Interface" in body
 
 
 def test_get_web_asset_serves_javascript() -> None:

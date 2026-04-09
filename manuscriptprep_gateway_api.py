@@ -61,9 +61,9 @@ class GatewayAPI:
         self.upload_root = self.runtime_root.parent / "uploads"
         self.upload_root.mkdir(parents=True, exist_ok=True)
         self.auth_required = auth_required
+        self.bootstrap_admin_username = bootstrap_username or "admin"
         if bootstrap_token:
-            username = bootstrap_username or "admin"
-            self.store.upsert_user(username=username, role=bootstrap_role, api_token=bootstrap_token)
+            self.store.upsert_user(username=self.bootstrap_admin_username, role=bootstrap_role, api_token=bootstrap_token)
         if bootstrap_config_profile_name and bootstrap_config_profile_path:
             checksum = hashlib.sha256(str(bootstrap_config_profile_path).encode("utf-8")).hexdigest()
             self.store.upsert_config_profile(
@@ -117,6 +117,17 @@ class GatewayAPI:
             return None
         return self.store.get_user_by_token(token)
 
+    def _bootstrap_admin_user(self) -> Optional[UserRecord]:
+        return self.store.get_user_by_username(self.bootstrap_admin_username)
+
+    def auth_setup_state(self) -> Tuple[int, Dict[str, Any]]:
+        admin = self._bootstrap_admin_user()
+        needs_setup = admin is None or not admin.password_hash
+        return HTTPStatus.OK, {
+            "needs_admin_setup": needs_setup,
+            "admin_username": self.bootstrap_admin_username,
+        }
+
     def _serialize_user(self, user: UserRecord) -> Dict[str, Any]:
         return {
             "user_id": user.user_id,
@@ -151,6 +162,9 @@ class GatewayAPI:
             return False
 
     def register_user(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        admin = self._bootstrap_admin_user()
+        if admin is None or not admin.password_hash:
+            return HTTPStatus.FORBIDDEN, {"error": "Complete admin setup before registering users"}
         username = str(payload.get("username", "")).strip()
         password = str(payload.get("password", ""))
         if len(username) < 3:
@@ -167,6 +181,33 @@ class GatewayAPI:
             api_token=api_token,
             password_hash=self._hash_password(password),
         )
+        return HTTPStatus.CREATED, {"user": self._serialize_user(user), "api_token": user.api_token}
+
+    def bootstrap_admin_password(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        username = str(payload.get("username", self.bootstrap_admin_username)).strip() or self.bootstrap_admin_username
+        password = str(payload.get("password", ""))
+        if username != self.bootstrap_admin_username:
+            return HTTPStatus.BAD_REQUEST, {"error": "Bootstrap admin username cannot be changed"}
+        if len(password) < 8:
+            return HTTPStatus.BAD_REQUEST, {"error": "password must be at least 8 characters"}
+        user = self._bootstrap_admin_user()
+        if user is not None and user.password_hash:
+            return HTTPStatus.CONFLICT, {"error": "Admin setup has already been completed"}
+        if user is None:
+            api_token = secrets.token_urlsafe(32)
+            user = self.store.upsert_user(
+                username=self.bootstrap_admin_username,
+                role="admin",
+                api_token=api_token,
+                password_hash=self._hash_password(password),
+            )
+        else:
+            user = self.store.upsert_user(
+                username=user.username,
+                role=user.role,
+                api_token=user.api_token,
+                password_hash=self._hash_password(password),
+            )
         return HTTPStatus.CREATED, {"user": self._serialize_user(user), "api_token": user.api_token}
 
     def login_user(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
@@ -852,6 +893,11 @@ class GatewayHandler(BaseHTTPRequestHandler):
             self._write_json(status, payload)
             return
 
+        if path == "/v1/auth/setup-state":
+            status, payload = self.app.auth_setup_state()
+            self._write_json(status, payload)
+            return
+
         if path == "/v1/pipelines":
             status, payload = self.app.list_pipelines(actor=self._current_actor())
             self._write_json(status, payload)
@@ -942,6 +988,16 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
                 return
             status, response = self.app.register_user(payload)
+            self._write_json(status, response)
+            return
+
+        if path == "/v1/auth/bootstrap-admin":
+            try:
+                payload = self._read_json_body()
+            except (json.JSONDecodeError, ValueError) as exc:
+                self._write_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+                return
+            status, response = self.app.bootstrap_admin_password(payload)
             self._write_json(status, response)
             return
 

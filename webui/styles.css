@@ -113,6 +113,10 @@ h3 {
   gap: 20px;
 }
 
+.auth-columns.hidden {
+  display: none;
+}
+
 .auth-card,
 .panel {
   background: var(--paper);

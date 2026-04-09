@@ -13,6 +13,19 @@
         <h1>Build your manuscript pipeline from one workspace.</h1>
         <p class="lede">Upload drafts, manage multiple manuscripts, and run each stage from ingest through reporting with live status and per-manuscript history.</p>
       </div>
+      <form id="setup-form" class="auth-card stack hidden">
+        <div>
+          <p class="eyebrow">First Run Setup</p>
+          <h2>Set the admin password</h2>
+        </div>
+        <p class="muted">Complete this once to activate the admin account. After that, the same login screen is used for both admin and normal users.</p>
+        <label for="setup-username">Admin username</label>
+        <input id="setup-username" type="text" readonly>
+        <label for="setup-password">Admin password</label>
+        <input id="setup-password" autocomplete="new-password" type="password" placeholder="At least 8 characters">
+        <button type="submit">Complete Setup</button>
+        <p id="setup-status" class="muted">The admin account token is preserved behind the scenes for service use.</p>
+      </form>
       <div class="auth-columns">
         <form id="login-form" class="auth-card stack">
           <div>
@@ -54,6 +67,7 @@
             <summary id="profile-summary">Profile</summary>
             <div class="profile-card">
               <div id="profile-detail" class="summary-block">Profile details load after sign-in.</div>
+              <button type="button" id="toggle-admin-mode" class="ghost-button hidden">Open Admin Interface</button>
               <button type="button" id="logout-button" class="secondary-button">Log Out</button>
             </div>
           </details>
@@ -157,6 +171,20 @@
               </div>
               <div id="system-status" class="summary-block">Sign in to load workspace status.</div>
             </article>
+          </section>
+
+          <section id="admin-console" class="panel hidden">
+            <div class="panel-head">
+              <div>
+                <h2>Admin Interface</h2>
+                <p class="muted">Admin mode exposes platform-level status and control surfaces without changing the default manuscript workspace.</p>
+              </div>
+              <button type="button" data-refresh="system">Refresh Admin Status</button>
+            </div>
+            <div class="grid two">
+              <div id="admin-system-status" class="summary-block">Switch to admin mode from the profile menu to load system-wide status.</div>
+              <div id="admin-interface-note" class="summary-block">Admin mode is intended for platform oversight. Your manuscript workflow remains available above.</div>
+            </div>
           </section>
 
           <article class="panel">

@@ -48,7 +48,16 @@ def test_gateway_api_exposes_health_pipelines_and_jobs(tmp_path) -> None:
 
 
 def test_gateway_api_registers_logs_in_and_returns_current_user(tmp_path) -> None:
-    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"), auth_required=True)
+    app = GatewayAPI(
+        store=JobStore(root=tmp_path / "jobs"),
+        auth_required=True,
+        bootstrap_username="admin",
+        bootstrap_token="admin-token",
+    )
+
+    status, bootstrapped = app.bootstrap_admin_password({"username": "admin", "password": "supersecret1"})
+    assert status == 201
+    assert bootstrapped["user"]["role"] == "admin"
 
     status, registered = app.register_user({"username": "alice", "password": "supersecret1"})
     assert status == 201
@@ -77,6 +86,41 @@ def test_gateway_api_registers_logs_in_and_returns_current_user(tmp_path) -> Non
     assert status == 200
     assert me["user"]["username"] == "alice"
     assert "api_token" not in me["user"]
+
+
+def test_gateway_api_exposes_admin_setup_state_and_bootstraps_password(tmp_path) -> None:
+    app = GatewayAPI(
+        store=JobStore(root=tmp_path / "jobs"),
+        auth_required=True,
+        bootstrap_username="admin",
+        bootstrap_token="admin-token",
+    )
+
+    status, setup = app.auth_setup_state()
+    assert status == 200
+    assert setup["needs_admin_setup"] is True
+    assert setup["admin_username"] == "admin"
+
+    status, registered = app.register_user({"username": "alice", "password": "supersecret1"})
+    assert status == 403
+    assert registered["error"] == "Complete admin setup before registering users"
+
+    status, bootstrapped = app.bootstrap_admin_password({"username": "admin", "password": "supersecret1"})
+    assert status == 201
+    assert bootstrapped["user"]["role"] == "admin"
+    assert bootstrapped["api_token"] == "admin-token"
+
+    status, setup_done = app.auth_setup_state()
+    assert status == 200
+    assert setup_done["needs_admin_setup"] is False
+
+    status, admin_login = app.login_user({"username": "admin", "password": "supersecret1"})
+    assert status == 200
+    assert admin_login["user"]["role"] == "admin"
+
+    status, duplicate = app.bootstrap_admin_password({"username": "admin", "password": "anotherpass1"})
+    assert status == 409
+    assert duplicate["error"] == "Admin setup has already been completed"
 
 
 def test_gateway_api_persists_and_runs_ingest_jobs(tmp_path, sample_pdf, test_env) -> None:
