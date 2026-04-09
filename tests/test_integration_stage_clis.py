@@ -65,6 +65,73 @@ def test_ingest_cli_honors_explicit_book_slug(tmp_path: Path, sample_pdf: Path, 
     assert (workdir / "chunks" / "treasure_island_custom").exists()
 
 
+def test_ingest_cli_supports_plain_text_sources(tmp_path: Path, test_env: dict[str, str]) -> None:
+    source = tmp_path / "moby_dick.txt"
+    source.write_text("CHAPTER I\n\nCall me Ishmael.\n\nSome years ago...\n", encoding="utf-8")
+    workdir = tmp_path / "work"
+
+    result = run_cli(
+        [
+            "manuscriptprep_ingest.py",
+            "--input",
+            str(source),
+            "--workdir",
+            str(workdir),
+            "--title",
+            "Moby Dick",
+            "--chunk-words",
+            "10",
+            "--min-chunk-words",
+            "2",
+            "--max-chunk-words",
+            "20",
+        ],
+        env=test_env,
+    )
+
+    assert result.returncode == 0, result.stderr
+    ingest_manifest = json.loads((workdir / "manifests" / "moby_dick" / "ingest_manifest.json").read_text(encoding="utf-8"))
+    assert ingest_manifest["classification"]["source_format"] == "txt"
+    assert ingest_manifest["extraction"]["extractor"] == "plain_text"
+    assert (workdir / "chunks" / "moby_dick" / "chunk_000.txt").exists()
+
+
+def test_ingest_cli_supports_mobi_sources(tmp_path: Path, test_env: dict[str, str]) -> None:
+    source = tmp_path / "moby_dick.mobi"
+    source.write_bytes(
+        (b"\x00" * 64)
+        + b"BOOKMOBI"
+        + b"<html><body><h1>Moby-Dick</h1><p>Call me Ishmael. Some years ago...</p></body></html>"
+    )
+    workdir = tmp_path / "work"
+
+    result = run_cli(
+        [
+            "manuscriptprep_ingest.py",
+            "--input",
+            str(source),
+            "--workdir",
+            str(workdir),
+            "--title",
+            "Moby Dick",
+            "--chunk-words",
+            "10",
+            "--min-chunk-words",
+            "2",
+            "--max-chunk-words",
+            "20",
+        ],
+        env=test_env,
+    )
+
+    assert result.returncode == 0, result.stderr
+    ingest_manifest = json.loads((workdir / "manifests" / "moby_dick" / "ingest_manifest.json").read_text(encoding="utf-8"))
+    assert ingest_manifest["classification"]["source_format"] == "mobi"
+    assert ingest_manifest["extraction"]["extractor"] == "ebook_heuristic"
+    raw_text = (workdir / "extracted" / "moby_dick" / "raw.txt").read_text(encoding="utf-8")
+    assert "Call me Ishmael" in raw_text
+
+
 def test_ingest_cli_uses_config_defaults_for_paths_and_chunking(tmp_path: Path, sample_pdf: Path, test_env: dict[str, str]) -> None:
     workspace_root = tmp_path / "workspace"
     config_path = tmp_path / "config.yaml"

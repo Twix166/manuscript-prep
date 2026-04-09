@@ -107,6 +107,7 @@ Web UI:
 - the job timeline now uses colored status pills so queued, running, paused, cancelled, and failed jobs are easier to scan at a glance
 - the `Ingest` stage now shows the currently selected manuscript and includes a `Choose Manuscript` popup so users can switch the active manuscript from inside the workflow
 - manuscript upload now auto-detects and accepts `PDF`, `DOCX`, `EPUB`, `ODT`, `MOBI`, `AZW`, `AZW3`, and `TXT` files during upload
+- ingest now extracts text directly from `TXT`, `DOCX`, `EPUB`, `ODT`, `MOBI`, `AZW`, and `AZW3` sources instead of assuming every manuscript is a PDF
 - stage cards now prefer active work first, then the latest successful run, and otherwise fall back to `not-started`; cancelled and failed jobs still remain visible in the timeline for auditability
 - stage cards show pipeline substeps and the configured model names where applicable
 - the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads
