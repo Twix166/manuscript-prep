@@ -17,6 +17,7 @@ def test_get_web_asset_serves_index() -> None:
     assert b"Create Account" in body
     assert b"Set the admin password" in body
     assert b"Open Admin Interface" in body
+    assert b"analysis-detail-modal" in body
 
 
 def test_get_web_asset_serves_javascript() -> None:

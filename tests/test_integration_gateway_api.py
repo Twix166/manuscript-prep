@@ -391,6 +391,112 @@ def test_gateway_api_exposes_orchestrate_progress_from_log(tmp_path) -> None:
     assert progress["recent_events"]
 
 
+def test_gateway_api_exposes_analysis_details_for_orchestrate_job(tmp_path) -> None:
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"))
+    input_dir = tmp_path / "chunks"
+    output_dir = tmp_path / "out"
+    input_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for index in range(1, 4):
+        (input_dir / f"chunk_{index:03d}.txt").write_text(f"chunk {index}\n", encoding="utf-8")
+
+    status, created = app.create_job(
+        {
+            "pipeline": "orchestrate",
+            "book_slug": "treasure_island",
+            "options": {
+                "input_dir": str(input_dir),
+                "output_dir": str(output_dir),
+            },
+        }
+    )
+    assert status == 201
+
+    persisted = app.store.get_job(created["job_id"])
+    assert persisted is not None
+    persisted.created_at = "2026-04-09T09:59:00+00:00"
+    persisted.updated_at = "2026-04-09T09:59:00+00:00"
+    persisted.status = "running"
+    persisted.stage_runs[0].status = "running"
+    persisted.stage_runs[0].started_at = "2026-04-09T09:59:30+00:00"
+    app.store.update_job(persisted)
+
+    chunk_dir = output_dir / "chunk_001"
+    chunk_dir.mkdir(parents=True, exist_ok=True)
+    (chunk_dir / "structure.json").write_text(
+        json.dumps({"chapters": ["CHAPTER I"], "parts": [], "scene_breaks": ["***"], "status": "ok"}) + "\n",
+        encoding="utf-8",
+    )
+    (chunk_dir / "dialogue.json").write_text(
+        json.dumps(
+            {
+                "pov": "third_person_limited",
+                "dialogue": True,
+                "internal_thought": True,
+                "explicitly_attributed_speakers": ["Jim Hawkins", "Long John Silver"],
+                "unattributed_dialogue_present": False,
+            }
+        ) + "\n",
+        encoding="utf-8",
+    )
+    (chunk_dir / "entities.json").write_text(
+        json.dumps(
+            {
+                "characters": ["Jim Hawkins", "Long John Silver"],
+                "places": ["Admiral Benbow Inn"],
+                "objects": ["map"],
+                "identity_notes": ["Jim may refer to Jim Hawkins"],
+            }
+        ) + "\n",
+        encoding="utf-8",
+    )
+    (chunk_dir / "dossiers.json").write_text(
+        json.dumps(
+            {
+                "character_dossiers": [
+                    {"name": "Jim Hawkins", "role": "protagonist"},
+                    {"name": "Long John Silver", "role": "antagonist"},
+                ]
+            }
+        ) + "\n",
+        encoding="utf-8",
+    )
+    (chunk_dir / "timing.json").write_text(
+        json.dumps({"chunk": "chunk_001", "passes": {"structure": 1.1}, "total_duration_seconds": 4.2}) + "\n",
+        encoding="utf-8",
+    )
+
+    log_path = output_dir / "orchestrator.log.jsonl"
+    log_path.write_text(
+        json.dumps(
+            {
+                "timestamp": "2026-04-09T10:01:31+00:00",
+                "event_type": "pass_success",
+                "message": "Pass completed successfully",
+                "chunk": "chunk_001",
+                "pass": "dialogue",
+                "step": "completed dialogue",
+                "model": "manuscriptprep-dialogue",
+                "reported_tps": 44.2,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    status, details = app.get_job_analysis_details(created["job_id"])
+    assert status == 200
+    assert details["available"] is True
+    assert details["chunks_total"] == 3
+    assert details["chunks_with_outputs"] == 1
+    assert details["progress"]["reported_tps"] == 44.2
+    assert details["chunks"][0]["chunk_id"] == "chunk_001"
+    assert details["chunks"][0]["structure"]["chapters"] == ["CHAPTER I"]
+    assert details["chunks"][0]["dialogue"]["explicitly_attributed_speakers"] == ["Jim Hawkins", "Long John Silver"]
+    assert details["chunks"][0]["entities"]["characters"] == ["Jim Hawkins", "Long John Silver"]
+    assert len(details["chunks"][0]["dossiers"]["character_dossiers"]) == 2
+
+
 def test_gateway_api_ingest_artifacts_follow_manuscript_slug(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

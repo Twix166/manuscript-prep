@@ -20,10 +20,12 @@ const state = {
   configProfiles: [],
   jobs: [],
   jobProgressById: {},
+  analysisDetailsByJobId: {},
   manuscriptDrafts: {},
   selectedManuscriptId: null,
   selectedConfigProfileId: null,
   selectedJobId: null,
+  selectedAnalysisChunkId: null,
 };
 
 const els = {
@@ -72,6 +74,13 @@ const els = {
   jobDownloads: document.getElementById("job-downloads"),
   cancelSelectedJob: document.getElementById("cancel-selected-job"),
   runFullPipeline: document.getElementById("run-full-pipeline"),
+  analysisDetailModal: document.getElementById("analysis-detail-modal"),
+  analysisDetailTitle: document.getElementById("analysis-detail-title"),
+  analysisDetailClose: document.getElementById("analysis-detail-close"),
+  analysisDetailSummary: document.getElementById("analysis-detail-summary"),
+  analysisChunkList: document.getElementById("analysis-chunk-list"),
+  analysisChunkTitle: document.getElementById("analysis-chunk-title"),
+  analysisChunkDetail: document.getElementById("analysis-chunk-detail"),
 };
 
 function currentHeaders(extra = {}) {
@@ -151,10 +160,12 @@ function resetWorkspaceState() {
   state.configProfiles = [];
   state.jobs = [];
   state.jobProgressById = {};
+  state.analysisDetailsByJobId = {};
   state.manuscriptDrafts = {};
   state.selectedManuscriptId = null;
   state.selectedConfigProfileId = null;
   state.selectedJobId = null;
+  state.selectedAnalysisChunkId = null;
   els.manuscriptList.innerHTML = "";
   els.stageBoard.innerHTML = "";
   els.jobList.innerHTML = "";
@@ -498,7 +509,132 @@ function renderCompactStageProgress(progress) {
   if (!progress || progress.available === false || !progress.current_chunk) {
     return "";
   }
-  return `Chunk ${progress.current_chunk_index || "?"}/${progress.chunks_total || "?"}: ${progress.current_chunk} | Pass ${progress.current_pass_index || "?"}/4: ${progress.current_pass || "starting"} | ${progress.current_step || "working"}`;
+  const throughput = progress.reported_tps || progress.estimated_tps;
+  return `Chunk ${progress.current_chunk_index || "?"}/${progress.chunks_total || "?"}: ${progress.current_chunk} | Pass ${progress.current_pass_index || "?"}/4: ${progress.current_pass || "starting"} | ${progress.current_step || "working"}${throughput ? ` | ${throughput} tok/s` : ""}`;
+}
+
+function stringifyFlag(value) {
+  if (value === true) return "yes";
+  if (value === false) return "no";
+  if (value === null || value === undefined || value === "") return "n/a";
+  return String(value);
+}
+
+function analysisChunkSummaryLine(chunk) {
+  return `${chunk.chunk_id} | ${chunk.passes_completed.length}/4 passes | ${chunk.entities.characters.length} characters | ${chunk.dossiers.character_dossiers.length} dossiers`;
+}
+
+function renderAnalysisSummary(details) {
+  if (!details || details.available === false) {
+    return details?.message || "No chunk findings are available yet.";
+  }
+  const progress = details.progress || {};
+  const throughput = progress.reported_tps || progress.estimated_tps;
+  return [
+    "Analysis Summary",
+    "",
+    `- Processed chunks: ${details.chunks_with_outputs || 0} of ${details.chunks_total || 0}`,
+    `- Active chunk: ${progress.current_chunk || "n/a"}`,
+    `- Active pass: ${progress.current_pass || "n/a"}`,
+    `- Active model: ${progress.current_model || "n/a"}`,
+    `- Throughput: ${throughput ? `${throughput} tok/s` : "n/a"}`,
+  ].join("\n");
+}
+
+function renderAnalysisChunkDetail(chunk) {
+  if (!chunk) {
+    return "Select a processed chunk to inspect structure, dialogue, entities, and dossiers.";
+  }
+  const dossiers = chunk.dossiers.character_dossiers || [];
+  const dossierLines = dossiers.length
+    ? dossiers.map((item) => {
+      const role = item.role || item.roles?.join(", ") || "role not set";
+      return `- ${item.name || "Unnamed"} | ${role}`;
+    })
+    : ["- No dossier entries yet"];
+  return [
+    `${chunk.chunk_id}`,
+    "",
+    `Completion`,
+    `- Passes completed: ${chunk.passes_completed.join(", ") || "none yet"}`,
+    `- Total duration: ${chunk.timing.total_duration_seconds ?? "n/a"} s`,
+    "",
+    `Structure`,
+    `- Chapters: ${(chunk.structure.chapters || []).join(", ") || "none"}`,
+    `- Parts: ${(chunk.structure.parts || []).join(", ") || "none"}`,
+    `- Scene breaks: ${(chunk.structure.scene_breaks || []).length}`,
+    `- Status: ${chunk.structure.status || "n/a"}`,
+    "",
+    `Dialogue`,
+    `- POV: ${chunk.dialogue.pov || "n/a"}`,
+    `- Dialogue present: ${stringifyFlag(chunk.dialogue.dialogue)}`,
+    `- Internal thought: ${stringifyFlag(chunk.dialogue.internal_thought)}`,
+    `- Attributed speakers: ${(chunk.dialogue.explicitly_attributed_speakers || []).join(", ") || "none"}`,
+    `- Unattributed dialogue: ${stringifyFlag(chunk.dialogue.unattributed_dialogue_present)}`,
+    "",
+    `Entities`,
+    `- Characters: ${(chunk.entities.characters || []).join(", ") || "none"}`,
+    `- Places: ${(chunk.entities.places || []).join(", ") || "none"}`,
+    `- Objects: ${(chunk.entities.objects || []).join(", ") || "none"}`,
+    `- Identity notes: ${(chunk.entities.identity_notes || []).join(" | ") || "none"}`,
+    "",
+    `Dossiers`,
+    ...dossierLines,
+  ].join("\n");
+}
+
+function renderAnalysisChunkList(details) {
+  els.analysisChunkList.innerHTML = "";
+  const chunks = details?.chunks || [];
+  if (!chunks.length) {
+    els.analysisChunkList.innerHTML = '<li class="muted">No processed chunks yet</li>';
+    els.analysisChunkTitle.textContent = "Chunk Findings";
+    els.analysisChunkDetail.textContent = "Select a processed chunk to inspect structure, dialogue, entities, and dossiers.";
+    return;
+  }
+  if (!state.selectedAnalysisChunkId || !chunks.find((chunk) => chunk.chunk_id === state.selectedAnalysisChunkId)) {
+    state.selectedAnalysisChunkId = chunks[0].chunk_id;
+  }
+  for (const chunk of chunks) {
+    const li = document.createElement("li");
+    li.className = chunk.chunk_id === state.selectedAnalysisChunkId ? "selected" : "";
+    li.innerHTML = `<strong>${chunk.chunk_id}</strong><span class="meta">${analysisChunkSummaryLine(chunk)}</span>`;
+    li.addEventListener("click", () => {
+      state.selectedAnalysisChunkId = chunk.chunk_id;
+      renderAnalysisChunkList(details);
+    });
+    els.analysisChunkList.appendChild(li);
+  }
+  const selectedChunk = chunks.find((chunk) => chunk.chunk_id === state.selectedAnalysisChunkId) || chunks[0];
+  els.analysisChunkTitle.textContent = selectedChunk.chunk_id;
+  els.analysisChunkDetail.textContent = renderAnalysisChunkDetail(selectedChunk);
+}
+
+function showAnalysisDetailModal(details, job) {
+  els.analysisDetailTitle.textContent = `${stageLabels.orchestrate} Detail`;
+  els.analysisDetailSummary.textContent = renderAnalysisSummary(details);
+  renderAnalysisChunkList(details);
+  if (!els.analysisDetailModal.open) {
+    els.analysisDetailModal.showModal();
+  }
+  if (job?.job_id) {
+    els.stageActionStatus.textContent = `Showing processed chunk detail for job ${job.job_id}`;
+  }
+}
+
+async function openAnalysisDetails(job) {
+  if (!job) {
+    els.stageActionStatus.textContent = "No categorisation job is available for detail view yet.";
+    return;
+  }
+  try {
+    const details = await fetchJson(`/v1/jobs/${encodeURIComponent(job.job_id)}/analysis-details`);
+    state.analysisDetailsByJobId[job.job_id] = details;
+    state.selectedAnalysisChunkId = details.chunks?.[0]?.chunk_id || null;
+    showAnalysisDetailModal(details, job);
+  } catch (error) {
+    els.stageActionStatus.textContent = error.message;
+  }
 }
 
 function renderArtifactSummary(artifactIndex) {
@@ -844,6 +980,7 @@ function renderStageBoard() {
     const stageStatus = latestJob ? latestJob.status : "not-started";
     const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
     const compactProgress = stage.name === "orchestrate" ? renderCompactStageProgress(progress) : "";
+    const throughput = stage.name === "orchestrate" ? (progress?.reported_tps || progress?.estimated_tps) : null;
     const models = resolveModelRefs(stage);
     const card = document.createElement("details");
     card.className = `workflow-step stage-card status-${stageStatus}`;
@@ -865,6 +1002,7 @@ function renderStageBoard() {
         <p class="meta"><strong>Substeps:</strong> ${(stage.metadata.substeps || []).join(", ") || "n/a"}</p>
         <p class="meta"><strong>Models:</strong> ${models.length ? models.join(", ") : "Deterministic stage"}</p>
         <p class="meta"><strong>Last update:</strong> ${latestJob ? formatDate(latestJob.updated_at) : "n/a"}</p>
+        ${throughput ? `<p class="meta"><strong>Throughput:</strong> ${throughput} tok/s</p>` : ""}
         ${compactProgress ? `<p class="meta"><strong>Live progress:</strong> ${compactProgress}</p>` : ""}
         <div class="stage-card-actions">
           <button type="button" data-run-stage="${stage.name}">Run ${stageLabels[stage.name] || stage.name}</button>
@@ -879,6 +1017,14 @@ function renderStageBoard() {
       viewButton.textContent = "Open Ingest Results";
       viewButton.addEventListener("click", openLatestIngestResults);
       card.querySelector(".stage-card-actions").appendChild(viewButton);
+    }
+    if (stage.name === "orchestrate" && latestJob) {
+      const detailButton = document.createElement("button");
+      detailButton.type = "button";
+      detailButton.className = "secondary-button";
+      detailButton.textContent = "Detail";
+      detailButton.addEventListener("click", () => openAnalysisDetails(latestJob));
+      card.querySelector(".stage-card-actions").appendChild(detailButton);
     }
     els.stageBoard.appendChild(card);
   }
@@ -1030,6 +1176,14 @@ async function refreshJobs() {
   }
   const payload = await fetchJson(`/v1/jobs?manuscript_id=${encodeURIComponent(manuscript.manuscript_id)}`);
   state.jobs = payload.jobs;
+  const orchestrateJob = latestStageCardJobForPipeline("orchestrate");
+  if (orchestrateJob) {
+    try {
+      state.jobProgressById[orchestrateJob.job_id] = await fetchJson(`/v1/jobs/${orchestrateJob.job_id}/progress`);
+    } catch {
+      // keep last known progress if the lightweight refresh fails
+    }
+  }
   if (!state.selectedJobId && state.jobs.length) {
     state.selectedJobId = state.jobs[0].job_id;
   }
@@ -1200,6 +1354,18 @@ els.cancelSelectedJob.addEventListener("click", async () => {
   }
 });
 els.runFullPipeline.addEventListener("click", () => triggerPipeline("manuscript-prep"));
+els.analysisDetailClose.addEventListener("click", () => els.analysisDetailModal.close());
+els.analysisDetailModal.addEventListener("click", (event) => {
+  const rect = els.analysisDetailModal.getBoundingClientRect();
+  const withinDialog =
+    event.clientX >= rect.left &&
+    event.clientX <= rect.right &&
+    event.clientY >= rect.top &&
+    event.clientY <= rect.bottom;
+  if (!withinDialog) {
+    els.analysisDetailModal.close();
+  }
+});
 
 for (const button of document.querySelectorAll("[data-refresh]")) {
   button.addEventListener("click", async () => {

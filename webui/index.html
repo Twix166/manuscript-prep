@@ -173,6 +173,29 @@
       </section>
     </main>
 
+    <dialog id="analysis-detail-modal" class="analysis-modal">
+      <div class="analysis-modal-shell">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Categorisation And Analysis</p>
+            <h2 id="analysis-detail-title">Chunk Detail</h2>
+          </div>
+          <button type="button" id="analysis-detail-close" class="secondary-button">Close</button>
+        </div>
+        <div id="analysis-detail-summary" class="summary-block">Chunk summaries will appear here.</div>
+        <div class="analysis-modal-grid">
+          <aside>
+            <h3>Processed Chunks</h3>
+            <ul id="analysis-chunk-list" class="list selectable"></ul>
+          </aside>
+          <section>
+            <h3 id="analysis-chunk-title">Chunk Findings</h3>
+            <div id="analysis-chunk-detail" class="summary-block">Select a processed chunk to inspect structure, dialogue, entities, and dossiers.</div>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
     <script src="/ui/app.js"></script>
   </body>
 </html>

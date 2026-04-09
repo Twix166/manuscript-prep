@@ -481,6 +481,84 @@ class GatewayAPI:
     def _pass_order(self) -> list[str]:
         return ["structure", "dialogue", "entities", "dossiers"]
 
+    def _resolve_orchestrate_output_dir(self, job) -> Optional[Path]:
+        output_dir = job.options.get("output_dir")
+        if not output_dir and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            output_dir = str(paths.output_root / str(job.book_slug))
+        if not output_dir:
+            return None
+        return Path(str(output_dir))
+
+    def _load_json_file(self, path: Path) -> Any:
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return None
+
+    def _build_chunk_analysis_summary(self, chunk_dir: Path) -> Dict[str, Any]:
+        structure = self._load_json_file(chunk_dir / "structure.json")
+        dialogue = self._load_json_file(chunk_dir / "dialogue.json")
+        entities = self._load_json_file(chunk_dir / "entities.json")
+        dossiers = self._load_json_file(chunk_dir / "dossiers.json")
+        timing = self._load_json_file(chunk_dir / "timing.json")
+
+        passes_completed = [
+            pass_name
+            for pass_name, payload in {
+                "structure": structure,
+                "dialogue": dialogue,
+                "entities": entities,
+                "dossiers": dossiers,
+            }.items()
+            if payload is not None
+        ]
+
+        return {
+            "chunk_id": chunk_dir.name,
+            "passes_completed": passes_completed,
+            "structure": {
+                "chapters": (structure or {}).get("chapters", []),
+                "parts": (structure or {}).get("parts", []),
+                "scene_breaks": (structure or {}).get("scene_breaks", []),
+                "status": (structure or {}).get("status"),
+            },
+            "dialogue": {
+                "pov": (dialogue or {}).get("pov"),
+                "dialogue": (dialogue or {}).get("dialogue"),
+                "internal_thought": (dialogue or {}).get("internal_thought"),
+                "explicitly_attributed_speakers": (dialogue or {}).get("explicitly_attributed_speakers", []),
+                "unattributed_dialogue_present": (dialogue or {}).get("unattributed_dialogue_present"),
+            },
+            "entities": {
+                "characters": (entities or {}).get("characters", []),
+                "places": (entities or {}).get("places", []),
+                "objects": (entities or {}).get("objects", []),
+                "identity_notes": (entities or {}).get("identity_notes", []),
+            },
+            "dossiers": {
+                "character_dossiers": (dossiers or {}).get("character_dossiers", []),
+            },
+            "timing": timing or {},
+        }
+
+    def _chunk_has_analysis_output(self, chunk_summary: Dict[str, Any]) -> bool:
+        return bool(
+            chunk_summary["passes_completed"]
+            or chunk_summary["timing"]
+            or chunk_summary["structure"]["chapters"]
+            or chunk_summary["structure"]["parts"]
+            or chunk_summary["structure"]["scene_breaks"]
+            or chunk_summary["dialogue"]["pov"]
+            or chunk_summary["dialogue"]["dialogue"] is not None
+            or chunk_summary["entities"]["characters"]
+            or chunk_summary["entities"]["places"]
+            or chunk_summary["entities"]["objects"]
+            or chunk_summary["entities"]["identity_notes"]
+            or chunk_summary["dossiers"]["character_dossiers"]
+        )
+
     def _build_orchestrate_progress(self, job) -> Dict[str, Any]:
         input_dir, log_path = self._resolve_orchestrate_progress_paths(job)
         total_chunks = 0
@@ -639,6 +717,47 @@ class GatewayAPI:
             "pipeline": job.pipeline,
             "available": False,
             "message": "Live chunk progress is currently available for categorisation and analysis jobs only.",
+        }
+
+    def get_job_analysis_details(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        job = self.store.get_job(job_id)
+        if job is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown job: {job_id}"}
+        if not self._can_access_job(actor, job.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this job"}
+        if job.pipeline != "orchestrate":
+            return HTTPStatus.BAD_REQUEST, {"error": "Analysis details are available for categorisation and analysis jobs only"}
+
+        output_dir = self._resolve_orchestrate_output_dir(job)
+        progress = self._build_orchestrate_progress(job)
+        if output_dir is None or not output_dir.exists():
+            return HTTPStatus.OK, {
+                "job_id": job.job_id,
+                "available": False,
+                "message": "No analysis chunk outputs are available for this job yet.",
+                "progress": progress,
+                "chunks": [],
+            }
+
+        chunk_dirs = sorted(
+            [item for item in output_dir.iterdir() if item.is_dir() and item.name.startswith("chunk_")],
+            key=lambda item: item.name,
+        )
+        chunks = []
+        for chunk_dir in chunk_dirs:
+            summary = self._build_chunk_analysis_summary(chunk_dir)
+            if self._chunk_has_analysis_output(summary):
+                chunks.append(summary)
+        return HTTPStatus.OK, {
+            "job_id": job.job_id,
+            "available": bool(chunks),
+            "progress": progress,
+            "chunks_total": progress.get("chunks_total") or len(chunk_dirs),
+            "chunks_with_outputs": len(chunks),
+            "chunks": chunks,
         }
 
     def get_job(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
@@ -959,6 +1078,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
             if len(parts) == 4:
                 _, _, job_id, _ = parts
                 status, payload = self.app.get_job_progress(job_id, actor=self._current_actor())
+                self._write_json(status, payload)
+                return
+
+        if path.startswith("/v1/jobs/") and path.endswith("/analysis-details"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 4:
+                _, _, job_id, _ = parts
+                status, payload = self.app.get_job_analysis_details(job_id, actor=self._current_actor())
                 self._write_json(status, payload)
                 return
 
