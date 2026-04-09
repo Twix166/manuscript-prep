@@ -194,6 +194,72 @@ def test_orchestrator_cli_with_config_writes_outputs(tmp_path: Path, test_env: d
     assert set(timing["passes"]) == {"structure", "dialogue", "entities", "dossiers"}
 
 
+def test_orchestrator_cli_resumes_after_last_successful_chunk(tmp_path: Path, test_env: dict[str, str]) -> None:
+    chunks_dir = tmp_path / "work" / "chunks" / "treasure_island"
+    chunks_dir.mkdir(parents=True)
+    (chunks_dir / "chunk_000.txt").write_text("Jim spoke to Silver.", encoding="utf-8")
+    (chunks_dir / "chunk_001.txt").write_text("Silver answered Jim.", encoding="utf-8")
+    output_root = tmp_path / "out"
+    logs_root = tmp_path / "logs"
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        "\n".join(
+            [
+                "paths:",
+                f"  output_root: {output_root}",
+                f"  logs_root: {logs_root}",
+                "models:",
+                "  structure: manuscriptprep-structure",
+                "  dialogue: manuscriptprep-dialogue",
+                "  entities: manuscriptprep-entities",
+                "  dossiers: manuscriptprep-dossiers",
+                "ollama:",
+                "  command: ollama",
+                "timeouts:",
+                "  idle_seconds: 10",
+                "  hard_seconds: 30",
+                "  retries: 0",
+                "  idle_timeout_backoff: 1.5",
+                "  max_idle_timeout_seconds: 30",
+                "logging:",
+                "  level: INFO",
+                "  console: false",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    chunk_000_out = output_root / "treasure_island" / "chunk_000"
+    chunk_000_out.mkdir(parents=True)
+    sentinel_structure = {"chapters": ["SENTINEL"], "parts": [], "scene_breaks": [], "status": "ok"}
+    (chunk_000_out / "structure.json").write_text(json.dumps(sentinel_structure) + "\n", encoding="utf-8")
+    (chunk_000_out / "dialogue.json").write_text(json.dumps({"pov": "first_person"}) + "\n", encoding="utf-8")
+    (chunk_000_out / "entities.json").write_text(json.dumps({"characters": ["Sentinel"]}) + "\n", encoding="utf-8")
+    (chunk_000_out / "dossiers.json").write_text(json.dumps({"character_dossiers": [{"name": "Sentinel"}]}) + "\n", encoding="utf-8")
+    (chunk_000_out / "timing.json").write_text(json.dumps({"chunk": "chunk_000", "passes": {}, "total_duration_seconds": 1.0}) + "\n", encoding="utf-8")
+
+    result = run_cli(
+        [
+            "manuscriptprep_orchestrator_tui_refactored.py",
+            "--config",
+            str(config_path),
+            "--input-dir",
+            str(chunks_dir),
+            "--book-slug",
+            "treasure_island",
+            "--no-tui",
+        ],
+        env=test_env,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads((chunk_000_out / "structure.json").read_text(encoding="utf-8"))["chapters"] == ["SENTINEL"]
+    chunk_001_out = output_root / "treasure_island" / "chunk_001"
+    assert (chunk_001_out / "structure.json").exists()
+    log_text = (logs_root / "orchestrator.log.jsonl").read_text(encoding="utf-8")
+    assert '"event_type": "run_resume"' in log_text
+
+
 def test_merger_cli_uses_config_defaults_for_paths(tmp_path: Path, test_env: dict[str, str]) -> None:
     workspace_root = tmp_path / "workspace"
     output_root = workspace_root / "out"

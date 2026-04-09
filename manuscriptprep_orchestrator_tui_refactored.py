@@ -417,6 +417,29 @@ def collect_inputs(args: argparse.Namespace) -> List[Path]:
     return files
 
 
+def chunk_output_is_complete(output_dir: Path, chunk_name: str) -> bool:
+    chunk_dir = output_dir / chunk_name
+    required = [
+        chunk_dir / "structure.json",
+        chunk_dir / "dialogue.json",
+        chunk_dir / "entities.json",
+        chunk_dir / "dossiers.json",
+        chunk_dir / "timing.json",
+    ]
+    return all(path.is_file() for path in required)
+
+
+def split_completed_chunks(chunk_files: List[Path], output_dir: Path) -> Tuple[List[Path], List[Path]]:
+    completed: List[Path] = []
+    pending: List[Path] = []
+    for chunk_path in chunk_files:
+        if chunk_output_is_complete(output_dir, chunk_path.stem):
+            completed.append(chunk_path)
+        else:
+            pending.append(chunk_path)
+    return completed, pending
+
+
 def build_dossier_input(excerpt_text: str, entities_json: Dict[str, Any], dialogue_json: Dict[str, Any]) -> str:
     payload = {
         "characters": entities_json.get("characters", []),
@@ -1366,8 +1389,10 @@ def run_plain(args: argparse.Namespace, runtime: RuntimeConfig, output_dir: Path
     state = TUIState()
     try:
         chunk_files = collect_inputs(args)
-        state.chunks_total = len(chunk_files)
         output_dir.mkdir(parents=True, exist_ok=True)
+        completed_chunks, pending_chunks = split_completed_chunks(chunk_files, output_dir)
+        state.chunks_total = len(chunk_files)
+        state.chunks_completed = len(completed_chunks)
 
         logger.emit(
             level="INFO",
@@ -1375,6 +1400,8 @@ def run_plain(args: argparse.Namespace, runtime: RuntimeConfig, output_dir: Path
             message="Starting pipeline run",
             extra={
                 "chunks_total": state.chunks_total,
+                "chunks_already_completed": len(completed_chunks),
+                "chunks_pending": len(pending_chunks),
                 "output_dir": str(output_dir),
                 "retries": runtime.retries,
                 "on_failure": runtime.on_failure,
@@ -1391,7 +1418,15 @@ def run_plain(args: argparse.Namespace, runtime: RuntimeConfig, output_dir: Path
             },
         )
 
-        for chunk_path in chunk_files:
+        if completed_chunks:
+            logger.emit(
+                level="INFO",
+                event_type="run_resume",
+                message="Resuming pipeline from first unfinished chunk",
+                extra={"completed_chunks": [chunk.name for chunk in completed_chunks]},
+            )
+
+        for chunk_path in pending_chunks:
             try:
                 process_chunk(
                     chunk_path=chunk_path,
@@ -1561,8 +1596,10 @@ def main() -> int:
 
     try:
         chunk_files = collect_inputs(args)
-        state.chunks_total = len(chunk_files)
         output_dir.mkdir(parents=True, exist_ok=True)
+        completed_chunks, pending_chunks = split_completed_chunks(chunk_files, output_dir)
+        state.chunks_total = len(chunk_files)
+        state.chunks_completed = len(completed_chunks)
     except Exception as exc:
         logger.emit(
             level="ERROR",
@@ -1580,6 +1617,8 @@ def main() -> int:
         message="Starting pipeline run",
         extra={
             "chunks_total": state.chunks_total,
+            "chunks_already_completed": len(completed_chunks),
+            "chunks_pending": len(pending_chunks),
             "output_dir": str(output_dir),
             "config_path": str(args.config) if args.config else None,
             "retries": runtime.retries,
@@ -1598,9 +1637,18 @@ def main() -> int:
         },
     )
 
+    if completed_chunks:
+        state.log(f"Resuming run. Skipping {len(completed_chunks)} completed chunk(s).")
+        logger.emit(
+            level="INFO",
+            event_type="run_resume",
+            message="Resuming pipeline from first unfinished chunk",
+            extra={"completed_chunks": [chunk.name for chunk in completed_chunks]},
+        )
+
     with Live(render_tui(state), refresh_per_second=8, screen=True) as live:
         try:
-            for chunk_path in chunk_files:
+            for chunk_path in pending_chunks:
                 try:
                     process_chunk(
                         chunk_path=chunk_path,
