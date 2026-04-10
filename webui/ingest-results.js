@@ -18,6 +18,8 @@ const els = {
   downloadCleanText: document.getElementById("download-clean-text"),
   downloadChunkManifest: document.getElementById("download-chunk-manifest"),
   downloadIngestManifest: document.getElementById("download-ingest-manifest"),
+  tabButtons: Array.from(document.querySelectorAll(".tab-button")),
+  tabPanels: Array.from(document.querySelectorAll(".tab-panel")),
 };
 
 let currentJobId = null;
@@ -70,6 +72,19 @@ function summaryCard(label, value) {
   article.className = "panel";
   article.innerHTML = `<p class="eyebrow">${label}</p><h2>${value}</h2>`;
   return article;
+}
+
+function switchTab(target) {
+  for (const button of els.tabButtons) {
+    const active = button.dataset.tabTarget === target;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+  }
+  for (const panel of els.tabPanels) {
+    const active = panel.id === `tab-panel-${target}`;
+    panel.classList.toggle("active", active);
+    panel.classList.toggle("hidden", !active);
+  }
 }
 
 function renderPayload(payload) {
@@ -144,6 +159,12 @@ for (const [button, artifactName] of [
     } catch (error) {
       renderError(error.message);
     }
+  });
+}
+
+for (const button of els.tabButtons) {
+  button.addEventListener("click", () => {
+    switchTab(button.dataset.tabTarget);
   });
 }
 

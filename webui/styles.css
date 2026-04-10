@@ -160,6 +160,42 @@ h3 {
   flex-wrap: wrap;
 }
 
+.compact-downloads {
+  flex-wrap: nowrap;
+}
+
+.compact-button {
+  padding: 8px 12px;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.tab-button {
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+}
+
+.tab-button.active {
+  background: var(--accent);
+  color: white;
+  border-color: transparent;
+}
+
+.tab-panels,
+.tab-panel {
+  min-width: 0;
+}
+
 .profile-menu {
   position: relative;
 }
@@ -561,6 +597,10 @@ h3 {
     width: 100%;
     margin-top: 10px;
   }
+
+  .compact-downloads {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 700px) {
@@ -577,5 +617,9 @@ h3 {
   .panel-head,
   .stage-card-head {
     flex-direction: column;
+  }
+
+  .compact-downloads {
+    flex-wrap: wrap;
   }
 }

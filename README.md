@@ -95,7 +95,7 @@ Web UI:
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
 - the layout is now organized around multiple managed manuscripts, with stage controls and job history scoped to the selected manuscript
 - successful ingest runs now expose a dedicated manuscript-scoped results page for classification, extraction metadata, the full raw text, the full cleaned text, and the full chunk list, preloaded from the current UI session for reliable display
-- the ingest results page now includes direct download buttons for raw text, clean text, chunk manifest, and ingest manifest
+- the ingest results page now uses a tabbed detail view for classification, chunk summary, extraction metadata, cleaning metadata, chunk index, raw text, and clean text, with compact artifact download buttons above it
 - the selected-job panel now exposes direct downloads for later-stage artifacts such as orchestrator logs, merged/resolved JSON, and the final report PDF
 - running categorisation and analysis jobs now expose live chunk progress in the UI, including current chunk, pass, model, step, retry/timeout state, and recent progress events
 - the categorisation and analysis stage card now also shows live throughput in `tok/s` when the orchestrator reports it
