@@ -90,6 +90,7 @@ Web UI:
   - middle row: `Pipeline Workspace` in a wider left column, with `Workspace Status` and `Job Timeline` in the right rail
   - bottom row: a full-width `Selected Job` panel
 - manuscript save/remove controls now live inline in the `Your Manuscripts` list, with save disabled until a title or slug is changed and remove protected by a confirmation prompt
+- manuscript actions now include `Archive` export/import support plus two delete modes: record-only removal and full manuscript-data deletion with stronger confirmation
 - the workflow steps are now explicitly numbered `1-5` so progress through the pipeline is easier to scan
 - the main dashboard panels now summarize config, manuscript, system, job, and artifact state in human-readable text instead of raw JSON dumps
 - manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI

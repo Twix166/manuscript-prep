@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import zipfile
+from pathlib import Path
 import pytest
 
 from manuscriptprep.execution_adapter import ExecutionAdapter
@@ -339,6 +341,149 @@ def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results
     assert ingest_results["raw_text"]["content"]
     assert ingest_results["clean_text"]["content"]
     assert "treasure_island" in ingest_results["ingest_manifest"]["artifact"]["path"]
+
+
+def test_gateway_api_delete_modes_keep_or_remove_pipeline_data(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    app = GatewayAPI(store=store, runtime_root=tmp_path / "runtime")
+
+    source_path = tmp_path / "uploads" / "book.txt"
+    source_path.parent.mkdir(parents=True, exist_ok=True)
+    source_path.write_text("sample source\n", encoding="utf-8")
+    artifact_path = tmp_path / "runtime" / "outputs" / "book_merged.json"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    artifact_path.write_text('{"ok": true}\n', encoding="utf-8")
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Delete Me",
+            "book_slug": "delete_me",
+            "source_path": str(source_path),
+            "document_type": "txt",
+            "file_size_bytes": source_path.stat().st_size,
+        }
+    )
+    assert status == 201
+
+    status, created = app.create_job(
+        {
+            "pipeline": "merge",
+            "manuscript_id": manuscript["manuscript_id"],
+        }
+    )
+    assert status == 201
+    job = store.get_job(created["job_id"])
+    assert job is not None
+    job.status = "succeeded"
+    job.artifacts = [
+        {
+            "name": "book_merged",
+            "path": str(artifact_path),
+            "kind": "json",
+            "stage": "merge",
+            "metadata": {},
+        }
+    ]
+    from manuscriptprep.api_models import ArtifactRef
+
+    job.artifacts = [ArtifactRef(**item) for item in job.artifacts]
+    store.update_job(job)
+
+    status, removed = app.delete_manuscript(manuscript["manuscript_id"])
+    assert status == 200
+    assert removed["deleted_mode"] == "record_only"
+    assert store.get_manuscript(manuscript["manuscript_id"]) is None
+    assert store.get_job(created["job_id"]) is not None
+    assert source_path.exists()
+    assert artifact_path.exists()
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Delete Me Again",
+            "book_slug": "delete_me_again",
+            "source_path": str(source_path),
+            "document_type": "txt",
+            "file_size_bytes": source_path.stat().st_size,
+        }
+    )
+    assert status == 201
+    status, created = app.create_job(
+        {
+            "pipeline": "merge",
+            "manuscript_id": manuscript["manuscript_id"],
+        }
+    )
+    assert status == 201
+    job = store.get_job(created["job_id"])
+    assert job is not None
+    job.status = "succeeded"
+    job.artifacts = [ArtifactRef(name="book_merged", path=str(artifact_path), kind="json", stage="merge")]
+    store.update_job(job)
+
+    status, deleted = app.delete_manuscript_with_data(manuscript["manuscript_id"])
+    assert status == 200
+    assert deleted["deleted_mode"] == "full"
+    assert store.get_manuscript(manuscript["manuscript_id"]) is None
+    assert store.get_job(created["job_id"]) is None
+    assert not source_path.exists()
+    assert not artifact_path.exists()
+
+
+def test_gateway_api_can_export_and_import_manuscript_archives(tmp_path) -> None:
+    store = JobStore(root=tmp_path / "jobs")
+    app = GatewayAPI(store=store, runtime_root=tmp_path / "runtime")
+
+    source_path = tmp_path / "uploads" / "source.txt"
+    source_path.parent.mkdir(parents=True, exist_ok=True)
+    source_path.write_text("Call me Ishmael.\n", encoding="utf-8")
+    raw_text_path = tmp_path / "runtime" / "ingest" / "raw.txt"
+    raw_text_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_text_path.write_text("Call me Ishmael.\n", encoding="utf-8")
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Moby Dick",
+            "book_slug": "moby_dick",
+            "source_path": str(source_path),
+            "document_type": "txt",
+            "file_size_bytes": source_path.stat().st_size,
+        }
+    )
+    assert status == 201
+    status, created = app.create_job({"pipeline": "ingest", "manuscript_id": manuscript["manuscript_id"]})
+    assert status == 201
+    job = store.get_job(created["job_id"])
+    assert job is not None
+    from manuscriptprep.api_models import ArtifactRef
+
+    job.status = "succeeded"
+    job.stage_runs[0].status = "succeeded"
+    job.artifacts = [ArtifactRef(name="raw_text", path=str(raw_text_path), kind="text", stage="ingest")]
+    store.update_job(job)
+
+    status, archive_path, content_type = app.download_manuscript_archive(manuscript["manuscript_id"])
+    assert status == 200
+    assert content_type == "application/zip"
+    assert archive_path.is_file()
+
+    with zipfile.ZipFile(archive_path) as bundle:
+        manifest = json.loads(bundle.read("bundle.json").decode("utf-8"))
+        assert manifest["manuscript"]["title"] == "Moby Dick"
+        assert manifest["jobs"][0]["job"]["pipeline"] == "ingest"
+
+    status, imported = app.import_manuscript_archive(
+        filename=archive_path.name,
+        body=archive_path.read_bytes(),
+    )
+    assert status == 201
+    imported_manuscript = imported["manuscript"]
+    assert imported_manuscript["title"].startswith("Moby Dick")
+    assert imported["imported_job_count"] == 1
+
+    imported_jobs = [item for item in store.list_jobs() if item.manuscript_id == imported_manuscript["manuscript_id"]]
+    assert len(imported_jobs) == 1
+    assert imported_jobs[0].artifacts[0].path.endswith("raw.txt")
+    assert Path(imported_jobs[0].artifacts[0].path).read_text(encoding="utf-8") == "Call me Ishmael.\n"
 
 
 def test_gateway_api_exposes_orchestrate_progress_from_log(tmp_path) -> None:

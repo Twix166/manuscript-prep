@@ -20,6 +20,7 @@ import io
 import json
 import os
 import secrets
+import shutil
 import zipfile
 from collections import Counter
 from datetime import datetime
@@ -29,10 +30,13 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 import re
+from uuid import uuid4
 
 from manuscriptprep.api_models import (
+    ArtifactRef,
     JobCreateRequest,
     ManuscriptIngestSummary,
+    StageRun,
     UserRecord,
     to_dict,
     utc_now_iso,
@@ -427,7 +431,260 @@ class GatewayAPI:
             return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this manuscript"}
         if not self.store.delete_manuscript(manuscript_id):
             return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
-        return HTTPStatus.OK, {"deleted": True, "manuscript_id": manuscript_id}
+        return HTTPStatus.OK, {"deleted": True, "deleted_mode": "record_only", "manuscript_id": manuscript_id}
+
+    def _jobs_for_manuscript(self, manuscript_id: str, actor: Optional[UserRecord]) -> list:
+        jobs = [job for job in self.store.list_jobs() if job.manuscript_id == manuscript_id]
+        if actor is not None and actor.role != "admin":
+            jobs = [job for job in jobs if job.owner_user_id == actor.user_id]
+        return jobs
+
+    def _collect_manuscript_paths(self, manuscript, jobs: list) -> list[Path]:
+        paths: dict[str, Path] = {}
+        if manuscript.source_path:
+            paths[str(Path(manuscript.source_path))] = Path(manuscript.source_path)
+        for job in jobs:
+            for stage in job.stage_runs:
+                for item in (stage.stdout_path, stage.stderr_path):
+                    if item:
+                        paths[str(Path(item))] = Path(item)
+            for artifact in job.artifacts:
+                if artifact.path:
+                    paths[str(Path(artifact.path))] = Path(artifact.path)
+        return sorted(paths.values(), key=lambda item: (len(item.parts), str(item)), reverse=True)
+
+    def delete_manuscript_with_data(self, manuscript_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        manuscript = self.store.get_manuscript(manuscript_id)
+        if manuscript is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
+        if not self._can_access_manuscript(actor, manuscript.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this manuscript"}
+
+        jobs = self._jobs_for_manuscript(manuscript_id, actor)
+        paths = self._collect_manuscript_paths(manuscript, jobs)
+
+        deleted_jobs = 0
+        for job in jobs:
+            if self.store.delete_job(job.job_id):
+                deleted_jobs += 1
+        if not self.store.delete_manuscript(manuscript_id):
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
+
+        deleted_paths = 0
+        for path in paths:
+            try:
+                if path.is_dir():
+                    shutil.rmtree(path, ignore_errors=True)
+                    deleted_paths += 1
+                elif path.exists():
+                    path.unlink()
+                    deleted_paths += 1
+            except OSError:
+                continue
+        return HTTPStatus.OK, {
+            "deleted": True,
+            "deleted_mode": "full",
+            "manuscript_id": manuscript_id,
+            "deleted_jobs": deleted_jobs,
+            "deleted_paths": deleted_paths,
+        }
+
+    def _archive_bundle_filename(self, manuscript) -> str:
+        return f"{self._slugify(manuscript.title) or manuscript.book_slug}_archive.mprep.zip"
+
+    def _archive_copy_path(self, source: Path, zip_handle: zipfile.ZipFile, archive_root: str) -> str | None:
+        if not source.exists():
+            return None
+        if source.is_file():
+            archive_path = f"{archive_root}/{source.name}"
+            zip_handle.write(source, archive_path)
+            return archive_path
+        for child in sorted(source.rglob("*")):
+            if child.is_file():
+                zip_handle.write(child, f"{archive_root}/{child.relative_to(source)}")
+        return archive_root
+
+    def download_manuscript_archive(
+        self,
+        manuscript_id: str,
+        actor: Optional[UserRecord] = None,
+    ) -> Tuple[int, Path | Dict[str, Any], str]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error[0], error[1], "application/json; charset=utf-8"
+        manuscript = self.store.get_manuscript(manuscript_id)
+        if manuscript is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}, "application/json; charset=utf-8"
+        if not self._can_access_manuscript(actor, manuscript.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this manuscript"}, "application/json; charset=utf-8"
+
+        export_root = self.runtime_root / "exports"
+        export_root.mkdir(parents=True, exist_ok=True)
+        archive_path = export_root / f"{manuscript.manuscript_id}.mprep.zip"
+        jobs = self._jobs_for_manuscript(manuscript_id, actor)
+
+        bundle_manifest: Dict[str, Any] = {
+            "bundle_version": 1,
+            "exported_at": utc_now_iso(),
+            "manuscript": to_dict(manuscript),
+            "jobs": [],
+        }
+
+        with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+            source_relpath = None
+            source_path = Path(manuscript.source_path)
+            if source_path.exists():
+                source_relpath = self._archive_copy_path(source_path, bundle, "source")
+            bundle_manifest["manuscript"]["source_relpath"] = source_relpath
+
+            for job in jobs:
+                job_payload = to_dict(job)
+                archived_artifacts = []
+                for artifact in job.artifacts:
+                    artifact_payload = to_dict(artifact)
+                    artifact_payload["bundle_path"] = self._archive_copy_path(
+                        Path(artifact.path),
+                        bundle,
+                        f"jobs/{job.job_id}/artifacts/{artifact.name}",
+                    )
+                    archived_artifacts.append(artifact_payload)
+                bundle_manifest["jobs"].append(
+                    {
+                        "job": job_payload,
+                        "artifacts": archived_artifacts,
+                    }
+                )
+            bundle.writestr("bundle.json", json.dumps(bundle_manifest, indent=2, ensure_ascii=False) + "\n")
+        return HTTPStatus.OK, archive_path, "application/zip"
+
+    def _next_import_identity(self, actor: Optional[UserRecord], title: str, book_slug: str) -> tuple[str, str]:
+        manuscripts = self.store.list_manuscripts()
+        if actor is not None and actor.role != "admin":
+            manuscripts = [item for item in manuscripts if item.owner_user_id == actor.user_id]
+        existing = {item.book_slug for item in manuscripts}
+        if book_slug not in existing:
+            return title, book_slug
+        index = 2
+        while True:
+            next_slug = f"{book_slug}_imported_{index}"
+            if next_slug not in existing:
+                return f"{title} (Imported {index})", next_slug
+            index += 1
+
+    def import_manuscript_archive(
+        self,
+        *,
+        filename: str,
+        body: bytes,
+        actor: Optional[UserRecord] = None,
+    ) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        try:
+            archive = zipfile.ZipFile(io.BytesIO(body))
+        except zipfile.BadZipFile:
+            return HTTPStatus.BAD_REQUEST, {"error": "Uploaded archive is not a valid zip bundle"}
+
+        with archive:
+            try:
+                manifest = json.loads(archive.read("bundle.json").decode("utf-8"))
+            except KeyError:
+                return HTTPStatus.BAD_REQUEST, {"error": "Archive is missing bundle.json"}
+            except json.JSONDecodeError:
+                return HTTPStatus.BAD_REQUEST, {"error": "Archive bundle manifest is not valid JSON"}
+
+            manuscript_payload = manifest.get("manuscript") or {}
+            title = str(manuscript_payload.get("title") or "Imported Manuscript")
+            book_slug = self._slugify(str(manuscript_payload.get("book_slug") or title)) or "imported_manuscript"
+            next_title, next_slug = self._next_import_identity(actor, title, book_slug)
+
+            import_root = self.runtime_root / "imports" / str(uuid4())
+            import_root.mkdir(parents=True, exist_ok=True)
+            archive.extractall(import_root)
+
+            source_relpath = manuscript_payload.get("source_relpath")
+            source_path = import_root / str(source_relpath) if source_relpath else import_root / "source"
+            source_path_value = str(source_path) if source_relpath else str(import_root)
+            created_manuscript = self.store.upsert_manuscript(
+                book_slug=next_slug,
+                title=next_title,
+                source_path=source_path_value,
+                document_type=manuscript_payload.get("document_type"),
+                file_size_bytes=manuscript_payload.get("file_size_bytes"),
+                owner_user_id=actor.user_id if actor else manuscript_payload.get("owner_user_id"),
+                owner_username=actor.username if actor else manuscript_payload.get("owner_username"),
+            )
+
+            imported_jobs = []
+            for job_entry in manifest.get("jobs", []):
+                original_job = job_entry.get("job") or {}
+                created_job = self.store.create_job(
+                    JobCreateRequest(
+                        pipeline=str(original_job.get("pipeline")),
+                        book_slug=created_manuscript.book_slug,
+                        title=created_manuscript.title,
+                        manuscript_id=created_manuscript.manuscript_id,
+                        config_profile_id=None,
+                        config_path=original_job.get("config_path"),
+                        input_path=created_manuscript.source_path,
+                        owner_user_id=actor.user_id if actor else original_job.get("owner_user_id"),
+                        owner_username=actor.username if actor else original_job.get("owner_username"),
+                        options={
+                            **(original_job.get("options") or {}),
+                            "_imported_from_archive": True,
+                            "_original_job_id": original_job.get("job_id"),
+                        },
+                    )
+                )
+                artifact_path_map: Dict[str, str] = {}
+                imported_artifacts = []
+                for artifact_payload in job_entry.get("artifacts", []):
+                    bundle_path = artifact_payload.get("bundle_path")
+                    next_path = str(import_root / bundle_path) if bundle_path else artifact_payload.get("path")
+                    if artifact_payload.get("path"):
+                        artifact_path_map[str(artifact_payload["path"])] = str(next_path)
+                    imported_artifacts.append(
+                        ArtifactRef(
+                            name=str(artifact_payload["name"]),
+                            path=str(next_path),
+                            kind=str(artifact_payload["kind"]),
+                            stage=artifact_payload.get("stage"),
+                            metadata=artifact_payload.get("metadata") or {},
+                        )
+                    )
+
+                def _normalized_stage_status(status: str) -> str:
+                    return "paused" if status in {"queued", "running", "pause_requested", "cancel_requested", "pending"} else status
+
+                created_job.status = _normalized_stage_status(str(original_job.get("status") or created_job.status))
+                created_job.stage_runs = []
+                for stage_payload in original_job.get("stage_runs", []):
+                    created_job.stage_runs.append(
+                        StageRun(
+                            name=str(stage_payload["name"]),
+                            status=_normalized_stage_status(str(stage_payload.get("status") or "pending")),
+                            started_at=stage_payload.get("started_at"),
+                            finished_at=stage_payload.get("finished_at"),
+                            error=stage_payload.get("error"),
+                            command=list(stage_payload.get("command") or []),
+                            exit_code=stage_payload.get("exit_code"),
+                            stdout_path=artifact_path_map.get(str(stage_payload.get("stdout_path")), stage_payload.get("stdout_path")),
+                            stderr_path=artifact_path_map.get(str(stage_payload.get("stderr_path")), stage_payload.get("stderr_path")),
+                        )
+                    )
+                created_job.artifacts = imported_artifacts
+                created_job = self.store.update_job(created_job)
+                imported_jobs.append(created_job.job_id)
+
+        return HTTPStatus.CREATED, {
+            "manuscript": self._serialize_manuscript(created_manuscript),
+            "imported_job_ids": imported_jobs,
+            "imported_job_count": len(imported_jobs),
+        }
 
     def get_manuscript_ingest_results(self, manuscript_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
@@ -1186,6 +1443,18 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 self._write_json(status, payload)
                 return
 
+        if path.startswith("/v1/manuscripts/") and path.endswith("/archive"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 4:
+                _, _, manuscript_id, _ = parts
+                status, payload, content_type = self.app.download_manuscript_archive(manuscript_id, actor=self._current_actor())
+                if status == HTTPStatus.OK and isinstance(payload, Path):
+                    filename = self.app._archive_bundle_filename(self.app.store.get_manuscript(manuscript_id))
+                    self._write_file(payload, content_type, filename=filename)
+                else:
+                    self._write_json(status, payload)
+                return
+
         if path.startswith("/v1/jobs/") and path.endswith("/artifacts"):
             parts = path.strip("/").split("/")
             if len(parts) == 4:
@@ -1225,6 +1494,15 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 filename=self.headers.get("X-Filename", ""),
                 body=self._read_raw_body(),
                 content_type=self.headers.get("Content-Type", ""),
+                actor=self._current_actor(),
+            )
+            self._write_json(status, response)
+            return
+
+        if path == "/v1/manuscript-archives/import":
+            status, response = self.app.import_manuscript_archive(
+                filename=self.headers.get("X-Filename", ""),
+                body=self._read_raw_body(),
                 actor=self._current_actor(),
             )
             self._write_json(status, response)
@@ -1327,6 +1605,13 @@ class GatewayHandler(BaseHTTPRequestHandler):
 
     def do_DELETE(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if path.startswith("/v1/manuscripts/") and path.endswith("/delete-data"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 4:
+                _, _, manuscript_id, _ = parts
+                status, response = self.app.delete_manuscript_with_data(manuscript_id, actor=self._current_actor())
+                self._write_json(status, response)
+                return
         if path.startswith("/v1/manuscripts/"):
             manuscript_id = path.rsplit("/", 1)[-1]
             status, response = self.app.delete_manuscript(manuscript_id, actor=self._current_actor())

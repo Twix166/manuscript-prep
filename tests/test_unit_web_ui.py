@@ -21,6 +21,7 @@ def test_get_web_asset_serves_index() -> None:
     assert b"Active Manuscript" in body
     assert b"DOCX, EPUB, ODT, MOBI, AZW, AZW3, or TXT" in body
     assert b"pipeline-manuscript-select" in body
+    assert b"Import Archive" in body
 
 
 def test_get_web_asset_serves_javascript() -> None:
@@ -28,6 +29,8 @@ def test_get_web_asset_serves_javascript() -> None:
 
     assert content_type.startswith("application/javascript")
     assert b"triggerPipeline" in body
+    assert b"Delete Data" in body
+    assert b"Archive" in body
 
 
 def test_get_web_asset_serves_ingest_results_page() -> None:

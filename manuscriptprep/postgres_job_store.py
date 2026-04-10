@@ -221,6 +221,20 @@ class PostgresJobStore(BaseJobStore):
             conn.commit()
         return self._row_to_job(asdict(job))
 
+    def delete_job(self, job_id: str) -> bool:
+        with self._connect(autocommit=False) as conn, conn.cursor() as cur:
+            cur.execute(
+                f"DELETE FROM {self.schema}.gateway_artifacts WHERE job_id = %s",
+                (job_id,),
+            )
+            cur.execute(
+                f"DELETE FROM {self.schema}.gateway_jobs WHERE job_id = %s",
+                (job_id,),
+            )
+            deleted = cur.rowcount > 0
+            conn.commit()
+        return deleted
+
     def _request_control_state(
         self,
         job_id: str,

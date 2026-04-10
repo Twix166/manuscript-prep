@@ -129,6 +129,10 @@ class BaseJobStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def delete_job(self, job_id: str) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
     def cancel_job(self, job_id: str, reason: str = "Cancelled by user") -> Optional[JobRecord]:
         raise NotImplementedError
 
@@ -367,6 +371,18 @@ class JobStore(BaseJobStore):
             self._artifact_index[job.job_id] = [ArtifactRef(**asdict(item)) for item in job.artifacts]
             self._persist_artifact_index()
             return _job_from_dict(asdict(job))
+
+    def delete_job(self, job_id: str) -> bool:
+        with self._lock:
+            job = self._jobs.pop(job_id, None)
+            if job is None:
+                return False
+            path = self._job_path(job_id)
+            if path.exists():
+                path.unlink()
+            self._artifact_index.pop(job_id, None)
+            self._persist_artifact_index()
+            return True
 
     def _request_control_state(
         self,

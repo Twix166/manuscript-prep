@@ -56,6 +56,9 @@ const els = {
   logoutButton: document.getElementById("logout-button"),
   uploadForm: document.getElementById("upload-form-inline"),
   uploadStatus: document.getElementById("upload-status"),
+  importArchiveForm: document.getElementById("import-archive-form"),
+  importArchiveFile: document.getElementById("manuscript-archive-file"),
+  importStatus: document.getElementById("import-status"),
   manuscriptTitle: document.getElementById("manuscript-title"),
   manuscriptSlug: document.getElementById("manuscript-slug"),
   manuscriptFile: document.getElementById("manuscript-file"),
@@ -142,6 +145,7 @@ async function postBinary(path, filename, file) {
     ".azw": "application/vnd.amazon.ebook",
     ".azw3": "application/vnd.amazon.ebook",
     ".txt": "text/plain",
+    ".zip": "application/zip",
   };
   const response = await fetch(path, {
     method: "POST",
@@ -152,6 +156,28 @@ async function postBinary(path, filename, file) {
     body: file,
   });
   return parseJsonResponse(response, path);
+}
+
+async function downloadBinary(path, fallbackFilename) {
+  const response = await fetch(path, {
+    headers: currentHeaders(),
+  });
+  if (!response.ok) {
+    await parseJsonResponse(response, path);
+    return;
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename="([^"]+)"/);
+  const filename = match ? match[1] : fallbackFilename;
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function persistToken(token) {
@@ -928,7 +954,9 @@ function renderManuscripts() {
           </div>
           <div class="manuscript-row-actions">
             <button type="button" class="secondary-button" data-save-manuscript="${manuscript.manuscript_id}" disabled>Save</button>
+            <button type="button" class="secondary-button" data-archive-manuscript="${manuscript.manuscript_id}">Archive</button>
             <button type="button" class="danger-button" data-delete-manuscript="${manuscript.manuscript_id}">Remove</button>
+            <button type="button" class="danger-button" data-delete-manuscript-data="${manuscript.manuscript_id}">Delete Data</button>
           </div>
         </div>
         <div class="manuscript-row-fields">
@@ -948,7 +976,9 @@ function renderManuscripts() {
     const titleInput = li.querySelector(`[data-manuscript-title="${manuscript.manuscript_id}"]`);
     const slugInput = li.querySelector(`[data-manuscript-slug="${manuscript.manuscript_id}"]`);
     const saveButton = li.querySelector(`[data-save-manuscript="${manuscript.manuscript_id}"]`);
+    const archiveButton = li.querySelector(`[data-archive-manuscript="${manuscript.manuscript_id}"]`);
     const deleteButton = li.querySelector(`[data-delete-manuscript="${manuscript.manuscript_id}"]`);
+    const deleteDataButton = li.querySelector(`[data-delete-manuscript-data="${manuscript.manuscript_id}"]`);
     const syncDirtyState = () => {
       state.manuscriptDrafts[manuscript.manuscript_id] = {
         title: titleInput.value,
@@ -981,6 +1011,18 @@ function renderManuscripts() {
         els.stageActionStatus.textContent = error.message;
       }
     });
+    archiveButton.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      try {
+        await downloadBinary(
+          `/v1/manuscripts/${manuscript.manuscript_id}/archive`,
+          `${manuscript.book_slug}_archive.mprep.zip`,
+        );
+        els.stageActionStatus.textContent = `Archived manuscript: ${manuscript.title}`;
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
+    });
     deleteButton.addEventListener("click", async (event) => {
       event.stopPropagation();
       if (!window.confirm(`Remove manuscript ${manuscript.title}?`)) {
@@ -990,6 +1032,30 @@ function renderManuscripts() {
         await sendJson("DELETE", `/v1/manuscripts/${manuscript.manuscript_id}`);
         delete state.manuscriptDrafts[manuscript.manuscript_id];
         els.stageActionStatus.textContent = `Removed manuscript: ${manuscript.title}`;
+        if (state.selectedManuscriptId === manuscript.manuscript_id) {
+          state.selectedManuscriptId = null;
+          state.selectedJobId = null;
+        }
+        await refreshManuscripts();
+        await refreshJobs();
+      } catch (error) {
+        els.stageActionStatus.textContent = error.message;
+      }
+    });
+    deleteDataButton.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      const confirmation = window.prompt(
+        `This will permanently delete ${manuscript.title}, its jobs, artifacts, uploads, and pipeline outputs.\n\nType the manuscript title exactly to continue:`,
+        "",
+      );
+      if ((confirmation || "").trim() !== manuscript.title) {
+        els.stageActionStatus.textContent = "Full deletion cancelled.";
+        return;
+      }
+      try {
+        await sendJson("DELETE", `/v1/manuscripts/${manuscript.manuscript_id}/delete-data`);
+        delete state.manuscriptDrafts[manuscript.manuscript_id];
+        els.stageActionStatus.textContent = `Deleted manuscript and all data: ${manuscript.title}`;
         if (state.selectedManuscriptId === manuscript.manuscript_id) {
           state.selectedManuscriptId = null;
           state.selectedJobId = null;
@@ -1431,7 +1497,7 @@ function attachUploadFormHandler() {
     return;
   }
   els.uploadForm.dataset.bound = "true";
-  els.uploadForm.addEventListener("submit", async (event) => {
+els.uploadForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const title = els.manuscriptTitle.value.trim();
     const slug = els.manuscriptSlug.value.trim();
@@ -1476,6 +1542,26 @@ els.setupForm.addEventListener("submit", async (event) => {
     els.setupUsername.value = payload.user.username;
   } catch (error) {
     els.setupStatus.textContent = error.message;
+  }
+});
+
+els.importArchiveForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const archiveFile = els.importArchiveFile.files[0];
+  if (!archiveFile) {
+    els.importStatus.textContent = "Select an archive bundle first.";
+    return;
+  }
+  els.importStatus.textContent = `Importing ${archiveFile.name}...`;
+  try {
+    const payload = await postBinary("/v1/manuscript-archives/import", archiveFile.name, archiveFile);
+    state.selectedManuscriptId = payload.manuscript.manuscript_id;
+    els.importArchiveForm.reset();
+    els.importStatus.textContent = `Imported manuscript: ${payload.manuscript.title}`;
+    await refreshManuscripts();
+    await refreshJobs();
+  } catch (error) {
+    els.importStatus.textContent = error.message;
   }
 });
 
