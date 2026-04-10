@@ -160,7 +160,7 @@ h3 {
   flex-wrap: wrap;
 }
 
-.compact-downloads {
+.panel-actions.wrap.compact-downloads {
   display: flex;
   flex-wrap: nowrap;
   justify-content: flex-start;
