@@ -1,0 +1,110 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: manuscriptprep-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${MANUSCRIPTPREP_POSTGRES_DB:-manuscriptprep}
+      POSTGRES_USER: ${MANUSCRIPTPREP_POSTGRES_USER:-manuscriptprep}
+      POSTGRES_PASSWORD: ${MANUSCRIPTPREP_POSTGRES_PASSWORD:-manuscriptprep}
+    ports:
+      - "${MANUSCRIPTPREP_POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - manuscriptprep_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MANUSCRIPTPREP_POSTGRES_USER:-manuscriptprep} -d ${MANUSCRIPTPREP_POSTGRES_DB:-manuscriptprep}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    build:
+      context: .
+    container_name: manuscriptprep-gateway
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MANUSCRIPTPREP_STORE_BACKEND: postgres
+      MANUSCRIPTPREP_DATABASE_URL: postgresql://${MANUSCRIPTPREP_POSTGRES_USER:-manuscriptprep}:${MANUSCRIPTPREP_POSTGRES_PASSWORD:-manuscriptprep}@postgres:5432/${MANUSCRIPTPREP_POSTGRES_DB:-manuscriptprep}
+      MANUSCRIPTPREP_POSTGRES_SCHEMA: ${MANUSCRIPTPREP_POSTGRES_SCHEMA:-gateway}
+      MANUSCRIPTPREP_AUTH_REQUIRED: "true"
+      MANUSCRIPTPREP_BOOTSTRAP_ADMIN_USERNAME: ${MANUSCRIPTPREP_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN: ${MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN:-dev-admin-token}
+      MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_NAME: ${MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_NAME:-studio-default}
+      MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_PATH: ${MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_PATH:-/app/config/manuscriptprep.compose.yaml}
+      MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_VERSION: ${MANUSCRIPTPREP_BOOTSTRAP_CONFIG_PROFILE_VERSION:-v1}
+      PYTHONUNBUFFERED: "1"
+    command:
+      - python
+      - manuscriptprep_gateway_api.py
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8765"
+      - --runtime-root
+      - /app/runtime_data/runtime
+    ports:
+      - "${MANUSCRIPTPREP_GATEWAY_PORT:-8765}:8765"
+    volumes:
+      - .:/app
+      - manuscriptprep_runtime_data:/app/runtime_data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  worker:
+    build:
+      context: .
+    container_name: manuscriptprep-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MANUSCRIPTPREP_STORE_BACKEND: postgres
+      MANUSCRIPTPREP_DATABASE_URL: postgresql://${MANUSCRIPTPREP_POSTGRES_USER:-manuscriptprep}:${MANUSCRIPTPREP_POSTGRES_PASSWORD:-manuscriptprep}@postgres:5432/${MANUSCRIPTPREP_POSTGRES_DB:-manuscriptprep}
+      MANUSCRIPTPREP_POSTGRES_SCHEMA: ${MANUSCRIPTPREP_POSTGRES_SCHEMA:-gateway}
+      PYTHONUNBUFFERED: "1"
+    command:
+      - python
+      - manuscriptprep_worker.py
+      - --runtime-root
+      - /app/runtime_data/runtime
+      - --exclude-pipeline
+      - ingest
+    volumes:
+      - .:/app
+      - manuscriptprep_runtime_data:/app/runtime_data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ingest-worker:
+    build:
+      context: .
+    container_name: manuscriptprep-ingest-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MANUSCRIPTPREP_STORE_BACKEND: postgres
+      MANUSCRIPTPREP_DATABASE_URL: postgresql://${MANUSCRIPTPREP_POSTGRES_USER:-manuscriptprep}:${MANUSCRIPTPREP_POSTGRES_PASSWORD:-manuscriptprep}@postgres:5432/${MANUSCRIPTPREP_POSTGRES_DB:-manuscriptprep}
+      MANUSCRIPTPREP_POSTGRES_SCHEMA: ${MANUSCRIPTPREP_POSTGRES_SCHEMA:-gateway}
+      PYTHONUNBUFFERED: "1"
+    command:
+      - python
+      - manuscriptprep_worker.py
+      - --runtime-root
+      - /app/runtime_data/runtime
+      - --include-pipeline
+      - ingest
+    volumes:
+      - .:/app
+      - manuscriptprep_runtime_data:/app/runtime_data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  manuscriptprep_postgres_data:
+  manuscriptprep_runtime_data:

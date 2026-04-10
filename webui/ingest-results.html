@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ManuscriptPrep Ingest Results</title>
+    <link rel="stylesheet" href="/ui/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">ManuscriptPrep</p>
+          <h1 id="ingest-results-title">Ingest Results</h1>
+          <p id="ingest-results-status" class="lede">Loading classification, extract, clean, and chunking results.</p>
+        </div>
+      </section>
+
+      <section id="ingest-results-summary" class="grid three"></section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Downloads</h2>
+        </div>
+        <div class="panel-actions wrap compact-downloads">
+          <button type="button" id="download-raw-text" class="secondary-button compact-button">Raw Text</button>
+          <button type="button" id="download-clean-text" class="secondary-button compact-button">Clean Text</button>
+          <button type="button" id="download-chunk-manifest" class="secondary-button compact-button">Chunk Manifest</button>
+          <button type="button" id="download-ingest-manifest" class="secondary-button compact-button">Ingest Manifest</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Ingest Detail</h2>
+        </div>
+        <div id="ingest-tab-list" class="tab-list" role="tablist" aria-label="Ingest detail tabs">
+          <button type="button" class="tab-button active" data-tab-target="classification" role="tab" aria-selected="true">Classification</button>
+          <button type="button" class="tab-button" data-tab-target="chunking" role="tab" aria-selected="false">Chunk Summary</button>
+          <button type="button" class="tab-button" data-tab-target="extract" role="tab" aria-selected="false">Extraction Metadata</button>
+          <button type="button" class="tab-button" data-tab-target="clean" role="tab" aria-selected="false">Cleaning Metadata</button>
+          <button type="button" class="tab-button" data-tab-target="chunk-list" role="tab" aria-selected="false">Chunk Index</button>
+          <button type="button" class="tab-button" data-tab-target="raw-text" role="tab" aria-selected="false">Raw Text</button>
+          <button type="button" class="tab-button" data-tab-target="clean-text" role="tab" aria-selected="false">Clean Text</button>
+        </div>
+        <div class="tab-panels">
+          <section id="tab-panel-classification" class="tab-panel active" role="tabpanel">
+            <pre id="ingest-classification">Loading...</pre>
+          </section>
+          <section id="tab-panel-chunking" class="tab-panel hidden" role="tabpanel">
+            <pre id="ingest-chunking">Loading...</pre>
+          </section>
+          <section id="tab-panel-extract" class="tab-panel hidden" role="tabpanel">
+            <pre id="ingest-extract">Loading...</pre>
+          </section>
+          <section id="tab-panel-clean" class="tab-panel hidden" role="tabpanel">
+            <pre id="ingest-clean">Loading...</pre>
+          </section>
+          <section id="tab-panel-chunk-list" class="tab-panel hidden" role="tabpanel">
+            <pre id="ingest-chunk-list">Loading...</pre>
+          </section>
+          <section id="tab-panel-raw-text" class="tab-panel hidden" role="tabpanel">
+            <pre id="ingest-raw-text">Loading...</pre>
+          </section>
+          <section id="tab-panel-clean-text" class="tab-panel hidden" role="tabpanel">
+            <pre id="ingest-clean-text">Loading...</pre>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="/ui/ingest-results.js"></script>
+  </body>
+</html>

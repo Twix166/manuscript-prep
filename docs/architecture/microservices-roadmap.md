@@ -10,38 +10,44 @@ The current slices introduce:
 
 - an API-facing job model
 - a pipeline and stage registry
-- a persistent file-backed job store
+- a pluggable job store with file-backed and PostgreSQL-backed implementations
 - a minimal HTTP gateway service
+- a queued worker service that claims and executes jobs
 - artifact references on jobs
-- synchronous execution adapters for `ingest`, `orchestrate`, `merge`, `resolve`, and `report`
+- per-stage command/stdout/stderr capture for gateway-managed runs
+- execution adapters for `ingest`, `orchestrate`, `merge`, `resolve`, and `report`
+- a single gateway-managed `manuscript-prep` job that chains all stages locally
+- a `compose.yaml` stack that runs gateway, worker, and PostgreSQL together
+- readiness, system-status, queue summary, worker heartbeat, and stale-job recovery support
 
 The current scripts remain the execution backend while the API contract is
-established. The gateway can now create and run stage jobs against the
+established. The gateway now queues jobs while workers execute them against the
 existing CLI implementations.
 
 ## Initial Gateway Endpoints
 
 - `GET /health`
+- `GET /ready`
+- `GET /v1/system/status`
 - `GET /v1/pipelines`
 - `GET /v1/jobs`
 - `POST /v1/jobs`
 - `GET /v1/jobs/{job_id}`
+- `GET /v1/jobs/{job_id}/artifacts/{artifact_name}`
 - `POST /v1/jobs/{job_id}/run`
 
 ## Immediate Follow-Up Slices
 
-1. add execution adapters for orchestrate, merge, resolve, and report
-2. attach richer artifact metadata and stage logs to jobs
-3. update the TUI to consume the gateway instead of calling scripts directly
-4. add a basic web UI against the same endpoints
-5. replace file-backed jobs with a database-backed store when concurrency needs it
+1. add health, readiness, and worker heartbeat reporting
+2. add a basic web UI against the same endpoints
+3. introduce auth and user management on top of the PostgreSQL-backed gateway
+4. split stage runners into independently deployable worker services
 
 ## Current Limitations
 
-- execution is synchronous
-- jobs are persisted as local JSON files, not database records
-- there is not yet a single gateway endpoint that runs the full multi-stage pipeline as one long-lived job
-- the TUI and web UI have not yet been switched to consume the gateway
+- file-backed persistence still exists as a fallback path and test backend
+- the TUI can use the gateway, but the web UI does not exist yet
+- worker retry, cancellation, and recovery semantics are still minimal
 
 ## Target Service Split
 

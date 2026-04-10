@@ -48,11 +48,13 @@ import re
 import shutil
 import subprocess
 import sys
+import zipfile
 from collections import Counter
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+from xml.etree import ElementTree
 
 from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
 from manuscriptprep.paths import build_paths
@@ -98,6 +100,10 @@ def unique_preserve_order(items: Iterable[str]) -> List[str]:
     return out
 
 
+def detect_source_format(path: Path) -> str:
+    return path.suffix.lower().lstrip(".")
+
+
 class Logger:
     def __init__(self, path: Path):
         self.path = path
@@ -112,6 +118,7 @@ class Logger:
 
 @dataclass
 class PdfClassification:
+    source_format: str
     pdf_type: str
     needs_ocr: bool
     native_sample_chars: int
@@ -138,6 +145,7 @@ class ChunkRecord:
 class IngestRuntimeSettings:
     input_pdf: Path
     title: str
+    book_slug: str
     workdir: Path
     source_dir: Path
     extracted_dir: Path
@@ -191,17 +199,195 @@ def detect_page_count(pdf_path: Path) -> Optional[int]:
     return None
 
 
-def classify_pdf(pdf_path: Path, tmp_dir: Path, logger: Logger) -> PdfClassification:
+def _extract_docx_text(source_path: Path) -> str:
+    with zipfile.ZipFile(source_path) as archive:
+        xml_data = archive.read("word/document.xml")
+    root = ElementTree.fromstring(xml_data)
+    parts: List[str] = []
+    for node in root.iter():
+        if node.tag.endswith("}t") and node.text:
+            parts.append(node.text)
+        elif node.tag.endswith("}p"):
+            parts.append("\n\n")
+    return "".join(parts)
+
+
+def _extract_epub_text(source_path: Path) -> str:
+    from bs4 import BeautifulSoup
+
+    parts: List[str] = []
+    with zipfile.ZipFile(source_path) as archive:
+        for name in sorted(archive.namelist()):
+            lowered = name.lower()
+            if not lowered.endswith((".xhtml", ".html", ".htm")):
+                continue
+            html = archive.read(name).decode("utf-8", errors="ignore")
+            soup = BeautifulSoup(html, "html.parser")
+            text = soup.get_text("\n")
+            if text.strip():
+                parts.append(text.strip())
+    return "\n\n".join(parts)
+
+
+def _extract_odt_text(source_path: Path) -> str:
+    with zipfile.ZipFile(source_path) as archive:
+        xml_data = archive.read("content.xml")
+    root = ElementTree.fromstring(xml_data)
+    parts: List[str] = []
+    for node in root.iter():
+        if node.tag.endswith(("}p", "}h")):
+            text = "".join(node.itertext()).strip()
+            if text:
+                parts.append(text)
+    return "\n\n".join(parts)
+
+
+def _decode_mobi_text_encoding(value: int) -> str:
+    if value == 65001:
+        return "utf-8"
+    if value in {1252, 0}:
+        return "cp1252"
+    return "utf-8"
+
+
+def _palm_doc_unpack(data: bytes) -> bytes:
+    out = bytearray()
+    index = 0
+    size = len(data)
+    while index < size:
+        current = data[index]
+        index += 1
+
+        if current == 0 or 0x09 <= current <= 0x7F:
+            out.append(current)
+            continue
+
+        if 0x01 <= current <= 0x08:
+            out.extend(data[index:index + current])
+            index += current
+            continue
+
+        if 0x80 <= current <= 0xBF:
+            if index >= size:
+                break
+            pair = (current << 8) | data[index]
+            index += 1
+            distance = (pair >> 3) & 0x7FF
+            length = (pair & 0x07) + 3
+            if distance <= 0:
+                continue
+            start = len(out) - distance
+            for offset in range(length):
+                source_index = start + offset
+                if source_index < 0 or source_index >= len(out):
+                    break
+                out.append(out[source_index])
+            continue
+
+        out.append(0x20)
+        out.append(current ^ 0x80)
+
+    return bytes(out)
+
+
+def _mobi_record_offsets(raw_bytes: bytes) -> List[int]:
+    if len(raw_bytes) < 78:
+        raise RuntimeError("MOBI file is too short")
+    record_count = int.from_bytes(raw_bytes[76:78], "big")
+    offsets: List[int] = []
+    for record_index in range(record_count):
+        start = 78 + (record_index * 8)
+        end = start + 4
+        if end > len(raw_bytes):
+            raise RuntimeError("MOBI record table is truncated")
+        offsets.append(int.from_bytes(raw_bytes[start:end], "big"))
+    offsets.append(len(raw_bytes))
+    return offsets
+
+
+def _extract_mobi_record_text(raw_bytes: bytes) -> str:
+    record_offsets = _mobi_record_offsets(raw_bytes)
+    record_zero = record_offsets[0]
+    if record_zero + 32 > len(raw_bytes):
+        raise RuntimeError("MOBI header record is truncated")
+
+    compression = int.from_bytes(raw_bytes[record_zero:record_zero + 2], "big")
+    text_length = int.from_bytes(raw_bytes[record_zero + 4:record_zero + 8], "big")
+    text_record_count = int.from_bytes(raw_bytes[record_zero + 8:record_zero + 10], "big")
+    text_encoding = _decode_mobi_text_encoding(int.from_bytes(raw_bytes[record_zero + 28:record_zero + 32], "big"))
+
+    if compression not in {1, 2}:
+        raise RuntimeError(f"Unsupported MOBI compression type: {compression}")
+    if len(record_offsets) <= text_record_count:
+        raise RuntimeError("MOBI text record table is incomplete")
+
+    decoded_records: List[bytes] = []
+    for record_index in range(1, text_record_count + 1):
+        start = record_offsets[record_index]
+        end = record_offsets[record_index + 1]
+        record_bytes = raw_bytes[start:end]
+        decoded_records.append(_palm_doc_unpack(record_bytes) if compression == 2 else record_bytes)
+
+    text = b"".join(decoded_records)[:text_length].decode(text_encoding, errors="ignore")
+    text = text.replace("\x00", "")
+    text = re.sub(r"[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]+", "", text)
+    return text
+
+
+def _extract_ebook_binary_text(source_path: Path) -> str:
+    from bs4 import BeautifulSoup
+
+    raw_bytes = source_path.read_bytes()
+    if b"BOOKMOBI" not in raw_bytes[:512] and source_path.suffix.lower() == ".mobi":
+        raise RuntimeError("File does not look like a MOBI ebook")
+
+    decoded = _extract_mobi_record_text(raw_bytes)
+    html_segments = re.findall(r"(?is)<html\b.*?</html>|<body\b.*?</body>", decoded)
+    candidates: List[str] = []
+    if html_segments:
+        for segment in html_segments:
+            soup = BeautifulSoup(segment, "html.parser")
+            text = soup.get_text("\n").strip()
+            if len(text) > 20:
+                candidates.append(text)
+    else:
+        soup = BeautifulSoup(decoded, "html.parser")
+        text = soup.get_text("\n").strip()
+        if len(text) > 20:
+            candidates.append(text)
+
+    if candidates:
+        text = max(candidates, key=len)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        text = re.sub(r"[ \t]+", " ", text)
+        return text.strip() + "\n"
+
+    raise RuntimeError("Could not extract readable text from ebook file")
+
+
+def classify_source(source_path: Path, tmp_dir: Path, logger: Logger) -> PdfClassification:
+    source_format = detect_source_format(source_path)
+    if source_format != "pdf":
+        logger.log(f"Source classification: format={source_format}, treated_as_text_source")
+        return PdfClassification(
+            source_format=source_format,
+            pdf_type="text",
+            needs_ocr=False,
+            native_sample_chars=0,
+            page_count=None,
+            warnings=[],
+        )
+
     sample_txt = tmp_dir / "native_sample.txt"
     warnings: List[str] = []
-    page_count = detect_page_count(pdf_path)
+    page_count = detect_page_count(source_path)
 
     native_chars = 0
     needs_ocr = False
     pdf_type = "text"
 
     try:
-        result = try_pdftotext_extract(pdf_path, sample_txt)
+        result = try_pdftotext_extract(source_path, sample_txt)
         if result.returncode != 0:
             warnings.append("native_extraction_failed")
             needs_ocr = True
@@ -223,6 +409,7 @@ def classify_pdf(pdf_path: Path, tmp_dir: Path, logger: Logger) -> PdfClassifica
         f"native_sample_chars={native_chars}, page_count={page_count}"
     )
     return PdfClassification(
+        source_format=source_format,
         pdf_type=pdf_type,
         needs_ocr=needs_ocr,
         native_sample_chars=native_chars,
@@ -245,7 +432,7 @@ def run_ocr(pdf_path: Path, ocr_pdf_path: Path, logger: Logger) -> None:
 
 
 def extract_raw_text(
-    pdf_path: Path,
+    source_path: Path,
     raw_txt_path: Path,
     raw_ocr_txt_path: Path,
     tmp_dir: Path,
@@ -254,6 +441,7 @@ def extract_raw_text(
     logger: Logger,
 ) -> Dict[str, Any]:
     extraction_info: Dict[str, Any] = {
+        "source_format": classification.source_format,
         "extractor": "pdftotext",
         "ocr_used": False,
         "raw_text_path": str(raw_txt_path),
@@ -261,9 +449,29 @@ def extract_raw_text(
         "warnings": [],
     }
 
-    if force_ocr or classification.needs_ocr:
+    if classification.source_format == "txt":
+        text = read_text(source_path)
+        write_text(raw_txt_path, text)
+        extraction_info["extractor"] = "plain_text"
+    elif classification.source_format == "docx":
+        text = _extract_docx_text(source_path)
+        write_text(raw_txt_path, text)
+        extraction_info["extractor"] = "docx_xml"
+    elif classification.source_format == "epub":
+        text = _extract_epub_text(source_path)
+        write_text(raw_txt_path, text)
+        extraction_info["extractor"] = "epub_html"
+    elif classification.source_format == "odt":
+        text = _extract_odt_text(source_path)
+        write_text(raw_txt_path, text)
+        extraction_info["extractor"] = "odt_xml"
+    elif classification.source_format in {"mobi", "azw", "azw3"}:
+        text = _extract_ebook_binary_text(source_path)
+        write_text(raw_txt_path, text)
+        extraction_info["extractor"] = "ebook_heuristic"
+    elif force_ocr or classification.needs_ocr:
         ocr_pdf_path = tmp_dir / "ocr_output.pdf"
-        run_ocr(pdf_path, ocr_pdf_path, logger)
+        run_ocr(source_path, ocr_pdf_path, logger)
         extraction_info["ocr_used"] = True
 
         result = try_pdftotext_extract(ocr_pdf_path, raw_ocr_txt_path)
@@ -275,7 +483,7 @@ def extract_raw_text(
         extraction_info["raw_ocr_text_path"] = str(raw_ocr_txt_path)
         logger.log(f"Wrote OCR-extracted raw text to {raw_ocr_txt_path}")
     else:
-        result = try_pdftotext_extract(pdf_path, raw_txt_path)
+        result = try_pdftotext_extract(source_path, raw_txt_path)
         if result.returncode != 0:
             raise RuntimeError(f"pdftotext failed: {result.stderr.strip() or result.stdout.strip()}")
 
@@ -461,8 +669,9 @@ def chunk_clean_text(
     target_chunk_words: int,
     max_chunk_words: int,
     logger: Logger,
+    book_slug: Optional[str] = None,
 ) -> Tuple[List[ChunkRecord], Dict[str, Any]]:
-    book_slug = slugify(book_title)
+    book_slug = book_slug or slugify(book_title)
     book_chunk_dir = chunks_root / book_slug
     book_chunk_dir.mkdir(parents=True, exist_ok=True)
 
@@ -601,13 +810,13 @@ def resolve_work_paths(cfg: Optional[ManuscriptPrepConfig], workdir: Path, book_
 
 def resolve_ingest_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPrepConfig]) -> IngestRuntimeSettings:
     if args.input is None:
-        raise ConfigError("Missing required input PDF. Use --input.")
+        raise ConfigError("Missing required input manuscript. Use --input.")
     if args.title is None:
         raise ConfigError("Missing required book title. Use --title.")
 
     input_pdf = args.input.expanduser()
     title = args.title
-    book_slug = slugify(title)
+    book_slug = str(args.book_slug).strip() if getattr(args, "book_slug", None) else slugify(title)
 
     if cfg is not None:
         workdir = (args.workdir.expanduser() if args.workdir is not None else Path(cfg.require("paths", "workspace_root")).expanduser())
@@ -626,6 +835,7 @@ def resolve_ingest_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPr
     return IngestRuntimeSettings(
         input_pdf=input_pdf,
         title=title,
+        book_slug=book_slug,
         workdir=workdir,
         source_dir=paths["source_dir"],
         extracted_dir=paths["extracted_dir"],
@@ -646,9 +856,10 @@ def resolve_ingest_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPr
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="End-to-end ingest pipeline for ManuscriptPrep")
     parser.add_argument("--config", type=Path, default=None, help="Optional YAML config file")
-    parser.add_argument("--input", type=Path, required=False, help="Source PDF path")
+    parser.add_argument("--input", type=Path, required=False, help="Source manuscript path")
     parser.add_argument("--workdir", type=Path, required=False, help="Workspace directory")
     parser.add_argument("--title", required=False, help="Book title, used for book_slug subdirectories")
+    parser.add_argument("--book-slug", required=False, help="Optional explicit book slug for output subdirectories")
     parser.add_argument(
         "--chunk-words",
         type=int,
@@ -675,7 +886,7 @@ def main() -> int:
 
     input_pdf = settings.input_pdf
     if not input_pdf.is_file():
-        print(f"Input PDF does not exist: {input_pdf}", file=sys.stderr)
+        print(f"Input manuscript does not exist: {input_pdf}", file=sys.stderr)
         return 1
 
     if settings.min_chunk_words > settings.chunk_words or settings.chunk_words > settings.max_chunk_words:
@@ -685,7 +896,7 @@ def main() -> int:
         )
         return 1
 
-    book_slug = slugify(settings.title)
+    book_slug = settings.book_slug
 
     for d in [
         settings.source_dir,
@@ -704,18 +915,18 @@ def main() -> int:
     workspace_pdf = settings.source_dir / input_pdf.name
     if workspace_pdf.resolve() != input_pdf.resolve():
         shutil.copy2(input_pdf, workspace_pdf)
-        logger.log(f"Copied source PDF to workspace: {workspace_pdf}")
+        logger.log(f"Copied source manuscript to workspace: {workspace_pdf}")
     else:
-        logger.log(f"Using source PDF in place: {workspace_pdf}")
+        logger.log(f"Using source manuscript in place: {workspace_pdf}")
 
     raw_txt_path = settings.extracted_dir / "raw.txt"
     raw_ocr_txt_path = settings.extracted_dir / "raw_ocr.txt"
     clean_txt_path = settings.cleaned_dir / "clean.txt"
 
-    classification = classify_pdf(workspace_pdf, settings.tmp_dir, logger)
+    classification = classify_source(workspace_pdf, settings.tmp_dir, logger)
 
     extraction_info = extract_raw_text(
-        pdf_path=workspace_pdf,
+        source_path=workspace_pdf,
         raw_txt_path=raw_txt_path,
         raw_ocr_txt_path=raw_ocr_txt_path,
         tmp_dir=settings.tmp_dir,
@@ -734,6 +945,7 @@ def main() -> int:
     chunks, chunk_stats = chunk_clean_text(
         clean_text_value=clean_text_value,
         book_title=settings.title,
+        book_slug=book_slug,
         chunks_root=settings.chunks_dir,
         min_chunk_words=settings.min_chunk_words,
         target_chunk_words=settings.chunk_words,
@@ -743,6 +955,7 @@ def main() -> int:
 
     chunk_manifest = {
         "source_pdf": str(workspace_pdf),
+        "source_document": str(workspace_pdf),
         "book_title": settings.title,
         "book_slug": book_slug,
         "raw_text": str(raw_txt_path),
@@ -760,6 +973,7 @@ def main() -> int:
     ingest_manifest = {
         "timestamp": utc_now_iso(),
         "source_pdf": str(workspace_pdf),
+        "source_document": str(workspace_pdf),
         "book_title": settings.title,
         "book_slug": book_slug,
         "paths": {

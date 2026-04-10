@@ -11,6 +11,43 @@ from tests.helpers import run_cli
 pytestmark = pytest.mark.integration
 
 
+def build_test_mobi(text: str) -> bytes:
+    payload = text.encode("utf-8")
+    record_size = 4096
+    text_records = [payload[index:index + record_size] for index in range(0, len(payload), record_size)]
+    text_record_count = len(text_records)
+    record_count = 1 + text_record_count
+
+    record_zero = bytearray(256)
+    record_zero[0:2] = (1).to_bytes(2, "big")
+    record_zero[4:8] = len(payload).to_bytes(4, "big")
+    record_zero[8:10] = text_record_count.to_bytes(2, "big")
+    record_zero[10:12] = record_size.to_bytes(2, "big")
+    record_zero[16:20] = b"MOBI"
+    record_zero[20:24] = (232).to_bytes(4, "big")
+    record_zero[28:32] = (65001).to_bytes(4, "big")
+
+    pdb_header = bytearray(78)
+    pdb_header[0:32] = b"Integration_Test_MOBI".ljust(32, b"\x00")
+    pdb_header[60:64] = b"BOOK"
+    pdb_header[64:68] = b"MOBI"
+    pdb_header[76:78] = record_count.to_bytes(2, "big")
+
+    offsets = []
+    current_offset = 78 + (record_count * 8)
+    records = [bytes(record_zero), *text_records]
+    for index, record in enumerate(records):
+        offsets.append(current_offset)
+        current_offset += len(record)
+
+    record_table = bytearray()
+    for index, offset in enumerate(offsets):
+        record_table.extend(offset.to_bytes(4, "big"))
+        record_table.extend(index.to_bytes(4, "big"))
+
+    return bytes(pdb_header + record_table + b"".join(records))
+
+
 def test_ingest_cli_creates_expected_workspace_artifacts(tmp_path: Path, sample_pdf: Path, test_env: dict[str, str]) -> None:
     workdir = tmp_path / "work"
     result = run_cli(
@@ -34,6 +71,98 @@ def test_ingest_cli_creates_expected_workspace_artifacts(tmp_path: Path, sample_
     assert result.returncode == 0, result.stderr
     assert (workdir / "manifests" / "treasure_island" / "ingest_manifest.json").exists()
     assert (workdir / "chunks" / "treasure_island").exists()
+
+
+def test_ingest_cli_honors_explicit_book_slug(tmp_path: Path, sample_pdf: Path, test_env: dict[str, str]) -> None:
+    workdir = tmp_path / "work"
+    result = run_cli(
+        [
+            "manuscriptprep_ingest.py",
+            "--input",
+            str(sample_pdf),
+            "--workdir",
+            str(workdir),
+            "--title",
+            "Treasure Island",
+            "--book-slug",
+            "treasure_island_custom",
+            "--chunk-words",
+            "20",
+            "--min-chunk-words",
+            "5",
+            "--max-chunk-words",
+            "30",
+        ],
+        env=test_env,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (workdir / "manifests" / "treasure_island_custom" / "ingest_manifest.json").exists()
+    ingest_manifest = json.loads((workdir / "manifests" / "treasure_island_custom" / "ingest_manifest.json").read_text(encoding="utf-8"))
+    assert ingest_manifest["book_slug"] == "treasure_island_custom"
+    assert (workdir / "chunks" / "treasure_island_custom").exists()
+
+
+def test_ingest_cli_supports_plain_text_sources(tmp_path: Path, test_env: dict[str, str]) -> None:
+    source = tmp_path / "moby_dick.txt"
+    source.write_text("CHAPTER I\n\nCall me Ishmael.\n\nSome years ago...\n", encoding="utf-8")
+    workdir = tmp_path / "work"
+
+    result = run_cli(
+        [
+            "manuscriptprep_ingest.py",
+            "--input",
+            str(source),
+            "--workdir",
+            str(workdir),
+            "--title",
+            "Moby Dick",
+            "--chunk-words",
+            "10",
+            "--min-chunk-words",
+            "2",
+            "--max-chunk-words",
+            "20",
+        ],
+        env=test_env,
+    )
+
+    assert result.returncode == 0, result.stderr
+    ingest_manifest = json.loads((workdir / "manifests" / "moby_dick" / "ingest_manifest.json").read_text(encoding="utf-8"))
+    assert ingest_manifest["classification"]["source_format"] == "txt"
+    assert ingest_manifest["extraction"]["extractor"] == "plain_text"
+    assert (workdir / "chunks" / "moby_dick" / "chunk_000.txt").exists()
+
+
+def test_ingest_cli_supports_mobi_sources(tmp_path: Path, test_env: dict[str, str]) -> None:
+    source = tmp_path / "moby_dick.mobi"
+    source.write_bytes(build_test_mobi("<html><body><h1>Moby-Dick</h1><p>Call me Ishmael. Some years ago...</p></body></html>"))
+    workdir = tmp_path / "work"
+
+    result = run_cli(
+        [
+            "manuscriptprep_ingest.py",
+            "--input",
+            str(source),
+            "--workdir",
+            str(workdir),
+            "--title",
+            "Moby Dick",
+            "--chunk-words",
+            "10",
+            "--min-chunk-words",
+            "2",
+            "--max-chunk-words",
+            "20",
+        ],
+        env=test_env,
+    )
+
+    assert result.returncode == 0, result.stderr
+    ingest_manifest = json.loads((workdir / "manifests" / "moby_dick" / "ingest_manifest.json").read_text(encoding="utf-8"))
+    assert ingest_manifest["classification"]["source_format"] == "mobi"
+    assert ingest_manifest["extraction"]["extractor"] == "ebook_heuristic"
+    raw_text = (workdir / "extracted" / "moby_dick" / "raw.txt").read_text(encoding="utf-8")
+    assert "Call me Ishmael" in raw_text
 
 
 def test_ingest_cli_uses_config_defaults_for_paths_and_chunking(tmp_path: Path, sample_pdf: Path, test_env: dict[str, str]) -> None:
@@ -163,6 +292,72 @@ def test_orchestrator_cli_with_config_writes_outputs(tmp_path: Path, test_env: d
     assert (logs_root / "orchestrator.log.jsonl").exists()
     timing = json.loads((chunk_out / "timing.json").read_text(encoding="utf-8"))
     assert set(timing["passes"]) == {"structure", "dialogue", "entities", "dossiers"}
+
+
+def test_orchestrator_cli_resumes_after_last_successful_chunk(tmp_path: Path, test_env: dict[str, str]) -> None:
+    chunks_dir = tmp_path / "work" / "chunks" / "treasure_island"
+    chunks_dir.mkdir(parents=True)
+    (chunks_dir / "chunk_000.txt").write_text("Jim spoke to Silver.", encoding="utf-8")
+    (chunks_dir / "chunk_001.txt").write_text("Silver answered Jim.", encoding="utf-8")
+    output_root = tmp_path / "out"
+    logs_root = tmp_path / "logs"
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        "\n".join(
+            [
+                "paths:",
+                f"  output_root: {output_root}",
+                f"  logs_root: {logs_root}",
+                "models:",
+                "  structure: manuscriptprep-structure",
+                "  dialogue: manuscriptprep-dialogue",
+                "  entities: manuscriptprep-entities",
+                "  dossiers: manuscriptprep-dossiers",
+                "ollama:",
+                "  command: ollama",
+                "timeouts:",
+                "  idle_seconds: 10",
+                "  hard_seconds: 30",
+                "  retries: 0",
+                "  idle_timeout_backoff: 1.5",
+                "  max_idle_timeout_seconds: 30",
+                "logging:",
+                "  level: INFO",
+                "  console: false",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    chunk_000_out = output_root / "treasure_island" / "chunk_000"
+    chunk_000_out.mkdir(parents=True)
+    sentinel_structure = {"chapters": ["SENTINEL"], "parts": [], "scene_breaks": [], "status": "ok"}
+    (chunk_000_out / "structure.json").write_text(json.dumps(sentinel_structure) + "\n", encoding="utf-8")
+    (chunk_000_out / "dialogue.json").write_text(json.dumps({"pov": "first_person"}) + "\n", encoding="utf-8")
+    (chunk_000_out / "entities.json").write_text(json.dumps({"characters": ["Sentinel"]}) + "\n", encoding="utf-8")
+    (chunk_000_out / "dossiers.json").write_text(json.dumps({"character_dossiers": [{"name": "Sentinel"}]}) + "\n", encoding="utf-8")
+    (chunk_000_out / "timing.json").write_text(json.dumps({"chunk": "chunk_000", "passes": {}, "total_duration_seconds": 1.0}) + "\n", encoding="utf-8")
+
+    result = run_cli(
+        [
+            "manuscriptprep_orchestrator_tui_refactored.py",
+            "--config",
+            str(config_path),
+            "--input-dir",
+            str(chunks_dir),
+            "--book-slug",
+            "treasure_island",
+            "--no-tui",
+        ],
+        env=test_env,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert json.loads((chunk_000_out / "structure.json").read_text(encoding="utf-8"))["chapters"] == ["SENTINEL"]
+    chunk_001_out = output_root / "treasure_island" / "chunk_001"
+    assert (chunk_001_out / "structure.json").exists()
+    log_text = (logs_root / "orchestrator.log.jsonl").read_text(encoding="utf-8")
+    assert '"event_type": "run_resume"' in log_text
 
 
 def test_merger_cli_uses_config_defaults_for_paths(tmp_path: Path, test_env: dict[str, str]) -> None:
@@ -341,3 +536,113 @@ def test_resolver_cli_uses_config_defaults_for_paths_and_model(tmp_path: Path, t
     assert resolution_report["model"] == "manuscriptprep-resolver"
     assert resolution_report["config_path"] == str(config_path.resolve())
     assert book_resolved["config_path"] == str(config_path.resolve())
+
+
+def test_pdf_report_cli_uses_config_defaults_for_paths(tmp_path: Path, test_env: dict[str, str]) -> None:
+    workspace_root = tmp_path / "workspace"
+    merged_root = workspace_root / "merged"
+    reports_root = workspace_root / "reports"
+    book_slug = "treasure_island"
+    merged_dir = merged_root / book_slug
+    merged_dir.mkdir(parents=True)
+
+    (merged_dir / "book_merged.json").write_text(
+        json.dumps({"book_slug": book_slug, "book_title": "Treasure Island"}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (merged_dir / "structure_merged.json").write_text(
+        json.dumps({"chapters": ["CHAPTER I"], "parts": [], "scene_breaks": []}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (merged_dir / "dialogue_merged.json").write_text(
+        json.dumps(
+            {
+                "dominant_pov": "third_person",
+                "observed_pov_values": ["third_person"],
+                "dialogue_present_in_chunks": 1,
+                "internal_thought_present_in_chunks": 0,
+                "unattributed_dialogue_present_in_chunks": 0,
+                "explicitly_attributed_speakers": ["Jim"],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (merged_dir / "entities_merged.json").write_text(
+        json.dumps({"characters": ["Jim"], "places": [], "objects": [], "identity_notes": []}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (merged_dir / "dossiers_merged.json").write_text(
+        json.dumps({"character_dossiers": []}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (merged_dir / "conflict_report.json").write_text(
+        json.dumps({"summary": {}}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (merged_dir / "merge_report.json").write_text(
+        json.dumps({"chunk_count": 1, "present_counts": {}, "missing": {}}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        "\n".join(
+            [
+                "project:",
+                "  name: manuscriptprep",
+                "  environment: test",
+                "paths:",
+                f"  repo_root: {tmp_path}",
+                f"  workspace_root: {workspace_root}",
+                f"  input_root: {workspace_root / 'source'}",
+                f"  extracted_root: {workspace_root / 'extracted'}",
+                f"  cleaned_root: {workspace_root / 'cleaned'}",
+                f"  chunks_root: {workspace_root / 'chunks'}",
+                f"  output_root: {workspace_root / 'out'}",
+                f"  merged_root: {merged_root}",
+                f"  resolved_root: {workspace_root / 'resolved'}",
+                f"  reports_root: {reports_root}",
+                f"  logs_root: {workspace_root / 'logs'}",
+                "models:",
+                "  structure: manuscriptprep-structure",
+                "  dialogue: manuscriptprep-dialogue",
+                "  entities: manuscriptprep-entities",
+                "  dossiers: manuscriptprep-dossiers",
+                "  resolver: manuscriptprep-resolver",
+                "ollama:",
+                "  host: http://127.0.0.1:11434",
+                "  command: ollama",
+                "timeouts:",
+                "  idle_seconds: 10",
+                "  hard_seconds: 30",
+                "  retries: 0",
+                "  idle_timeout_backoff: 1.5",
+                "  max_idle_timeout_seconds: 30",
+                "  resolver_timeout_seconds: 30",
+                "chunking:",
+                "  target_words: 20",
+                "  min_words: 5",
+                "  max_words: 30",
+                "logging:",
+                "  level: INFO",
+                "  jsonl: true",
+                "  console: false",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_cli(
+        [
+            "manuscriptprep_pdf_report.py",
+            "--config",
+            str(config_path),
+            "--book-slug",
+            book_slug,
+        ],
+        env=test_env,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (reports_root / f"{book_slug}_report.pdf").exists()

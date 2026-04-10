@@ -32,11 +32,14 @@ import json
 import os
 import queue
 import re
+import shutil
 import subprocess
 import sys
 import threading
 import time
 import uuid
+from urllib import error as urllib_error
+from urllib import request as urllib_request
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -67,6 +70,7 @@ class RuntimeConfig:
     entities_model: str = "manuscriptprep-entities"
     dossiers_model: str = "manuscriptprep-dossiers"
     ollama_bin: str = "ollama"
+    ollama_host: Optional[str] = None
     retries: int = 1
     on_failure: str = "skip"
     idle_timeout: int = 180
@@ -110,6 +114,7 @@ class TUIState:
     orchestrator_log: List[str] = field(default_factory=list)
     model_stdout_lines: List[str] = field(default_factory=list)
     model_stderr_lines: List[str] = field(default_factory=list)
+    gateway_job_id: Optional[str] = None
 
     def log(self, msg: str) -> None:
         timestamp = time.strftime("%H:%M:%S")
@@ -206,6 +211,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=None, help="Directory for outputs")
     parser.add_argument("--config", type=Path, default=None, help="Optional YAML config file")
     parser.add_argument("--book-slug", default=None, help="Optional book slug used when deriving paths from config")
+    parser.add_argument("--gateway-url", default=None, help="Optional gateway base URL for API-backed orchestration")
     parser.add_argument("--glob", default="*.txt", help="Glob for input-dir mode")
     parser.add_argument("--no-tui", action="store_true", help="Disable TUI and use plain logging")
 
@@ -282,6 +288,7 @@ def build_runtime_config(args: argparse.Namespace, config_data: Dict[str, Any]) 
         entities_model=args.entities_model or models.get("entities", "manuscriptprep-entities"),
         dossiers_model=args.dossiers_model or models.get("dossiers", "manuscriptprep-dossiers"),
         ollama_bin=args.ollama_bin or ollama_cfg.get("command", "ollama"),
+        ollama_host=str(ollama_cfg.get("host")).rstrip("/") if ollama_cfg.get("host") else None,
         retries=args.retries if args.retries is not None else int(timeouts.get("retries", 1)),
         on_failure=args.on_failure or "skip",
         idle_timeout=args.idle_timeout if args.idle_timeout is not None else int(timeouts.get("idle_seconds", 180)),
@@ -317,6 +324,48 @@ def resolve_output_dir(args: argparse.Namespace, config_data: Dict[str, Any]) ->
         slug = args.input.stem
 
     return Path(output_root).expanduser() / slug
+
+
+def gateway_request(base_url: str, method: str, path: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    body = None
+    headers = {"Accept": "application/json"}
+    if payload is not None:
+        body = json.dumps(payload).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    req = urllib_request.Request(base_url.rstrip("/") + path, data=body, headers=headers, method=method)
+    try:
+        with urllib_request.urlopen(req) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib_error.HTTPError as exc:
+        raw = exc.read().decode("utf-8")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            payload = {"error": raw or str(exc)}
+        raise RuntimeError(payload.get("error", str(exc))) from exc
+    except urllib_error.URLError as exc:
+        raise RuntimeError(f"Gateway request failed: {exc.reason}") from exc
+
+
+def build_gateway_orchestrate_payload(args: argparse.Namespace, output_dir: Path) -> Dict[str, Any]:
+    if args.input is not None:
+        raise RuntimeError("Gateway mode currently requires --input-dir, not --input.")
+    if args.input_dir is None:
+        raise RuntimeError("Gateway mode requires --input-dir.")
+    if not args.input_dir.is_dir():
+        raise RuntimeError(f"Input directory does not exist: {args.input_dir}")
+
+    book_slug = args.book_slug or args.input_dir.name
+    payload: Dict[str, Any] = {
+        "pipeline": "orchestrate",
+        "book_slug": book_slug,
+        "config_path": str(args.config.expanduser().resolve()) if args.config else None,
+        "options": {
+            "input_dir": str(args.input_dir.expanduser()),
+            "output_dir": str(output_dir),
+        },
+    }
+    return payload
 
 
 def resolve_log_path(args: argparse.Namespace, output_dir: Path, runtime: RuntimeConfig) -> Path:
@@ -366,6 +415,29 @@ def collect_inputs(args: argparse.Namespace) -> List[Path]:
     if not files:
         raise RuntimeError(f"No files matched {args.glob} in {args.input_dir}")
     return files
+
+
+def chunk_output_is_complete(output_dir: Path, chunk_name: str) -> bool:
+    chunk_dir = output_dir / chunk_name
+    required = [
+        chunk_dir / "structure.json",
+        chunk_dir / "dialogue.json",
+        chunk_dir / "entities.json",
+        chunk_dir / "dossiers.json",
+        chunk_dir / "timing.json",
+    ]
+    return all(path.is_file() for path in required)
+
+
+def split_completed_chunks(chunk_files: List[Path], output_dir: Path) -> Tuple[List[Path], List[Path]]:
+    completed: List[Path] = []
+    pending: List[Path] = []
+    for chunk_path in chunk_files:
+        if chunk_output_is_complete(output_dir, chunk_path.stem):
+            completed.append(chunk_path)
+        else:
+            pending.append(chunk_path)
+    return completed, pending
 
 
 def build_dossier_input(excerpt_text: str, entities_json: Dict[str, Any], dialogue_json: Dict[str, Any]) -> str:
@@ -470,6 +542,7 @@ def render_tui(state: TUIState):
     status_table.add_column(ratio=1)
     status_table.add_column(ratio=3)
     status_table.add_row("Chunk", state.current_chunk)
+    status_table.add_row("Gateway job", state.gateway_job_id or "-")
     status_table.add_row("Pass", state.current_pass)
     status_table.add_row("Status", state.pass_status)
     status_table.add_row("Step", state.current_step)
@@ -539,6 +612,21 @@ def run_ollama_streaming(
 
     if live is not None:
         live.update(render_tui(state), refresh=True)
+
+    if runtime.ollama_host and shutil.which(runtime.ollama_bin) is None:
+        return run_ollama_http_streaming(
+            runtime=runtime,
+            model=model,
+            prompt_text=prompt_text,
+            state=state,
+            live=live,
+            logger=logger,
+            chunk_name=chunk_name,
+            pass_name=pass_name,
+            attempt=attempt,
+            idle_timeout=idle_timeout,
+            hard_timeout=hard_timeout,
+        )
 
     proc = subprocess.Popen(
         [runtime.ollama_bin, "run", model],
@@ -715,6 +803,136 @@ def run_ollama_streaming(
             "stderr_chars": len(stderr_text),
             "duration_seconds": model_elapsed,
             "idle_timeout_s": idle_timeout,
+        },
+    )
+
+    return stdout_text
+
+
+def run_ollama_http_streaming(
+    *,
+    runtime: RuntimeConfig,
+    model: str,
+    prompt_text: str,
+    state: TUIState,
+    live: Optional[Live],
+    logger: JsonlLogger,
+    chunk_name: str,
+    pass_name: str,
+    attempt: int,
+    idle_timeout: int,
+    hard_timeout: int,
+) -> str:
+    started_at = time.time()
+    state.current_step = "connecting to ollama host"
+    if live is not None:
+        live.update(render_tui(state), refresh=True)
+
+    payload = json.dumps({"model": model, "prompt": prompt_text, "stream": True}).encode("utf-8")
+    req = urllib_request.Request(
+        f"{runtime.ollama_host}/api/generate",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    collected_stdout: List[str] = []
+    timeout = max(idle_timeout, 1) if idle_timeout > 0 else max(hard_timeout, 1) if hard_timeout > 0 else 60
+
+    try:
+        with urllib_request.urlopen(req, timeout=timeout) as resp:
+            for raw_line in resp:
+                now = time.time()
+                if hard_timeout > 0 and (now - started_at) > hard_timeout:
+                    logger.emit(
+                        level="ERROR",
+                        event_type="pass_hard_timeout",
+                        message="Hard timeout reached while streaming Ollama HTTP response",
+                        chunk=chunk_name,
+                        pass_name=pass_name,
+                        step=state.current_step,
+                        model=model,
+                        attempt=attempt,
+                        extra={"elapsed_s": now - started_at, "idle_timeout_s": idle_timeout},
+                    )
+                    raise HardTimeoutError(
+                        f"Hard timeout exceeded for {pass_name} on {chunk_name} after {hard_timeout}s"
+                    )
+
+                line = raw_line.decode("utf-8").strip()
+                if not line:
+                    continue
+                event = json.loads(line)
+                if event.get("error"):
+                    raise RuntimeError(f"Ollama API error for model '{model}': {event['error']}")
+
+                chunk_text = str(event.get("response") or "")
+                if chunk_text:
+                    collected_stdout.append(chunk_text)
+                    state.append_stdout(chunk_text)
+                    state.current_step = "streaming model output"
+                    state.stdout_token_count += approx_token_count(chunk_text)
+                    maybe_real_tps = extract_tps_from_text(chunk_text)
+                    if maybe_real_tps is not None:
+                        state.real_tps = maybe_real_tps
+                    if state.pass_started_at is not None and state.real_tps is None:
+                        elapsed = max(time.time() - state.pass_started_at, 0.001)
+                        state.estimated_tps = state.stdout_token_count / elapsed
+                    if live is not None:
+                        live.update(render_tui(state), refresh=True)
+
+                if event.get("done"):
+                    break
+    except TimeoutError as exc:
+        logger.emit(
+            level="ERROR",
+            event_type="pass_idle_timeout",
+            message="Idle timeout reached while waiting for Ollama HTTP response",
+            chunk=chunk_name,
+            pass_name=pass_name,
+            step=state.current_step,
+            model=model,
+            attempt=attempt,
+            extra={"idle_timeout_s": idle_timeout},
+        )
+        raise IdleTimeoutError(
+            f"Idle timeout exceeded for {pass_name} on {chunk_name} after {idle_timeout}s with no output"
+        ) from exc
+    except urllib_error.URLError as exc:
+        raise RuntimeError(f"Unable to reach Ollama host '{runtime.ollama_host}': {exc}") from exc
+
+    stdout_text = "".join(collected_stdout).strip()
+    if not stdout_text:
+        logger.emit(
+            level="ERROR",
+            event_type="empty_output",
+            message="Model returned empty stdout via Ollama HTTP API",
+            chunk=chunk_name,
+            pass_name=pass_name,
+            step=state.current_step,
+            model=model,
+            attempt=attempt,
+            extra={"duration_seconds": time.time() - started_at},
+        )
+        raise RuntimeError(f"Empty output from model '{model}'")
+
+    logger.emit(
+        level="INFO",
+        event_type="model_completed",
+        message="Model completed successfully via Ollama HTTP API",
+        chunk=chunk_name,
+        pass_name=pass_name,
+        step="model complete",
+        model=model,
+        attempt=attempt,
+        extra={
+            "estimated_tps": state.estimated_tps,
+            "reported_tps": state.real_tps,
+            "stdout_chars": len(stdout_text),
+            "stderr_chars": 0,
+            "duration_seconds": time.time() - started_at,
+            "idle_timeout_s": idle_timeout,
+            "ollama_host": runtime.ollama_host,
         },
     )
 
@@ -1171,8 +1389,10 @@ def run_plain(args: argparse.Namespace, runtime: RuntimeConfig, output_dir: Path
     state = TUIState()
     try:
         chunk_files = collect_inputs(args)
-        state.chunks_total = len(chunk_files)
         output_dir.mkdir(parents=True, exist_ok=True)
+        completed_chunks, pending_chunks = split_completed_chunks(chunk_files, output_dir)
+        state.chunks_total = len(chunk_files)
+        state.chunks_completed = len(completed_chunks)
 
         logger.emit(
             level="INFO",
@@ -1180,6 +1400,8 @@ def run_plain(args: argparse.Namespace, runtime: RuntimeConfig, output_dir: Path
             message="Starting pipeline run",
             extra={
                 "chunks_total": state.chunks_total,
+                "chunks_already_completed": len(completed_chunks),
+                "chunks_pending": len(pending_chunks),
                 "output_dir": str(output_dir),
                 "retries": runtime.retries,
                 "on_failure": runtime.on_failure,
@@ -1196,7 +1418,15 @@ def run_plain(args: argparse.Namespace, runtime: RuntimeConfig, output_dir: Path
             },
         )
 
-        for chunk_path in chunk_files:
+        if completed_chunks:
+            logger.emit(
+                level="INFO",
+                event_type="run_resume",
+                message="Resuming pipeline from first unfinished chunk",
+                extra={"completed_chunks": [chunk.name for chunk in completed_chunks]},
+            )
+
+        for chunk_path in pending_chunks:
             try:
                 process_chunk(
                     chunk_path=chunk_path,
@@ -1245,6 +1475,100 @@ def run_plain(args: argparse.Namespace, runtime: RuntimeConfig, output_dir: Path
         return 1
 
 
+def run_gateway_plain(args: argparse.Namespace, output_dir: Path, logger: JsonlLogger) -> int:
+    try:
+        payload = build_gateway_orchestrate_payload(args, output_dir)
+        created = gateway_request(args.gateway_url, "POST", "/v1/jobs", payload)
+        job_id = created["job_id"]
+        logger.emit(
+            level="INFO",
+            event_type="gateway_job_created",
+            message="Created gateway orchestrate job",
+            extra={"job_id": job_id, "gateway_url": args.gateway_url},
+        )
+        completed = gateway_request(args.gateway_url, "POST", f"/v1/jobs/{job_id}/run")
+        if completed.get("status") != "succeeded":
+            raise RuntimeError(completed.get("status", "Gateway job failed"))
+        print(f"[DONE] Gateway job completed: {job_id}")
+        return 0
+    except Exception as exc:
+        logger.emit(level="ERROR", event_type="gateway_run_abort", message=str(exc))
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 1
+
+
+def run_gateway_tui(args: argparse.Namespace, output_dir: Path, logger: JsonlLogger) -> int:
+    state = TUIState(current_pass="gateway", pass_status="submitting", current_step="creating gateway job")
+    run_result: Dict[str, Any] = {}
+    run_error: List[Exception] = []
+
+    try:
+        payload = build_gateway_orchestrate_payload(args, output_dir)
+        created = gateway_request(args.gateway_url, "POST", "/v1/jobs", payload)
+        job_id = created["job_id"]
+        state.gateway_job_id = job_id
+        state.log(f"Created gateway job: {job_id}")
+        logger.emit(
+            level="INFO",
+            event_type="gateway_job_created",
+            message="Created gateway orchestrate job",
+            extra={"job_id": job_id, "gateway_url": args.gateway_url},
+        )
+    except Exception as exc:
+        logger.emit(level="ERROR", event_type="gateway_job_create_failed", message=str(exc))
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 1
+
+    def _runner() -> None:
+        try:
+            run_result["payload"] = gateway_request(args.gateway_url, "POST", f"/v1/jobs/{state.gateway_job_id}/run")
+        except Exception as exc:  # pragma: no cover
+            run_error.append(exc)
+
+    thread = threading.Thread(target=_runner, daemon=True)
+    thread.start()
+
+    with Live(render_tui(state), refresh_per_second=8, screen=True) as live:
+        while thread.is_alive():
+            state.pass_status = "running"
+            state.current_step = "waiting for gateway job"
+            try:
+                fetched = gateway_request(args.gateway_url, "GET", f"/v1/jobs/{state.gateway_job_id}")
+                state.current_chunk = fetched.get("book_slug") or "-"
+                state.log(f"Gateway job status: {fetched.get('status', 'unknown')}")
+            except Exception:
+                state.log("Gateway polling failed; keeping last known state")
+            live.update(render_tui(state), refresh=True)
+            time.sleep(0.5)
+        thread.join()
+        live.update(render_tui(state), refresh=True)
+
+    if run_error:
+        exc = run_error[0]
+        logger.emit(level="ERROR", event_type="gateway_run_abort", message=str(exc))
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        return 1
+
+    completed = run_result.get("payload", {})
+    if completed.get("status") != "succeeded":
+        message = completed.get("status", "Gateway job failed")
+        logger.emit(level="ERROR", event_type="gateway_run_failed", message=message)
+        print(f"[ERROR] {message}", file=sys.stderr)
+        return 1
+
+    state.pass_status = "done"
+    state.current_step = "gateway job complete"
+    state.log(f"Gateway job completed: {state.gateway_job_id}")
+    logger.emit(
+        level="INFO",
+        event_type="gateway_run_complete",
+        message="Gateway orchestrate job completed",
+        extra={"job_id": state.gateway_job_id},
+    )
+    print(f"[DONE] Gateway job completed: {state.gateway_job_id}")
+    return 0
+
+
 def main() -> int:
     args = parse_args()
 
@@ -1260,6 +1584,11 @@ def main() -> int:
     log_path = resolve_log_path(args, output_dir, runtime)
     logger = JsonlLogger(log_path, run_id)
 
+    if args.gateway_url:
+        if args.no_tui:
+            return run_gateway_plain(args, output_dir, logger)
+        return run_gateway_tui(args, output_dir, logger)
+
     if args.no_tui:
         return run_plain(args, runtime, output_dir, logger)
 
@@ -1267,8 +1596,10 @@ def main() -> int:
 
     try:
         chunk_files = collect_inputs(args)
-        state.chunks_total = len(chunk_files)
         output_dir.mkdir(parents=True, exist_ok=True)
+        completed_chunks, pending_chunks = split_completed_chunks(chunk_files, output_dir)
+        state.chunks_total = len(chunk_files)
+        state.chunks_completed = len(completed_chunks)
     except Exception as exc:
         logger.emit(
             level="ERROR",
@@ -1286,6 +1617,8 @@ def main() -> int:
         message="Starting pipeline run",
         extra={
             "chunks_total": state.chunks_total,
+            "chunks_already_completed": len(completed_chunks),
+            "chunks_pending": len(pending_chunks),
             "output_dir": str(output_dir),
             "config_path": str(args.config) if args.config else None,
             "retries": runtime.retries,
@@ -1304,9 +1637,18 @@ def main() -> int:
         },
     )
 
+    if completed_chunks:
+        state.log(f"Resuming run. Skipping {len(completed_chunks)} completed chunk(s).")
+        logger.emit(
+            level="INFO",
+            event_type="run_resume",
+            message="Resuming pipeline from first unfinished chunk",
+            extra={"completed_chunks": [chunk.name for chunk in completed_chunks]},
+        )
+
     with Live(render_tui(state), refresh_per_second=8, screen=True) as live:
         try:
-            for chunk_path in chunk_files:
+            for chunk_path in pending_chunks:
                 try:
                     process_chunk(
                         chunk_path=chunk_path,

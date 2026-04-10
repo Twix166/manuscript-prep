@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import subprocess
 import sys
+import time
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 from manuscriptprep.api_models import ArtifactRef, JobRecord, utc_now_iso
 from manuscriptprep.config import load_config
@@ -16,11 +20,34 @@ from manuscriptprep.paths import build_paths
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+@dataclass
+class CommandExecution:
+    exit_code: int
+    stdout_path: Path
+    stderr_path: Path
+    command_path: Path
+    stdout: str
+    stderr: str
+
+
+class JobCancelledError(RuntimeError):
+    pass
+
+
 class ExecutionAdapter:
-    def __init__(self, repo_root: Path | None = None, python_bin: str | None = None, env: dict[str, str] | None = None) -> None:
+    def __init__(
+        self,
+        repo_root: Path | None = None,
+        python_bin: str | None = None,
+        env: dict[str, str] | None = None,
+        runtime_root: Path | None = None,
+        cancel_check: Callable[[str], bool] | None = None,
+    ) -> None:
         self.repo_root = repo_root or REPO_ROOT
         self.python_bin = python_bin or sys.executable
         self.env = env or os.environ.copy()
+        self.runtime_root = (runtime_root or (self.repo_root / "work" / "gateway_jobs" / "runtime")).expanduser()
+        self.cancel_check = cancel_check or (lambda _job_id: False)
 
     def run_job(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         if job.pipeline == "manuscript-prep":
@@ -37,17 +64,108 @@ class ExecutionAdapter:
             return self._run_report(job)
         raise ValueError(f"Execution adapter does not yet support pipeline: {job.pipeline}")
 
-    def _run_command(self, cmd: list[str], error_message: str) -> None:
-        result = subprocess.run(
-            cmd,
-            cwd=str(self.repo_root),
-            env=self.env,
-            capture_output=True,
-            text=True,
-            check=False,
+    def _stage_run(self, job: JobRecord, stage_name: str):
+        for stage in job.stage_runs:
+            if stage.name == stage_name:
+                return stage
+        raise ValueError(f"Unknown stage on job: {stage_name}")
+
+    def _stage_runtime_dir(self, job: JobRecord, stage_name: str) -> Path:
+        path = self.runtime_root / job.job_id / stage_name
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def _record_stage_execution(
+        self,
+        job: JobRecord,
+        stage_name: str,
+        cmd: list[str],
+        result: CommandExecution,
+    ) -> list[ArtifactRef]:
+        stage = self._stage_run(job, stage_name)
+        stage.command = list(cmd)
+        stage.exit_code = result.exit_code
+        stage.stdout_path = str(result.stdout_path)
+        stage.stderr_path = str(result.stderr_path)
+
+        return [
+            ArtifactRef(
+                name=f"{stage_name}_command",
+                path=str(result.command_path),
+                kind="json",
+                stage=stage_name,
+            ),
+            ArtifactRef(
+                name=f"{stage_name}_stdout",
+                path=str(result.stdout_path),
+                kind="text",
+                stage=stage_name,
+                metadata={"bytes": result.stdout_path.stat().st_size},
+            ),
+            ArtifactRef(
+                name=f"{stage_name}_stderr",
+                path=str(result.stderr_path),
+                kind="text",
+                stage=stage_name,
+                metadata={"bytes": result.stderr_path.stat().st_size},
+            ),
+        ]
+
+    def _run_command(self, job: JobRecord, stage_name: str, cmd: list[str], error_message: str) -> CommandExecution:
+        runtime_dir = self._stage_runtime_dir(job, stage_name)
+        stdout_path = runtime_dir / "stdout.txt"
+        stderr_path = runtime_dir / "stderr.txt"
+        command_path = runtime_dir / "command.json"
+        with stdout_path.open("w", encoding="utf-8") as stdout_handle, stderr_path.open("w", encoding="utf-8") as stderr_handle:
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(self.repo_root),
+                env=self.env,
+                stdout=stdout_handle,
+                stderr=stderr_handle,
+                text=True,
+            )
+            cancelled = False
+            while proc.poll() is None:
+                if self.cancel_check(job.job_id):
+                    cancelled = True
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                        proc.wait()
+                    break
+                time.sleep(0.5)
+            return_code = proc.wait()
+
+        stdout_text = stdout_path.read_text(encoding="utf-8")
+        stderr_text = stderr_path.read_text(encoding="utf-8")
+        command_path.write_text(
+            json.dumps(
+                {
+                    "stage": stage_name,
+                    "cwd": str(self.repo_root),
+                    "exit_code": return_code,
+                    "command": cmd,
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
         )
-        if result.returncode != 0:
-            raise RuntimeError(result.stderr.strip() or result.stdout.strip() or error_message)
+        if cancelled:
+            raise JobCancelledError(job.options.get("_cancel_reason") or "Cancelled by user")
+        if return_code != 0:
+            raise RuntimeError(stderr_text.strip() or stdout_text.strip() or error_message)
+        return CommandExecution(
+            exit_code=return_code,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+            command_path=command_path,
+            stdout=stdout_text,
+            stderr=stderr_text,
+        )
 
     def _mark_stage_running(self, job: JobRecord, stage_name: str) -> None:
         now = utc_now_iso()
@@ -82,6 +200,18 @@ class ExecutionAdapter:
         for stage in updated.stage_runs:
             if stage.name == stage_name:
                 stage.status = "failed"
+                stage.finished_at = updated.updated_at
+                stage.error = message
+                break
+        return updated
+
+    def _mark_stage_cancelled(self, job: JobRecord, stage_name: str, message: str) -> JobRecord:
+        updated = job
+        updated.status = "cancelled"
+        updated.updated_at = utc_now_iso()
+        for stage in updated.stage_runs:
+            if stage.name == stage_name:
+                stage.status = "cancelled"
                 stage.finished_at = updated.updated_at
                 stage.error = message
                 break
@@ -135,6 +265,9 @@ class ExecutionAdapter:
             raise ValueError("Ingest jobs require title")
 
         workdir = job.options.get("workdir")
+        if not workdir and job.config_path:
+            cfg = load_config(job.config_path)
+            workdir = str(build_paths(cfg).workspace_root)
         if not workdir:
             raise ValueError("Ingest jobs require options.workdir")
 
@@ -148,6 +281,8 @@ class ExecutionAdapter:
             "--title",
             str(job.title),
         ]
+        if job.book_slug:
+            cmd.extend(["--book-slug", str(job.book_slug)])
         if job.config_path:
             cmd.extend(["--config", str(job.config_path)])
         if job.options.get("chunk_words") is not None:
@@ -159,16 +294,19 @@ class ExecutionAdapter:
         if job.options.get("force_ocr"):
             cmd.append("--force-ocr")
 
-        self._run_command(cmd, "Ingest execution failed")
+        try:
+            result = self._run_command(job, "ingest", cmd, "Ingest execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "ingest", str(exc)), []
 
-        book_slug = job.book_slug or ""
+        book_slug = job.book_slug or self._slugify(job.title or "")
         workdir_path = Path(str(workdir))
         manifests_dir = workdir_path / "manifests" / book_slug
         chunk_dir = workdir_path / "chunks" / book_slug
         cleaned_path = workdir_path / "cleaned" / book_slug / "clean.txt"
         raw_path = workdir_path / "extracted" / book_slug / "raw.txt"
 
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "ingest", cmd, result) + [
             ArtifactRef(name="raw_text", path=str(raw_path), kind="text", stage="ingest"),
             ArtifactRef(name="clean_text", path=str(cleaned_path), kind="text", stage="ingest"),
             ArtifactRef(name="chunk_dir", path=str(chunk_dir), kind="directory", stage="ingest"),
@@ -181,6 +319,11 @@ class ExecutionAdapter:
     def _run_orchestrate(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         input_dir = job.options.get("input_dir")
         output_dir = job.options.get("output_dir")
+        if (not input_dir or not output_dir) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.chunks_root / str(job.book_slug))
+            output_dir = output_dir or str(paths.output_root / str(job.book_slug))
         if not input_dir or not output_dir:
             raise ValueError("Orchestrate jobs require options.input_dir and options.output_dir")
 
@@ -198,10 +341,13 @@ class ExecutionAdapter:
         if job.book_slug:
             cmd.extend(["--book-slug", str(job.book_slug)])
 
-        self._run_command(cmd, "Orchestrator execution failed")
+        try:
+            result = self._run_command(job, "orchestrate", cmd, "Orchestrator execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "orchestrate", str(exc)), []
 
         out_root = Path(str(output_dir))
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "orchestrate", cmd, result) + [
             ArtifactRef(name="output_dir", path=str(out_root), kind="directory", stage="orchestrate"),
             ArtifactRef(name="orchestrator_log", path=str(out_root / "orchestrator.log.jsonl"), kind="jsonl", stage="orchestrate"),
         ]
@@ -210,6 +356,13 @@ class ExecutionAdapter:
     def _run_merge(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         input_dir = job.options.get("input_dir")
         output_dir = job.options.get("output_dir")
+        chunk_manifest = job.options.get("chunk_manifest")
+        if (not input_dir or not output_dir or not chunk_manifest) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.output_root / str(job.book_slug))
+            output_dir = output_dir or str(paths.merged_root / str(job.book_slug))
+            chunk_manifest = chunk_manifest or str(paths.workspace_root / "manifests" / str(job.book_slug) / "chunk_manifest.json")
         if not input_dir or not output_dir:
             raise ValueError("Merge jobs require options.input_dir and options.output_dir")
 
@@ -225,13 +378,16 @@ class ExecutionAdapter:
             cmd.extend(["--config", str(job.config_path)])
         if job.book_slug:
             cmd.extend(["--book-slug", str(job.book_slug)])
-        if job.options.get("chunk_manifest"):
-            cmd.extend(["--chunk-manifest", str(job.options["chunk_manifest"])])
+        if chunk_manifest:
+            cmd.extend(["--chunk-manifest", str(chunk_manifest)])
 
-        self._run_command(cmd, "Merger execution failed")
+        try:
+            result = self._run_command(job, "merge", cmd, "Merger execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "merge", str(exc)), []
 
         merged_root = Path(str(output_dir))
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "merge", cmd, result) + [
             ArtifactRef(name="merged_dir", path=str(merged_root), kind="directory", stage="merge"),
             ArtifactRef(name="book_merged", path=str(merged_root / "book_merged.json"), kind="json", stage="merge"),
             ArtifactRef(name="merge_report", path=str(merged_root / "merge_report.json"), kind="json", stage="merge"),
@@ -243,6 +399,12 @@ class ExecutionAdapter:
         input_dir = job.options.get("input_dir")
         output_dir = job.options.get("output_dir")
         model = job.options.get("model") or job.options.get("resolver_model") or job.options.get("model_name")
+        if (not input_dir or not output_dir or not model) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.merged_root / str(job.book_slug))
+            output_dir = output_dir or str(paths.resolved_root / str(job.book_slug))
+            model = model or str(cfg.require("models", "resolver"))
         if not input_dir or not output_dir:
             raise ValueError("Resolve jobs require options.input_dir and options.output_dir")
 
@@ -261,10 +423,13 @@ class ExecutionAdapter:
         if model:
             cmd.extend(["--model", str(model)])
 
-        self._run_command(cmd, "Resolver execution failed")
+        try:
+            result = self._run_command(job, "resolve", cmd, "Resolver execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "resolve", str(exc)), []
 
         resolved_root = Path(str(output_dir))
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "resolve", cmd, result) + [
             ArtifactRef(name="resolved_dir", path=str(resolved_root), kind="directory", stage="resolve"),
             ArtifactRef(name="book_resolved", path=str(resolved_root / "book_resolved.json"), kind="json", stage="resolve"),
             ArtifactRef(name="resolution_map", path=str(resolved_root / "resolution_map.json"), kind="json", stage="resolve"),
@@ -275,6 +440,11 @@ class ExecutionAdapter:
     def _run_report(self, job: JobRecord) -> tuple[JobRecord, list[ArtifactRef]]:
         input_dir = job.options.get("input_dir")
         output_path = job.options.get("output_path") or job.options.get("output")
+        if (not input_dir or not output_path) and job.config_path and job.book_slug:
+            cfg = load_config(job.config_path)
+            paths = build_paths(cfg)
+            input_dir = input_dir or str(paths.merged_root / str(job.book_slug))
+            output_path = output_path or str(paths.reports_root / f"{job.book_slug}_report.pdf")
         if not input_dir or not output_path:
             raise ValueError("Report jobs require options.input_dir and options.output_path")
 
@@ -288,13 +458,20 @@ class ExecutionAdapter:
         ]
         if job.title:
             cmd.extend(["--title", str(job.title)])
+        if job.config_path:
+            cmd.extend(["--config", str(job.config_path)])
+        if job.book_slug:
+            cmd.extend(["--book-slug", str(job.book_slug)])
         if job.options.get("subtitle"):
             cmd.extend(["--subtitle", str(job.options["subtitle"])])
 
-        self._run_command(cmd, "Report execution failed")
+        try:
+            result = self._run_command(job, "report", cmd, "Report execution failed")
+        except JobCancelledError as exc:
+            return self._mark_stage_cancelled(job, "report", str(exc)), []
 
         report_path = Path(str(output_path))
-        artifacts = [
+        artifacts = self._record_stage_execution(job, "report", cmd, result) + [
             ArtifactRef(name="report_pdf", path=str(report_path), kind="pdf", stage="report"),
         ]
         return self._mark_stage_succeeded(job, "report"), artifacts
@@ -326,6 +503,9 @@ class ExecutionAdapter:
             ingest_job, artifacts = self._run_ingest(ingest_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[0] = ingest_job.stage_runs[0]
+            if ingest_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "ingest", str(exc))
             raise
@@ -348,6 +528,9 @@ class ExecutionAdapter:
             orch_job, artifacts = self._run_orchestrate(orch_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[1] = orch_job.stage_runs[0]
+            if orch_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "orchestrate", str(exc))
             raise
@@ -371,6 +554,9 @@ class ExecutionAdapter:
             merge_job, artifacts = self._run_merge(merge_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[2] = merge_job.stage_runs[0]
+            if merge_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "merge", str(exc))
             raise
@@ -394,6 +580,9 @@ class ExecutionAdapter:
             resolve_job, artifacts = self._run_resolve(resolve_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[3] = resolve_job.stage_runs[0]
+            if resolve_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "resolve", str(exc))
             raise
@@ -416,6 +605,9 @@ class ExecutionAdapter:
             report_job, artifacts = self._run_report(report_job)
             all_artifacts.extend(artifacts)
             job.stage_runs[4] = report_job.stage_runs[0]
+            if report_job.status == "cancelled":
+                job.status = "cancelled"
+                return job, all_artifacts
         except Exception as exc:
             self._mark_stage_failed(job, "report", str(exc))
             raise

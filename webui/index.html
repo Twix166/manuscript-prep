@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ManuscriptPrep Pipeline Studio</title>
+    <link rel="stylesheet" href="/ui/styles.css">
+  </head>
+  <body>
+    <section id="auth-screen" class="auth-screen">
+      <div class="auth-hero">
+        <p class="eyebrow">ManuscriptPrep</p>
+        <h1>Build your manuscript pipeline from one workspace.</h1>
+        <p class="lede">Upload drafts, manage multiple manuscripts, and run each stage from ingest through reporting with live status and per-manuscript history.</p>
+      </div>
+      <form id="setup-form" class="auth-card stack hidden">
+        <div>
+          <p class="eyebrow">First Run Setup</p>
+          <h2>Set the admin password</h2>
+        </div>
+        <p class="muted">Complete this once to activate the admin account. After that, the same login screen is used for both admin and normal users.</p>
+        <label for="setup-username">Admin username</label>
+        <input id="setup-username" type="text" readonly>
+        <label for="setup-password">Admin password</label>
+        <input id="setup-password" autocomplete="new-password" type="password" placeholder="At least 8 characters">
+        <button type="submit">Complete Setup</button>
+        <p id="setup-status" class="muted">The admin account token is preserved behind the scenes for service use.</p>
+      </form>
+      <div class="auth-columns">
+        <form id="login-form" class="auth-card stack">
+          <div>
+            <p class="eyebrow">Sign In</p>
+            <h2>Welcome back</h2>
+          </div>
+          <label for="login-username">Username</label>
+          <input id="login-username" autocomplete="username" type="text" placeholder="alex">
+          <label for="login-password">Password</label>
+          <input id="login-password" autocomplete="current-password" type="password" placeholder="Your password">
+          <button type="submit">Log In</button>
+          <p id="login-status" class="muted">Use your ManuscriptPrep account to open the workspace.</p>
+        </form>
+
+        <form id="register-form" class="auth-card stack">
+          <div>
+            <p class="eyebrow">Create Account</p>
+            <h2>Start a new workspace</h2>
+          </div>
+          <label for="register-username">Username</label>
+          <input id="register-username" autocomplete="username" type="text" placeholder="alex">
+          <label for="register-password">Password</label>
+          <input id="register-password" autocomplete="new-password" type="password" placeholder="At least 8 characters">
+          <button type="submit">Register</button>
+          <p id="register-status" class="muted">New accounts sign in automatically after registration.</p>
+        </form>
+      </div>
+    </section>
+
+    <main id="app-shell" class="app-shell hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ManuscriptPrep</p>
+          <h1>Pipeline Studio</h1>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" id="refresh-workspace" class="ghost-button">Refresh Workspace</button>
+          <details class="profile-menu">
+            <summary id="profile-summary">Profile</summary>
+            <div class="profile-card">
+              <div id="profile-detail" class="summary-block">Profile details load after sign-in.</div>
+              <button type="button" id="toggle-admin-mode" class="ghost-button hidden">Open Admin Interface</button>
+              <button type="button" id="logout-button" class="secondary-button">Log Out</button>
+            </div>
+          </details>
+        </div>
+      </header>
+
+      <nav class="workspace-nav" aria-label="Workspace pages">
+        <button type="button" class="ghost-button" data-page="manuscripts">Manuscripts</button>
+        <button type="button" class="ghost-button" data-page="pipeline">Pipeline</button>
+        <button type="button" class="ghost-button" data-page="jobs">Jobs</button>
+      </nav>
+
+      <section class="workspace-shell">
+        <section class="workspace-main">
+          <section id="page-manuscripts" class="workspace-page">
+            <section class="workspace-top grid two">
+              <div class="stack">
+                <article class="panel sidebar-panel">
+                  <div class="panel-head">
+                    <h2>Upload Manuscript</h2>
+                  </div>
+                  <form id="upload-form-inline" class="stack">
+                    <label for="manuscript-title">Title</label>
+                    <input id="manuscript-title" type="text" placeholder="Treasure Island">
+                    <label for="manuscript-slug">Slug</label>
+                    <input id="manuscript-slug" type="text" placeholder="Optional; generated from title if blank">
+                    <label for="manuscript-file">Manuscript file</label>
+                    <input id="manuscript-file" type="file" accept=".pdf,.docx,.epub,.odt,.mobi,.azw,.azw3,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/vnd.oasis.opendocument.text,application/x-mobipocket-ebook,text/plain">
+                    <button type="submit">Upload And Register</button>
+                    <p id="upload-status" class="muted">Upload a manuscript in PDF, DOCX, EPUB, ODT, MOBI, AZW, AZW3, or TXT format to create a managed manuscript record.</p>
+                  </form>
+                  <form id="import-archive-form" class="stack">
+                    <label for="manuscript-archive-file">Import archive bundle</label>
+                    <input id="manuscript-archive-file" type="file" accept=".zip,.mprep.zip,application/zip">
+                    <button type="submit" class="secondary-button">Import Archive</button>
+                    <p id="import-status" class="muted">Import a manuscript bundle exported from ManuscriptPrep.</p>
+                  </form>
+                </article>
+
+                <article class="panel sidebar-panel">
+                  <div class="panel-head">
+                    <h2>Your Manuscripts</h2>
+                    <button type="button" data-refresh="manuscripts">Refresh</button>
+                  </div>
+                  <p class="muted">Select a manuscript to inspect its stage history and run the pipeline for that manuscript only.</p>
+                  <ul id="manuscript-list" class="list selectable"></ul>
+                </article>
+              </div>
+
+              <article class="panel manuscript-hero-panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Active Manuscript</h2>
+                    <h3 id="workspace-manuscript-title" class="panel-subtitle">Choose a manuscript</h3>
+                    <p id="workspace-manuscript-subtitle" class="muted">Each manuscript has its own ingest, analysis, merge, resolution, and report history.</p>
+                  </div>
+                  <div class="panel-actions wrap">
+                    <button type="button" id="run-full-pipeline">Run Full Pipeline</button>
+                    <button type="button" id="open-ingest-results" class="secondary-button">Open Ingest Results</button>
+                  </div>
+                </div>
+                <div class="grid two">
+                  <div>
+                    <h3>Manuscript Details</h3>
+                    <div id="manuscript-detail" class="summary-block">Select a manuscript to see pipeline-ready details.</div>
+                  </div>
+                  <div class="stack">
+                    <label for="config-profile-select">Runtime profile</label>
+                    <select id="config-profile-select"></select>
+                    <div id="config-profile-detail" class="summary-block">Select a config profile to inspect models, chunking, and timeouts.</div>
+                  </div>
+                </div>
+              </article>
+            </section>
+
+            <section class="workspace-single">
+              <article class="panel">
+                <div class="panel-head">
+                  <h2>Workspace Status</h2>
+                  <button type="button" data-refresh="system">Refresh</button>
+                </div>
+                <div id="system-status" class="summary-block">Sign in to load workspace status.</div>
+              </article>
+            </section>
+          </section>
+
+          <section id="page-pipeline" class="workspace-page hidden">
+            <section class="workspace-single">
+              <article class="panel pipeline-panel">
+                <div class="panel-head">
+                  <h2>Pipeline Workspace</h2>
+                  <button type="button" data-refresh="pipelines">Refresh</button>
+                </div>
+                <div class="grid two">
+                  <div class="stack">
+                    <label for="pipeline-manuscript-select">Selected manuscript</label>
+                    <select id="pipeline-manuscript-select"></select>
+                  </div>
+                </div>
+                <div id="stage-board" class="stage-board"></div>
+                <p id="stage-action-status" class="muted">Select a manuscript and config profile, then trigger a stage or the full pipeline.</p>
+              </article>
+            </section>
+          </section>
+
+          <section id="page-jobs" class="workspace-page hidden">
+            <section class="workspace-single">
+              <article class="panel">
+                <div class="panel-head">
+                  <h2>Job Timeline</h2>
+                  <button type="button" data-refresh="jobs">Refresh</button>
+                </div>
+                <ul id="job-list" class="list selectable"></ul>
+              </article>
+          </section>
+
+            <article class="panel workspace-bottom">
+              <div class="panel-head">
+                <h2>Selected Job</h2>
+                <div class="panel-actions wrap">
+                  <button type="button" id="cancel-selected-job" class="danger-button">Cancel Job</button>
+                  <button type="button" data-refresh="selected-job">Refresh</button>
+                </div>
+              </div>
+              <div class="panel-actions wrap" id="job-downloads"></div>
+              <div class="grid three">
+                <div id="job-detail" class="summary-block">Choose a job to inspect stage timing, command lines, and errors.</div>
+                <div id="job-progress" class="summary-block">Live chunk progress appears here for categorisation and analysis jobs.</div>
+                <div id="job-artifacts" class="summary-block">Artifact index appears here, including checksums and output paths.</div>
+              </div>
+            </article>
+          </section>
+
+          <section id="admin-console" class="panel hidden">
+            <div class="panel-head">
+              <div>
+                <h2>Admin Interface</h2>
+                <p class="muted">Admin mode exposes platform-level status and control surfaces without changing the default manuscript workspace.</p>
+              </div>
+              <button type="button" data-refresh="system">Refresh Admin Status</button>
+            </div>
+            <div class="grid two">
+              <div id="admin-system-status" class="summary-block">Switch to admin mode from the profile menu to load system-wide status.</div>
+              <div id="admin-interface-note" class="summary-block">Admin mode is intended for platform oversight. Your manuscript workflow remains available above.</div>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="analysis-detail-modal" class="analysis-modal">
+      <div class="analysis-modal-shell">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Categorisation And Analysis</p>
+            <h2 id="analysis-detail-title">Chunk Detail</h2>
+          </div>
+          <button type="button" id="analysis-detail-close" class="secondary-button">Close</button>
+        </div>
+        <div id="analysis-detail-summary" class="summary-block">Chunk summaries will appear here.</div>
+        <div class="analysis-modal-grid">
+          <aside>
+            <h3>Processed Chunks</h3>
+            <ul id="analysis-chunk-list" class="list selectable"></ul>
+          </aside>
+          <section>
+            <h3 id="analysis-chunk-title">Chunk Findings</h3>
+            <div id="analysis-chunk-detail" class="summary-block">Select a processed chunk to inspect structure, dialogue, entities, and dossiers.</div>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="manuscript-picker-modal" class="analysis-modal">
+      <div class="analysis-modal-shell">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Manuscripts</p>
+            <h2>Select A Manuscript</h2>
+          </div>
+          <button type="button" id="manuscript-picker-close" class="secondary-button">Close</button>
+        </div>
+        <div id="manuscript-picker-summary" class="summary-block">Choose a manuscript to make it active for ingest and downstream stages.</div>
+        <ul id="manuscript-picker-list" class="list selectable"></ul>
+      </div>
+    </dialog>
+
+    <script src="/ui/app.js"></script>
+  </body>
+</html>

@@ -19,9 +19,12 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
+from manuscriptprep.paths import build_paths
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -41,6 +44,15 @@ from reportlab.platypus.tableofcontents import TableOfContents
 
 
 PAGE_WIDTH, PAGE_HEIGHT = A4
+
+
+@dataclass
+class ReportRuntimeSettings:
+    input_dir: Path
+    output_path: Path
+    title: Optional[str]
+    subtitle: str
+    config_path: Optional[Path]
 
 
 def read_json(path: Path) -> Dict[str, Any]:
@@ -616,10 +628,48 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
     return story
 
 
+def resolve_report_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPrepConfig]) -> ReportRuntimeSettings:
+    if cfg is None:
+        if args.input_dir is None or args.output is None:
+            raise ConfigError(
+                "Missing required --input-dir or --output. Provide both, or use --config with --book-slug."
+            )
+        return ReportRuntimeSettings(
+            input_dir=args.input_dir.expanduser(),
+            output_path=args.output.expanduser(),
+            title=args.title,
+            subtitle=args.subtitle,
+            config_path=None,
+        )
+
+    paths = build_paths(cfg)
+    input_dir = args.input_dir.expanduser() if args.input_dir is not None else None
+    output_path = args.output.expanduser() if args.output is not None else None
+
+    if input_dir is None or output_path is None:
+        if not args.book_slug:
+            raise ConfigError(
+                "When using --config without explicit --input-dir and --output, provide --book-slug."
+            )
+        slug = args.book_slug
+        input_dir = input_dir or (paths.merged_root / slug)
+        output_path = output_path or (paths.reports_root / f"{slug}_report.pdf")
+
+    return ReportRuntimeSettings(
+        input_dir=input_dir,
+        output_path=output_path,
+        title=args.title,
+        subtitle=args.subtitle,
+        config_path=cfg.path,
+    )
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Create a formatted PDF report from merged ManuscriptPrep outputs.")
-    parser.add_argument("--input-dir", type=Path, required=True, help="Directory containing merged JSON outputs")
-    parser.add_argument("--output", type=Path, required=True, help="Destination PDF path")
+    parser.add_argument("--config", type=Path, default=None, help="Optional YAML config file")
+    parser.add_argument("--book-slug", default=None, help="Book slug used to derive config-based paths")
+    parser.add_argument("--input-dir", type=Path, required=False, help="Directory containing merged JSON outputs")
+    parser.add_argument("--output", type=Path, required=False, help="Destination PDF path")
     parser.add_argument("--title", default=None, help="Override report title")
     parser.add_argument("--subtitle", default="Merged ManuscriptPrep Analysis Report", help="Report subtitle")
     return parser.parse_args()
@@ -627,21 +677,26 @@ def parse_args():
 
 def main():
     args = parse_args()
+    try:
+        cfg = load_config(args.config) if args.config is not None else None
+        settings = resolve_report_settings(args, cfg)
+    except (ConfigError, RuntimeError) as exc:
+        raise SystemExit(str(exc))
 
-    if not args.input_dir.is_dir():
-        raise SystemExit(f"Input directory does not exist: {args.input_dir}")
+    if not settings.input_dir.is_dir():
+        raise SystemExit(f"Input directory does not exist: {settings.input_dir}")
 
     data = {
-        "book_merged": maybe_read_json(args.input_dir / "book_merged.json"),
-        "structure_merged": maybe_read_json(args.input_dir / "structure_merged.json"),
-        "dialogue_merged": maybe_read_json(args.input_dir / "dialogue_merged.json"),
-        "entities_merged": maybe_read_json(args.input_dir / "entities_merged.json"),
-        "dossiers_merged": maybe_read_json(args.input_dir / "dossiers_merged.json"),
-        "conflict_report": maybe_read_json(args.input_dir / "conflict_report.json"),
-        "merge_report": maybe_read_json(args.input_dir / "merge_report.json"),
+        "book_merged": maybe_read_json(settings.input_dir / "book_merged.json"),
+        "structure_merged": maybe_read_json(settings.input_dir / "structure_merged.json"),
+        "dialogue_merged": maybe_read_json(settings.input_dir / "dialogue_merged.json"),
+        "entities_merged": maybe_read_json(settings.input_dir / "entities_merged.json"),
+        "dossiers_merged": maybe_read_json(settings.input_dir / "dossiers_merged.json"),
+        "conflict_report": maybe_read_json(settings.input_dir / "conflict_report.json"),
+        "merge_report": maybe_read_json(settings.input_dir / "merge_report.json"),
     }
 
-    book_title = args.title
+    book_title = settings.title
     if not book_title:
         book_title = (
             (data.get("book_merged") or {}).get("book_title")
@@ -649,10 +704,10 @@ def main():
             or "ManuscriptPrep Book Report"
         )
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
+    settings.output_path.parent.mkdir(parents=True, exist_ok=True)
 
     doc = ReportDocTemplate(
-        str(args.output),
+        str(settings.output_path),
         pagesize=A4,
         leftMargin=18 * mm,
         rightMargin=18 * mm,
@@ -662,10 +717,10 @@ def main():
         author="OpenAI / ManuscriptPrep",
     )
 
-    story = build_story(data, book_title, args.subtitle)
+    story = build_story(data, book_title, settings.subtitle)
     doc.build(story)
 
-    print(f"Wrote PDF report to {args.output}")
+    print(f"Wrote PDF report to {settings.output_path}")
 
 
 if __name__ == "__main__":

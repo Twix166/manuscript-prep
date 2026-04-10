@@ -18,6 +18,11 @@ Status notes:
 - `manuscriptprep_orchestrator_tui.py` is a legacy implementation kept for reference.
 - `scripts/manuscriptprep_orchestrator_tui_configured.py` is a scaffold for config refactoring, not the production runner.
 
+Gateway-backed mode:
+- the canonical orchestrator also supports `--gateway-url`
+- in gateway mode it submits an `orchestrate` job to `manuscriptprep_gateway_api.py`
+- local direct execution remains the default when `--gateway-url` is not supplied
+
 ## Responsibilities
 
 - run structure, dialogue, entities, and dossiers

@@ -25,6 +25,7 @@ The currently supported pipeline entry points are:
 - `python manuscriptprep_resolver.py`
 - `python manuscriptprep_pdf_report.py`
 - `python manuscriptprep_gateway_api.py`
+- `python manuscriptprep_worker.py`
 
 The canonical orchestrator is:
 
@@ -34,7 +35,86 @@ Notes:
 
 - `manuscriptprep_orchestrator_tui.py` is a legacy orchestrator kept for reference and comparison.
 - `scripts/manuscriptprep_orchestrator_tui_configured.py` is a config wiring scaffold, not the supported production runner.
-- `manuscriptprep_gateway_api.py` is the current API-oriented microservices slice. It can create and run stage jobs against the existing local CLI implementations through a persistent local job store.
+- `manuscriptprep_gateway_api.py` is the API control plane. It creates jobs, requeues jobs, and exposes persisted job artifacts and status through either a file-backed store or PostgreSQL.
+- `manuscriptprep_worker.py` is the execution worker. It claims queued jobs and runs them outside the gateway process.
+- `manuscriptprep_orchestrator_tui_refactored.py` can now also run in gateway-client mode with `--gateway-url` while preserving the existing direct local orchestration mode.
+
+Operational endpoints:
+
+- `GET /health`
+- `GET /ready`
+- `GET /v1/system/status`
+
+Authentication:
+
+- `GET /health` and `GET /ready` stay unauthenticated
+- `/v1/*` routes can require bearer-token auth with `Authorization: Bearer <token>` or `X-API-Token`
+- the gateway now also exposes user-facing auth endpoints:
+  - `POST /v1/auth/register`
+  - `POST /v1/auth/login`
+  - `GET /v1/auth/me`
+- the gateway also exposes first-run auth bootstrap endpoints:
+  - `GET /v1/auth/setup-state`
+  - `POST /v1/auth/bootstrap-admin`
+- the compose stack still boots a default admin token for development via `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN`
+
+Managed records:
+
+- `POST /v1/manuscripts` and `GET /v1/manuscripts`
+- `POST /v1/config-profiles` and `GET /v1/config-profiles`
+- jobs can now reference `manuscript_id` and `config_profile_id` instead of repeating source/config paths on every request
+
+Artifact management:
+
+- `GET /v1/jobs/{job_id}/artifacts` returns the persisted artifact index for a job
+- artifacts produced by workers are now enriched with `sha256`, `bytes`, and `storage_backend` metadata
+
+Web UI:
+
+- `GET /ui` now serves a user-facing pipeline studio with a login/register landing page
+- on first run, the UI shows an out-of-box setup step that asks you to set the admin password before normal user registration is enabled
+- authenticated users land in a manuscript-first workspace with profile controls in the top-right header
+- admin users still land in the normal user workspace first, and can open an admin interface from the profile menu when they need platform-level visibility
+- the workspace now supports manuscript upload, managed manuscript registration, config-profile selection, stage-by-stage triggering, full-pipeline runs, and live job/artifact status
+- the workspace is now split into three user-facing pages:
+  - `Manuscripts` for `Your Manuscripts`, the active manuscript overview, runtime profile, and `Workspace Status`
+  - `Pipeline` for the stage workflow panels
+  - `Jobs` for `Job Timeline` and `Selected Job`
+- the `Your Manuscripts` list now shows a document-type pill for each manuscript, and the `Pipeline` page has its own manuscript selector so users can switch context without leaving the workflow view
+- the `Upload Manuscript` panel now lives on the `Manuscripts` page above `Your Manuscripts`, so new users can start from the manuscript workspace while advanced users can jump straight to the pipeline page
+- the pipeline stages are now numbered `1-5`, since upload is handled on the `Manuscripts` page rather than inside the pipeline stage flow
+- the pipeline workspace is intentionally simplified so the stage cards are the only stage-summary surface; there is no separate description-card layer above them
+- the pipeline workflow now behaves like an accordion, and manual expand/collapse choices are preserved across background refreshes instead of snapping back
+- the main workspace layout is now arranged as:
+  - top row: `Your Manuscripts` beside the selected manuscript overview
+  - middle row: `Pipeline Workspace` in a wider left column, with `Workspace Status` and `Job Timeline` in the right rail
+  - bottom row: a full-width `Selected Job` panel
+- manuscript save/remove controls now live inline in the `Your Manuscripts` list, with save disabled until a title or slug is changed and remove protected by a confirmation prompt
+- manuscript actions now include `Archive` export/import support plus two delete modes: record-only removal and full manuscript-data deletion with stronger confirmation
+- the workflow steps are now explicitly numbered `1-5` so progress through the pipeline is easier to scan
+- the main dashboard panels now summarize config, manuscript, system, job, and artifact state in human-readable text instead of raw JSON dumps
+- manuscripts now show latest ingest status and ingest completion time, and can be renamed or removed from the UI
+- the layout is now organized around multiple managed manuscripts, with stage controls and job history scoped to the selected manuscript
+- successful ingest runs now expose a dedicated manuscript-scoped results page for classification, extraction metadata, the full raw text, the full cleaned text, and the full chunk list, preloaded from the current UI session for reliable display
+- the ingest results page now uses a tabbed detail view for classification, chunk summary, extraction metadata, cleaning metadata, chunk index, raw text, and clean text, with compact artifact download buttons above it
+- the selected-job panel now exposes direct downloads for later-stage artifacts such as orchestrator logs, merged/resolved JSON, and the final report PDF
+- running categorisation and analysis jobs now expose live chunk progress in the UI, including current chunk, pass, model, step, retry/timeout state, and recent progress events
+- the categorisation and analysis stage card now also shows live throughput in `tok/s` when the orchestrator reports it
+- stage cards now expose a single stateful `Run`/`Pause` primary control, plus `Stop` and `Detail`, so the active action stays compact and easier to scan
+- categorisation and analysis jobs now expose a `Detail` viewer that opens processed chunks in a modal and summarizes structure, dialogue, entities, dossiers, and per-chunk timing without dropping users into raw JSON
+- categorisation and analysis runs now resume after interruption by skipping chunks that already have complete per-chunk outputs on disk and continuing from the next unfinished chunk
+- live chunk numbering now follows the actual chunk id, so `chunk_007` is shown as `Chunk 8/...` rather than being inferred from completed-count math
+- jobs now show their full Job ID in the timeline and selected-job panel, and queued/running jobs can be cancelled from the UI while the worker continuously performs stale-job housekeeping between polls
+- the job timeline now uses colored status pills so queued, running, paused, cancelled, and failed jobs are easier to scan at a glance
+- the `Ingest` stage now shows the currently selected manuscript and includes a `Choose Manuscript` popup so users can switch the active manuscript from inside the workflow
+- manuscript upload now auto-detects and accepts `PDF`, `DOCX`, `EPUB`, `ODT`, `MOBI`, `AZW`, `AZW3`, and `TXT` files during upload
+- ingest now extracts text directly from `TXT`, `DOCX`, `EPUB`, `ODT`, `MOBI`, `AZW`, and `AZW3` sources instead of assuming every manuscript is a PDF
+- MOBI-style ebook ingest now decodes PalmDOC text records directly before converting HTML to text, which avoids the binary/container corruption that the earlier heuristic extractor could leak into raw and clean text
+- stage cards now prefer active work first, then the latest successful run, and otherwise fall back to `not-started`; cancelled and failed jobs still remain visible in the timeline for auditability
+- stage cards show pipeline substeps and the configured model names where applicable
+- the compose stack now mounts a shared runtime volume for uploaded manuscripts and pipeline scratch data so gateway and worker can both access user uploads
+- the compose stack now runs a dedicated `ingest-worker` alongside the general worker so ingest jobs can run in parallel with longer analysis jobs instead of waiting behind them in the same queue lane
+- the compose images now include the PDF/OCR toolchain (`pdftotext`, `pdfinfo`, `ocrmypdf`, `tesseract`, `ghostscript`) needed for ingest
 
 ---
 
@@ -54,6 +134,10 @@ Test suites currently required for code changes:
 - `integration`
 
 Additional testing guidance lives in [docs/development/testing.md](docs/development/testing.md).
+
+Release/UAT guidance lives in [docs/development/uat_checklist.md](docs/development/uat_checklist.md).
+
+Release notes for the current baseline live in [docs/releases/v1.0.0.md](docs/releases/v1.0.0.md).
 
 ---
 
@@ -216,6 +300,52 @@ python --version
 ### 3. Install Python dependencies
 
 Create a virtual environment:
+
+### 4. Optional container stack
+
+The repository now includes a root [compose.yaml](/home/rbalm/Manuscript_Prep_Modelfile/compose.yaml) that starts:
+
+- `postgres`
+- `gateway`
+- `worker`
+
+The compose stack configures the gateway and worker to use PostgreSQL by default:
+
+```bash
+docker compose up --build
+```
+
+The gateway will be available on `http://127.0.0.1:8765` and PostgreSQL will be published on host port `5433` by default. The container-to-container database port remains `5432`.
+
+For the user-facing flow:
+
+1. Open `http://127.0.0.1:8765/ui`
+2. If this is the first run, complete the one-time admin password setup
+3. Log in as admin or register a normal user account
+4. Upload one or more manuscript PDFs
+5. Select a manuscript from the workspace sidebar
+6. Choose a config profile
+7. Trigger the full pipeline or individual stages and watch live status updates
+
+For compose-based analysis, the container-safe config uses `http://host.docker.internal:11434` for Ollama, and the canonical orchestrator now streams generation through that configured host instead of requiring a local `ollama run` subprocess inside the container. On Linux, `compose.yaml` maps that hostname to the Docker host automatically.
+
+If those host ports conflict with your machine, override them when starting the stack:
+
+```bash
+MANUSCRIPTPREP_POSTGRES_PORT=55432 MANUSCRIPTPREP_GATEWAY_PORT=18765 docker compose up --build
+```
+
+The stack will use:
+
+- PostgreSQL database: `manuscriptprep`
+- PostgreSQL schema: `gateway`
+- API auth: enabled for `/v1/*`
+- default self-service user registration through the gateway auth endpoints
+- default development admin token: `dev-admin-token` unless `MANUSCRIPTPREP_BOOTSTRAP_ADMIN_TOKEN` is overridden
+- environment-driven database credentials and admin token, with examples in `.env.example`
+- non-root `manuscriptprep` user inside the gateway and worker containers
+
+For local non-container development, the gateway can still run with the file-backed store by default.
 
 ```bash
 python -m venv .venv
@@ -550,6 +680,14 @@ python manuscriptprep_pdf_report.py \
   --input-dir merged/treasure_island \
   --output reports/treasure_island_report.pdf \
   --title "Treasure Island"
+```
+
+Or, with shared defaults from config:
+
+```bash
+python manuscriptprep_pdf_report.py \
+  --config config/manuscriptprep.example.yaml \
+  --book-slug treasure_island
 ```
 
 ---
@@ -1421,3 +1559,15 @@ Once per-chunk outputs are stable, the next major improvement is a book-level me
 - merge entity references conservatively
 - aggregate dossier facts
 - track recurring characters across excerpts
+
+## License
+
+This project is licensed under the Apache License, Version 2.0. See the `LICENSE` file for details.
+
+## Attribution
+
+Created by Robert Balm.
+
+This project was developed with AI-assisted tooling, including OpenAI Codex and related orchestration/tooling.
+
+If you fork or redistribute this project, please retain existing copyright, license, and notice text.

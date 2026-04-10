@@ -1,4 +1,5 @@
 PyYAML
 rich
 reportlab
-
+psycopg[binary]
+beautifulsoup4
