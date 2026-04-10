@@ -11,6 +11,43 @@ from tests.helpers import run_cli
 pytestmark = pytest.mark.integration
 
 
+def build_test_mobi(text: str) -> bytes:
+    payload = text.encode("utf-8")
+    record_size = 4096
+    text_records = [payload[index:index + record_size] for index in range(0, len(payload), record_size)]
+    text_record_count = len(text_records)
+    record_count = 1 + text_record_count
+
+    record_zero = bytearray(256)
+    record_zero[0:2] = (1).to_bytes(2, "big")
+    record_zero[4:8] = len(payload).to_bytes(4, "big")
+    record_zero[8:10] = text_record_count.to_bytes(2, "big")
+    record_zero[10:12] = record_size.to_bytes(2, "big")
+    record_zero[16:20] = b"MOBI"
+    record_zero[20:24] = (232).to_bytes(4, "big")
+    record_zero[28:32] = (65001).to_bytes(4, "big")
+
+    pdb_header = bytearray(78)
+    pdb_header[0:32] = b"Integration_Test_MOBI".ljust(32, b"\x00")
+    pdb_header[60:64] = b"BOOK"
+    pdb_header[64:68] = b"MOBI"
+    pdb_header[76:78] = record_count.to_bytes(2, "big")
+
+    offsets = []
+    current_offset = 78 + (record_count * 8)
+    records = [bytes(record_zero), *text_records]
+    for index, record in enumerate(records):
+        offsets.append(current_offset)
+        current_offset += len(record)
+
+    record_table = bytearray()
+    for index, offset in enumerate(offsets):
+        record_table.extend(offset.to_bytes(4, "big"))
+        record_table.extend(index.to_bytes(4, "big"))
+
+    return bytes(pdb_header + record_table + b"".join(records))
+
+
 def test_ingest_cli_creates_expected_workspace_artifacts(tmp_path: Path, sample_pdf: Path, test_env: dict[str, str]) -> None:
     workdir = tmp_path / "work"
     result = run_cli(
@@ -98,11 +135,7 @@ def test_ingest_cli_supports_plain_text_sources(tmp_path: Path, test_env: dict[s
 
 def test_ingest_cli_supports_mobi_sources(tmp_path: Path, test_env: dict[str, str]) -> None:
     source = tmp_path / "moby_dick.mobi"
-    source.write_bytes(
-        (b"\x00" * 64)
-        + b"BOOKMOBI"
-        + b"<html><body><h1>Moby-Dick</h1><p>Call me Ishmael. Some years ago...</p></body></html>"
-    )
+    source.write_bytes(build_test_mobi("<html><body><h1>Moby-Dick</h1><p>Call me Ishmael. Some years ago...</p></body></html>"))
     workdir = tmp_path / "work"
 
     result = run_cli(

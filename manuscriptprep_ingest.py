@@ -242,6 +242,98 @@ def _extract_odt_text(source_path: Path) -> str:
     return "\n\n".join(parts)
 
 
+def _decode_mobi_text_encoding(value: int) -> str:
+    if value == 65001:
+        return "utf-8"
+    if value in {1252, 0}:
+        return "cp1252"
+    return "utf-8"
+
+
+def _palm_doc_unpack(data: bytes) -> bytes:
+    out = bytearray()
+    index = 0
+    size = len(data)
+    while index < size:
+        current = data[index]
+        index += 1
+
+        if current == 0 or 0x09 <= current <= 0x7F:
+            out.append(current)
+            continue
+
+        if 0x01 <= current <= 0x08:
+            out.extend(data[index:index + current])
+            index += current
+            continue
+
+        if 0x80 <= current <= 0xBF:
+            if index >= size:
+                break
+            pair = (current << 8) | data[index]
+            index += 1
+            distance = (pair >> 3) & 0x7FF
+            length = (pair & 0x07) + 3
+            if distance <= 0:
+                continue
+            start = len(out) - distance
+            for offset in range(length):
+                source_index = start + offset
+                if source_index < 0 or source_index >= len(out):
+                    break
+                out.append(out[source_index])
+            continue
+
+        out.append(0x20)
+        out.append(current ^ 0x80)
+
+    return bytes(out)
+
+
+def _mobi_record_offsets(raw_bytes: bytes) -> List[int]:
+    if len(raw_bytes) < 78:
+        raise RuntimeError("MOBI file is too short")
+    record_count = int.from_bytes(raw_bytes[76:78], "big")
+    offsets: List[int] = []
+    for record_index in range(record_count):
+        start = 78 + (record_index * 8)
+        end = start + 4
+        if end > len(raw_bytes):
+            raise RuntimeError("MOBI record table is truncated")
+        offsets.append(int.from_bytes(raw_bytes[start:end], "big"))
+    offsets.append(len(raw_bytes))
+    return offsets
+
+
+def _extract_mobi_record_text(raw_bytes: bytes) -> str:
+    record_offsets = _mobi_record_offsets(raw_bytes)
+    record_zero = record_offsets[0]
+    if record_zero + 32 > len(raw_bytes):
+        raise RuntimeError("MOBI header record is truncated")
+
+    compression = int.from_bytes(raw_bytes[record_zero:record_zero + 2], "big")
+    text_length = int.from_bytes(raw_bytes[record_zero + 4:record_zero + 8], "big")
+    text_record_count = int.from_bytes(raw_bytes[record_zero + 8:record_zero + 10], "big")
+    text_encoding = _decode_mobi_text_encoding(int.from_bytes(raw_bytes[record_zero + 28:record_zero + 32], "big"))
+
+    if compression not in {1, 2}:
+        raise RuntimeError(f"Unsupported MOBI compression type: {compression}")
+    if len(record_offsets) <= text_record_count:
+        raise RuntimeError("MOBI text record table is incomplete")
+
+    decoded_records: List[bytes] = []
+    for record_index in range(1, text_record_count + 1):
+        start = record_offsets[record_index]
+        end = record_offsets[record_index + 1]
+        record_bytes = raw_bytes[start:end]
+        decoded_records.append(_palm_doc_unpack(record_bytes) if compression == 2 else record_bytes)
+
+    text = b"".join(decoded_records)[:text_length].decode(text_encoding, errors="ignore")
+    text = text.replace("\x00", "")
+    text = re.sub(r"[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]+", "", text)
+    return text
+
+
 def _extract_ebook_binary_text(source_path: Path) -> str:
     from bs4 import BeautifulSoup
 
@@ -249,27 +341,26 @@ def _extract_ebook_binary_text(source_path: Path) -> str:
     if b"BOOKMOBI" not in raw_bytes[:512] and source_path.suffix.lower() == ".mobi":
         raise RuntimeError("File does not look like a MOBI ebook")
 
+    decoded = _extract_mobi_record_text(raw_bytes)
+    html_segments = re.findall(r"(?is)<html\b.*?</html>|<body\b.*?</body>", decoded)
     candidates: List[str] = []
-    for encoding in ("utf-8", "cp1252", "latin-1"):
-        decoded = raw_bytes.decode(encoding, errors="ignore")
-        html_segments = re.findall(r"(?is)<html\b.*?</html>|<body\b.*?</body>", decoded)
+    if html_segments:
         for segment in html_segments:
             soup = BeautifulSoup(segment, "html.parser")
             text = soup.get_text("\n").strip()
             if len(text) > 20:
                 candidates.append(text)
-        if candidates:
-            break
+    else:
+        soup = BeautifulSoup(decoded, "html.parser")
+        text = soup.get_text("\n").strip()
+        if len(text) > 20:
+            candidates.append(text)
 
     if candidates:
-        return max(candidates, key=len)
-
-    printable = raw_bytes.decode("latin-1", errors="ignore")
-    text_runs = re.findall(r"[A-Za-z0-9 ,;:'\"?!()\-\n]{120,}", printable)
-    cleaned_runs = [re.sub(r"\s+", " ", run).strip() for run in text_runs]
-    cleaned_runs = [run for run in cleaned_runs if len(run.split()) >= 20]
-    if cleaned_runs:
-        return "\n\n".join(cleaned_runs)
+        text = max(candidates, key=len)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        text = re.sub(r"[ \t]+", " ", text)
+        return text.strip() + "\n"
 
     raise RuntimeError("Could not extract readable text from ebook file")
 
