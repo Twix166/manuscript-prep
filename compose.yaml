@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:16
     container_name: manuscriptprep-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${MANUSCRIPTPREP_POSTGRES_DB:-manuscriptprep}
       POSTGRES_USER: ${MANUSCRIPTPREP_POSTGRES_USER:-manuscriptprep}
@@ -20,6 +21,7 @@ services:
     build:
       context: .
     container_name: manuscriptprep-gateway
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -55,6 +57,7 @@ services:
     build:
       context: .
     container_name: manuscriptprep-worker
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -80,6 +83,7 @@ services:
     build:
       context: .
     container_name: manuscriptprep-ingest-worker
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
