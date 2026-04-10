@@ -1558,3 +1558,15 @@ Once per-chunk outputs are stable, the next major improvement is a book-level me
 - merge entity references conservatively
 - aggregate dossier facts
 - track recurring characters across excerpts
+
+## License
+
+This project is licensed under the Apache License, Version 2.0. See the `LICENSE` file for details.
+
+## Attribution
+
+Created by Robert Balm.
+
+This project was developed with AI-assisted tooling, including OpenAI Codex and related orchestration/tooling.
+
+If you fork or redistribute this project, please retain existing copyright, license, and notice text.
