@@ -1,6 +1,5 @@
 const storageKey = "manuscriptprep.apiToken";
 const autoRefreshMs = 3000;
-const ingestResultsCachePrefix = "manuscriptprep.ingestResults.";
 const stageLabels = {
   ingest: "Ingest",
   orchestrate: "Categorisation And Analysis",
@@ -1060,8 +1059,7 @@ async function openLatestIngestResults() {
     return;
   }
   try {
-    const payload = await fetchJson(`/v1/manuscripts/${encodeURIComponent(manuscript.manuscript_id)}/ingest-results`);
-    localStorage.setItem(`${ingestResultsCachePrefix}${manuscript.manuscript_id}`, JSON.stringify(payload));
+    await fetchJson(`/v1/manuscripts/${encodeURIComponent(manuscript.manuscript_id)}/ingest-results`);
     window.open(`/ui/ingest-results.html?manuscript_id=${encodeURIComponent(manuscript.manuscript_id)}`, "_blank", "noopener");
   } catch (error) {
     els.stageActionStatus.textContent = error.message;

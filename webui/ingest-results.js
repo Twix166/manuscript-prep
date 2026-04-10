@@ -1,5 +1,4 @@
 const storageKey = "manuscriptprep.apiToken";
-const ingestResultsCachePrefix = "manuscriptprep.ingestResults.";
 const params = new URLSearchParams(window.location.search);
 const manuscriptId = params.get("manuscript_id");
 const token = localStorage.getItem(storageKey) || "";
@@ -124,23 +123,12 @@ async function load() {
     renderError("Missing manuscript_id in URL.");
     return;
   }
-  const cacheKey = `${ingestResultsCachePrefix}${manuscriptId}`;
-  const cached = localStorage.getItem(cacheKey);
-  if (cached) {
-    try {
-      renderPayload(JSON.parse(cached));
-    } catch {
-      localStorage.removeItem(cacheKey);
-    }
-  }
+  els.status.textContent = "Loading ingest results...";
   try {
     const payload = await fetchJson(`/v1/manuscripts/${encodeURIComponent(manuscriptId)}/ingest-results`);
-    localStorage.setItem(cacheKey, JSON.stringify(payload));
     renderPayload(payload);
   } catch (error) {
-    if (!cached) {
-      renderError(error.message);
-    }
+    renderError(error.message);
   }
 }
 
