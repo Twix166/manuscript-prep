@@ -646,3 +646,122 @@ def test_pdf_report_cli_uses_config_defaults_for_paths(tmp_path: Path, test_env:
     )
     assert result.returncode == 0, result.stderr
     assert (reports_root / f"{book_slug}_report.pdf").exists()
+
+
+def test_pdf_report_cli_prefers_resolved_outputs_when_available(tmp_path: Path, test_env: dict[str, str]) -> None:
+    workspace_root = tmp_path / "workspace"
+    merged_root = workspace_root / "merged"
+    resolved_root = workspace_root / "resolved"
+    reports_root = workspace_root / "reports"
+    book_slug = "treasure_island"
+    merged_dir = merged_root / book_slug
+    resolved_dir = resolved_root / book_slug
+    merged_dir.mkdir(parents=True)
+    resolved_dir.mkdir(parents=True)
+
+    (merged_dir / "book_merged.json").write_text(
+        json.dumps({"book_slug": book_slug, "book_title": "Wrong Source"}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (merged_dir / "merge_report.json").write_text(
+        json.dumps({"chunk_count": 1, "present_counts": {}, "missing": {}}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (resolved_dir / "book_resolved.json").write_text(
+        json.dumps(
+            {
+                "book_slug": book_slug,
+                "book_title": "Treasure Island Resolved",
+                "structure": {"chapters": ["CHAPTER I"], "parts": [], "scene_breaks": []},
+                "dialogue": {
+                    "dominant_pov": "third_person",
+                    "observed_pov_values": ["third_person"],
+                    "dialogue_present_in_chunks": 1,
+                    "internal_thought_present_in_chunks": 0,
+                    "unattributed_dialogue_present_in_chunks": 0,
+                    "explicitly_attributed_speakers": ["Jim"],
+                },
+                "entities": {"characters": ["Jim"], "places": [], "objects": [], "identity_notes": []},
+                "dossiers": {"character_dossiers": []},
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (resolved_dir / "resolution_report.json").write_text(
+        json.dumps(
+            {
+                "model": "manuscriptprep-resolver",
+                "group_count": 1,
+                "merged_group_count": 1,
+                "variant_mapping_count": 2,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(
+        "\n".join(
+            [
+                "project:",
+                "  name: manuscriptprep",
+                "  environment: test",
+                "paths:",
+                f"  repo_root: {tmp_path}",
+                f"  workspace_root: {workspace_root}",
+                f"  input_root: {workspace_root / 'source'}",
+                f"  extracted_root: {workspace_root / 'extracted'}",
+                f"  cleaned_root: {workspace_root / 'cleaned'}",
+                f"  chunks_root: {workspace_root / 'chunks'}",
+                f"  output_root: {workspace_root / 'out'}",
+                f"  merged_root: {merged_root}",
+                f"  resolved_root: {resolved_root}",
+                f"  reports_root: {reports_root}",
+                f"  logs_root: {workspace_root / 'logs'}",
+                "models:",
+                "  structure: manuscriptprep-structure",
+                "  dialogue: manuscriptprep-dialogue",
+                "  entities: manuscriptprep-entities",
+                "  dossiers: manuscriptprep-dossiers",
+                "  resolver: manuscriptprep-resolver",
+                "ollama:",
+                "  host: http://127.0.0.1:11434",
+                "  command: ollama",
+                "timeouts:",
+                "  idle_seconds: 10",
+                "  hard_seconds: 30",
+                "  retries: 0",
+                "  idle_timeout_backoff: 1.5",
+                "  max_idle_timeout_seconds: 30",
+                "  resolver_timeout_seconds: 30",
+                "chunking:",
+                "  target_words: 20",
+                "  min_words: 5",
+                "  max_words: 30",
+                "logging:",
+                "  level: INFO",
+                "  jsonl: true",
+                "  console: false",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_cli(
+        [
+            "manuscriptprep_pdf_report.py",
+            "--config",
+            str(config_path),
+            "--book-slug",
+            book_slug,
+        ],
+        env=test_env,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert (reports_root / f"{book_slug}_report.pdf").exists()
+    assert "Treasure Island Resolved" in result.stdout or result.stderr == ""

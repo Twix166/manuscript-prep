@@ -678,7 +678,7 @@ python manuscriptprep_resolver.py \
 
 ```bash
 python manuscriptprep_pdf_report.py \
-  --input-dir merged/treasure_island \
+  --input-dir resolved/treasure_island \
   --output reports/treasure_island_report.pdf \
   --title "Treasure Island"
 ```
@@ -690,6 +690,11 @@ python manuscriptprep_pdf_report.py \
   --config config/manuscriptprep.example.yaml \
   --book-slug treasure_island
 ```
+
+In config-derived mode, the report generator prefers `resolved/<book_slug>` when
+`book_resolved.json` exists and falls back to `merged/<book_slug>` otherwise.
+The generated PDF now also states whether it was built from merged or resolved
+data.
 
 ---
 

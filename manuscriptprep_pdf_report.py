@@ -53,6 +53,7 @@ class ReportRuntimeSettings:
     title: Optional[str]
     subtitle: str
     config_path: Optional[Path]
+    source_mode: str
 
 
 def read_json(path: Path) -> Dict[str, Any]:
@@ -64,6 +65,52 @@ def maybe_read_json(path: Path) -> Optional[Dict[str, Any]]:
     if path.exists():
         return read_json(path)
     return None
+
+
+def choose_report_input_dir(paths, slug: str) -> tuple[Path, str]:
+    resolved_dir = paths.resolved_root / slug
+    merged_dir = paths.merged_root / slug
+    if (resolved_dir / "book_resolved.json").exists():
+        return resolved_dir, "resolved"
+    return merged_dir, "merged"
+
+
+def load_report_data(input_dir: Path) -> Dict[str, Dict[str, Any]]:
+    source_mode = "resolved" if (input_dir / "book_resolved.json").exists() else "merged"
+    sibling_merged_dir = input_dir.parent.parent / "merged" / input_dir.name if source_mode == "resolved" else input_dir
+
+    if source_mode == "resolved":
+        book = maybe_read_json(input_dir / "book_resolved.json") or {}
+        data = {
+            "book": book,
+            "structure": maybe_read_json(input_dir / "structure_merged.json") or book.get("structure") or {},
+            "dialogue": maybe_read_json(input_dir / "dialogue_merged.json") or book.get("dialogue") or {},
+            "entities": maybe_read_json(input_dir / "entities_merged.json") or book.get("entities") or {},
+            "dossiers": maybe_read_json(input_dir / "dossiers_merged.json") or book.get("dossiers") or {},
+            "conflict_report": maybe_read_json(input_dir / "conflict_report.json")
+            or maybe_read_json(sibling_merged_dir / "conflict_report.json")
+            or {},
+            "merge_report": maybe_read_json(input_dir / "merge_report.json")
+            or maybe_read_json(sibling_merged_dir / "merge_report.json")
+            or {},
+            "resolution_map": maybe_read_json(input_dir / "resolution_map.json") or {},
+            "resolution_report": maybe_read_json(input_dir / "resolution_report.json") or {},
+            "source_mode": {"mode": source_mode},
+        }
+        return data
+
+    return {
+        "book": maybe_read_json(input_dir / "book_merged.json") or {},
+        "structure": maybe_read_json(input_dir / "structure_merged.json") or {},
+        "dialogue": maybe_read_json(input_dir / "dialogue_merged.json") or {},
+        "entities": maybe_read_json(input_dir / "entities_merged.json") or {},
+        "dossiers": maybe_read_json(input_dir / "dossiers_merged.json") or {},
+        "conflict_report": maybe_read_json(input_dir / "conflict_report.json") or {},
+        "merge_report": maybe_read_json(input_dir / "merge_report.json") or {},
+        "resolution_map": maybe_read_json(input_dir / "resolution_map.json") or {},
+        "resolution_report": maybe_read_json(input_dir / "resolution_report.json") or {},
+        "source_mode": {"mode": source_mode},
+    }
 
 
 def normalize_text(text: Any) -> str:
@@ -496,20 +543,23 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
     styles = make_styles()
     story = []
 
-    book_merged = data.get("book_merged") or {}
-    structure = data.get("structure_merged") or {}
-    dialogue = data.get("dialogue_merged") or {}
-    entities = data.get("entities_merged") or {}
-    dossiers = data.get("dossiers_merged") or {}
+    book = data.get("book") or {}
+    structure = data.get("structure") or {}
+    dialogue = data.get("dialogue") or {}
+    entities = data.get("entities") or {}
+    dossiers = data.get("dossiers") or {}
     conflict_report = data.get("conflict_report") or {}
     merge_report = data.get("merge_report") or {}
+    resolution_report = data.get("resolution_report") or {}
+    source_mode = ((data.get("source_mode") or {}).get("mode") or "merged").lower()
 
     story.append(Spacer(1, 24))
     story.append(Paragraph(title, styles["ReportTitle"]))
     story.append(Paragraph(subtitle, styles["ReportSubtitle"]))
 
     summary_items = [
-        ("Book slug", str(book_merged.get("book_slug", "—"))),
+        ("Book slug", str(book.get("book_slug", "—"))),
+        ("Source data", source_mode.title()),
         ("Chunks merged", str(merge_report.get("chunk_count", "—"))),
         ("Dominant POV", str(dialogue.get("dominant_pov", "—"))),
         ("Chapters", str(len(structure.get("chapters", [])))),
@@ -520,9 +570,9 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
 
     story.append(
         Paragraph(
-            "This report consolidates the merged ManuscriptPrep outputs for a single manuscript. "
-            "It includes document structure, dialogue summary, entity extraction, merged character dossiers, "
-            "and conflict and merge diagnostics.",
+            "This report consolidates the ManuscriptPrep outputs for a single manuscript. "
+            f"It was built from {source_mode} data and includes document structure, dialogue summary, "
+            "entity extraction, character dossiers, and available merge or resolution diagnostics.",
             styles["BodyText"],
         )
     )
@@ -537,14 +587,29 @@ def build_story(data: Dict[str, Dict[str, Any]], title: str, subtitle: str):
         story,
         styles,
         [
-            ("Book title", book_merged.get("book_title", "—")),
-            ("Book slug", book_merged.get("book_slug", "—")),
-            ("Source chunk manifest", book_merged.get("source_chunk_manifest", "—")),
+            ("Book title", book.get("book_title", "—")),
+            ("Book slug", book.get("book_slug", "—")),
+            ("Report source", source_mode.title()),
+            ("Source chunk manifest", book.get("source_chunk_manifest", "—")),
             ("Chunks merged", merge_report.get("chunk_count", "—")),
         ],
     )
 
-    timing = book_merged.get("timing_summary", {})
+    if source_mode == "resolved" and resolution_report:
+        story.append(Paragraph("<b>Resolution summary</b>", styles["SubHeading"]))
+        resolution_rows = [["Metric", "Value"]]
+        resolution_rows.extend(
+            [
+                ["Resolver model", str(resolution_report.get("model", "—"))],
+                ["Candidate groups", str(resolution_report.get("group_count", "—"))],
+                ["Merged groups", str(resolution_report.get("merged_group_count", "—"))],
+                ["Variant mappings", str(resolution_report.get("variant_mapping_count", "—"))],
+            ]
+        )
+        story.append(info_table(resolution_rows, styles, col_widths=[95 * mm, 80 * mm]))
+        story.append(Spacer(1, 8))
+
+    timing = book.get("timing_summary", {})
     if timing:
         story.append(Paragraph("<b>Timing summary</b>", styles["SubHeading"]))
         rows = [["Metric", "Value"]]
@@ -640,6 +705,7 @@ def resolve_report_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPr
             title=args.title,
             subtitle=args.subtitle,
             config_path=None,
+            source_mode="resolved" if (args.input_dir.expanduser() / "book_resolved.json").exists() else "merged",
         )
 
     paths = build_paths(cfg)
@@ -652,8 +718,13 @@ def resolve_report_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPr
                 "When using --config without explicit --input-dir and --output, provide --book-slug."
             )
         slug = args.book_slug
-        input_dir = input_dir or (paths.merged_root / slug)
+        if input_dir is None:
+            input_dir, source_mode = choose_report_input_dir(paths, slug)
+        else:
+            source_mode = "resolved" if (input_dir / "book_resolved.json").exists() else "merged"
         output_path = output_path or (paths.reports_root / f"{slug}_report.pdf")
+    else:
+        source_mode = "resolved" if (input_dir / "book_resolved.json").exists() else "merged"
 
     return ReportRuntimeSettings(
         input_dir=input_dir,
@@ -661,14 +732,15 @@ def resolve_report_settings(args: argparse.Namespace, cfg: Optional[ManuscriptPr
         title=args.title,
         subtitle=args.subtitle,
         config_path=cfg.path,
+        source_mode=source_mode,
     )
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Create a formatted PDF report from merged ManuscriptPrep outputs.")
+    parser = argparse.ArgumentParser(description="Create a formatted PDF report from merged or resolved ManuscriptPrep outputs.")
     parser.add_argument("--config", type=Path, default=None, help="Optional YAML config file")
     parser.add_argument("--book-slug", default=None, help="Book slug used to derive config-based paths")
-    parser.add_argument("--input-dir", type=Path, required=False, help="Directory containing merged JSON outputs")
+    parser.add_argument("--input-dir", type=Path, required=False, help="Directory containing merged or resolved JSON outputs")
     parser.add_argument("--output", type=Path, required=False, help="Destination PDF path")
     parser.add_argument("--title", default=None, help="Override report title")
     parser.add_argument("--subtitle", default="Merged ManuscriptPrep Analysis Report", help="Report subtitle")
@@ -686,21 +758,13 @@ def main():
     if not settings.input_dir.is_dir():
         raise SystemExit(f"Input directory does not exist: {settings.input_dir}")
 
-    data = {
-        "book_merged": maybe_read_json(settings.input_dir / "book_merged.json"),
-        "structure_merged": maybe_read_json(settings.input_dir / "structure_merged.json"),
-        "dialogue_merged": maybe_read_json(settings.input_dir / "dialogue_merged.json"),
-        "entities_merged": maybe_read_json(settings.input_dir / "entities_merged.json"),
-        "dossiers_merged": maybe_read_json(settings.input_dir / "dossiers_merged.json"),
-        "conflict_report": maybe_read_json(settings.input_dir / "conflict_report.json"),
-        "merge_report": maybe_read_json(settings.input_dir / "merge_report.json"),
-    }
+    data = load_report_data(settings.input_dir)
 
     book_title = settings.title
     if not book_title:
         book_title = (
-            (data.get("book_merged") or {}).get("book_title")
-            or (data.get("book_merged") or {}).get("book_slug")
+            (data.get("book") or {}).get("book_title")
+            or (data.get("book") or {}).get("book_slug")
             or "ManuscriptPrep Book Report"
         )
 

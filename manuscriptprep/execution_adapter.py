@@ -443,7 +443,9 @@ class ExecutionAdapter:
         if (not input_dir or not output_path) and job.config_path and job.book_slug:
             cfg = load_config(job.config_path)
             paths = build_paths(cfg)
-            input_dir = input_dir or str(paths.merged_root / str(job.book_slug))
+            if not input_dir:
+                resolved_dir = paths.resolved_root / str(job.book_slug)
+                input_dir = str(resolved_dir if (resolved_dir / "book_resolved.json").exists() else (paths.merged_root / str(job.book_slug)))
             output_path = output_path or str(paths.reports_root / f"{job.book_slug}_report.pdf")
         if not input_dir or not output_path:
             raise ValueError("Report jobs require options.input_dir and options.output_path")
@@ -597,7 +599,7 @@ class ExecutionAdapter:
                     "stage_runs": [job.stage_runs[4]],
                     "options": {
                         **job.options,
-                        "input_dir": str(layout["merged_dir"]),
+                        "input_dir": str(layout["resolved_dir"]),
                         "output_path": str(layout["report_output"]),
                     },
                 }

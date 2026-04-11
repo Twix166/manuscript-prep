@@ -1044,6 +1044,8 @@ def test_gateway_api_runs_single_end_to_end_pipeline_job(tmp_path, sample_pdf, t
         "succeeded",
         "succeeded",
     ]
+    report_stage = completed["stage_runs"][4]
+    assert str(tmp_path / "resolved" / book_slug) in report_stage["command"]
     artifact_names = {item["name"] for item in completed["artifacts"]}
     assert "chunk_manifest" in artifact_names
     assert "book_merged" in artifact_names
