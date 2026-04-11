@@ -59,6 +59,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
 from manuscriptprep.paths import build_paths
+from manuscriptprep.runtime_logging import emit_runtime_event
 
 TITLE_EQUIVS = {
     "dr": "doctor",
@@ -429,7 +430,17 @@ def ask_ollama(model: str, payload: Dict[str, Any], timeout: int) -> Dict[str, A
 
 def resolve_groups_with_llm(groups: List[Dict[str, Any]], model: str, timeout: int) -> List[Dict[str, Any]]:
     results = []
-    for group in groups:
+    total_groups = len(groups)
+    for index, group in enumerate(groups, start=1):
+        emit_runtime_event(
+            "manuscriptprep-resolver",
+            "resolve_group_start",
+            group_id=group["group_id"],
+            group_index=index,
+            total_groups=total_groups,
+            candidate_names=group["members"],
+            model=model,
+        )
         payload = {
             "group_id": group["group_id"],
             "members": [
@@ -452,13 +463,25 @@ def resolve_groups_with_llm(groups: List[Dict[str, Any]], model: str, timeout: i
         }
         response = ask_ollama(model, payload, timeout)
         canonical_name = choose_canonical_name_from_response(response, group)
-        results.append(
+        result = (
             {
                 "group_id": group["group_id"],
                 "canonical_name": canonical_name,
                 "response": response,
                 "input_members": group["members"],
             }
+        )
+        results.append(result)
+        emit_runtime_event(
+            "manuscriptprep-resolver",
+            "resolve_group_success",
+            group_id=group["group_id"],
+            group_index=index,
+            total_groups=total_groups,
+            canonical_name=canonical_name,
+            merge=bool(response.get("merge", False)),
+            confidence=response.get("confidence", "review"),
+            candidate_names=group["members"],
         )
     return results
 

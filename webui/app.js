@@ -209,10 +209,10 @@ async function openJobArtifactDetail(job, artifactName, title) {
   try {
     const payload = await fetchJson(`/v1/jobs/${encodeURIComponent(job.job_id)}/artifacts/${encodeURIComponent(artifact.name)}`);
     const content = payload.content ?? payload.preview ?? "";
-    const formatted = artifact.kind === "json" && content && typeof content !== "string"
-      ? JSON.stringify(content, null, 2)
-      : String(content || "");
-    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title></head><body style="margin:0;background:#fbf6ee;color:#182227;"><main style="padding:24px;font-family:IBM Plex Sans,Segoe UI,sans-serif;"><h1 style="font-family:IBM Plex Serif,Georgia,serif;margin-top:0;">${escapeHtml(title)}</h1><pre style="white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#fffaf2;border:1px solid #d9cab6;border-radius:16px;padding:18px;">${escapeHtml(formatted)}</pre></main></body></html>`;
+    const structured = artifact.kind === "json" && content && typeof content !== "string" ? content : null;
+    const formatted = structured ? JSON.stringify(structured, null, 2) : String(content || "");
+    const summary = structured ? renderHumanReadableArtifactSummary(structured, title) : "Human-readable summary is not available for this artifact.";
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title></head><body style="margin:0;background:#fbf6ee;color:#182227;"><main style="padding:24px;font-family:IBM Plex Sans,Segoe UI,sans-serif;"><h1 style="font-family:IBM Plex Serif,Georgia,serif;margin-top:0;">${escapeHtml(title)}</h1><div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"><button id="tab-summary" style="border:1px solid #d9cab6;border-radius:999px;padding:8px 12px;background:#bf4f2f;color:white;cursor:pointer;">Readable View</button><button id="tab-json" style="border:1px solid #d9cab6;border-radius:999px;padding:8px 12px;background:white;color:#182227;cursor:pointer;">JSON</button></div><section style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;"><article id="panel-summary" style="background:#fffaf2;border:1px solid #d9cab6;border-radius:16px;padding:18px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;">${escapeHtml(summary)}</article><article id="panel-json" style="background:#fffaf2;border:1px solid #d9cab6;border-radius:16px;padding:18px;display:none;"><pre style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;">${escapeHtml(formatted)}</pre></article></section></main><script>const summaryBtn=document.getElementById("tab-summary");const jsonBtn=document.getElementById("tab-json");const summaryPanel=document.getElementById("panel-summary");const jsonPanel=document.getElementById("panel-json");summaryBtn.onclick=()=>{summaryPanel.style.display="block";jsonPanel.style.display="none";summaryBtn.style.background="#bf4f2f";summaryBtn.style.color="white";jsonBtn.style.background="white";jsonBtn.style.color="#182227";};jsonBtn.onclick=()=>{summaryPanel.style.display="none";jsonPanel.style.display="block";jsonBtn.style.background="#bf4f2f";jsonBtn.style.color="white";summaryBtn.style.background="white";summaryBtn.style.color="#182227";};</script></body></html>`;
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const detailWindow = window.open(url, "_blank", "noopener");
@@ -225,6 +225,54 @@ async function openJobArtifactDetail(job, artifactName, title) {
   } catch (error) {
     els.stageActionStatus.textContent = error.message;
   }
+}
+
+function renderHumanReadableArtifactSummary(payload, title) {
+  const entities = payload.entities || {};
+  const dialogue = payload.dialogue || {};
+  const dossiers = payload.dossiers || {};
+  const resolutionMap = payload.resolution_map || {};
+  const lines = [
+    title,
+    "",
+    `Characters: ${(entities.characters_resolved || entities.characters || []).length || 0}`,
+    `Places: ${(entities.places || []).length || 0}`,
+    `Objects: ${(entities.objects || []).length || 0}`,
+    `Attributed speakers: ${(dialogue.explicitly_attributed_speakers || []).length || 0}`,
+    `Dossiers: ${(dossiers.character_dossiers || []).length || 0}`,
+  ];
+  if ((entities.characters_resolved || []).length) {
+    lines.push("", `Resolved characters: ${(entities.characters_resolved || []).join(", ")}`);
+  } else if ((entities.characters || []).length) {
+    lines.push("", `Characters: ${(entities.characters || []).join(", ")}`);
+  }
+  if ((dialogue.explicitly_attributed_speakers || []).length) {
+    lines.push("", `Speakers: ${(dialogue.explicitly_attributed_speakers || []).join(", ")}`);
+  }
+  if ((resolutionMap.resolutions || []).length) {
+    lines.push("", "Resolution decisions:");
+    for (const item of resolutionMap.resolutions.slice(0, 12)) {
+      lines.push(`- ${item.canonical_name || "Unmerged"} | ${item.confidence || "review"} | ${(item.members_to_merge || []).join(", ") || "no merges"}`);
+    }
+  }
+  if ((dossiers.character_dossiers || []).length) {
+    lines.push("", "Dossiers:");
+    for (const dossier of dossiers.character_dossiers.slice(0, 8)) {
+      lines.push(`- ${dossier.resolved_canonical_name || dossier.name || "Unknown"} | role: ${[].concat(dossier.roles || dossier.role || []).filter(Boolean).join(", ") || "n/a"}`);
+    }
+  }
+  return lines.join("\n");
+}
+
+async function openStageLogs(job, stageName) {
+  const stderrArtifact = artifactForJob(job, `${stageName}_stderr`);
+  const stdoutArtifact = artifactForJob(job, `${stageName}_stdout`);
+  const target = stderrArtifact || stdoutArtifact;
+  if (!target) {
+    els.stageActionStatus.textContent = `No logs are available for ${stageLabels[stageName] || stageName}.`;
+    return;
+  }
+  await openJobArtifactDetail(job, target.name, `${stageLabels[stageName] || stageName} Logs`);
 }
 
 async function openJobArtifactBinary(job, artifactName, fallbackFilename) {
@@ -688,6 +736,22 @@ function renderJobProgressSummary(progress) {
   if (!progress || progress.available === false) {
     return progress?.message || "Live chunk progress appears here for categorisation and analysis jobs.";
   }
+  if (progress.pipeline === "resolve") {
+    const recentEvents = Array.isArray(progress.recent_events) && progress.recent_events.length
+      ? progress.recent_events.slice(-5).map((event) => `- ${formatDate(event.timestamp)} | ${event.group_id || "-"} | ${(event.candidate_names || []).join(", ") || "-"} | ${event.event || "-"}`)
+      : ["- No resolver progress events yet"];
+    return [
+      "Resolution Progress",
+      `- Active group: ${progress.current_group || "n/a"}`,
+      `- Group index: ${progress.current_group_index || "n/a"} of ${progress.groups_total || "n/a"}`,
+      `- Characters: ${progress.current_character || "n/a"}`,
+      `- Completed groups: ${progress.groups_completed || 0}`,
+      `- Last canonical name: ${progress.canonical_name || "n/a"}`,
+      `- Status: ${progress.message || "n/a"}`,
+      "Recent events:",
+      ...recentEvents,
+    ].join("\n");
+  }
   const currentChunk = progress.current_chunk
     ? `${progress.current_chunk} (${progress.current_chunk_index || "?"} of ${progress.chunks_total || "?"})`
     : progress.chunks_total
@@ -724,7 +788,16 @@ function renderJobProgressSummary(progress) {
 }
 
 function renderCompactStageProgress(progress) {
-  if (!progress || progress.available === false || !progress.current_chunk) {
+  if (!progress || progress.available === false) {
+    return "";
+  }
+  if (progress.pipeline === "resolve") {
+    if (!progress.current_group) {
+      return progress.message || "";
+    }
+    return `Group ${progress.current_group_index || "?"}/${progress.groups_total || "?"}: ${progress.current_character || progress.current_group}`;
+  }
+  if (!progress.current_chunk) {
     return "";
   }
   const throughput = progress.reported_tps || progress.estimated_tps;
@@ -1243,7 +1316,7 @@ function renderStageBoard() {
     );
     const stageStatus = latestJob ? latestJob.status : "not-started";
     const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
-    const compactProgress = stage.name === "orchestrate" ? renderCompactStageProgress(progress) : "";
+    const compactProgress = ["orchestrate", "resolve"].includes(stage.name) ? renderCompactStageProgress(progress) : "";
     const throughput = stage.name === "orchestrate" ? (progress?.reported_tps || progress?.estimated_tps) : null;
     const models = resolveModelRefs(stage);
     const card = document.createElement("details");
@@ -1325,6 +1398,9 @@ function renderStageBoard() {
     actionRow.appendChild(runPauseButton);
     actionRow.appendChild(stopButton);
 
+    const statusMarkup = stageStatus === "failed"
+      ? `<button type="button" class="status-pill ghost-button" data-stage-error-pill="${stage.name}">${stageStatus}</button>`
+      : `<span class="status-pill">${stageStatus}</span>`;
     card.innerHTML = `
       <summary>
         <div class="workflow-step-head">
@@ -1334,7 +1410,7 @@ function renderStageBoard() {
           </div>
           <div class="workflow-step-controls">
             <div class="stage-card-actions" data-stage-actions="${stage.name}"></div>
-            <span class="status-pill">${stageStatus}</span>
+            ${statusMarkup}
           </div>
         </div>
         <p class="meta">${stage.description}</p>
@@ -1349,6 +1425,16 @@ function renderStageBoard() {
       </div>
     `;
     card.querySelector(`[data-stage-actions="${stage.name}"]`).replaceWith(actionRow);
+    const errorPill = card.querySelector(`[data-stage-error-pill="${stage.name}"]`);
+    if (errorPill) {
+      errorPill.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (latestJob) {
+          await openStageLogs(latestJob, stage.name);
+        }
+      });
+    }
     for (const button of actionRow.querySelectorAll("button")) {
       button.addEventListener("click", (event) => {
         event.stopPropagation();

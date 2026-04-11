@@ -693,6 +693,69 @@ def test_gateway_api_exposes_analysis_details_for_orchestrate_job(tmp_path) -> N
     assert len(details["chunks"][0]["dossiers"]["character_dossiers"]) == 2
 
 
+def test_gateway_api_exposes_resolve_progress_from_stdout(tmp_path) -> None:
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"))
+
+    status, created = app.create_job(
+        {
+            "pipeline": "resolve",
+            "book_slug": "treasure_island",
+            "title": "Treasure Island",
+        }
+    )
+    assert status == 201
+
+    job = app.store.get_job(created["job_id"])
+    assert job is not None
+    job.status = "running"
+    job.stage_runs[0].status = "running"
+    stdout_path = tmp_path / "resolve_stdout.txt"
+    stdout_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "timestamp": "2026-04-10T10:00:00+00:00",
+                        "service": "manuscriptprep-resolver",
+                        "event": "resolve_group_start",
+                        "group_id": "group_001",
+                        "group_index": 1,
+                        "total_groups": 3,
+                        "candidate_names": ["Jim", "Jim Hawkins"],
+                    }
+                ),
+                json.dumps(
+                    {
+                        "timestamp": "2026-04-10T10:00:05+00:00",
+                        "service": "manuscriptprep-resolver",
+                        "event": "resolve_group_success",
+                        "group_id": "group_001",
+                        "group_index": 1,
+                        "total_groups": 3,
+                        "candidate_names": ["Jim", "Jim Hawkins"],
+                        "canonical_name": "Jim Hawkins",
+                        "merge": True,
+                    }
+                ),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    job.stage_runs[0].stdout_path = str(stdout_path)
+    app.store.update_job(job)
+
+    status, progress = app.get_job_progress(created["job_id"])
+    assert status == 200
+    assert progress["available"] is True
+    assert progress["pipeline"] == "resolve"
+    assert progress["current_group"] == "group_001"
+    assert progress["current_character"] == "Jim, Jim Hawkins"
+    assert progress["groups_total"] == 3
+    assert progress["groups_completed"] == 1
+    assert progress["canonical_name"] == "Jim Hawkins"
+
+
 def test_gateway_api_ingest_artifacts_follow_manuscript_slug(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

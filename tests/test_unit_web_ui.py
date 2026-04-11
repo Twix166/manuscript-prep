@@ -34,6 +34,9 @@ def test_get_web_asset_serves_javascript() -> None:
     assert b"Merged Analysis" in body
     assert b"Resolved Analysis" in body
     assert b"report_pdf" in body
+    assert b"Resolution Progress" in body
+    assert b"openStageLogs" in body
+    assert b"Readable View" in body
 
 
 def test_get_web_asset_serves_ingest_results_page() -> None:

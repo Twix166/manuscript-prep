@@ -1048,6 +1048,60 @@ class GatewayAPI:
 
         return progress
 
+    def _build_resolve_progress(self, job) -> Dict[str, Any]:
+        stage = next((item for item in job.stage_runs if item.name == "resolve"), None)
+        stdout_path = Path(stage.stdout_path) if stage and stage.stdout_path else None
+        progress: Dict[str, Any] = {
+            "job_id": job.job_id,
+            "pipeline": job.pipeline,
+            "available": True,
+            "current_character": None,
+            "current_group": None,
+            "current_group_index": None,
+            "groups_total": None,
+            "groups_completed": 0,
+            "recent_events": [],
+            "message": "Waiting for resolver progress events.",
+        }
+        if stdout_path is None or not stdout_path.is_file():
+            progress["available"] = False
+            progress["message"] = "Resolver stdout is not available yet."
+            return progress
+
+        recent_events = []
+        for line in stdout_path.read_text(encoding="utf-8").splitlines():
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if event.get("service") != "manuscriptprep-resolver":
+                continue
+            recent_events.append(event)
+            event_name = event.get("event")
+            progress["groups_total"] = event.get("total_groups") or progress["groups_total"]
+            if event_name == "resolve_group_start":
+                progress["current_group"] = event.get("group_id")
+                progress["current_group_index"] = event.get("group_index")
+                names = event.get("candidate_names") or []
+                progress["current_character"] = ", ".join(names[:3]) if names else None
+                progress["message"] = "Resolving character group."
+            elif event_name == "resolve_group_success":
+                progress["groups_completed"] = max(progress["groups_completed"], int(event.get("group_index") or 0))
+                progress["current_group"] = event.get("group_id")
+                progress["current_group_index"] = event.get("group_index")
+                names = event.get("candidate_names") or []
+                progress["current_character"] = ", ".join(names[:3]) if names else None
+                progress["canonical_name"] = event.get("canonical_name")
+                progress["last_merge"] = event.get("merge")
+                progress["message"] = "Resolved character group."
+
+        progress["recent_events"] = recent_events[-8:]
+        if job.status == "succeeded":
+            progress["message"] = "Resolution completed."
+        elif job.status == "failed":
+            progress["message"] = "Resolution failed."
+        return progress
+
     def get_job_progress(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
         allowed, error = self._require_actor(actor)
         if not allowed:
@@ -1060,6 +1114,8 @@ class GatewayAPI:
 
         if job.pipeline == "orchestrate":
             return HTTPStatus.OK, self._build_orchestrate_progress(job)
+        if job.pipeline == "resolve":
+            return HTTPStatus.OK, self._build_resolve_progress(job)
 
         return HTTPStatus.OK, {
             "job_id": job.job_id,
