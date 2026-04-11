@@ -38,6 +38,7 @@ This document is the working backlog for moving ManuscriptPrep from a functional
 - [ ] Improve operational docs for failure recovery and rerun workflows.
 - [ ] Improve final report quality so the report is more useful as a production handoff artifact.
 - [ ] Add spoken-text highlighting so narrator-relevant dialogue is visually distinct for voice performance work.
+- [ ] Improve character accent identification and add clearer accent notes for narrator-facing outputs.
 
 ## Prioritized Backlog
 
@@ -184,6 +185,7 @@ Goal: make merged, resolved, and report outputs more production-useful for narra
 - Improve report structure, clarity, and usefulness beyond the current baseline PDF.
 - Fine-tune character merging so entity resolution produces fewer false merges and missed aliases.
 - Improve dossier content quality and completeness for narrator and editor use.
+- Improve accent detection so character dossiers and downstream outputs include more reliable accent notes.
 - Add text highlighting for spoken dialogue so character voice cues are easier to act and review.
 
 Why this matters:
@@ -194,6 +196,7 @@ Suggested deliverables:
 - richer report layouts and summaries
 - improved resolution heuristics and evaluation fixtures
 - better dossier prompts / post-processing
+- stronger accent-identification prompts, heuristics, and dossier/report note fields
 - dialogue-highlighted views and exports
 
 ## Candidate Task Sequence
