@@ -36,6 +36,8 @@ This document is the working backlog for moving ManuscriptPrep from a functional
 - [ ] Add CI for linting, tests, and basic docs validation.
 - [ ] Add reproducible local dev setup for dependencies and tools.
 - [ ] Improve operational docs for failure recovery and rerun workflows.
+- [ ] Improve final report quality so the report is more useful as a production handoff artifact.
+- [ ] Add spoken-text highlighting so narrator-relevant dialogue is visually distinct for voice performance work.
 
 ## Prioritized Backlog
 
@@ -174,6 +176,25 @@ Suggested deliverables:
 - corrected README
 - canonical quickstart
 - implementation-status notes where needed
+
+### P7: Improve Editorial Output Quality
+
+Goal: make merged, resolved, and report outputs more production-useful for narration and editorial review.
+
+- Improve report structure, clarity, and usefulness beyond the current baseline PDF.
+- Fine-tune character merging so entity resolution produces fewer false merges and missed aliases.
+- Improve dossier content quality and completeness for narrator and editor use.
+- Add text highlighting for spoken dialogue so character voice cues are easier to act and review.
+
+Why this matters:
+- The pipeline currently runs end to end, but output quality still limits downstream usability.
+- Narration prep especially benefits from stronger dialogue attribution and clearer character-focused presentation.
+
+Suggested deliverables:
+- richer report layouts and summaries
+- improved resolution heuristics and evaluation fixtures
+- better dossier prompts / post-processing
+- dialogue-highlighted views and exports
 
 ## Candidate Task Sequence
 

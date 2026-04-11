@@ -217,8 +217,9 @@ async function openJobArtifactDetail(job, artifactName, title) {
       els.stageActionStatus.textContent = `Could not open ${title.toLowerCase()} viewer.`;
       return;
     }
-    detailWindow.document.title = title;
-    detailWindow.document.body.innerHTML = `<main style="padding:24px;font-family:IBM Plex Sans,Segoe UI,sans-serif;background:#fbf6ee;color:#182227;"><h1 style="font-family:IBM Plex Serif,Georgia,serif;">${escapeHtml(title)}</h1><pre style="white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#fffaf2;border:1px solid #d9cab6;border-radius:16px;padding:18px;">${escapeHtml(formatted)}</pre></main>`;
+    detailWindow.document.open();
+    detailWindow.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title></head><body style="margin:0;background:#fbf6ee;color:#182227;"><main style="padding:24px;font-family:IBM Plex Sans,Segoe UI,sans-serif;"><h1 style="font-family:IBM Plex Serif,Georgia,serif;margin-top:0;">${escapeHtml(title)}</h1><pre style="white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#fffaf2;border:1px solid #d9cab6;border-radius:16px;padding:18px;">${escapeHtml(formatted)}</pre></main></body></html>`);
+    detailWindow.document.close();
   } catch (error) {
     els.stageActionStatus.textContent = error.message;
   }
@@ -364,6 +365,14 @@ function latestStageCardJobForPipeline(pipeline) {
     return succeeded;
   }
   return null;
+}
+
+function latestJobWithArtifactsForPipeline(pipeline, ...artifactNames) {
+  const jobs = state.jobs
+    .filter((job) => job.pipeline === pipeline)
+    .slice()
+    .sort((left, right) => String(right.updated_at || "").localeCompare(String(left.updated_at || "")));
+  return jobs.find((job) => artifactForJob(job, ...artifactNames)) || null;
 }
 
 function latestIngestForSelectedManuscript() {
@@ -1206,6 +1215,9 @@ function renderStageBoard() {
   for (const stage of fullPipeline.stages) {
     const manuscript = selectedManuscript();
     const latestJob = latestStageCardJobForPipeline(stage.name);
+    const latestMergeArtifactJob = stage.name === "merge" ? latestJobWithArtifactsForPipeline("merge", "book_merged") : null;
+    const latestResolveArtifactJob = stage.name === "resolve" ? latestJobWithArtifactsForPipeline("resolve", "book_resolved") : null;
+    const latestReportArtifactJob = stage.name === "report" ? latestJobWithArtifactsForPipeline("report", "report_pdf") : null;
     const stageStatus = latestJob ? latestJob.status : "not-started";
     const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
     const compactProgress = stage.name === "orchestrate" ? renderCompactStageProgress(progress) : "";
@@ -1343,12 +1355,12 @@ function renderStageBoard() {
       detailButton.addEventListener("click", () => openAnalysisDetails(latestJob));
       actionRow.appendChild(detailButton);
     }
-    if (stage.name === "merge" && latestJob && artifactForJob(latestJob, "book_merged")) {
+    if (stage.name === "merge" && latestMergeArtifactJob) {
       const detailButton = document.createElement("button");
       detailButton.type = "button";
       detailButton.className = "secondary-button";
       detailButton.textContent = "Detail";
-      detailButton.addEventListener("click", () => openJobArtifactDetail(latestJob, "book_merged", "Merged Analysis"));
+      detailButton.addEventListener("click", () => openJobArtifactDetail(latestMergeArtifactJob, "book_merged", "Merged Analysis"));
       actionRow.appendChild(detailButton);
 
       const downloadButton = document.createElement("button");
@@ -1358,8 +1370,8 @@ function renderStageBoard() {
       downloadButton.addEventListener("click", async () => {
         try {
           await downloadBinary(
-            `/v1/jobs/${encodeURIComponent(latestJob.job_id)}/artifacts/book_merged/download`,
-            `${latestJob.book_slug || "merged"}_analysis.json`,
+            `/v1/jobs/${encodeURIComponent(latestMergeArtifactJob.job_id)}/artifacts/book_merged/download`,
+            `${latestMergeArtifactJob.book_slug || "merged"}_analysis.json`,
           );
         } catch (error) {
           els.stageActionStatus.textContent = error.message;
@@ -1367,12 +1379,12 @@ function renderStageBoard() {
       });
       actionRow.appendChild(downloadButton);
     }
-    if (stage.name === "resolve" && latestJob && artifactForJob(latestJob, "book_resolved")) {
+    if (stage.name === "resolve" && latestResolveArtifactJob) {
       const detailButton = document.createElement("button");
       detailButton.type = "button";
       detailButton.className = "secondary-button";
       detailButton.textContent = "Detail";
-      detailButton.addEventListener("click", () => openJobArtifactDetail(latestJob, "book_resolved", "Resolved Analysis"));
+      detailButton.addEventListener("click", () => openJobArtifactDetail(latestResolveArtifactJob, "book_resolved", "Resolved Analysis"));
       actionRow.appendChild(detailButton);
 
       const downloadButton = document.createElement("button");
@@ -1382,8 +1394,8 @@ function renderStageBoard() {
       downloadButton.addEventListener("click", async () => {
         try {
           await downloadBinary(
-            `/v1/jobs/${encodeURIComponent(latestJob.job_id)}/artifacts/book_resolved/download`,
-            `${latestJob.book_slug || "resolved"}_analysis.json`,
+            `/v1/jobs/${encodeURIComponent(latestResolveArtifactJob.job_id)}/artifacts/book_resolved/download`,
+            `${latestResolveArtifactJob.book_slug || "resolved"}_analysis.json`,
           );
         } catch (error) {
           els.stageActionStatus.textContent = error.message;
@@ -1391,12 +1403,12 @@ function renderStageBoard() {
       });
       actionRow.appendChild(downloadButton);
     }
-    if (stage.name === "report" && latestJob && artifactForJob(latestJob, "report_pdf")) {
+    if (stage.name === "report" && latestReportArtifactJob) {
       const openButton = document.createElement("button");
       openButton.type = "button";
       openButton.className = "secondary-button";
       openButton.textContent = "Open";
-      openButton.addEventListener("click", () => openJobArtifactBinary(latestJob, "report_pdf", `${latestJob.book_slug || "report"}_report.pdf`));
+      openButton.addEventListener("click", () => openJobArtifactBinary(latestReportArtifactJob, "report_pdf", `${latestReportArtifactJob.book_slug || "report"}_report.pdf`));
       actionRow.appendChild(openButton);
 
       const downloadButton = document.createElement("button");
@@ -1406,8 +1418,8 @@ function renderStageBoard() {
       downloadButton.addEventListener("click", async () => {
         try {
           await downloadBinary(
-            `/v1/jobs/${encodeURIComponent(latestJob.job_id)}/artifacts/report_pdf/download`,
-            `${latestJob.book_slug || "report"}_report.pdf`,
+            `/v1/jobs/${encodeURIComponent(latestReportArtifactJob.job_id)}/artifacts/report_pdf/download`,
+            `${latestReportArtifactJob.book_slug || "report"}_report.pdf`,
           );
         } catch (error) {
           els.stageActionStatus.textContent = error.message;
