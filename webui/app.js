@@ -434,6 +434,15 @@ function displayStageJobForPipeline(pipeline, ...artifactNames) {
   if (artifactJob && artifactJob.status === "succeeded") {
     return artifactJob;
   }
+  if (pipeline === "resolve") {
+    const failedOrCancelled = state.jobs
+      .filter((job) => job.pipeline === pipeline && ["failed", "cancelled"].includes(job.status))
+      .slice()
+      .sort((left, right) => String(right.updated_at || "").localeCompare(String(left.updated_at || "")))[0];
+    if (failedOrCancelled) {
+      return failedOrCancelled;
+    }
+  }
   return activeJob;
 }
 

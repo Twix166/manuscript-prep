@@ -51,11 +51,14 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import subprocess
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+from urllib import error as urllib_error
+from urllib import request as urllib_request
 
 from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
 from manuscriptprep.paths import build_paths
@@ -143,6 +146,8 @@ class ResolverRuntimeSettings:
     min_variant_count: int
     max_group_size: int
     config_path: Optional[Path]
+    ollama_host: Optional[str]
+    ollama_command: str
 
 def read_json(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
@@ -414,9 +419,9 @@ def extract_json_object(text: str) -> Dict[str, Any]:
         return json.loads(text[start:end + 1])
     raise ValueError("Could not parse JSON from model output")
 
-def ask_ollama(model: str, payload: Dict[str, Any], timeout: int) -> Dict[str, Any]:
+def ask_ollama_cli(model: str, payload: Dict[str, Any], timeout: int, command: str) -> Dict[str, Any]:
     prompt = json.dumps(payload, ensure_ascii=False, indent=2)
-    cmd = ["ollama", "run", model]
+    cmd = [command, "run", model]
     proc = subprocess.run(
         cmd,
         input=f"{SYSTEM_PROMPT}\n\n{prompt}",
@@ -428,7 +433,35 @@ def ask_ollama(model: str, payload: Dict[str, Any], timeout: int) -> Dict[str, A
         raise RuntimeError(f"Ollama returned {proc.returncode}: {proc.stderr.strip()}")
     return extract_json_object(proc.stdout)
 
-def resolve_groups_with_llm(groups: List[Dict[str, Any]], model: str, timeout: int) -> List[Dict[str, Any]]:
+def ask_ollama_http(model: str, payload: Dict[str, Any], timeout: int, host: str) -> Dict[str, Any]:
+    request_payload = json.dumps(
+        {
+            "model": model,
+            "prompt": f"{SYSTEM_PROMPT}\n\n{json.dumps(payload, ensure_ascii=False, indent=2)}",
+            "stream": False,
+        }
+    ).encode("utf-8")
+    req = urllib_request.Request(
+        f"{host.rstrip('/')}/api/generate",
+        data=request_payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib_request.urlopen(req, timeout=max(timeout, 1)) as resp:
+            response = json.loads(resp.read().decode("utf-8"))
+    except urllib_error.URLError as exc:
+        raise RuntimeError(f"Unable to reach Ollama host '{host}': {exc}") from exc
+    if response.get("error"):
+        raise RuntimeError(f"Ollama API error for model '{model}': {response['error']}")
+    return extract_json_object(str(response.get("response") or ""))
+
+def ask_ollama(model: str, payload: Dict[str, Any], timeout: int, settings: ResolverRuntimeSettings) -> Dict[str, Any]:
+    if settings.ollama_host and shutil.which(settings.ollama_command) is None:
+        return ask_ollama_http(model, payload, timeout, settings.ollama_host)
+    return ask_ollama_cli(model, payload, timeout, settings.ollama_command)
+
+def resolve_groups_with_llm(groups: List[Dict[str, Any]], model: str, timeout: int, settings: ResolverRuntimeSettings) -> List[Dict[str, Any]]:
     results = []
     total_groups = len(groups)
     for index, group in enumerate(groups, start=1):
@@ -461,7 +494,7 @@ def resolve_groups_with_llm(groups: List[Dict[str, Any]], model: str, timeout: i
             ],
             "pairing_reasons": group.get("pairing_reasons", {}),
         }
-        response = ask_ollama(model, payload, timeout)
+        response = ask_ollama(model, payload, timeout, settings)
         canonical_name = choose_canonical_name_from_response(response, group)
         result = (
             {
@@ -573,6 +606,8 @@ def resolve_resolver_settings(args: argparse.Namespace, cfg: Optional[Manuscript
             min_variant_count=args.min_variant_count if args.min_variant_count is not None else 2,
             max_group_size=args.max_group_size if args.max_group_size is not None else 8,
             config_path=None,
+            ollama_host=None,
+            ollama_command="ollama",
         )
 
     paths = build_paths(cfg)
@@ -592,6 +627,8 @@ def resolve_resolver_settings(args: argparse.Namespace, cfg: Optional[Manuscript
     timeout = args.timeout if args.timeout is not None else int(cfg.get("timeouts", "resolver_timeout_seconds", default=180))
     min_variant_count = args.min_variant_count if args.min_variant_count is not None else 2
     max_group_size = args.max_group_size if args.max_group_size is not None else 8
+    ollama_host = str(cfg.get("ollama", "host", default="")).rstrip("/") or None
+    ollama_command = str(cfg.get("ollama", "command", default="ollama"))
 
     return ResolverRuntimeSettings(
         input_dir=input_dir,
@@ -601,6 +638,8 @@ def resolve_resolver_settings(args: argparse.Namespace, cfg: Optional[Manuscript
         min_variant_count=min_variant_count,
         max_group_size=max_group_size,
         config_path=cfg.path,
+        ollama_host=ollama_host,
+        ollama_command=ollama_command,
     )
 
 def parse_args() -> argparse.Namespace:
@@ -637,7 +676,7 @@ def main() -> int:
         max_group_size=settings.max_group_size,
     )
 
-    llm_results = resolve_groups_with_llm(groups, settings.model, settings.timeout)
+    llm_results = resolve_groups_with_llm(groups, settings.model, settings.timeout, settings)
     resolution_map = build_resolution_map(llm_results)
     book_resolved = apply_resolution_to_book(book_merged, resolution_map)
     book_resolved["config_path"] = str(settings.config_path.resolve()) if settings.config_path is not None else None
