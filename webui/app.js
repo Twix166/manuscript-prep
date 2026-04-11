@@ -159,17 +159,7 @@ async function postBinary(path, filename, file) {
 }
 
 async function downloadBinary(path, fallbackFilename) {
-  const response = await fetch(path, {
-    headers: currentHeaders(),
-  });
-  if (!response.ok) {
-    await parseJsonResponse(response, path);
-    return;
-  }
-  const blob = await response.blob();
-  const disposition = response.headers.get("Content-Disposition") || "";
-  const match = disposition.match(/filename="([^"]+)"/);
-  const filename = match ? match[1] : fallbackFilename;
+  const { blob, filename } = await fetchBinary(path, fallbackFilename);
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -178,6 +168,79 @@ async function downloadBinary(path, fallbackFilename) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+async function fetchBinary(path, fallbackFilename) {
+  const response = await fetch(path, {
+    headers: currentHeaders(),
+  });
+  if (!response.ok) {
+    await parseJsonResponse(response, path);
+    throw new Error(`Request failed for ${path}`);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename="([^"]+)"/);
+  return {
+    blob,
+    filename: match ? match[1] : fallbackFilename,
+  };
+}
+
+function artifactForJob(job, ...artifactNames) {
+  if (!job || !Array.isArray(job.artifacts)) {
+    return null;
+  }
+  for (const artifactName of artifactNames) {
+    const found = job.artifacts.find((artifact) => artifact.name === artifactName);
+    if (found) {
+      return found;
+    }
+  }
+  return null;
+}
+
+async function openJobArtifactDetail(job, artifactName, title) {
+  const artifact = artifactForJob(job, artifactName);
+  if (!artifact) {
+    els.stageActionStatus.textContent = `No ${title.toLowerCase()} is available for this stage yet.`;
+    return;
+  }
+  try {
+    const payload = await fetchJson(`/v1/jobs/${encodeURIComponent(job.job_id)}/artifacts/${encodeURIComponent(artifact.name)}`);
+    const content = payload.content ?? payload.preview ?? "";
+    const formatted = artifact.kind === "json" && content && typeof content !== "string"
+      ? JSON.stringify(content, null, 2)
+      : String(content || "");
+    const detailWindow = window.open("", "_blank", "noopener");
+    if (!detailWindow) {
+      els.stageActionStatus.textContent = `Could not open ${title.toLowerCase()} viewer.`;
+      return;
+    }
+    detailWindow.document.title = title;
+    detailWindow.document.body.innerHTML = `<main style="padding:24px;font-family:IBM Plex Sans,Segoe UI,sans-serif;background:#fbf6ee;color:#182227;"><h1 style="font-family:IBM Plex Serif,Georgia,serif;">${escapeHtml(title)}</h1><pre style="white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#fffaf2;border:1px solid #d9cab6;border-radius:16px;padding:18px;">${escapeHtml(formatted)}</pre></main>`;
+  } catch (error) {
+    els.stageActionStatus.textContent = error.message;
+  }
+}
+
+async function openJobArtifactBinary(job, artifactName, fallbackFilename) {
+  const artifact = artifactForJob(job, artifactName);
+  if (!artifact) {
+    els.stageActionStatus.textContent = `No ${fallbackFilename} artifact is available for this stage yet.`;
+    return;
+  }
+  try {
+    const { blob } = await fetchBinary(
+      `/v1/jobs/${encodeURIComponent(job.job_id)}/artifacts/${encodeURIComponent(artifact.name)}/download`,
+      fallbackFilename,
+    );
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener");
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } catch (error) {
+    els.stageActionStatus.textContent = error.message;
+  }
 }
 
 function persistToken(token) {
@@ -1279,6 +1342,78 @@ function renderStageBoard() {
       detailButton.textContent = "Detail";
       detailButton.addEventListener("click", () => openAnalysisDetails(latestJob));
       actionRow.appendChild(detailButton);
+    }
+    if (stage.name === "merge" && latestJob && artifactForJob(latestJob, "book_merged")) {
+      const detailButton = document.createElement("button");
+      detailButton.type = "button";
+      detailButton.className = "secondary-button";
+      detailButton.textContent = "Detail";
+      detailButton.addEventListener("click", () => openJobArtifactDetail(latestJob, "book_merged", "Merged Analysis"));
+      actionRow.appendChild(detailButton);
+
+      const downloadButton = document.createElement("button");
+      downloadButton.type = "button";
+      downloadButton.className = "secondary-button";
+      downloadButton.textContent = "Download";
+      downloadButton.addEventListener("click", async () => {
+        try {
+          await downloadBinary(
+            `/v1/jobs/${encodeURIComponent(latestJob.job_id)}/artifacts/book_merged/download`,
+            `${latestJob.book_slug || "merged"}_analysis.json`,
+          );
+        } catch (error) {
+          els.stageActionStatus.textContent = error.message;
+        }
+      });
+      actionRow.appendChild(downloadButton);
+    }
+    if (stage.name === "resolve" && latestJob && artifactForJob(latestJob, "book_resolved")) {
+      const detailButton = document.createElement("button");
+      detailButton.type = "button";
+      detailButton.className = "secondary-button";
+      detailButton.textContent = "Detail";
+      detailButton.addEventListener("click", () => openJobArtifactDetail(latestJob, "book_resolved", "Resolved Analysis"));
+      actionRow.appendChild(detailButton);
+
+      const downloadButton = document.createElement("button");
+      downloadButton.type = "button";
+      downloadButton.className = "secondary-button";
+      downloadButton.textContent = "Download";
+      downloadButton.addEventListener("click", async () => {
+        try {
+          await downloadBinary(
+            `/v1/jobs/${encodeURIComponent(latestJob.job_id)}/artifacts/book_resolved/download`,
+            `${latestJob.book_slug || "resolved"}_analysis.json`,
+          );
+        } catch (error) {
+          els.stageActionStatus.textContent = error.message;
+        }
+      });
+      actionRow.appendChild(downloadButton);
+    }
+    if (stage.name === "report" && latestJob && artifactForJob(latestJob, "report_pdf")) {
+      const openButton = document.createElement("button");
+      openButton.type = "button";
+      openButton.className = "secondary-button";
+      openButton.textContent = "Open";
+      openButton.addEventListener("click", () => openJobArtifactBinary(latestJob, "report_pdf", `${latestJob.book_slug || "report"}_report.pdf`));
+      actionRow.appendChild(openButton);
+
+      const downloadButton = document.createElement("button");
+      downloadButton.type = "button";
+      downloadButton.className = "secondary-button";
+      downloadButton.textContent = "Download";
+      downloadButton.addEventListener("click", async () => {
+        try {
+          await downloadBinary(
+            `/v1/jobs/${encodeURIComponent(latestJob.job_id)}/artifacts/report_pdf/download`,
+            `${latestJob.book_slug || "report"}_report.pdf`,
+          );
+        } catch (error) {
+          els.stageActionStatus.textContent = error.message;
+        }
+      });
+      actionRow.appendChild(downloadButton);
     }
     els.stageBoard.appendChild(card);
   }

@@ -31,6 +31,9 @@ def test_get_web_asset_serves_javascript() -> None:
     assert b"triggerPipeline" in body
     assert b"Delete Data" in body
     assert b"Archive" in body
+    assert b"Merged Analysis" in body
+    assert b"Resolved Analysis" in body
+    assert b"report_pdf" in body
 
 
 def test_get_web_asset_serves_ingest_results_page() -> None:
