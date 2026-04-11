@@ -212,14 +212,16 @@ async function openJobArtifactDetail(job, artifactName, title) {
     const formatted = artifact.kind === "json" && content && typeof content !== "string"
       ? JSON.stringify(content, null, 2)
       : String(content || "");
-    const detailWindow = window.open("", "_blank", "noopener");
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title></head><body style="margin:0;background:#fbf6ee;color:#182227;"><main style="padding:24px;font-family:IBM Plex Sans,Segoe UI,sans-serif;"><h1 style="font-family:IBM Plex Serif,Georgia,serif;margin-top:0;">${escapeHtml(title)}</h1><pre style="white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#fffaf2;border:1px solid #d9cab6;border-radius:16px;padding:18px;">${escapeHtml(formatted)}</pre></main></body></html>`;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const detailWindow = window.open(url, "_blank", "noopener");
     if (!detailWindow) {
+      URL.revokeObjectURL(url);
       els.stageActionStatus.textContent = `Could not open ${title.toLowerCase()} viewer.`;
       return;
     }
-    detailWindow.document.open();
-    detailWindow.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title></head><body style="margin:0;background:#fbf6ee;color:#182227;"><main style="padding:24px;font-family:IBM Plex Sans,Segoe UI,sans-serif;"><h1 style="font-family:IBM Plex Serif,Georgia,serif;margin-top:0;">${escapeHtml(title)}</h1><pre style="white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#fffaf2;border:1px solid #d9cab6;border-radius:16px;padding:18px;">${escapeHtml(formatted)}</pre></main></body></html>`);
-    detailWindow.document.close();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
   } catch (error) {
     els.stageActionStatus.textContent = error.message;
   }
@@ -373,6 +375,18 @@ function latestJobWithArtifactsForPipeline(pipeline, ...artifactNames) {
     .slice()
     .sort((left, right) => String(right.updated_at || "").localeCompare(String(left.updated_at || "")));
   return jobs.find((job) => artifactForJob(job, ...artifactNames)) || null;
+}
+
+function displayStageJobForPipeline(pipeline, ...artifactNames) {
+  const activeJob = latestStageCardJobForPipeline(pipeline);
+  if (activeJob && ["running", "pause_requested", "cancel_requested", "queued", "paused"].includes(activeJob.status)) {
+    return activeJob;
+  }
+  const artifactJob = artifactNames.length ? latestJobWithArtifactsForPipeline(pipeline, ...artifactNames) : null;
+  if (artifactJob && artifactJob.status === "succeeded") {
+    return artifactJob;
+  }
+  return activeJob;
 }
 
 function latestIngestForSelectedManuscript() {
@@ -1214,10 +1228,19 @@ function renderStageBoard() {
 
   for (const stage of fullPipeline.stages) {
     const manuscript = selectedManuscript();
-    const latestJob = latestStageCardJobForPipeline(stage.name);
     const latestMergeArtifactJob = stage.name === "merge" ? latestJobWithArtifactsForPipeline("merge", "book_merged") : null;
     const latestResolveArtifactJob = stage.name === "resolve" ? latestJobWithArtifactsForPipeline("resolve", "book_resolved") : null;
     const latestReportArtifactJob = stage.name === "report" ? latestJobWithArtifactsForPipeline("report", "report_pdf") : null;
+    const latestJob = displayStageJobForPipeline(
+      stage.name,
+      ...(stage.name === "merge"
+        ? ["book_merged"]
+        : stage.name === "resolve"
+          ? ["book_resolved"]
+          : stage.name === "report"
+            ? ["report_pdf"]
+            : []),
+    );
     const stageStatus = latestJob ? latestJob.status : "not-started";
     const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
     const compactProgress = stage.name === "orchestrate" ? renderCompactStageProgress(progress) : "";
@@ -1379,12 +1402,13 @@ function renderStageBoard() {
       });
       actionRow.appendChild(downloadButton);
     }
-    if (stage.name === "resolve" && latestResolveArtifactJob) {
+    if (stage.name === "resolve" && (latestResolveArtifactJob || (latestJob && latestJob.status === "succeeded"))) {
+      const resolveActionJob = latestResolveArtifactJob || latestJob;
       const detailButton = document.createElement("button");
       detailButton.type = "button";
       detailButton.className = "secondary-button";
       detailButton.textContent = "Detail";
-      detailButton.addEventListener("click", () => openJobArtifactDetail(latestResolveArtifactJob, "book_resolved", "Resolved Analysis"));
+      detailButton.addEventListener("click", () => openJobArtifactDetail(resolveActionJob, "book_resolved", "Resolved Analysis"));
       actionRow.appendChild(detailButton);
 
       const downloadButton = document.createElement("button");
@@ -1394,8 +1418,8 @@ function renderStageBoard() {
       downloadButton.addEventListener("click", async () => {
         try {
           await downloadBinary(
-            `/v1/jobs/${encodeURIComponent(latestResolveArtifactJob.job_id)}/artifacts/book_resolved/download`,
-            `${latestResolveArtifactJob.book_slug || "resolved"}_analysis.json`,
+            `/v1/jobs/${encodeURIComponent(resolveActionJob.job_id)}/artifacts/book_resolved/download`,
+            `${resolveActionJob.book_slug || "resolved"}_analysis.json`,
           );
         } catch (error) {
           els.stageActionStatus.textContent = error.message;
