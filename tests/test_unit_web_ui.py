@@ -45,7 +45,7 @@ def test_get_web_asset_serves_narrator_toolkit_page() -> None:
 
     assert content_type.startswith("text/html")
     assert b"Narrator's Toolkit" in body
-    assert b"reader-content" in body
+    assert b"document-queue" in body
     assert b"scroll-toggle" in body
     assert b"scroll-speed" in body
 
@@ -59,3 +59,4 @@ def test_get_web_asset_serves_narrator_toolkit_script() -> None:
     assert b"ArrowUp" in body
     assert b"ArrowDown" in body
     assert b"Escape" in body
+    assert b"Open in Narrator's Toolkit" in body

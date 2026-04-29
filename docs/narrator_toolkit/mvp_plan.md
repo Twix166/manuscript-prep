@@ -30,3 +30,12 @@ Limitations:
 
 MVP 2 should add constant-speed auto-scroll controls without changing the cleaned document format.
 
+## MVP 3
+
+Implemented:
+
+- Visible cleaned-document queue in the reader sidebar.
+- One-row-per-document metadata and explicit `Open in Narrator's Toolkit` action.
+- Queue selection remains gateway-driven and does not require manual text entry.
+
+MVP 4 should add chapter controls, resume state, and navigation without changing the queue contract.

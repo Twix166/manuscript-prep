@@ -13,8 +13,15 @@
           <p class="eyebrow">Narrator's Toolkit</p>
           <h1>Reader</h1>
         </div>
-        <label for="document-select">Cleaned manuscript</label>
-        <select id="document-select"></select>
+        <section class="queue-panel" aria-label="Cleaned document queue">
+          <div class="panel-head compact">
+            <div>
+              <p class="eyebrow">Queue</p>
+              <h2>Cleaned documents</h2>
+            </div>
+          </div>
+          <ul id="document-queue" class="document-queue"></ul>
+        </section>
         <div id="document-status" class="summary-block">Loading cleaned manuscripts...</div>
         <label for="chapter-select">Chapter</label>
         <select id="chapter-select"></select>

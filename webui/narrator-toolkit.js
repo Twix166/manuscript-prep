@@ -1,5 +1,5 @@
 const els = {
-  documentSelect: document.getElementById("document-select"),
+  documentQueue: document.getElementById("document-queue"),
   documentStatus: document.getElementById("document-status"),
   chapterSelect: document.getElementById("chapter-select"),
   highlightLegend: document.getElementById("highlight-legend"),
@@ -20,6 +20,10 @@ const scroller = {
   speed: Number(document.getElementById("scroll-speed")?.value || 45),
   frameId: null,
   lastFrameTime: null,
+};
+const queueState = {
+  documents: [],
+  selectedDocumentId: null,
 };
 
 function escapeHtml(value) {
@@ -81,6 +85,20 @@ function renderMappingWarning(report) {
   els.mappingWarning.textContent = `${report.unmapped_highlights} of ${report.total_highlights} highlights could not be mapped. Review the highlight preservation report before narrating.`;
 }
 
+function formatDateTime(value) {
+  if (!value) {
+    return "Unknown";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
 function maxScrollTop() {
   return Math.max(
     0,
@@ -103,6 +121,14 @@ function stopScrolling() {
     scroller.frameId = null;
   }
   renderScrollControls();
+}
+
+function openDocument(manuscriptId) {
+  queueState.selectedDocumentId = manuscriptId;
+  renderDocumentQueue();
+  loadDocument(manuscriptId).catch((error) => {
+    els.documentStatus.textContent = error.message;
+  });
 }
 
 function scrollFrame(timestamp) {
@@ -166,6 +192,50 @@ function renderDocument(document, report) {
   renderMappingWarning(report || document.metadata?.highlight_report);
 }
 
+function renderDocumentQueue() {
+  const documents = queueState.documents || [];
+  if (!documents.length) {
+    els.documentQueue.innerHTML = '<li class="muted">No cleaned manuscripts yet</li>';
+    return;
+  }
+  els.documentQueue.innerHTML = documents.map((document, index) => {
+    const selected = document.manuscript_id === queueState.selectedDocumentId;
+    const queueLabel = `#${index + 1}`;
+    return `
+      <li class="queue-item ${selected ? "selected" : ""}" data-manuscript-id="${escapeHtml(document.manuscript_id)}">
+        <div class="queue-item-main">
+          <div class="queue-item-title">
+            <span class="queue-label">${queueLabel}</span>
+            <strong>${escapeHtml(document.title)}</strong>
+          </div>
+          <div class="queue-item-meta">
+            <span>${escapeHtml(document.source_filename || "Unknown source")}</span>
+            <span>${escapeHtml(document.cleaning_status || "unknown")}</span>
+            <span>${escapeHtml(formatDateTime(document.created_at))}</span>
+          </div>
+          <div class="queue-item-meta">
+            <span>${document.has_highlights ? `Highlights ${Number(document.highlight_count || 0)}` : "No highlights"}</span>
+            <span>Chapters ${Number(document.chapter_count || 0)}</span>
+          </div>
+        </div>
+        <div class="queue-item-actions">
+          <button type="button" class="secondary-button open-reader">Open in Narrator's Toolkit</button>
+        </div>
+      </li>
+    `;
+  }).join("");
+
+  for (const item of els.documentQueue.querySelectorAll(".queue-item")) {
+    const manuscriptId = item.dataset.manuscriptId;
+    item.addEventListener("click", () => openDocument(manuscriptId));
+    const button = item.querySelector(".open-reader");
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      openDocument(manuscriptId);
+    });
+  }
+}
+
 async function loadDocument(manuscriptId) {
   if (!manuscriptId) {
     els.readerContent.textContent = "No cleaned document selected.";
@@ -173,29 +243,28 @@ async function loadDocument(manuscriptId) {
   }
   els.documentStatus.textContent = "Loading cleaned document...";
   const payload = await fetchJson(`/v1/narrator-toolkit/documents/${encodeURIComponent(manuscriptId)}`);
+  queueState.selectedDocumentId = manuscriptId;
+  renderDocumentQueue();
   renderDocument(payload.document, payload.highlight_report);
   els.documentStatus.textContent = `Loaded ${payload.manuscript.title}`;
 }
 
 async function loadDocuments() {
   const payload = await fetchJson("/v1/narrator-toolkit/documents");
+  queueState.documents = payload.documents || [];
   if (!payload.documents.length) {
-    els.documentSelect.innerHTML = '<option value="">No cleaned manuscripts</option>';
+    queueState.selectedDocumentId = null;
+    renderDocumentQueue();
     els.documentStatus.textContent = "Run an ingest job first to create a Narrator's Toolkit cleaned document.";
     return;
   }
-  els.documentSelect.innerHTML = payload.documents.map((document) => (
-    `<option value="${escapeHtml(document.manuscript_id)}">${escapeHtml(document.title)}</option>`
-  )).join("");
   els.documentStatus.textContent = `${payload.documents.length} cleaned manuscript${payload.documents.length === 1 ? "" : "s"} available.`;
-  await loadDocument(els.documentSelect.value);
+  if (!queueState.selectedDocumentId || !queueState.documents.some((document) => document.manuscript_id === queueState.selectedDocumentId)) {
+    queueState.selectedDocumentId = queueState.documents[0].manuscript_id;
+  }
+  renderDocumentQueue();
+  await loadDocument(queueState.selectedDocumentId);
 }
-
-els.documentSelect.addEventListener("change", () => {
-  loadDocument(els.documentSelect.value).catch((error) => {
-    els.documentStatus.textContent = error.message;
-  });
-});
 
 els.chapterSelect.addEventListener("change", () => {
   stopScrolling();
