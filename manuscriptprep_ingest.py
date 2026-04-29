@@ -66,6 +66,8 @@ from narrator_toolkit.text_rules import (
     is_probable_heading as shared_is_probable_heading,
     is_scene_break as shared_is_scene_break,
     is_toc_like_paragraph as shared_is_toc_like_paragraph,
+    PAGE_MARKER_RE,
+    TOC_DOT_LEADER_RE,
     normalize_unicode as shared_normalize_unicode,
 )
 
@@ -504,19 +506,7 @@ def extract_raw_text(
     return extraction_info
 
 
-HEADER_FOOTER_LINE_RE = re.compile(r"^\s*(?:page\s+\d+|\d+/\d+|\d+)\s*$", re.I)
-CHAPTER_RE = re.compile(r"^\s*chapter\s+[ivxlcdm0-9]+\b", re.I)
 PART_RE = re.compile(r"^\s*part\s+\w+\b", re.I)
-SCENE_BREAK_RE = re.compile(r"^\s*(\*\s*\*\s*\*|-\s*-\s*-|•\s*•\s*•)\s*$")
-TOC_DOT_LEADER_RE = re.compile(r"\.{3,}\s*\d+\s*$")
-
-
-def normalize_unicode(text: str) -> str:
-    return shared_normalize_unicode(text)
-
-
-def is_probable_heading(line: str) -> bool:
-    return shared_is_probable_heading(line)
 
 
 def detect_repeated_lines(lines: List[str], min_count: int = 3) -> set[str]:
@@ -547,7 +537,7 @@ def detect_page_edge_repeated_lines(raw_text: str, min_count: int = 2, edge_line
 
 
 def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
-    raw_text = normalize_unicode(raw_text)
+    raw_text = shared_normalize_unicode(raw_text)
     raw_text = raw_text.replace("\r\n", "\n").replace("\r", "\n")
     page_edge_repeated_lines = detect_page_edge_repeated_lines(raw_text)
     raw_text = raw_text.replace("\f", "\n")
@@ -563,7 +553,7 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
     for line in lines:
         stripped = line.strip()
 
-        if HEADER_FOOTER_LINE_RE.match(stripped):
+        if PAGE_MARKER_RE.match(stripped):
             removed_page_markers += 1
             continue
 
@@ -745,7 +735,7 @@ def chunk_clean_text(
             current_words += para_words
             continue
 
-        if SCENE_BREAK_RE.match(para):
+        if shared_is_scene_break(para):
             if current and current_words >= target_chunk_words:
                 finalize_chunk(chunk_index)
                 chunk_index += 1
