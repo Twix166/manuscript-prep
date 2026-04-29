@@ -58,6 +58,16 @@ from xml.etree import ElementTree
 
 from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
 from manuscriptprep.paths import build_paths
+from narrator_toolkit.document_model import build_cleaned_document
+from narrator_toolkit.highlight_extraction import extract_pdf_highlights
+from narrator_toolkit.text_rules import (
+    is_chapter_heading as shared_is_chapter_heading,
+    is_front_matter_like as shared_is_front_matter_like,
+    is_probable_heading as shared_is_probable_heading,
+    is_scene_break as shared_is_scene_break,
+    is_toc_like_paragraph as shared_is_toc_like_paragraph,
+    normalize_unicode as shared_normalize_unicode,
+)
 
 
 def utc_now_iso() -> str:
@@ -502,46 +512,49 @@ TOC_DOT_LEADER_RE = re.compile(r"\.{3,}\s*\d+\s*$")
 
 
 def normalize_unicode(text: str) -> str:
-    replacements = {
-        "\u2018": "'",
-        "\u2019": "'",
-        "\u201c": '"',
-        "\u201d": '"',
-        "\u2013": "-",
-        "\u2014": "—",
-        "\u00a0": " ",
-    }
-    for src, dst in replacements.items():
-        text = text.replace(src, dst)
-    return text
+    return shared_normalize_unicode(text)
 
 
 def is_probable_heading(line: str) -> bool:
-    s = line.strip()
-    if not s:
-        return False
-    if CHAPTER_RE.match(s) or PART_RE.match(s):
-        return True
-    if len(s) <= 90 and s == s.upper() and re.search(r"[A-Z]", s):
-        return True
-    return False
+    return shared_is_probable_heading(line)
 
 
 def detect_repeated_lines(lines: List[str], min_count: int = 3) -> set[str]:
     counts = Counter(line.strip() for line in lines if line.strip())
     repeated = {
         line for line, count in counts.items()
-        if count >= min_count and len(line) <= 120 and not CHAPTER_RE.match(line) and not PART_RE.match(line)
+        if count >= min_count and len(line) <= 120 and not shared_is_chapter_heading(line)
     }
     return repeated
+
+
+def detect_page_edge_repeated_lines(raw_text: str, min_count: int = 2, edge_lines: int = 3) -> set[str]:
+    pages = raw_text.split("\f") if "\f" in raw_text else [raw_text]
+    counts: Counter[str] = Counter()
+    for page in pages:
+        lines = [line.strip() for line in page.splitlines() if line.strip()]
+        if not lines:
+            continue
+        candidates = lines[:edge_lines] + lines[-edge_lines:]
+        for candidate in candidates:
+            if len(candidate) > 120:
+                continue
+            if shared_is_chapter_heading(candidate):
+                continue
+            counts[candidate] += 1
+    threshold = max(min_count, max(2, len(pages) // 3))
+    return {line for line, count in counts.items() if count >= threshold}
 
 
 def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
     raw_text = normalize_unicode(raw_text)
     raw_text = raw_text.replace("\r\n", "\n").replace("\r", "\n")
+    page_edge_repeated_lines = detect_page_edge_repeated_lines(raw_text)
+    raw_text = raw_text.replace("\f", "\n")
 
     lines = raw_text.split("\n")
     repeated_lines = detect_repeated_lines(lines)
+    repeated_lines |= page_edge_repeated_lines
 
     cleaned_lines: List[str] = []
     removed_page_markers = 0
@@ -554,7 +567,7 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
             removed_page_markers += 1
             continue
 
-        if stripped in repeated_lines and not is_probable_heading(stripped):
+        if stripped in repeated_lines and not shared_is_probable_heading(stripped):
             removed_repeated_headers += 1
             continue
 
@@ -584,7 +597,7 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
             flush_buffer()
             continue
 
-        if is_probable_heading(stripped) or SCENE_BREAK_RE.match(stripped):
+        if shared_is_probable_heading(stripped) or shared_is_scene_break(stripped):
             flush_buffer()
             paragraphs.append(stripped)
             continue
@@ -627,9 +640,9 @@ def detect_structure_hints(clean_text_value: str) -> Dict[str, Any]:
     for para in paragraphs:
         if PART_RE.match(para):
             parts.append(para)
-        elif CHAPTER_RE.match(para):
+        elif shared_is_chapter_heading(para):
             chapters.append(para)
-        elif SCENE_BREAK_RE.match(para):
+        elif shared_is_scene_break(para):
             scene_breaks.append(para)
 
     return {
@@ -640,25 +653,11 @@ def detect_structure_hints(clean_text_value: str) -> Dict[str, Any]:
 
 
 def is_toc_like_paragraph(para: str) -> bool:
-    s = para.strip()
-    if TOC_DOT_LEADER_RE.search(s):
-        return True
-    if CHAPTER_RE.match(s) and re.search(r"\b\d+\s*$", s):
-        return True
-    return False
+    return shared_is_toc_like_paragraph(para)
 
 
 def is_front_matter_like(para: str) -> bool:
-    s = para.strip().lower()
-    markers = [
-        "contents",
-        "table of contents",
-        "preface",
-        "introduction",
-        "copyright",
-        "title page",
-    ]
-    return s in markers
+    return shared_is_front_matter_like(para)
 
 
 def chunk_clean_text(
@@ -737,7 +736,7 @@ def chunk_clean_text(
         if PART_RE.match(para):
             current_part = para
 
-        if CHAPTER_RE.match(para):
+        if shared_is_chapter_heading(para):
             if current and current_words >= min_chunk_words:
                 finalize_chunk(chunk_index)
                 chunk_index += 1
@@ -762,7 +761,7 @@ def chunk_clean_text(
         current_words += para_words
 
         if current_words >= target_chunk_words and (
-            para.endswith(".") or para.endswith('"') or para.endswith("'") or is_probable_heading(para)
+            para.endswith(".") or para.endswith('"') or para.endswith("'") or shared_is_probable_heading(para)
         ):
             finalize_chunk(chunk_index)
             chunk_index += 1
@@ -922,6 +921,8 @@ def main() -> int:
     raw_txt_path = settings.extracted_dir / "raw.txt"
     raw_ocr_txt_path = settings.extracted_dir / "raw_ocr.txt"
     clean_txt_path = settings.cleaned_dir / "clean.txt"
+    narrator_document_path = settings.cleaned_dir / "cleaned_document.json"
+    highlight_report_path = settings.cleaned_dir / "highlight_report.json"
 
     classification = classify_source(workspace_pdf, settings.tmp_dir, logger)
 
@@ -939,6 +940,26 @@ def main() -> int:
     clean_text_value, cleaning_stats = clean_text(raw_text, logger)
     write_text(clean_txt_path, clean_text_value)
     logger.log(f"Wrote cleaned text to {clean_txt_path}")
+
+    extracted_highlights = []
+    highlight_extraction_warnings: List[str] = []
+    if classification.source_format == "pdf":
+        extracted_highlights, highlight_extraction_warnings = extract_pdf_highlights(workspace_pdf)
+        logger.log(
+            f"Extracted PDF highlights: count={len(extracted_highlights)}, "
+            f"warnings={len(highlight_extraction_warnings)}"
+        )
+    narrator_document, highlight_report = build_cleaned_document(
+        clean_text=clean_text_value,
+        title=settings.title,
+        source_file=str(workspace_pdf),
+        highlights=extracted_highlights,
+        extraction_warnings=highlight_extraction_warnings,
+        document_id=book_slug,
+    )
+    write_json(narrator_document_path, narrator_document)
+    write_json(highlight_report_path, highlight_report)
+    logger.log(f"Wrote Narrator's Toolkit cleaned document to {narrator_document_path}")
 
     structure_hints = detect_structure_hints(clean_text_value)
 
@@ -960,6 +981,8 @@ def main() -> int:
         "book_slug": book_slug,
         "raw_text": str(raw_txt_path),
         "clean_text": str(clean_txt_path),
+        "narrator_cleaned_document": str(narrator_document_path),
+        "highlight_report": str(highlight_report_path),
         "chunk_dir": str(settings.chunks_dir / book_slug),
         "chunk_count": len(chunks),
         "chunk_settings": {
@@ -980,11 +1003,14 @@ def main() -> int:
             "raw_text": str(raw_txt_path),
             "raw_ocr_text": str(raw_ocr_txt_path) if extraction_info.get("ocr_used") else None,
             "clean_text": str(clean_txt_path),
+            "narrator_cleaned_document": str(narrator_document_path),
+            "highlight_report": str(highlight_report_path),
             "chunk_dir": str(settings.chunks_dir / book_slug),
         },
         "classification": asdict(classification),
         "extraction": extraction_info,
         "cleaning": cleaning_stats,
+        "highlight_preservation": highlight_report,
         "structure_hints": structure_hints,
         "chunking": chunk_stats,
         "flags": {

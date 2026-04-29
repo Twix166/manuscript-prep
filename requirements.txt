@@ -3,3 +3,4 @@ rich
 reportlab
 psycopg[binary]
 beautifulsoup4
+PyMuPDF

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Narrator's Toolkit</title>
+    <link rel="stylesheet" href="/ui/styles.css">
+  </head>
+  <body>
+    <main class="narrator-shell">
+      <aside class="narrator-sidebar">
+        <div>
+          <p class="eyebrow">Narrator's Toolkit</p>
+          <h1>Reader</h1>
+        </div>
+        <section class="queue-panel" aria-label="Cleaned document queue">
+          <div class="panel-head compact">
+            <div>
+              <p class="eyebrow">Queue</p>
+              <h2>Cleaned documents</h2>
+            </div>
+          </div>
+          <ul id="document-queue" class="document-queue"></ul>
+        </section>
+        <div id="document-status" class="summary-block">Loading cleaned manuscripts...</div>
+        <section class="chapter-panel" aria-label="Chapter navigation">
+          <div class="panel-head compact">
+            <div>
+              <p class="eyebrow">Resume</p>
+              <h2>Chapter navigation</h2>
+            </div>
+            <button type="button" id="resume-reading" class="secondary-button" disabled>Resume</button>
+          </div>
+          <label for="chapter-select">Chapter</label>
+          <select id="chapter-select"></select>
+          <label for="chapter-mode">Chapter behaviour</label>
+          <select id="chapter-mode">
+            <option value="continue">Continue through chapters</option>
+            <option value="stop">Stop at next chapter</option>
+          </select>
+          <div id="reading-progress" class="summary-block compact">No reading position saved yet.</div>
+        </section>
+        <section class="scroll-controls" aria-label="Auto-scroll controls">
+          <div class="control-row">
+            <button type="button" id="scroll-toggle" class="scroll-toggle" aria-pressed="false">Play</button>
+            <button type="button" id="scroll-slower" class="secondary-button" title="Slower">-</button>
+            <button type="button" id="scroll-faster" class="secondary-button" title="Faster">+</button>
+          </div>
+          <label for="scroll-speed">Speed</label>
+          <input id="scroll-speed" type="range" min="10" max="180" step="5" value="45">
+          <div id="scroll-status" class="summary-block">Stopped at 45 px/s</div>
+        </section>
+        <div>
+          <h2>Highlight Legend</h2>
+          <ul id="highlight-legend" class="legend-list"></ul>
+        </div>
+        <div id="mapping-warning" class="warning-block hidden"></div>
+        <a class="secondary-button text-center" href="/ui/">ManuscriptPrep</a>
+      </aside>
+
+      <section class="reader-pane">
+        <header class="reader-header">
+          <div>
+            <p class="eyebrow">Continuous Cleaned Manuscript</p>
+            <h2 id="reader-title">Select a manuscript</h2>
+          </div>
+        </header>
+        <article id="reader-content" class="reader-content" aria-live="polite"></article>
+      </section>
+    </main>
+    <script src="/ui/narrator-toolkit.js"></script>
+  </body>
+</html>

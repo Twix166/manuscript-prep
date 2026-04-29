@@ -304,11 +304,15 @@ class ExecutionAdapter:
         manifests_dir = workdir_path / "manifests" / book_slug
         chunk_dir = workdir_path / "chunks" / book_slug
         cleaned_path = workdir_path / "cleaned" / book_slug / "clean.txt"
+        narrator_document_path = workdir_path / "cleaned" / book_slug / "cleaned_document.json"
+        highlight_report_path = workdir_path / "cleaned" / book_slug / "highlight_report.json"
         raw_path = workdir_path / "extracted" / book_slug / "raw.txt"
 
         artifacts = self._record_stage_execution(job, "ingest", cmd, result) + [
             ArtifactRef(name="raw_text", path=str(raw_path), kind="text", stage="ingest"),
             ArtifactRef(name="clean_text", path=str(cleaned_path), kind="text", stage="ingest"),
+            ArtifactRef(name="narrator_cleaned_document", path=str(narrator_document_path), kind="json", stage="ingest"),
+            ArtifactRef(name="highlight_report", path=str(highlight_report_path), kind="json", stage="ingest"),
             ArtifactRef(name="chunk_dir", path=str(chunk_dir), kind="directory", stage="ingest"),
             ArtifactRef(name="chunk_manifest", path=str(manifests_dir / "chunk_manifest.json"), kind="json", stage="ingest"),
             ArtifactRef(name="ingest_manifest", path=str(manifests_dir / "ingest_manifest.json"), kind="json", stage="ingest"),

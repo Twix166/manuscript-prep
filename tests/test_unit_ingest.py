@@ -79,6 +79,35 @@ def test_clean_text_removes_page_markers_and_repeated_headers() -> None:
     assert stats["removed_page_markers"] == 3
 
 
+def test_clean_text_removes_page_edge_author_headers_and_footers() -> None:
+    raw = "\n".join(
+        [
+            "Deborah Balm",
+            "1",
+            "",
+            "CHAPTER I",
+            "",
+            "Jim spoke softly.",
+            "\f",
+            "Deborah Balm",
+            "2",
+            "",
+            "Jim thought again.",
+            "\f",
+            "Deborah Balm",
+            "3",
+            "",
+            "EPILOGUE",
+        ]
+    )
+
+    cleaned, _stats = ingest.clean_text(raw, StubLogger())
+
+    assert "Deborah Balm" not in cleaned
+    assert "CHAPTER I" in cleaned
+    assert "EPILOGUE" in cleaned
+
+
 def test_chunk_clean_text_writes_chunks_and_preserves_chapter_hint(tmp_path: Path) -> None:
     text = "\n\n".join(
         [
@@ -101,6 +130,33 @@ def test_chunk_clean_text_writes_chunks_and_preserves_chapter_hint(tmp_path: Pat
     assert stats["chunk_count"] >= 2
     assert chunks[0].chapter_hint == "CHAPTER I"
     assert Path(chunks[0].path).exists()
+
+
+def test_chunk_clean_text_recognises_keyword_and_numbered_chapters(tmp_path: Path) -> None:
+    text = "\n\n".join(
+        [
+            "PROLOGUE",
+            "A cold wind blew over the harbour.",
+            "CHAPTER 1: The Arrival",
+            "The ship moved slowly into port.",
+            "EPILOGUE",
+            "The harbour was quiet again.",
+        ]
+    )
+    chunks, _stats = ingest.chunk_clean_text(
+        clean_text_value=text,
+        book_title="Treasure Island",
+        chunks_root=tmp_path,
+        min_chunk_words=1,
+        target_chunk_words=5,
+        max_chunk_words=8,
+        logger=StubLogger(),
+    )
+
+    chapter_hints = [chunk.chapter_hint for chunk in chunks if chunk.chapter_hint]
+    assert "PROLOGUE" in chapter_hints
+    assert "CHAPTER 1: The Arrival" in chapter_hints
+    assert "EPILOGUE" in chapter_hints
 
 
 def test_extract_raw_text_supports_plain_text_sources(tmp_path: Path) -> None:

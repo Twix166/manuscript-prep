@@ -720,6 +720,80 @@ class GatewayAPI:
             **artifacts,
         }
 
+    def list_narrator_documents(self, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        status, payload = self.list_manuscripts(actor=actor)
+        if status != HTTPStatus.OK:
+            return status, payload
+
+        documents = []
+        for manuscript_payload in payload["manuscripts"]:
+            latest_ingest = manuscript_payload.get("latest_ingest")
+            if not latest_ingest:
+                continue
+            job = self.store.get_job(str(latest_ingest["job_id"]))
+            artifact = next((item for item in (job.artifacts if job else []) if item.name == "narrator_cleaned_document"), None)
+            report_artifact = next((item for item in (job.artifacts if job else []) if item.name == "highlight_report"), None)
+            document_path = Path(artifact.path) if artifact else None
+            report = None
+            if report_artifact and Path(report_artifact.path).is_file():
+                report = self._load_json_file(Path(report_artifact.path))
+            if document_path is None or not document_path.is_file():
+                continue
+            document = self._load_json_file(document_path) or {}
+            chapters = document.get("chapters") or []
+            report_summary = None
+            if isinstance(report, dict):
+                report_summary = {
+                    "total_highlights": report.get("total_highlights", 0),
+                    "mapped_highlights": report.get("mapped_highlights", 0),
+                    "unmapped_highlights": report.get("unmapped_highlights", 0),
+                    "extraction_warnings": report.get("extraction_warnings", []),
+                }
+            documents.append(
+                {
+                    "id": manuscript_payload["manuscript_id"],
+                    "manuscript_id": manuscript_payload["manuscript_id"],
+                    "title": manuscript_payload["title"],
+                    "source_filename": Path(str(manuscript_payload.get("source_path") or "")).name,
+                    "cleaning_status": latest_ingest["status"],
+                    "created_at": document.get("created_at") or latest_ingest.get("finished_at"),
+                    "has_highlights": bool((document.get("metadata") or {}).get("has_highlights")),
+                    "highlight_count": (report or {}).get("mapped_highlights", 0),
+                    "chapter_count": len(chapters),
+                    "mapping_report": report_summary,
+                }
+            )
+        return HTTPStatus.OK, {"documents": documents}
+
+    def get_narrator_document(self, manuscript_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:
+        allowed, error = self._require_actor(actor)
+        if not allowed:
+            return error
+        manuscript = self.store.get_manuscript(manuscript_id)
+        if manuscript is None:
+            return HTTPStatus.NOT_FOUND, {"error": f"Unknown manuscript: {manuscript_id}"}
+        if not self._can_access_manuscript(actor, manuscript.owner_user_id):
+            return HTTPStatus.FORBIDDEN, {"error": "Not authorized for this manuscript"}
+        latest_ingest = self._latest_ingest_summary(manuscript_id)
+        if latest_ingest is None:
+            return HTTPStatus.NOT_FOUND, {"error": "No cleaned Narrator's Toolkit document is available yet"}
+        status, payload = self.get_job_artifact(latest_ingest.job_id, "narrator_cleaned_document", actor=actor)
+        if status != HTTPStatus.OK or not payload.get("exists"):
+            return HTTPStatus.NOT_FOUND, {"error": "Missing Narrator's Toolkit cleaned document artifact"}
+        document = payload.get("content")
+        if not isinstance(document, dict):
+            return HTTPStatus.INTERNAL_SERVER_ERROR, {"error": "Narrator's Toolkit cleaned document is not valid JSON"}
+        report_status, report_payload = self.get_job_artifact(latest_ingest.job_id, "highlight_report", actor=actor)
+        return HTTPStatus.OK, {
+            "manuscript": self._serialize_manuscript(manuscript),
+            "job_id": latest_ingest.job_id,
+            "document": document,
+            "highlight_report": report_payload.get("content") if report_status == HTTPStatus.OK else None,
+        }
+
     def upload_manuscript(
         self,
         *,
@@ -1466,6 +1540,19 @@ class GatewayHandler(BaseHTTPRequestHandler):
             if len(parts) == 4:
                 _, _, manuscript_id, _ = parts
                 status, payload = self.app.get_manuscript_ingest_results(manuscript_id, actor=self._current_actor())
+                self._write_json(status, payload)
+                return
+
+        if path == "/v1/narrator-toolkit/documents":
+            status, payload = self.app.list_narrator_documents(actor=self._current_actor())
+            self._write_json(status, payload)
+            return
+
+        if path.startswith("/v1/narrator-toolkit/documents/"):
+            parts = path.strip("/").split("/")
+            if len(parts) == 4:
+                _, _, _, manuscript_id = parts
+                status, payload = self.app.get_narrator_document(manuscript_id, actor=self._current_actor())
                 self._write_json(status, payload)
                 return
 
