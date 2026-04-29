@@ -79,6 +79,24 @@ def test_clean_text_removes_page_markers_and_repeated_headers() -> None:
     assert stats["removed_page_markers"] == 3
 
 
+def test_clean_text_preserves_line_breaks_inside_paragraphs() -> None:
+    raw = "\n".join(
+        [
+            "CHAPTER I",
+            "",
+            "The first line of a paragraph",
+            "continues on the next line.",
+            "",
+            "Another paragraph follows.",
+        ]
+    )
+
+    cleaned, _stats = ingest.clean_text(raw, StubLogger())
+
+    assert "The first line of a paragraph\ncontinues on the next line." in cleaned
+    assert "The first line of a paragraph continues" not in cleaned
+
+
 def test_clean_text_removes_page_edge_author_headers_and_footers() -> None:
     raw = "\n".join(
         [

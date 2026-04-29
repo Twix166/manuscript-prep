@@ -520,12 +520,14 @@ def detect_repeated_lines(lines: List[str], min_count: int = 3) -> set[str]:
 
 def detect_page_edge_repeated_lines(raw_text: str, min_count: int = 2, edge_lines: int = 3) -> set[str]:
     pages = raw_text.split("\f") if "\f" in raw_text else [raw_text]
+    if len(pages) < 2:
+        return set()
     counts: Counter[str] = Counter()
     for page in pages:
         lines = [line.strip() for line in page.splitlines() if line.strip()]
         if not lines:
             continue
-        candidates = lines[:edge_lines] + lines[-edge_lines:]
+        candidates = set(lines[:edge_lines]) | set(lines[-edge_lines:])
         for candidate in candidates:
             if len(candidate) > 120:
                 continue
@@ -574,8 +576,7 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
         nonlocal buffer
         if not buffer:
             return
-        para = " ".join(part.strip() for part in buffer if part.strip())
-        para = re.sub(r"\s+", " ", para).strip()
+        para = "\n".join(part.rstrip() for part in buffer if part.strip()).strip()
         if para:
             paragraphs.append(para)
         buffer = []

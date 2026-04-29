@@ -772,6 +772,8 @@ a.ghost-button {
 
 .reader-block {
   margin: 0 0 1.35em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .reader-content h3.reader-block {

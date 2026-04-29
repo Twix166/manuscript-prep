@@ -901,6 +901,40 @@ def test_gateway_api_updates_and_deletes_manuscripts(tmp_path, sample_pdf) -> No
     assert manuscripts["manuscripts"] == []
 
 
+def test_gateway_api_delete_with_data_removes_workspace_outputs(tmp_path, sample_pdf) -> None:
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"))
+    workdir = tmp_path / "work"
+    source_path = workdir / "source" / "treasure_island.pdf"
+    cleaned_dir = workdir / "cleaned" / "treasure_island"
+    chunks_dir = workdir / "chunks" / "treasure_island"
+    manifests_dir = workdir / "manifests" / "treasure_island"
+    extracted_dir = workdir / "extracted" / "treasure_island"
+    tmp_dir = workdir / "tmp" / "treasure_island"
+    for path in (source_path, cleaned_dir, chunks_dir, manifests_dir, extracted_dir, tmp_dir):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.suffix:
+            path.write_text("placeholder", encoding="utf-8")
+        else:
+            path.mkdir(parents=True, exist_ok=True)
+
+    status, manuscript = app.create_manuscript(
+        {
+            "title": "Treasure Island",
+            "book_slug": "treasure_island",
+            "source_path": str(source_path),
+            "file_size_bytes": sample_pdf.stat().st_size,
+        }
+    )
+    assert status == 201
+
+    status, deleted = app.delete_manuscript_with_data(manuscript["manuscript_id"])
+    assert status == 200
+    assert deleted["deleted_mode"] == "full"
+    assert not cleaned_dir.exists()
+    assert not chunks_dir.exists()
+    assert not manifests_dir.exists()
+
+
 def test_gateway_api_runs_full_service_sequence(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

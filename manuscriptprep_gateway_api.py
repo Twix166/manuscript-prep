@@ -442,7 +442,23 @@ class GatewayAPI:
     def _collect_manuscript_paths(self, manuscript, jobs: list) -> list[Path]:
         paths: dict[str, Path] = {}
         if manuscript.source_path:
-            paths[str(Path(manuscript.source_path))] = Path(manuscript.source_path)
+            source_path = Path(manuscript.source_path)
+            paths[str(source_path)] = source_path
+            try:
+                if source_path.parent.name == "source" and source_path.parent.parent.exists():
+                    workspace_root = source_path.parent.parent
+                    book_slug = manuscript.book_slug
+                    for relative in (
+                        ("cleaned", book_slug),
+                        ("chunks", book_slug),
+                        ("extracted", book_slug),
+                        ("manifests", book_slug),
+                        ("tmp", book_slug),
+                    ):
+                        derived = workspace_root / relative[0] / relative[1]
+                        paths[str(derived)] = derived
+            except Exception:
+                pass
         for job in jobs:
             for stage in job.stage_runs:
                 for item in (stage.stdout_path, stage.stderr_path):
