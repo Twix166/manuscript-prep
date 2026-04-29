@@ -23,8 +23,23 @@
           <ul id="document-queue" class="document-queue"></ul>
         </section>
         <div id="document-status" class="summary-block">Loading cleaned manuscripts...</div>
-        <label for="chapter-select">Chapter</label>
-        <select id="chapter-select"></select>
+        <section class="chapter-panel" aria-label="Chapter navigation">
+          <div class="panel-head compact">
+            <div>
+              <p class="eyebrow">Resume</p>
+              <h2>Chapter navigation</h2>
+            </div>
+            <button type="button" id="resume-reading" class="secondary-button" disabled>Resume</button>
+          </div>
+          <label for="chapter-select">Chapter</label>
+          <select id="chapter-select"></select>
+          <label for="chapter-mode">Chapter behaviour</label>
+          <select id="chapter-mode">
+            <option value="continue">Continue through chapters</option>
+            <option value="stop">Stop at next chapter</option>
+          </select>
+          <div id="reading-progress" class="summary-block compact">No reading position saved yet.</div>
+        </section>
         <section class="scroll-controls" aria-label="Auto-scroll controls">
           <div class="control-row">
             <button type="button" id="scroll-toggle" class="scroll-toggle" aria-pressed="false">Play</button>

@@ -2,10 +2,13 @@ const els = {
   documentQueue: document.getElementById("document-queue"),
   documentStatus: document.getElementById("document-status"),
   chapterSelect: document.getElementById("chapter-select"),
+  chapterMode: document.getElementById("chapter-mode"),
+  readingProgress: document.getElementById("reading-progress"),
   highlightLegend: document.getElementById("highlight-legend"),
   mappingWarning: document.getElementById("mapping-warning"),
   readerTitle: document.getElementById("reader-title"),
   readerContent: document.getElementById("reader-content"),
+  resumeReading: document.getElementById("resume-reading"),
   scrollToggle: document.getElementById("scroll-toggle"),
   scrollSlower: document.getElementById("scroll-slower"),
   scrollFaster: document.getElementById("scroll-faster"),
@@ -15,6 +18,8 @@ const els = {
 
 const authToken = localStorage.getItem("manuscriptprep.apiToken");
 const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+const SETTINGS_STORAGE_KEY = "manuscriptprep.narrator.settings";
+const RESUME_STORAGE_KEY = "manuscriptprep.narrator.resume";
 const scroller = {
   running: false,
   speed: Number(document.getElementById("scroll-speed")?.value || 45),
@@ -25,6 +30,83 @@ const queueState = {
   documents: [],
   selectedDocumentId: null,
 };
+const readingState = {
+  manuscriptId: null,
+  chapterMetrics: [],
+  resumeRecord: null,
+  wordCount: 0,
+  lastSavedScrollTop: 0,
+  lastSaveAt: 0,
+  lastKnownChapterIndex: 0,
+};
+
+function loadJsonStorage(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      return fallback;
+    }
+    return JSON.parse(raw);
+  } catch (_error) {
+    return fallback;
+  }
+}
+
+function writeJsonStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (_error) {
+    return;
+  }
+}
+
+function loadSettings() {
+  const settings = loadJsonStorage(SETTINGS_STORAGE_KEY, {});
+  if (settings && typeof settings === "object") {
+    if (typeof settings.speed === "number") {
+      scroller.speed = settings.speed;
+    }
+    if (settings.chapterMode === "stop" || settings.chapterMode === "continue") {
+      els.chapterMode.value = settings.chapterMode;
+    }
+  }
+}
+
+function persistSettings() {
+  writeJsonStorage(SETTINGS_STORAGE_KEY, {
+    speed: scroller.speed,
+    chapterMode: els.chapterMode.value,
+  });
+}
+
+function loadResumeStore() {
+  return loadJsonStorage(RESUME_STORAGE_KEY, {});
+}
+
+function saveResumeStore(store) {
+  writeJsonStorage(RESUME_STORAGE_KEY, store);
+}
+
+function getResumeRecord(manuscriptId) {
+  if (!manuscriptId) {
+    return null;
+  }
+  const store = loadResumeStore();
+  return store[manuscriptId] || null;
+}
+
+function setResumeRecord(manuscriptId, record) {
+  if (!manuscriptId) {
+    return;
+  }
+  const store = loadResumeStore();
+  store[manuscriptId] = record;
+  saveResumeStore(store);
+}
+
+function getChapterLabel(index, chapter) {
+  return chapter?.title || `Chapter ${index + 1}`;
+}
 
 function escapeHtml(value) {
   return String(value || "")
@@ -99,6 +181,10 @@ function formatDateTime(value) {
   }).format(date);
 }
 
+function getReadAheadGap() {
+  return Math.max(180, Math.round(window.innerHeight * 0.2));
+}
+
 function maxScrollTop() {
   return Math.max(
     0,
@@ -106,11 +192,54 @@ function maxScrollTop() {
   );
 }
 
+function estimateWordsPerMinute() {
+  const scrollableHeight = maxScrollTop();
+  if (scrollableHeight <= 0 || readingState.wordCount <= 0) {
+    return 0;
+  }
+  const wordsPerPixel = readingState.wordCount / scrollableHeight;
+  return Math.round(scroller.speed * wordsPerPixel * 60);
+}
+
+function getCurrentChapterIndex(scrollTop = window.scrollY) {
+  if (!readingState.chapterMetrics.length) {
+    return 0;
+  }
+  const probe = scrollTop + Math.round(window.innerHeight * 0.25);
+  let currentIndex = 0;
+  for (let index = 0; index < readingState.chapterMetrics.length; index += 1) {
+    if (probe >= readingState.chapterMetrics[index].top) {
+      currentIndex = index;
+    } else {
+      break;
+    }
+  }
+  return currentIndex;
+}
+
+function formatChapterProgress() {
+  if (!readingState.chapterMetrics.length) {
+    const saved = readingState.resumeRecord;
+    return saved ? `Saved ${formatDateTime(saved.saved_at)}` : "No chapters available";
+  }
+  const index = Math.min(getCurrentChapterIndex(), readingState.chapterMetrics.length - 1);
+  const percent = maxScrollTop() > 0 ? Math.round((window.scrollY / maxScrollTop()) * 100) : 100;
+  const saved = readingState.resumeRecord;
+  const savedLabel = saved
+    ? `Saved ${formatDateTime(saved.saved_at)} at ${saved.chapter_title || "chapter start"}`
+    : "No reading position saved yet";
+  return `Chapter ${index + 1} of ${readingState.chapterMetrics.length} • ${percent}% through document • ${savedLabel}`;
+}
+
 function renderScrollControls() {
   els.scrollToggle.textContent = scroller.running ? "Pause" : "Play";
   els.scrollToggle.setAttribute("aria-pressed", String(scroller.running));
   els.scrollSpeed.value = String(scroller.speed);
-  els.scrollStatus.textContent = `${scroller.running ? "Scrolling" : "Stopped"} at ${scroller.speed} px/s`;
+  const wpm = estimateWordsPerMinute();
+  const modeLabel = els.chapterMode.value === "stop" ? "chapter stop" : "chapter continue";
+  els.scrollStatus.textContent = `${scroller.running ? "Scrolling" : "Stopped"} at ${scroller.speed} px/s${wpm ? ` • ~${wpm} wpm` : ""} • ${modeLabel}`;
+  els.resumeReading.disabled = !readingState.resumeRecord;
+  els.readingProgress.textContent = formatChapterProgress();
 }
 
 function stopScrolling() {
@@ -120,6 +249,38 @@ function stopScrolling() {
     cancelAnimationFrame(scroller.frameId);
     scroller.frameId = null;
   }
+  renderScrollControls();
+}
+
+function saveReadingPosition() {
+  if (!readingState.manuscriptId) {
+    return;
+  }
+  const chapterIndex = getCurrentChapterIndex();
+  const chapter = readingState.chapterMetrics[chapterIndex];
+  const record = {
+    scroll_top: Math.round(window.scrollY),
+    chapter_id: chapter?.id || null,
+    chapter_title: chapter?.title || null,
+    chapter_index: chapterIndex,
+    saved_at: new Date().toISOString(),
+  };
+  readingState.resumeRecord = record;
+  readingState.lastSavedScrollTop = record.scroll_top;
+  readingState.lastSaveAt = Date.now();
+  readingState.lastKnownChapterIndex = chapterIndex;
+  setResumeRecord(readingState.manuscriptId, record);
+  renderScrollControls();
+}
+
+function restoreReadingPosition(record, behavior = "auto") {
+  if (!record) {
+    return;
+  }
+  const top = Math.max(0, Number(record.scroll_top || 0));
+  window.scrollTo({ top, behavior });
+  readingState.lastSavedScrollTop = top;
+  readingState.lastKnownChapterIndex = Number(record.chapter_index || 0);
   renderScrollControls();
 }
 
@@ -140,11 +301,28 @@ function scrollFrame(timestamp) {
   }
   const elapsedSeconds = Math.min((timestamp - scroller.lastFrameTime) / 1000, 0.1);
   scroller.lastFrameTime = timestamp;
-  const nextTop = Math.min(window.scrollY + scroller.speed * elapsedSeconds, maxScrollTop());
+  const currentTop = window.scrollY;
+  const readAheadCeiling = Math.max(0, maxScrollTop() - getReadAheadGap());
+  const currentChapterIndex = getCurrentChapterIndex(currentTop);
+  const chapterMode = els.chapterMode.value || "continue";
+  let nextTop = Math.min(currentTop + scroller.speed * elapsedSeconds, readAheadCeiling);
+  if (chapterMode === "stop" && readingState.chapterMetrics[currentChapterIndex + 1]) {
+    const nextChapterTop = readingState.chapterMetrics[currentChapterIndex + 1].top;
+    if (nextTop >= nextChapterTop - 4) {
+      window.scrollTo({ top: nextChapterTop, behavior: "auto" });
+      saveReadingPosition();
+      stopScrolling();
+      return;
+    }
+  }
   window.scrollTo({ top: nextTop, behavior: "auto" });
-  if (nextTop >= maxScrollTop()) {
+  if (nextTop >= readAheadCeiling || nextTop >= maxScrollTop()) {
+    saveReadingPosition();
     stopScrolling();
     return;
+  }
+  if (Date.now() - readingState.lastSaveAt > 400) {
+    saveReadingPosition();
   }
   scroller.frameId = requestAnimationFrame(scrollFrame);
 }
@@ -171,17 +349,38 @@ function setScrollSpeed(nextSpeed) {
   const min = Number(els.scrollSpeed.min);
   const max = Number(els.scrollSpeed.max);
   scroller.speed = Math.max(min, Math.min(max, Number(nextSpeed)));
+  persistSettings();
+  renderScrollControls();
+}
+
+function updateChapterMetrics() {
+  readingState.chapterMetrics = [...els.readerContent.querySelectorAll(".reader-chapter")].map((element, index) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      id: element.id,
+      title: element.dataset.chapterTitle || getChapterLabel(index, null),
+      top: Math.round(rect.top + window.scrollY),
+      bottom: Math.round(rect.bottom + window.scrollY),
+    };
+  });
   renderScrollControls();
 }
 
 function renderDocument(document, report) {
   stopScrolling();
   els.readerTitle.textContent = document.title || "Untitled manuscript";
+  readingState.manuscriptId = document.manuscript_id || null;
+  readingState.wordCount = (document.chapters || []).reduce((total, chapter) => (
+    total + (chapter.blocks || []).reduce((chapterTotal, block) => chapterTotal + String(block.text || "").trim().split(/\s+/).filter(Boolean).length, 0)
+  ), 0);
+  readingState.resumeRecord = getResumeRecord(readingState.manuscriptId);
   els.chapterSelect.innerHTML = (document.chapters || []).map((chapter, index) => (
-    `<option value="${escapeHtml(chapter.id)}">${escapeHtml(chapter.title || `Chapter ${index + 1}`)}</option>`
+    `<option value="${escapeHtml(chapter.id)}">${escapeHtml(getChapterLabel(index, chapter))}</option>`
   )).join("");
+  els.chapterSelect.disabled = !(document.chapters || []).length;
+  els.chapterMode.value = els.chapterMode.value || "continue";
   els.readerContent.innerHTML = (document.chapters || []).map((chapter) => `
-    <section class="reader-chapter" id="${escapeHtml(chapter.id)}">
+    <section class="reader-chapter" id="${escapeHtml(chapter.id)}" data-chapter-title="${escapeHtml(chapter.title || "")}">
       ${(chapter.blocks || []).map((block) => {
         const tag = block.type === "heading" ? "h3" : "p";
         return `<${tag} class="reader-block">${renderTextWithSpans(block)}</${tag}>`;
@@ -190,6 +389,17 @@ function renderDocument(document, report) {
   `).join("");
   renderLegend(document);
   renderMappingWarning(report || document.metadata?.highlight_report);
+  els.resumeReading.disabled = !readingState.resumeRecord;
+  els.chapterSelect.value = readingState.resumeRecord?.chapter_id || document.chapters?.[0]?.id || "";
+  requestAnimationFrame(() => {
+    updateChapterMetrics();
+    if (readingState.resumeRecord) {
+      restoreReadingPosition(readingState.resumeRecord);
+      els.documentStatus.textContent = `Loaded ${document.title || "Untitled manuscript"} and restored the last reading position.`;
+    } else {
+      els.documentStatus.textContent = `Loaded ${document.title || "Untitled manuscript"}`;
+    }
+  });
 }
 
 function renderDocumentQueue() {
@@ -236,6 +446,16 @@ function renderDocumentQueue() {
   }
 }
 
+function handleViewportScroll() {
+  if (!readingState.manuscriptId) {
+    return;
+  }
+  if (Date.now() - readingState.lastSaveAt > 350) {
+    saveReadingPosition();
+  }
+  renderScrollControls();
+}
+
 async function loadDocument(manuscriptId) {
   if (!manuscriptId) {
     els.readerContent.textContent = "No cleaned document selected.";
@@ -246,7 +466,6 @@ async function loadDocument(manuscriptId) {
   queueState.selectedDocumentId = manuscriptId;
   renderDocumentQueue();
   renderDocument(payload.document, payload.highlight_report);
-  els.documentStatus.textContent = `Loaded ${payload.manuscript.title}`;
 }
 
 async function loadDocuments() {
@@ -271,6 +490,19 @@ els.chapterSelect.addEventListener("change", () => {
   const target = document.getElementById(els.chapterSelect.value);
   if (target) {
     target.scrollIntoView({ behavior: "smooth", block: "start" });
+    requestAnimationFrame(() => saveReadingPosition());
+  }
+});
+
+els.chapterMode.addEventListener("change", () => {
+  persistSettings();
+  renderScrollControls();
+});
+
+els.resumeReading.addEventListener("click", () => {
+  stopScrolling();
+  if (readingState.resumeRecord) {
+    restoreReadingPosition(readingState.resumeRecord, "smooth");
   }
 });
 
@@ -278,6 +510,16 @@ els.scrollToggle.addEventListener("click", toggleScrolling);
 els.scrollSpeed.addEventListener("input", () => setScrollSpeed(els.scrollSpeed.value));
 els.scrollSlower.addEventListener("click", () => setScrollSpeed(scroller.speed - 5));
 els.scrollFaster.addEventListener("click", () => setScrollSpeed(scroller.speed + 5));
+
+window.addEventListener("scroll", handleViewportScroll, { passive: true });
+window.addEventListener("resize", () => {
+  updateChapterMetrics();
+  renderScrollControls();
+});
+window.addEventListener("beforeunload", saveReadingPosition);
+
+loadSettings();
+persistSettings();
 
 document.addEventListener("keydown", (event) => {
   const target = event.target;

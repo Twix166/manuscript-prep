@@ -11,11 +11,11 @@ from typing import Any
 from uuid import uuid4
 
 from narrator_toolkit.highlight_extraction import ExtractedHighlight
+from narrator_toolkit.text_rules import is_chapter_heading
 
 
 SCHEMA_VERSION = "narrator-toolkit.cleaned-document.v1"
 CLEANER_VERSION = "manuscriptprep-cleaner+highlight-map.v1"
-CHAPTER_RE = re.compile(r"^\s*chapter\s+[ivxlcdm0-9]+\b", re.I)
 
 
 def utc_now_iso() -> str:
@@ -148,6 +148,52 @@ def _find_normalised_precomputed(
     return None
 
 
+def _find_in_context(
+    clean_text: str,
+    highlight_text: str,
+    context_text: str,
+    used_ranges: list[tuple[int, int]],
+    preferred_start: int = 0,
+) -> tuple[int, int] | None:
+    if not context_text.strip():
+        return None
+
+    context_match = _find_exact(clean_text, context_text, used_ranges, preferred_start)
+    if context_match is None:
+        context_norm, context_map = _normalise_search_text(clean_text)
+        context_match = _find_normalised_precomputed(
+            context_norm,
+            context_map,
+            context_text,
+            used_ranges,
+            _normalise_search_text,
+            preferred_start,
+        )
+    if context_match is None:
+        context_norm, context_map = _normalise_punctuation_tolerant(clean_text)
+        context_match = _find_normalised_precomputed(
+            context_norm,
+            context_map,
+            context_text,
+            used_ranges,
+            _normalise_punctuation_tolerant,
+            preferred_start,
+        )
+    if context_match is None:
+        return None
+
+    context_start, context_end = context_match
+    segment = clean_text[context_start:context_end]
+    inner = _find_exact(segment, highlight_text, [], 0)
+    if inner is None:
+        inner = _find_normalised(segment, highlight_text, [], _normalise_search_text, 0)
+    if inner is None:
+        inner = _find_normalised(segment, highlight_text, [], _normalise_punctuation_tolerant, 0)
+    if inner is None:
+        return None
+    return context_start + inner[0], context_start + inner[1]
+
+
 def _find_fuzzy(clean_text: str, highlight_text: str, used_ranges: list[tuple[int, int]]) -> tuple[int, int, float] | None:
     words = re.findall(r"\S+", highlight_text)
     if not words:
@@ -186,9 +232,18 @@ def map_highlights_to_clean_text(
     clean_punctuation_norm, clean_punctuation_map = _normalise_punctuation_tolerant(clean_text)
 
     for highlight in highlights:
-        match = _find_exact(clean_text, highlight.text, used_ranges, search_cursor)
-        method = "exact"
-        confidence = 1.0
+        context_text = getattr(highlight, "source_context", "") or ""
+        match = _find_in_context(
+            clean_text,
+            highlight.text,
+            context_text,
+            used_ranges,
+            search_cursor,
+        )
+        method = "contextual" if match is not None else "exact"
+        confidence = 0.98 if match is not None else 1.0
+        if match is None:
+            match = _find_exact(clean_text, highlight.text, used_ranges, search_cursor)
         if match is None:
             match = _find_normalised_precomputed(
                 clean_whitespace_norm,
@@ -269,7 +324,7 @@ def _paragraph_offsets(clean_text: str) -> list[tuple[str, int, int]]:
 
 
 def _block_type(text: str) -> str:
-    if CHAPTER_RE.match(text):
+    if is_chapter_heading(text):
         return "heading"
     return "paragraph"
 
@@ -303,7 +358,7 @@ def build_cleaned_document(
         return chapter
 
     for block_index, (text, start_offset, end_offset) in enumerate(paragraphs, start=1):
-        is_chapter = CHAPTER_RE.match(text) is not None
+        is_chapter = is_chapter_heading(text)
         if current_chapter is None or is_chapter:
             current_chapter = start_chapter(text if is_chapter else None, start_offset)
 

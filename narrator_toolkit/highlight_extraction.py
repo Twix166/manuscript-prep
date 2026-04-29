@@ -14,6 +14,7 @@ class ExtractedHighlight:
     source_page: int
     source_annotation_id: str
     rect: list[float]
+    source_context: str = ""
     extraction_method: str = "pymupdf_annotation_words"
 
     def to_dict(self) -> dict[str, Any]:
@@ -69,6 +70,57 @@ def _words_under_rects(fitz: Any, page: Any, rects: list[Any]) -> str:
     return " ".join(str(item[4]) for item in words).strip()
 
 
+def _normalize_for_context(text: str) -> tuple[str, list[int]]:
+    out: list[str] = []
+    index_map: list[int] = []
+    previous_space = False
+    for index, char in enumerate(text):
+        if char.isspace():
+            if not previous_space:
+                out.append(" ")
+                index_map.append(index)
+                previous_space = True
+            continue
+        previous_space = False
+        out.append(char.lower())
+        index_map.append(index)
+    return "".join(out).strip(), index_map
+
+
+def _find_text_span(text: str, needle: str) -> tuple[int, int] | None:
+    start = text.find(needle)
+    if start >= 0:
+        return start, start + len(needle)
+
+    text_norm, text_map = _normalize_for_context(text)
+    needle_norm, needle_map = _normalize_for_context(needle)
+    if not text_norm or not needle_norm:
+        return None
+
+    norm_start = text_norm.find(needle_norm)
+    if norm_start < 0:
+        return None
+    norm_end = norm_start + len(needle_norm) - 1
+    start = text_map[norm_start]
+    end = text_map[norm_end] + 1
+    if needle_map:
+        end += len(needle) - needle_map[-1] - 1
+    return start, end
+
+
+def _context_snippet(page_text: str, highlight_text: str, window: int = 140) -> str:
+    if not page_text.strip():
+        return ""
+    match = _find_text_span(page_text, highlight_text)
+    if match is None:
+        return " ".join(page_text.split())[: window * 2].strip()
+    start, end = match
+    snippet_start = max(0, start - window)
+    snippet_end = min(len(page_text), end + window)
+    snippet = page_text[snippet_start:snippet_end].strip()
+    return " ".join(snippet.split())
+
+
 def _looks_like_flattened_highlight(fill: Any, rect: Any) -> bool:
     if not fill or rect is None:
         return False
@@ -91,6 +143,7 @@ def _extract_flattened_highlights(fitz: Any, pdf_path: Path) -> tuple[list[Extra
     seen: set[tuple[int, str, int, int, int, int]] = set()
     with fitz.open(pdf_path) as doc:
         for page_index, page in enumerate(doc):
+            page_text = page.get_text("text")
             flattened_index = 0
             for drawing in page.get_drawings():
                 fill = drawing.get("fill")
@@ -121,6 +174,7 @@ def _extract_flattened_highlights(fitz: Any, pdf_path: Path) -> tuple[list[Extra
                         source_page=page_index + 1,
                         source_annotation_id=f"page-{page_index + 1}-flattened-{flattened_index}",
                         rect=[float(rect.x0), float(rect.y0), float(rect.x1), float(rect.y1)],
+                        source_context=_context_snippet(page_text, text),
                         extraction_method="pymupdf_flattened_highlight_rect",
                     )
                 )
@@ -146,6 +200,7 @@ def extract_pdf_highlights(pdf_path: Path) -> tuple[list[ExtractedHighlight], li
     try:
         with fitz.open(pdf_path) as doc:
             for page_index, page in enumerate(doc):
+                page_text = page.get_text("text")
                 annot = page.first_annot
                 annot_index = 0
                 while annot:
@@ -162,6 +217,7 @@ def extract_pdf_highlights(pdf_path: Path) -> tuple[list[ExtractedHighlight], li
                                     source_page=page_index + 1,
                                     source_annotation_id=f"page-{page_index + 1}-annot-{annot_index}",
                                     rect=[float(rect.x0), float(rect.y0), float(rect.x1), float(rect.y1)],
+                                    source_context=_context_snippet(page_text, text),
                                 )
                             )
                         else:

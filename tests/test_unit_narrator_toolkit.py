@@ -81,6 +81,44 @@ def test_highlight_mapping_survives_cleaned_whitespace_changes() -> None:
     assert report["mapped_highlights"] == 1
 
 
+def test_highlight_mapping_prefers_source_context_for_repeated_text() -> None:
+    clean_text = "CHAPTER I\n\nSarah waved.\n\nLater Sarah waved again.\n"
+    highlights = [
+        ExtractedHighlight(
+            text="Sarah",
+            color="#93c47d",
+            source_page=2,
+            source_annotation_id="annot-2",
+            rect=[0, 0, 10, 10],
+            source_context="Later Sarah waved again.",
+        )
+    ]
+
+    document, report = build_cleaned_document(
+        clean_text=clean_text,
+        title="Context Test",
+        source_file="voice-test.pdf",
+        highlights=highlights,
+    )
+
+    later_block = document["chapters"][0]["blocks"][2]
+    assert later_block["text"] == "Later Sarah waved again."
+    assert later_block["spans"] == [
+        {
+            "start": 6,
+            "end": 11,
+            "type": "highlight",
+            "color": "#93c47d",
+            "source_page": 2,
+            "source_annotation_id": "annot-2",
+            "character": None,
+            "mapping_method": "contextual",
+            "confidence": 0.98,
+        }
+    ]
+    assert report["mapped_highlights"] == 1
+
+
 def test_highlight_extraction_reads_fake_pymupdf_annotations(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     class FakeRect:
         def __init__(self, values):
@@ -97,12 +135,14 @@ def test_highlight_extraction_reads_fake_pymupdf_annotations(monkeypatch: pytest
         first_annot = FakeAnnot()
 
         def get_text(self, mode):
-            assert mode == "words"
-            return [
-                (0, 0, 30, 10, "Hello", 0, 0, 0),
-                (35, 0, 70, 10, "Sarah", 0, 0, 1),
-                (110, 0, 140, 10, "Outside", 0, 0, 2),
-            ]
+            if mode == "words":
+                return [
+                    (0, 0, 30, 10, "Hello", 0, 0, 0),
+                    (35, 0, 70, 10, "Sarah", 0, 0, 1),
+                    (110, 0, 140, 10, "Outside", 0, 0, 2),
+                ]
+            assert mode == "text"
+            return "Hello Sarah\nOutside"
 
     class FakeDoc:
         def __enter__(self):

@@ -39,3 +39,13 @@ Implemented:
 - Queue selection remains gateway-driven and does not require manual text entry.
 
 MVP 4 should add chapter controls, resume state, and navigation without changing the queue contract.
+
+## MVP 4
+
+Implemented:
+
+- Chapter navigation remains separate from the queue and now includes a chapter behaviour selector.
+- Reading position is persisted per cleaned manuscript and restored on reopen.
+- A Resume action is available alongside manual chapter jumps.
+- The scroll status reports both px/s and estimated WPM.
+- Shared UI styling now uses the Deborah Balm-inspired palette across Manuscript Prep and Narrator's Toolkit.

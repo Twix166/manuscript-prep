@@ -46,8 +46,11 @@ def test_get_web_asset_serves_narrator_toolkit_page() -> None:
     assert content_type.startswith("text/html")
     assert b"Narrator's Toolkit" in body
     assert b"document-queue" in body
+    assert b"resume-reading" in body
+    assert b"chapter-mode" in body
     assert b"scroll-toggle" in body
     assert b"scroll-speed" in body
+    assert b"reading-progress" in body
 
 
 def test_get_web_asset_serves_narrator_toolkit_script() -> None:
@@ -55,6 +58,11 @@ def test_get_web_asset_serves_narrator_toolkit_script() -> None:
 
     assert content_type.startswith("application/javascript")
     assert b"requestAnimationFrame" in body
+    assert b"manuscriptprep.narrator.resume" in body
+    assert b"saveReadingPosition" in body
+    assert b"chapter stop" in body
+    assert b"px/s" in body
+    assert b"wpm" in body
     assert b"Space" in body
     assert b"ArrowUp" in body
     assert b"ArrowDown" in body
