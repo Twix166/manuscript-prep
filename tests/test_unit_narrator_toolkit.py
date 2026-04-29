@@ -165,3 +165,105 @@ def test_highlight_extraction_reads_fake_pymupdf_annotations(monkeypatch: pytest
     assert highlights[0].text == "Hello Sarah"
     assert highlights[0].color == "#ffd966"
     assert highlights[0].source_page == 1
+
+
+def test_highlight_extraction_prefers_quad_geometry_over_rect_overlap(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    class FakePoint:
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+
+    class FakeRect:
+        def __init__(self, values):
+            self.x0, self.y0, self.x1, self.y1 = values
+
+    class FakeAnnot:
+        type = (8, "Highlight")
+        rect = FakeRect((0, 0, 180, 20))
+        vertices = [
+            FakePoint(0, 0),
+            FakePoint(0, 20),
+            FakePoint(120, 20),
+            FakePoint(120, 0),
+        ]
+        colors = {"stroke": (1.0, 0.85, 0.4)}
+        next = None
+
+    class FakePage:
+        first_annot = FakeAnnot()
+
+        def get_text(self, mode):
+            if mode == "words":
+                return [
+                    (0, 0, 40, 10, "Hello", 0, 0, 0),
+                    (45, 0, 85, 10, "Sarah", 0, 0, 1),
+                    (130, 0, 175, 10, "Neighbor", 0, 0, 2),
+                ]
+            assert mode == "text"
+            return "Hello Sarah Neighbor"
+
+    class FakeDoc:
+        def __enter__(self):
+            return [FakePage()]
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    fake_fitz = SimpleNamespace(
+        Rect=lambda values: FakeRect(values),
+        Quad=lambda values: SimpleNamespace(rect=FakeRect((0, 0, 120, 20))),
+        open=lambda path: FakeDoc(),
+    )
+    monkeypatch.setitem(sys.modules, "fitz", fake_fitz)
+
+    highlights, warnings = extract_pdf_highlights(tmp_path / "sample.pdf")
+
+    assert warnings == []
+    assert len(highlights) == 1
+    assert highlights[0].text == "Hello Sarah"
+
+
+def test_flattened_highlight_rect_selection_ignores_nearby_line_overlap(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    class FakeRect:
+        def __init__(self, values):
+            self.x0, self.y0, self.x1, self.y1 = values
+
+    class FakeAnnot:
+        type = (8, "Highlight")
+        rect = FakeRect((0, 0, 120, 20))
+        vertices = None
+        colors = {"stroke": (1.0, 0.85, 0.4)}
+        next = None
+
+    class FakePage:
+        first_annot = FakeAnnot()
+
+        def get_text(self, mode):
+            if mode == "words":
+                return [
+                    (0, 2, 40, 12, "Hello", 0, 0, 0),
+                    (45, 2, 85, 12, "Sarah", 0, 0, 1),
+                    (0, 18, 40, 28, "Neighbor", 0, 0, 2),
+                ]
+            assert mode == "text"
+            return "Hello Sarah Neighbor"
+
+    class FakeDoc:
+        def __enter__(self):
+            return [FakePage()]
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    fake_fitz = SimpleNamespace(
+        Rect=lambda values: FakeRect(values),
+        Quad=lambda values: SimpleNamespace(rect=FakeRect((0, 0, 120, 20))),
+        open=lambda path: FakeDoc(),
+    )
+    monkeypatch.setitem(sys.modules, "fitz", fake_fitz)
+
+    highlights, warnings = extract_pdf_highlights(tmp_path / "sample.pdf")
+
+    assert warnings == []
+    assert len(highlights) == 1
+    assert highlights[0].text == "Hello Sarah"

@@ -42,6 +42,54 @@ def _rect_intersects(rect_a: Any, rect_b: Any) -> bool:
     )
 
 
+def _rect_contains_point(rect: Any, point: tuple[float, float]) -> bool:
+    x, y = point
+    return float(rect.x0) <= x <= float(rect.x1) and float(rect.y0) <= y <= float(rect.y1)
+
+
+def _rect_overlap_area(rect_a: Any, rect_b: Any) -> float:
+    x0 = max(float(rect_a.x0), float(rect_b.x0))
+    y0 = max(float(rect_a.y0), float(rect_b.y0))
+    x1 = min(float(rect_a.x1), float(rect_b.x1))
+    y1 = min(float(rect_a.y1), float(rect_b.y1))
+    if x1 <= x0 or y1 <= y0:
+        return 0.0
+    return (x1 - x0) * (y1 - y0)
+
+
+def _point_in_polygon(point: tuple[float, float], polygon: list[tuple[float, float]]) -> bool:
+    x, y = point
+    inside = False
+    if len(polygon) < 3:
+        return False
+    previous = polygon[-1]
+    for current in polygon:
+        x1, y1 = previous
+        x2, y2 = current
+        intersects = ((y1 > y) != (y2 > y)) and (
+            x < (x2 - x1) * (y - y1) / ((y2 - y1) or 1e-12) + x1
+        )
+        if intersects:
+            inside = not inside
+        previous = current
+    return inside
+
+
+def _word_center(word: Any) -> tuple[float, float]:
+    return ((float(word[0]) + float(word[2])) / 2.0, (float(word[1]) + float(word[3])) / 2.0)
+
+
+def _quad_points(quad: Any) -> list[tuple[float, float]]:
+    points: list[tuple[float, float]] = []
+    for point in quad:
+        if hasattr(point, "x") and hasattr(point, "y"):
+            points.append((float(point.x), float(point.y)))
+        else:
+            x, y = point
+            points.append((float(x), float(y)))
+    return points
+
+
 def _highlight_rects(fitz: Any, annot: Any) -> list[Any]:
     vertices = getattr(annot, "vertices", None)
     if vertices:
@@ -55,7 +103,39 @@ def _highlight_rects(fitz: Any, annot: Any) -> list[Any]:
     return [annot.rect]
 
 
+def _highlight_quads(fitz: Any, annot: Any) -> list[list[tuple[float, float]]]:
+    vertices = getattr(annot, "vertices", None)
+    if not vertices:
+        return []
+    quads: list[list[tuple[float, float]]] = []
+    for index in range(0, len(vertices), 4):
+        quad = vertices[index:index + 4]
+        if len(quad) == 4:
+            quads.append(_quad_points(quad))
+    return quads
+
+
+def _word_is_under_quad(word: Any, quad: list[tuple[float, float]]) -> bool:
+    return _point_in_polygon(_word_center(word), quad)
+
+
+def _words_from_selection(page: Any, selected_words: list[Any]) -> str:
+    if not selected_words:
+        return ""
+    selected_words.sort(key=lambda item: (round(float(item[1]), 1), float(item[0])))
+    return " ".join(str(item[4]) for item in selected_words).strip()
+
+
 def _words_under_annotation(fitz: Any, page: Any, annot: Any) -> str:
+    quads = _highlight_quads(fitz, annot)
+    if quads:
+        selected_words = []
+        for word in page.get_text("words"):
+            if any(_word_is_under_quad(word, quad) for quad in quads):
+                selected_words.append(word)
+        text = _words_from_selection(page, selected_words)
+        if text:
+            return text
     rects = _highlight_rects(fitz, annot)
     return _words_under_rects(fitz, page, rects)
 
@@ -64,10 +144,17 @@ def _words_under_rects(fitz: Any, page: Any, rects: list[Any]) -> str:
     words = []
     for word in page.get_text("words"):
         word_rect = fitz.Rect(word[:4])
-        if any(_rect_intersects(word_rect, rect) for rect in rects):
-            words.append(word)
-    words.sort(key=lambda item: (round(float(item[1]), 1), float(item[0])))
-    return " ".join(str(item[4]) for item in words).strip()
+        word_center = _word_center(word)
+        for rect in rects:
+            if _rect_contains_point(rect, word_center):
+                words.append(word)
+                break
+            overlap = _rect_overlap_area(word_rect, rect)
+            word_area = max((float(word_rect.x1) - float(word_rect.x0)) * (float(word_rect.y1) - float(word_rect.y0)), 1e-12)
+            if overlap / word_area >= 0.35:
+                words.append(word)
+                break
+    return _words_from_selection(page, words)
 
 
 def _normalize_for_context(text: str) -> tuple[str, list[int]]:
