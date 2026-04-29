@@ -563,7 +563,7 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
             removed_repeated_headers += 1
             continue
 
-        cleaned_lines.append(line)
+        cleaned_lines.append(line.rstrip())
 
     text = "\n".join(cleaned_lines)
     text = re.sub(r"([A-Za-z])-\n([a-z])", r"\1\2", text)
@@ -576,7 +576,7 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
         nonlocal buffer
         if not buffer:
             return
-        para = "\n".join(part.rstrip() for part in buffer if part.strip()).strip()
+        para = "\n".join(part.rstrip() for part in buffer if part.strip())
         if para:
             paragraphs.append(para)
         buffer = []
@@ -598,11 +598,11 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
             paragraphs.append(stripped)
             continue
 
-        buffer.append(stripped)
+        buffer.append(line)
 
     flush_buffer()
 
-    clean_text_out = "\n\n".join(paragraphs).strip() + "\n"
+    clean_text_out = "\n\n".join(paragraphs).rstrip() + "\n"
 
     cleaning_stats = {
         "removed_page_markers": removed_page_markers,
@@ -622,7 +622,7 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
 
 
 def detect_structure_hints(clean_text_value: str) -> Dict[str, Any]:
-    paragraphs = [p.strip() for p in clean_text_value.split("\n\n") if p.strip()]
+    paragraphs = [p.rstrip("\n") for p in clean_text_value.split("\n\n") if p.strip()]
 
     parts: List[str] = []
     chapters: List[str] = []
@@ -665,7 +665,7 @@ def chunk_clean_text(
     book_chunk_dir = chunks_root / book_slug
     book_chunk_dir.mkdir(parents=True, exist_ok=True)
 
-    paragraphs = [p.strip() for p in clean_text_value.split("\n\n") if p.strip()]
+    paragraphs = [p.rstrip("\n") for p in clean_text_value.split("\n\n") if p.strip()]
 
     chunks: List[ChunkRecord] = []
     current: List[str] = []
@@ -680,7 +680,7 @@ def chunk_clean_text(
         if not current:
             return
 
-        chunk_text = "\n\n".join(current).strip() + "\n"
+        chunk_text = "\n\n".join(current).rstrip() + "\n"
         chunk_id = f"chunk_{index:03d}"
         chunk_path = book_chunk_dir / f"{chunk_id}.txt"
 
@@ -724,19 +724,21 @@ def chunk_clean_text(
     for para in paragraphs:
         para_words = count_words(para)
 
-        if PART_RE.match(para):
-            current_part = para
+        para_text = para.strip()
 
-        if shared_is_chapter_heading(para):
+        if PART_RE.match(para_text):
+            current_part = para_text
+
+        if shared_is_chapter_heading(para_text):
             if current and current_words >= min_chunk_words:
                 finalize_chunk(chunk_index)
                 chunk_index += 1
-            current_chapter = para
+            current_chapter = para_text
             current.append(para)
             current_words += para_words
             continue
 
-        if shared_is_scene_break(para):
+        if shared_is_scene_break(para_text):
             if current and current_words >= target_chunk_words:
                 finalize_chunk(chunk_index)
                 chunk_index += 1
@@ -752,7 +754,7 @@ def chunk_clean_text(
         current_words += para_words
 
         if current_words >= target_chunk_words and (
-            para.endswith(".") or para.endswith('"') or para.endswith("'") or shared_is_probable_heading(para)
+            para_text.endswith(".") or para_text.endswith('"') or para_text.endswith("'") or shared_is_probable_heading(para_text)
         ):
             finalize_chunk(chunk_index)
             chunk_index += 1

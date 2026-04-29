@@ -313,7 +313,7 @@ def map_highlights_to_clean_text(
 def _paragraph_offsets(clean_text: str) -> list[tuple[str, int, int]]:
     paragraphs: list[tuple[str, int, int]] = []
     cursor = 0
-    for paragraph in [item.strip() for item in clean_text.split("\n\n") if item.strip()]:
+    for paragraph in [item.rstrip("\n") for item in clean_text.split("\n\n") if item.strip()]:
         start = clean_text.find(paragraph, cursor)
         if start < 0:
             start = cursor
@@ -360,7 +360,7 @@ def build_cleaned_document(
     for block_index, (text, start_offset, end_offset) in enumerate(paragraphs, start=1):
         is_chapter = is_chapter_heading(text)
         if current_chapter is None or is_chapter:
-            current_chapter = start_chapter(text if is_chapter else None, start_offset)
+            current_chapter = start_chapter(text.strip() if is_chapter else None, start_offset)
 
         block_spans = []
         for highlight in mapped_highlights:

@@ -97,6 +97,23 @@ def test_clean_text_preserves_line_breaks_inside_paragraphs() -> None:
     assert "The first line of a paragraph continues" not in cleaned
 
 
+def test_clean_text_preserves_first_line_indent() -> None:
+    raw = "\n".join(
+        [
+            "CHAPTER I",
+            "",
+            "    The first sentence keeps its indent.",
+            "The rest of the paragraph follows.",
+            "",
+            "Another paragraph starts normally.",
+        ]
+    )
+
+    cleaned, _stats = ingest.clean_text(raw, StubLogger())
+
+    assert "    The first sentence keeps its indent.\nThe rest of the paragraph follows." in cleaned
+
+
 def test_clean_text_removes_page_edge_author_headers_and_footers() -> None:
     raw = "\n".join(
         [
@@ -148,6 +165,29 @@ def test_chunk_clean_text_writes_chunks_and_preserves_chapter_hint(tmp_path: Pat
     assert stats["chunk_count"] >= 2
     assert chunks[0].chapter_hint == "CHAPTER I"
     assert Path(chunks[0].path).exists()
+
+
+def test_chunk_clean_text_preserves_first_line_indent(tmp_path: Path) -> None:
+    text = "\n\n".join(
+        [
+            "CHAPTER I",
+            "    The first sentence keeps its indent.",
+            "The rest of the paragraph follows.",
+        ]
+    )
+
+    chunks, _stats = ingest.chunk_clean_text(
+        clean_text_value=text,
+        book_title="Treasure Island",
+        chunks_root=tmp_path,
+        min_chunk_words=1,
+        target_chunk_words=5,
+        max_chunk_words=8,
+        logger=StubLogger(),
+    )
+
+    chunk_text = Path(chunks[0].path).read_text(encoding="utf-8")
+    assert "    The first sentence keeps its indent." in chunk_text
 
 
 def test_chunk_clean_text_recognises_keyword_and_numbered_chapters(tmp_path: Path) -> None:
