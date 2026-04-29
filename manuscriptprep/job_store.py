@@ -347,6 +347,14 @@ class JobStore(BaseJobStore):
             job = _job_from_dict(data)
             self._jobs[job.job_id] = job
 
+    def _reload_disk_state(self) -> None:
+        self._jobs = {}
+        self._users = {}
+        self._manuscripts = {}
+        self._config_profiles = {}
+        self._artifact_index = {}
+        self._load_existing_jobs()
+
     def create_job(self, request: JobCreateRequest) -> JobRecord:
         job = create_job_record(request)
 
@@ -357,11 +365,13 @@ class JobStore(BaseJobStore):
 
     def get_job(self, job_id: str) -> Optional[JobRecord]:
         with self._lock:
+            self._reload_disk_state()
             job = self._jobs.get(job_id)
             return _job_from_dict(asdict(job)) if job is not None else None
 
     def list_jobs(self) -> List[JobRecord]:
         with self._lock:
+            self._reload_disk_state()
             return [_job_from_dict(asdict(job)) for job in self._jobs.values()]
 
     def update_job(self, job: JobRecord) -> JobRecord:
@@ -452,6 +462,7 @@ class JobStore(BaseJobStore):
         exclude_pipelines: Optional[List[str]] = None,
     ) -> Optional[JobRecord]:
         with self._lock:
+            self._reload_disk_state()
             queued_jobs = sorted(
                 (
                     job

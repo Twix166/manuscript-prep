@@ -38,3 +38,24 @@ def test_get_web_asset_serves_ingest_results_page() -> None:
 
     assert content_type.startswith("text/html")
     assert b"Ingest Results" in body
+
+
+def test_get_web_asset_serves_narrator_toolkit_page() -> None:
+    content_type, body = get_web_asset("ui/narrator-toolkit.html")
+
+    assert content_type.startswith("text/html")
+    assert b"Narrator's Toolkit" in body
+    assert b"reader-content" in body
+    assert b"scroll-toggle" in body
+    assert b"scroll-speed" in body
+
+
+def test_get_web_asset_serves_narrator_toolkit_script() -> None:
+    content_type, body = get_web_asset("ui/narrator-toolkit.js")
+
+    assert content_type.startswith("application/javascript")
+    assert b"requestAnimationFrame" in body
+    assert b"Space" in body
+    assert b"ArrowUp" in body
+    assert b"ArrowDown" in body
+    assert b"Escape" in body

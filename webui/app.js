@@ -1094,16 +1094,24 @@ async function triggerPipeline(pipeline) {
     els.stageActionStatus.textContent = "Select a manuscript first.";
     return;
   }
-  if (!profile) {
+  if (!profile && pipeline !== "ingest") {
     els.stageActionStatus.textContent = "Select a config profile first.";
     return;
   }
+  const payload = {
+    pipeline,
+    manuscript_id: manuscript.manuscript_id,
+  };
+  if (profile) {
+    payload.config_profile_id = profile.config_profile_id;
+  }
+  if (pipeline === "ingest" && !profile) {
+    payload.options = {
+      workdir: "work",
+    };
+  }
   try {
-    const created = await sendJson("POST", "/v1/jobs", {
-      pipeline,
-      manuscript_id: manuscript.manuscript_id,
-      config_profile_id: profile.config_profile_id,
-    });
+    const created = await sendJson("POST", "/v1/jobs", payload);
     await sendJson("POST", `/v1/jobs/${created.job_id}/run`, {});
     state.selectedJobId = created.job_id;
     els.stageActionStatus.textContent = `${stageLabels[pipeline] || pipeline} job queued: ${created.job_id}`;

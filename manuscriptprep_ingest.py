@@ -58,6 +58,8 @@ from xml.etree import ElementTree
 
 from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
 from manuscriptprep.paths import build_paths
+from narrator_toolkit.document_model import build_cleaned_document
+from narrator_toolkit.highlight_extraction import extract_pdf_highlights
 
 
 def utc_now_iso() -> str:
@@ -922,6 +924,8 @@ def main() -> int:
     raw_txt_path = settings.extracted_dir / "raw.txt"
     raw_ocr_txt_path = settings.extracted_dir / "raw_ocr.txt"
     clean_txt_path = settings.cleaned_dir / "clean.txt"
+    narrator_document_path = settings.cleaned_dir / "cleaned_document.json"
+    highlight_report_path = settings.cleaned_dir / "highlight_report.json"
 
     classification = classify_source(workspace_pdf, settings.tmp_dir, logger)
 
@@ -939,6 +943,26 @@ def main() -> int:
     clean_text_value, cleaning_stats = clean_text(raw_text, logger)
     write_text(clean_txt_path, clean_text_value)
     logger.log(f"Wrote cleaned text to {clean_txt_path}")
+
+    extracted_highlights = []
+    highlight_extraction_warnings: List[str] = []
+    if classification.source_format == "pdf":
+        extracted_highlights, highlight_extraction_warnings = extract_pdf_highlights(workspace_pdf)
+        logger.log(
+            f"Extracted PDF highlights: count={len(extracted_highlights)}, "
+            f"warnings={len(highlight_extraction_warnings)}"
+        )
+    narrator_document, highlight_report = build_cleaned_document(
+        clean_text=clean_text_value,
+        title=settings.title,
+        source_file=str(workspace_pdf),
+        highlights=extracted_highlights,
+        extraction_warnings=highlight_extraction_warnings,
+        document_id=book_slug,
+    )
+    write_json(narrator_document_path, narrator_document)
+    write_json(highlight_report_path, highlight_report)
+    logger.log(f"Wrote Narrator's Toolkit cleaned document to {narrator_document_path}")
 
     structure_hints = detect_structure_hints(clean_text_value)
 
@@ -960,6 +984,8 @@ def main() -> int:
         "book_slug": book_slug,
         "raw_text": str(raw_txt_path),
         "clean_text": str(clean_txt_path),
+        "narrator_cleaned_document": str(narrator_document_path),
+        "highlight_report": str(highlight_report_path),
         "chunk_dir": str(settings.chunks_dir / book_slug),
         "chunk_count": len(chunks),
         "chunk_settings": {
@@ -980,11 +1006,14 @@ def main() -> int:
             "raw_text": str(raw_txt_path),
             "raw_ocr_text": str(raw_ocr_txt_path) if extraction_info.get("ocr_used") else None,
             "clean_text": str(clean_txt_path),
+            "narrator_cleaned_document": str(narrator_document_path),
+            "highlight_report": str(highlight_report_path),
             "chunk_dir": str(settings.chunks_dir / book_slug),
         },
         "classification": asdict(classification),
         "extraction": extraction_info,
         "cleaning": cleaning_stats,
+        "highlight_preservation": highlight_report,
         "structure_hints": structure_hints,
         "chunking": chunk_stats,
         "flags": {

@@ -340,7 +340,19 @@ def test_gateway_api_exposes_latest_ingest_summary_and_manuscript_ingest_results
     assert ingest_results["chunk_manifest"]["content"]["chunk_count"] >= 1
     assert ingest_results["raw_text"]["content"]
     assert ingest_results["clean_text"]["content"]
+    assert ingest_results["ingest_manifest"]["content"]["paths"]["narrator_cleaned_document"].endswith("cleaned_document.json")
+    assert ingest_results["ingest_manifest"]["content"]["highlight_preservation"]["total_highlights"] == 0
     assert "treasure_island" in ingest_results["ingest_manifest"]["artifact"]["path"]
+
+    status, narrator_documents = app.list_narrator_documents()
+    assert status == 200
+    assert narrator_documents["documents"][0]["title"] == "Treasure Island"
+    assert narrator_documents["documents"][0]["chapter_count"] >= 1
+
+    status, narrator_document = app.get_narrator_document(manuscript["manuscript_id"])
+    assert status == 200
+    assert narrator_document["document"]["title"] == "Treasure Island"
+    assert narrator_document["document"]["chapters"][0]["blocks"]
 
 
 def test_gateway_api_delete_modes_keep_or_remove_pipeline_data(tmp_path) -> None:
