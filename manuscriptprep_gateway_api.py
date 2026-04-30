@@ -1168,6 +1168,13 @@ class GatewayAPI:
             "stage_runs": [fallback_stage],
         }
         if not progress_path or not progress_path.exists():
+            if fallback_stage["status"] == "running":
+                progress["available"] = True
+                progress["current_stage"] = "startup"
+                progress["current_step"] = "worker has not emitted progress yet"
+                progress["message"] = "Ingest has been claimed, but this worker has not written a progress file yet."
+                progress["worker_id"] = job.options.get("_worker_id")
+                progress["claimed_at"] = job.options.get("_claimed_at")
             return progress
 
         data = self._load_json_file(progress_path)

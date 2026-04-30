@@ -831,6 +831,37 @@ def test_gateway_api_exposes_ingest_progress_from_runtime_file(tmp_path) -> None
     assert progress["recent_events"]
 
 
+def test_gateway_api_exposes_ingest_progress_fallback_when_no_progress_file_exists(tmp_path) -> None:
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"), runtime_root=tmp_path / "runtime")
+
+    status, created = app.create_job(
+        {
+            "pipeline": "ingest",
+            "book_slug": "moonlight_bones",
+            "title": "Moonlight Bones",
+        }
+    )
+    assert status == 201
+
+    job = app.store.get_job(created["job_id"])
+    assert job is not None
+    job.status = "running"
+    job.stage_runs[0].status = "running"
+    job.stage_runs[0].started_at = "2026-04-30T08:00:00+00:00"
+    job.options["_worker_id"] = "worker-123"
+    job.options["_claimed_at"] = "2026-04-30T08:00:01+00:00"
+    app.store.update_job(job)
+
+    status, progress = app.get_job_progress(created["job_id"])
+    assert status == 200
+    assert progress["available"] is True
+    assert progress["pipeline"] == "ingest"
+    assert progress["current_stage"] == "startup"
+    assert progress["current_step"] == "worker has not emitted progress yet"
+    assert progress["message"] == "Ingest has been claimed, but this worker has not written a progress file yet."
+    assert progress["worker_id"] == "worker-123"
+
+
 def test_gateway_api_ingest_artifacts_follow_manuscript_slug(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)
