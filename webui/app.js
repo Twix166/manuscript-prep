@@ -747,7 +747,13 @@ function renderJobProgressSummary(progress) {
   }
   if (progress.pipeline === "ingest") {
     const recentEvents = Array.isArray(progress.recent_events) && progress.recent_events.length
-      ? progress.recent_events.slice(-5).map((event) => `- ${formatDate(event.timestamp)} | ${event.current_stage || event.stage || "-"} | ${event.current_step || event.step || "-"} | ${event.message || "-"}`)
+      ? progress.recent_events.slice(-5).map((event) => {
+        const pagePart = event.current_page ? `page ${event.current_page}${event.pages_total ? `/${event.pages_total}` : ""}` : "-";
+        const counts = event.page_mapped !== undefined || event.page_unmapped !== undefined
+          ? `${event.page_mapped ?? 0} mapped / ${event.page_unmapped ?? 0} unmapped`
+          : "";
+        return `- ${formatDate(event.timestamp)} | ${pagePart} | ${event.current_step || event.step || "-"} | ${event.message || "-"}${counts ? ` | ${counts}` : ""}`;
+      })
       : ["- No ingest progress events yet"];
     const warnings = Array.isArray(progress.warnings) && progress.warnings.length
       ? progress.warnings.slice(-5).map((warning) => `- ${warning}`)
@@ -759,7 +765,11 @@ function renderJobProgressSummary(progress) {
       `- Message: ${progress.message || "n/a"}`,
       `- Overall progress: ${progress.overall_percent ?? 0}%`,
       `- Stage progress: ${progress.stage_percent ?? 0}%`,
+      `- Page: ${progress.current_page ?? "n/a"} of ${progress.pages_total ?? "n/a"}`,
+      `- Page mapped: ${progress.page_mapped ?? 0}`,
+      `- Page unmapped: ${progress.page_unmapped ?? 0}`,
       `- Highlight annotations: ${progress.highlight_count ?? "n/a"}`,
+      `- Mapped highlights: ${progress.mapped_highlights ?? "n/a"}`,
       `- Unmapped highlights: ${progress.unmapped_highlights ?? "n/a"}`,
       progress.current_chunk ? `- Current chunk: ${progress.current_chunk} (${progress.chunk_index || "?"} of ${progress.chunks_total || "?"})` : `- Current chunk: ${progress.chunks_total ? `${progress.chunk_index || 0} of ${progress.chunks_total}` : "n/a"}`,
       "",
@@ -837,6 +847,7 @@ function renderJobProgressPanel(progress) {
   const status = progress?.message || "Waiting for progress updates.";
   const stage = progress?.current_stage || progress?.stage?.name || "n/a";
   const step = progress?.current_step || "n/a";
+  const page = progress?.current_page || "n/a";
   const summary = renderJobProgressSummary(progress);
   return `
     <div class="progress-meter">
@@ -848,6 +859,13 @@ function renderJobProgressPanel(progress) {
       <div class="progress-meter-meta">
         <span><strong>Stage:</strong> ${escapeHtml(stage)}</span>
         <span><strong>Step:</strong> ${escapeHtml(step)}</span>
+        <span><strong>Page:</strong> ${escapeHtml(page)}${progress?.pages_total ? ` / ${escapeHtml(progress.pages_total)}` : ""}</span>
+      </div>
+      <div class="progress-meter-meta">
+        <span><strong>Page mapped:</strong> ${escapeHtml(progress?.page_mapped ?? 0)}</span>
+        <span><strong>Page unmapped:</strong> ${escapeHtml(progress?.page_unmapped ?? 0)}</span>
+        <span><strong>Mapped:</strong> ${escapeHtml(progress?.mapped_highlights ?? "n/a")}</span>
+        <span><strong>Unmapped:</strong> ${escapeHtml(progress?.unmapped_highlights ?? "n/a")}</span>
       </div>
       <p class="meta">${escapeHtml(status)}</p>
     </div>
@@ -865,7 +883,13 @@ function renderCompactStageProgress(progress) {
     const current = progress.current_chunk
       ? `${progress.current_chunk} (${progress.chunk_index || "?"} of ${progress.chunks_total || "?"})`
       : stage;
-    return `${stage}: ${step} | ${current} | ${formatProgressPercent(progress).toFixed(0)}%`;
+    const pageInfo = progress.current_page
+      ? `page ${progress.current_page}${progress.pages_total ? `/${progress.pages_total}` : ""}`
+      : "";
+    const countInfo = progress.page_mapped !== undefined || progress.page_unmapped !== undefined
+      ? `${progress.page_mapped ?? 0} mapped / ${progress.page_unmapped ?? 0} unmapped`
+      : "";
+    return [stage, step, current, pageInfo, countInfo, `${formatProgressPercent(progress).toFixed(0)}%`].filter(Boolean).join(" | ");
   }
   if (progress.pipeline === "resolve") {
     if (!progress.current_group) {

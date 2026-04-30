@@ -7,7 +7,7 @@ import re
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 from uuid import uuid4
 
 from narrator_toolkit.highlight_extraction import ExtractedHighlight
@@ -385,6 +385,7 @@ def map_highlights_to_clean_text(
     clean_text: str,
     highlights: list[ExtractedHighlight],
     raw_text: str | None = None,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     mapped: list[dict[str, Any]] = []
     used_ranges: list[tuple[int, int]] = []
@@ -406,6 +407,13 @@ def map_highlights_to_clean_text(
         else:
             fallback_highlights.append(highlight)
 
+    page_totals = len(page_segments)
+    mapping_total = max(len(highlights), 1)
+
+    def emit_progress(**fields: Any) -> None:
+        if progress_callback is not None:
+            progress_callback(fields)
+
     def record_match(highlight: ExtractedHighlight, start: int, end: int, method: str, confidence: float) -> None:
         used_ranges.append((start, end))
         mapped.append(
@@ -423,35 +431,92 @@ def map_highlights_to_clean_text(
             }
         )
 
-    for page_index in sorted(page_groups):
+    for page_index in range(page_totals):
         page_text = page_segments[page_index]
-        page_start = page_offsets[page_index]
+        page_start = page_offsets[page_index] if page_index < len(page_offsets) else None
+        page_highlights = page_groups.get(page_index, [])
+        page_mapped = 0
+        page_unmapped = 0
+
+        emit_progress(
+            event_type="highlight_page_start",
+            current_stage="highlight extraction",
+            current_step="map highlights",
+            current_page=page_index + 1,
+            pages_total=page_totals,
+            page_highlights=len(page_highlights),
+            mapped_highlights=len(mapped),
+            unmapped_highlights=len(highlights) - len(mapped),
+            stage_percent=round((page_index / max(page_totals, 1)) * 100, 1),
+            overall_percent=58.0 + round((page_index / max(page_totals, 1)) * 7.0, 1),
+            message=f"Mapping highlights on page {page_index + 1} of {page_totals}.",
+        )
+
         if page_start is None:
-            fallback_highlights.extend(page_groups[page_index])
+            fallback_highlights.extend(page_highlights)
+            page_unmapped = len(page_highlights)
+            emit_progress(
+                event_type="highlight_page_complete",
+                current_stage="highlight extraction",
+                current_step="map highlights",
+                current_page=page_index + 1,
+                pages_total=page_totals,
+                page_highlights=len(page_highlights),
+                page_mapped=0,
+                page_unmapped=page_unmapped,
+                mapped_highlights=len(mapped),
+                unmapped_highlights=len(highlights) - len(mapped),
+                stage_percent=round(((page_index + 1) / max(page_totals, 1)) * 100, 1),
+                overall_percent=58.0 + round(((page_index + 1) / max(page_totals, 1)) * 7.0, 1),
+                message=f"Finished page {page_index + 1}; unable to align this page to cleaned text.",
+            )
             continue
 
         page_search_cursor = 0
         page_used_ranges: list[tuple[int, int]] = []
-        for highlight in page_groups[page_index]:
+        for highlight in page_highlights:
             local_match, method, confidence = _find_highlight_match(page_text, highlight, page_used_ranges, page_search_cursor)
             if local_match is None:
                 fallback_highlights.append(highlight)
-                continue
+                page_unmapped += 1
+            else:
+                local_start, local_end = local_match
+                start = page_start + local_start
+                end = page_start + local_end
+                if _overlaps_existing(start, end, used_ranges):
+                    fallback_highlights.append(highlight)
+                    page_unmapped += 1
+                else:
+                    page_search_cursor = local_end
+                    page_used_ranges.append((local_start, local_end))
+                    record_match(highlight, start, end, method, confidence)
+                    page_mapped += 1
 
-            local_start, local_end = local_match
-            start = page_start + local_start
-            end = page_start + local_end
-            if _overlaps_existing(start, end, used_ranges):
-                fallback_highlights.append(highlight)
-                continue
-            page_search_cursor = local_end
-            page_used_ranges.append((local_start, local_end))
-            record_match(highlight, start, end, method, confidence)
+        emit_progress(
+            event_type="highlight_page_complete",
+            current_stage="highlight extraction",
+            current_step="map highlights",
+            current_page=page_index + 1,
+            pages_total=page_totals,
+            page_highlights=len(page_highlights),
+            page_mapped=page_mapped,
+            page_unmapped=page_unmapped,
+            mapped_highlights=len(mapped),
+            unmapped_highlights=len(highlights) - len(mapped),
+            stage_percent=round(((page_index + 1) / max(page_totals, 1)) * 100, 1),
+            overall_percent=58.0 + round(((page_index + 1) / max(page_totals, 1)) * 7.0, 1),
+            message=(
+                f"Finished page {page_index + 1} of {page_totals}: "
+                f"{page_mapped} mapped, {page_unmapped} unmapped."
+            ),
+        )
 
     clean_whitespace_norm, clean_whitespace_map = _normalise_search_text(clean_text)
     clean_punctuation_norm, clean_punctuation_map = _normalise_punctuation_tolerant(clean_text)
 
     search_cursor = 0
+    fallback_processed = 0
+    fallback_total = len(fallback_highlights)
     for highlight in fallback_highlights:
         match, method, confidence = _find_highlight_match(clean_text, highlight, used_ranges, search_cursor)
         if match is None:
@@ -497,6 +562,23 @@ def map_highlights_to_clean_text(
         start, end = match
         search_cursor = end
         record_match(highlight, start, end, method, confidence)
+        fallback_processed += 1
+        if fallback_processed == fallback_total or fallback_processed % 100 == 0:
+            emit_progress(
+                event_type="highlight_fallback_progress",
+                current_stage="highlight extraction",
+                current_step="map highlights",
+                current_page=highlight.source_page,
+                pages_total=page_totals or None,
+                mapped_highlights=len(mapped),
+                unmapped_highlights=len(highlights) - len(mapped),
+                message=(
+                    f"Fallback mapping progress: {len(mapped)} mapped, "
+                    f"{len(highlights) - len(mapped)} unmapped."
+                ),
+                stage_percent=100.0,
+                overall_percent=65.0,
+            )
 
     report = {
         "total_highlights": len(highlights),
@@ -535,8 +617,14 @@ def build_cleaned_document(
     highlights: list[ExtractedHighlight],
     extraction_warnings: list[str] | None = None,
     document_id: str | None = None,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    mapped_highlights, report = map_highlights_to_clean_text(clean_text, highlights, raw_text=raw_text)
+    mapped_highlights, report = map_highlights_to_clean_text(
+        clean_text,
+        highlights,
+        raw_text=raw_text,
+        progress_callback=progress_callback,
+    )
     if extraction_warnings:
         report["extraction_warnings"] = extraction_warnings
 

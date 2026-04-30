@@ -159,6 +159,47 @@ def test_highlight_mapping_uses_source_page_to_disambiguate_repeated_pages() -> 
     assert report["mapped_highlights"] == 1
 
 
+def test_highlight_mapping_emits_page_progress_callbacks() -> None:
+    raw_text = "CHAPTER I\n\nAlpha one.\n\fCHAPTER II\n\nBeta two.\n"
+    clean_text = "CHAPTER I\n\nAlpha one.\n\nCHAPTER II\n\nBeta two.\n"
+    highlights = [
+        ExtractedHighlight(
+            text="Alpha",
+            color="#ffd966",
+            source_page=1,
+            source_annotation_id="annot-1",
+            rect=[0, 0, 10, 10],
+            source_context="Alpha one.",
+        ),
+        ExtractedHighlight(
+            text="Beta",
+            color="#ffd966",
+            source_page=2,
+            source_annotation_id="annot-2",
+            rect=[0, 0, 10, 10],
+            source_context="Beta two.",
+        ),
+    ]
+    events: list[dict[str, object]] = []
+
+    document, report = build_cleaned_document(
+        clean_text=clean_text,
+        raw_text=raw_text,
+        title="Progress Test",
+        source_file="voice-test.pdf",
+        highlights=highlights,
+        progress_callback=events.append,
+    )
+
+    assert report["mapped_highlights"] == 2
+    assert document["metadata"]["has_highlights"] is True
+    assert any(event.get("event_type") == "highlight_page_start" for event in events)
+    assert any(event.get("event_type") == "highlight_page_complete" for event in events)
+    assert any(event.get("current_page") == 1 for event in events)
+    assert any(event.get("current_page") == 2 for event in events)
+    assert any(event.get("page_mapped") == 1 for event in events)
+
+
 def test_highlight_extraction_reads_fake_pymupdf_annotations(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     class FakeRect:
         def __init__(self, values):

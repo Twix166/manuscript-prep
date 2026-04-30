@@ -38,6 +38,8 @@ def test_get_web_asset_serves_javascript() -> None:
     assert b"Ingest Progress" in body
     assert b"progress-meter" in body
     assert b"overall_percent" in body
+    assert b"Page mapped" in body
+    assert b"Page unmapped" in body
     assert b"openStageLogs" in body
     assert b"Readable View" in body
 

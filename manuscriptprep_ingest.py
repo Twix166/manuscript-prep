@@ -1150,6 +1150,13 @@ def main() -> int:
             highlight_count=len(extracted_highlights),
             highlight_warnings=len(highlight_extraction_warnings),
         )
+    def emit_highlight_progress(fields: Dict[str, Any]) -> None:
+        event_type = fields.pop("event_type", None)
+        if event_type:
+            progress.event(event_type, **fields)
+        else:
+            progress.update(**fields)
+
     narrator_document, highlight_report = build_cleaned_document(
         clean_text=clean_text_value,
         raw_text=raw_text,
@@ -1158,6 +1165,7 @@ def main() -> int:
         highlights=extracted_highlights,
         extraction_warnings=highlight_extraction_warnings,
         document_id=book_slug,
+        progress_callback=emit_highlight_progress,
     )
     progress.update(
         current_stage="highlight mapping",
