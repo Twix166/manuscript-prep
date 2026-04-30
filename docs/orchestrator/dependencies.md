@@ -6,7 +6,8 @@ contract.
 ## Supported host combinations
 
 See [System Requirements](../getting-started/system-requirements.md) for the
-minimum and recommended operating system and hardware combinations. In short:
+minimum and recommended operating system and hardware combinations, plus the
+inference backend/API matrix. In short:
 
 - minimum local operation: macOS 13+, Ubuntu 22.04 LTS, or Windows 11 with
   WSL2 / Docker; 4 cores; 16 GB RAM; 30 GB SSD

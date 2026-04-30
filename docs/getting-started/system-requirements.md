@@ -12,6 +12,33 @@ explicitly opts into a cloud LLM path.
 
 This is the normal, private deployment model.
 
+### Inference backends
+
+Ollama can use different acceleration paths depending on the host operating
+system and hardware. The practical combinations for this project are:
+
+| Hardware / platform | Primary inference path | Notes |
+| --- | --- | --- |
+| NVIDIA GPU on Linux or Windows | CUDA | Ollama documents NVIDIA support for GPUs with compute capability 5.0+ and driver version 531+ on its hardware support page. |
+| AMD GPU on Linux or Windows | ROCm, with Vulkan as an additional path | Ollama documents ROCm support for AMD GPUs and notes Vulkan as an additional GPU path. ROCm support on Linux requires the ROCm driver stack. |
+| Apple Silicon on macOS | Metal | Ollama documents Metal-based GPU acceleration on Apple devices. |
+| Intel GPU on Linux or Windows | Vulkan | Ollama documents Vulkan as an experimental GPU path and links Linux Intel driver guidance for Vulkan-capable systems. |
+| Intel Mac or CPU-only host | CPU fallback | Ollama supports x86 macOS as CPU-only. CPU-only inference is usable for experimentation but is not the preferred production profile for this project. |
+
+The relevant APIs are:
+
+- CUDA for NVIDIA
+- ROCm for AMD where supported
+- Metal for Apple Silicon
+- Vulkan for cross-vendor Linux and Windows GPU paths
+
+Ollama's current public documentation does not describe an OpenCL inference
+backend. For this stack, the documented acceleration paths to plan around are
+CUDA, ROCm, Metal, and Vulkan.
+
+Ollama also provides a cloud model option, but that is a separate deployment
+choice and not the default for ManuscriptPrep.
+
 ### Minimum supported local-LLM setup
 
 Use this if you want the stack to run on a single machine and you are willing to
@@ -24,7 +51,7 @@ accept slower model execution on larger books.
 | Memory | 32 GB RAM |
 | Storage | 30 GB free SSD space |
 | Browser | Current Chromium, Firefox, or Safari |
-| GPU | Recommended: 8 GB VRAM or Apple Silicon unified memory equivalent |
+| GPU | NVIDIA 8 GB VRAM+, AMD 8 GB VRAM+, Apple Silicon unified memory equivalent, or Vulkan-capable Intel iGPU for lighter workloads |
 
 This minimum profile is suitable for:
 
@@ -48,7 +75,7 @@ Use this for day-to-day authoring, narration prep, and model-heavy workflows.
 | Memory | 64 GB RAM |
 | Storage | 100 GB free SSD space |
 | Browser | Current Chromium, Firefox, or Safari |
-| GPU | 12 to 24 GB VRAM preferred, or Apple Silicon unified memory equivalent |
+| GPU | NVIDIA 12 to 24 GB VRAM, AMD 12 to 24 GB VRAM, Apple Silicon unified memory equivalent, or higher-end Vulkan-capable Intel graphics |
 
 This recommended profile is suitable for:
 

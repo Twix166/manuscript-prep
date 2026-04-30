@@ -176,6 +176,19 @@ In this project, Ollama is used to host several custom models:
 
 These are all based on the same foundation model, but each has a different system prompt and task specialization.
 
+Ollama's inference backend depends on the host platform and hardware:
+
+- NVIDIA GPUs: CUDA on Linux and Windows
+- AMD GPUs: ROCm on supported Linux and Windows builds, with Vulkan as an additional path
+- Apple Silicon: Metal on macOS
+- Intel GPUs: Vulkan where the driver stack supports it
+- CPU-only fallback: available on hosts without supported acceleration, but slower
+
+Ollama documents Vulkan as an experimental path, so treat it as a compatibility
+option rather than the primary production target.
+
+For the supported host and GPU combinations, see the system requirements page.
+
 ---
 
 ### Base Model
