@@ -11,7 +11,7 @@ from typing import Any
 from uuid import uuid4
 
 from narrator_toolkit.highlight_extraction import ExtractedHighlight
-from narrator_toolkit.text_rules import is_chapter_heading
+from narrator_toolkit.text_rules import is_chapter_heading, is_probable_heading, is_scene_break
 
 
 SCHEMA_VERSION = "narrator-toolkit.cleaned-document.v1"
@@ -219,32 +219,243 @@ def _find_fuzzy(clean_text: str, highlight_text: str, used_ranges: list[tuple[in
     return None
 
 
+def _looks_like_running_header_or_footer(text: str) -> bool:
+    s = text.strip()
+    if not s or len(s) > 80:
+        return False
+    if re.search(r"[.!?]$", s):
+        return False
+    if re.fullmatch(r"(?:\d+|[ivxlcdm]+)", s, re.I):
+        return True
+    if re.fullmatch(r"(?:[A-Z0-9][A-Z0-9'’&\-]*)(?:\s+[A-Z0-9][A-Z0-9'’&\-]*){0,6}", s):
+        return True
+    if re.fullmatch(r"(?:[A-Z][a-z'’&\-]+)(?:\s+[A-Z][a-z'’&\-]+){0,6}", s):
+        return True
+    return False
+
+
+def _detect_repeated_lines(lines: list[str]) -> set[str]:
+    counts = Counter(line.strip() for line in lines if line.strip())
+    return {
+        line for line, count in counts.items()
+        if count >= 3 and len(line) <= 120 and not is_chapter_heading(line)
+    }
+
+
+def _detect_page_edge_repeated_lines(raw_text: str, min_count: int = 2, edge_lines: int = 3) -> set[str]:
+    pages = raw_text.split("\f") if "\f" in raw_text else [raw_text]
+    if len(pages) < 2:
+        return set()
+    counts: Counter[str] = Counter()
+    for page in pages:
+        lines = [line.strip() for line in page.splitlines() if line.strip()]
+        if not lines:
+            continue
+        candidates = set(lines[:edge_lines]) | set(lines[-edge_lines:])
+        for candidate in candidates:
+            if len(candidate) > 120 or is_chapter_heading(candidate) or not _looks_like_running_header_or_footer(candidate):
+                continue
+            counts[candidate] += 1
+    threshold = max(min_count, max(2, len(pages) // 3))
+    return {line for line, count in counts.items() if count >= threshold}
+
+
+def _clean_page_segment(page_text: str, repeated_lines: set[str]) -> str:
+    page_text = page_text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = page_text.split("\n")
+
+    cleaned_lines: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            cleaned_lines.append("")
+            continue
+        if stripped in repeated_lines and not is_probable_heading(stripped):
+            continue
+        if re.match(r"^\s*(?:page\s+\d+|\d+/\d+|\d+)\s*$", stripped, re.I):
+            continue
+        cleaned_lines.append(line.rstrip())
+
+    text = "\n".join(cleaned_lines)
+    text = re.sub(r"([A-Za-z])-\n([a-z])", r"\1\2", text)
+
+    lines = text.split("\n")
+    paragraphs: list[str] = []
+    buffer: list[str] = []
+
+    def flush_buffer() -> None:
+        nonlocal buffer
+        if not buffer:
+            return
+        para = "\n".join(part.rstrip() for part in buffer if part.strip())
+        if para:
+            paragraphs.append(para)
+        buffer = []
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            flush_buffer()
+            continue
+        if is_probable_heading(stripped) or is_scene_break(stripped):
+            flush_buffer()
+            paragraphs.append(stripped)
+            continue
+        if re.search(r"\.{3,}\s*\d+\s*$", stripped):
+            flush_buffer()
+            paragraphs.append(stripped)
+            continue
+        buffer.append(line)
+
+    flush_buffer()
+    return "\n\n".join(paragraphs).rstrip() + "\n"
+
+
+def _build_page_segments(raw_text: str) -> list[str]:
+    normalized = raw_text.replace("\r\n", "\n").replace("\r", "\n")
+    repeated_lines = _detect_repeated_lines(normalized.split("\n"))
+    repeated_lines |= _detect_page_edge_repeated_lines(normalized)
+    pages = normalized.split("\f")
+    return [_clean_page_segment(page, repeated_lines) for page in pages]
+
+
+def _locate_page_segments(clean_text: str, page_segments: list[str]) -> list[int | None]:
+    offsets: list[int | None] = []
+    cursor = 0
+    for segment in page_segments:
+        page_segment = segment.strip()
+        if not page_segment:
+            offsets.append(cursor)
+            continue
+        match = _find_exact(clean_text, page_segment, [], cursor)
+        if match is None:
+            match = _find_normalised_precomputed(
+                *_normalise_search_text(clean_text),
+                page_segment,
+                [],
+                _normalise_search_text,
+                cursor,
+            )
+        if match is None:
+            match = _find_normalised_precomputed(
+                *_normalise_punctuation_tolerant(clean_text),
+                page_segment,
+                [],
+                _normalise_punctuation_tolerant,
+                cursor,
+            )
+        if match is None:
+            offsets.append(None)
+            continue
+        offsets.append(match[0])
+        cursor = match[1]
+    return offsets
+
+
+def _find_highlight_match(
+    text: str,
+    highlight: ExtractedHighlight,
+    used_ranges: list[tuple[int, int]],
+    preferred_start: int = 0,
+) -> tuple[tuple[int, int] | None, str, float]:
+    context_text = getattr(highlight, "source_context", "") or ""
+    match = _find_in_context(text, highlight.text, context_text, used_ranges, preferred_start)
+    method = "contextual" if match is not None else "exact"
+    confidence = 0.98 if match is not None else 1.0
+    if match is None:
+        match = _find_exact(text, highlight.text, used_ranges, preferred_start)
+    if match is None:
+        match = _find_normalised(text, highlight.text, used_ranges, _normalise_search_text, preferred_start)
+        method = "normalised_whitespace"
+        confidence = 0.96
+    if match is None:
+        match = _find_normalised(text, highlight.text, used_ranges, _normalise_punctuation_tolerant, preferred_start)
+        method = "punctuation_tolerant"
+        confidence = 0.9
+    if match is None:
+        fuzzy = _find_fuzzy(text, highlight.text, used_ranges)
+        if fuzzy is not None:
+            match = (fuzzy[0], fuzzy[1])
+            method = "fuzzy"
+            confidence = round(fuzzy[2], 3)
+    return match, method, confidence
+
+
 def map_highlights_to_clean_text(
     clean_text: str,
     highlights: list[ExtractedHighlight],
+    raw_text: str | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     mapped: list[dict[str, Any]] = []
     used_ranges: list[tuple[int, int]] = []
     warnings: list[dict[str, Any]] = []
-    search_cursor = 0
     allow_fuzzy = len(highlights) <= 500
+
+    page_segments: list[str] = []
+    page_offsets: list[int | None] = []
+    if raw_text:
+        page_segments = _build_page_segments(raw_text)
+        page_offsets = _locate_page_segments(clean_text, page_segments)
+
+    page_groups: dict[int, list[ExtractedHighlight]] = {}
+    fallback_highlights: list[ExtractedHighlight] = []
+    for highlight in highlights:
+        page_index = int(highlight.source_page or 0) - 1
+        if 0 <= page_index < len(page_segments) and page_offsets[page_index] is not None:
+            page_groups.setdefault(page_index, []).append(highlight)
+        else:
+            fallback_highlights.append(highlight)
+
+    def record_match(highlight: ExtractedHighlight, start: int, end: int, method: str, confidence: float) -> None:
+        used_ranges.append((start, end))
+        mapped.append(
+            {
+                "start_offset": start,
+                "end_offset": end,
+                "type": "highlight",
+                "color": highlight.color,
+                "source_page": highlight.source_page,
+                "source_annotation_id": highlight.source_annotation_id,
+                "character": None,
+                "source_text": highlight.text,
+                "mapping_method": method,
+                "confidence": confidence,
+            }
+        )
+
+    for page_index in sorted(page_groups):
+        page_text = page_segments[page_index]
+        page_start = page_offsets[page_index]
+        if page_start is None:
+            fallback_highlights.extend(page_groups[page_index])
+            continue
+
+        page_search_cursor = 0
+        page_used_ranges: list[tuple[int, int]] = []
+        for highlight in page_groups[page_index]:
+            local_match, method, confidence = _find_highlight_match(page_text, highlight, page_used_ranges, page_search_cursor)
+            if local_match is None:
+                fallback_highlights.append(highlight)
+                continue
+
+            local_start, local_end = local_match
+            start = page_start + local_start
+            end = page_start + local_end
+            if _overlaps_existing(start, end, used_ranges):
+                fallback_highlights.append(highlight)
+                continue
+            page_search_cursor = local_end
+            page_used_ranges.append((local_start, local_end))
+            record_match(highlight, start, end, method, confidence)
+
     clean_whitespace_norm, clean_whitespace_map = _normalise_search_text(clean_text)
     clean_punctuation_norm, clean_punctuation_map = _normalise_punctuation_tolerant(clean_text)
 
-    for highlight in highlights:
-        context_text = getattr(highlight, "source_context", "") or ""
-        match = _find_in_context(
-            clean_text,
-            highlight.text,
-            context_text,
-            used_ranges,
-            search_cursor,
-        )
-        method = "contextual" if match is not None else "exact"
-        confidence = 0.98 if match is not None else 1.0
+    search_cursor = 0
+    for highlight in fallback_highlights:
+        match, method, confidence = _find_highlight_match(clean_text, highlight, used_ranges, search_cursor)
         if match is None:
-            match = _find_exact(clean_text, highlight.text, used_ranges, search_cursor)
-        if match is None:
+            # Try one last pass with precomputed normalisations before declaring a miss.
             match = _find_normalised_precomputed(
                 clean_whitespace_norm,
                 clean_whitespace_map,
@@ -285,21 +496,7 @@ def map_highlights_to_clean_text(
 
         start, end = match
         search_cursor = end
-        used_ranges.append((start, end))
-        mapped.append(
-            {
-                "start_offset": start,
-                "end_offset": end,
-                "type": "highlight",
-                "color": highlight.color,
-                "source_page": highlight.source_page,
-                "source_annotation_id": highlight.source_annotation_id,
-                "character": None,
-                "source_text": highlight.text,
-                "mapping_method": method,
-                "confidence": confidence,
-            }
-        )
+        record_match(highlight, start, end, method, confidence)
 
     report = {
         "total_highlights": len(highlights),
@@ -332,13 +529,14 @@ def _block_type(text: str) -> str:
 def build_cleaned_document(
     *,
     clean_text: str,
+    raw_text: str | None = None,
     title: str,
     source_file: str,
     highlights: list[ExtractedHighlight],
     extraction_warnings: list[str] | None = None,
     document_id: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    mapped_highlights, report = map_highlights_to_clean_text(clean_text, highlights)
+    mapped_highlights, report = map_highlights_to_clean_text(clean_text, highlights, raw_text=raw_text)
     if extraction_warnings:
         report["extraction_warnings"] = extraction_warnings
 

@@ -529,13 +529,28 @@ def detect_page_edge_repeated_lines(raw_text: str, min_count: int = 2, edge_line
             continue
         candidates = set(lines[:edge_lines]) | set(lines[-edge_lines:])
         for candidate in candidates:
-            if len(candidate) > 120:
+            if len(candidate) > 120 or not looks_like_running_header_or_footer(candidate):
                 continue
             if shared_is_chapter_heading(candidate):
                 continue
             counts[candidate] += 1
     threshold = max(min_count, max(2, len(pages) // 3))
     return {line for line, count in counts.items() if count >= threshold}
+
+
+def looks_like_running_header_or_footer(text: str) -> bool:
+    s = text.strip()
+    if not s or len(s) > 80:
+        return False
+    if re.search(r"[.!?]$", s):
+        return False
+    if re.fullmatch(r"(?:\d+|[ivxlcdm]+)", s, re.I):
+        return True
+    if re.fullmatch(r"(?:[A-Z0-9][A-Z0-9'’&\-]*)(?:\s+[A-Z0-9][A-Z0-9'’&\-]*){0,6}", s):
+        return True
+    if re.fullmatch(r"(?:[A-Z][a-z'’&\-]+)(?:\s+[A-Z][a-z'’&\-]+){0,6}", s):
+        return True
+    return False
 
 
 def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
@@ -944,6 +959,7 @@ def main() -> int:
         )
     narrator_document, highlight_report = build_cleaned_document(
         clean_text=clean_text_value,
+        raw_text=raw_text,
         title=settings.title,
         source_file=str(workspace_pdf),
         highlights=extracted_highlights,

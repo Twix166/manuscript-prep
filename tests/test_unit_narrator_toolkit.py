@@ -119,6 +119,46 @@ def test_highlight_mapping_prefers_source_context_for_repeated_text() -> None:
     assert report["mapped_highlights"] == 1
 
 
+def test_highlight_mapping_uses_source_page_to_disambiguate_repeated_pages() -> None:
+    raw_text = "CHAPTER I\n\nSarah waved.\n\fCHAPTER II\n\nSarah waved.\n"
+    clean_text = "CHAPTER I\n\nSarah waved.\n\nCHAPTER II\n\nSarah waved.\n"
+    highlights = [
+        ExtractedHighlight(
+            text="Sarah",
+            color="#ffd966",
+            source_page=2,
+            source_annotation_id="annot-3",
+            rect=[0, 0, 10, 10],
+            source_context="Sarah waved.",
+        )
+    ]
+
+    document, report = build_cleaned_document(
+        clean_text=clean_text,
+        raw_text=raw_text,
+        title="Page Test",
+        source_file="voice-test.pdf",
+        highlights=highlights,
+    )
+
+    second_chapter = document["chapters"][1]
+    assert second_chapter["blocks"][1]["text"] == "Sarah waved."
+    assert second_chapter["blocks"][1]["spans"] == [
+        {
+            "start": 0,
+            "end": 5,
+            "type": "highlight",
+            "color": "#ffd966",
+            "source_page": 2,
+            "source_annotation_id": "annot-3",
+            "character": None,
+            "mapping_method": "contextual",
+            "confidence": 0.98,
+        }
+    ]
+    assert report["mapped_highlights"] == 1
+
+
 def test_highlight_extraction_reads_fake_pymupdf_annotations(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     class FakeRect:
         def __init__(self, values):
