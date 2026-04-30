@@ -8,13 +8,17 @@ See also: [System Requirements](system-requirements.md).
 
 You will need:
 
-- macOS or Linux host
+- macOS or Linux host for the local-LLM deployment path
 - Python 3
 - virtual environment support
 - Git
-- Ollama
+- Ollama for local inference
 - PDF extraction tools
 - optionally OCR tooling
+
+If you plan to use a cloud LLM instead of local inference, see
+[System Requirements](system-requirements.md) for the opt-in cloud-assisted
+profile and privacy implications.
 
 ## Manual setup outline
 
