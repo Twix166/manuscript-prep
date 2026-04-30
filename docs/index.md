@@ -8,6 +8,7 @@ This project is a local-first LLM pipeline for converting manuscript PDFs into s
 
 - [Architecture](architecture/overview.md)
 - [Ingest Pipeline](ingest/ingest_script.md)
+- [System Requirements](getting-started/system-requirements.md)
 - [Orchestrator](orchestrator/overview.md)
 - [Models and Prompts](models/overview.md)
 - [Output Reference](output/directory_structure.md)

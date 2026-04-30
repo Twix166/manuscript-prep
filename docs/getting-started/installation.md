@@ -1,12 +1,14 @@
 # Installation
 
-This page documents the manual installation path before the automated installer is introduced.
+This page documents the supported installation path for the local ManuscriptPrep stack.
+
+See also: [System Requirements](system-requirements.md).
 
 ## Prerequisites
 
 You will need:
 
-- Linux host
+- macOS or Linux host
 - Python 3
 - virtual environment support
 - Git
@@ -17,13 +19,17 @@ You will need:
 ## Manual setup outline
 
 1. Clone the repository.
-2. Create a Python virtual environment.
-3. Install Python dependencies.
-4. Install system packages such as `pdftotext`.
-5. Copy `config/manuscriptprep.example.yaml` to a real config path.
-6. Update paths and model names for the host.
-7. Build the Ollama stage models from the Modelfiles.
-8. Run ingest, orchestration, merger, resolver, and reporting manually.
+2. Run `install/bootstrap.sh` or `install/install.sh`.
+3. The installer will:
+   - install Python dependencies from `requirements.txt`
+   - install system tools such as `pdftotext`, `pdfinfo`, `tesseract`, `ghostscript`, and `ocrmypdf`
+   - install or verify Ollama
+   - start Ollama if it is not already running
+   - pull the base model used by the repo
+   - build the ManuscriptPrep model tags from the Modelfiles
+4. Copy `config/manuscriptprep.example.yaml` to a real config path.
+5. Update paths and model names for the host if needed.
+6. Run ingest, orchestration, merger, resolver, and reporting manually or through the gateway.
 
 ## Recommended deployment locations
 

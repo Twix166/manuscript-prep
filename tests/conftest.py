@@ -58,10 +58,18 @@ src = Path(sys.argv[-2])
 dst = Path(sys.argv[-1])
 shutil.copyfile(src, dst)
 """
+    tesseract = """#!/usr/bin/env python3
+print("tesseract 5.0.0")
+"""
+    ghostscript = """#!/usr/bin/env python3
+print("GPL Ghostscript 10.0.0")
+"""
 
     write_executable(bin_dir / "pdftotext", pdftotext)
     write_executable(bin_dir / "pdfinfo", pdfinfo)
     write_executable(bin_dir / "ocrmypdf", ocrmypdf)
+    write_executable(bin_dir / "tesseract", tesseract)
+    write_executable(bin_dir / "ghostscript", ghostscript)
     return bin_dir
 
 
@@ -72,6 +80,16 @@ def fake_ollama_dir(tmp_path: Path) -> Path:
     ollama = """#!/usr/bin/env python3
 import json
 import sys
+
+if len(sys.argv) > 1 and sys.argv[1] == "list":
+    print("NAME                        ID              SIZE      MODIFIED")
+    print("manuscriptprep-structure:latest    deadbeef    1.0 GB    just now")
+    print("manuscriptprep-dialogue:latest     deadbeef    1.0 GB    just now")
+    print("manuscriptprep-entities:latest     deadbeef    1.0 GB    just now")
+    print("manuscriptprep-dossiers:latest     deadbeef    1.0 GB    just now")
+    print("manuscriptprep-resolver:latest     deadbeef    1.0 GB    just now")
+    print("qwen3:8b-q4_K_M                   deadbeef    7.0 GB    just now")
+    raise SystemExit(0)
 
 model = sys.argv[2]
 _ = sys.stdin.read()

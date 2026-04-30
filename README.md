@@ -276,6 +276,8 @@ source PDF
 
 ## Installation
 
+See [docs/getting-started/system-requirements.md](docs/getting-started/system-requirements.md) for the minimum and recommended OS/hardware combinations.
+
 ### 1. Install Ollama
 
 Install Ollama on your system.

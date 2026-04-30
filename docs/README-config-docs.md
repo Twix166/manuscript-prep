@@ -1,6 +1,6 @@
 # ManuscriptPrep config + docs starter set
 
-This bundle contains the first configuration and documentation layer before installer scripting.
+This bundle contains the first configuration and documentation layer, including the installer contract used by the orchestrator preflight and the repository installer.
 
 ## Included
 
@@ -10,11 +10,10 @@ This bundle contains the first configuration and documentation layer before inst
 - getting-started docs
 - architecture and operations docs
 
-## Suggested next step
+## Installer entry points
 
-After reviewing and adjusting these files for your repo layout, the next step is to create:
+The repository now includes:
 
 - `install/bootstrap.sh`
 - `install/install.sh`
-
-using the same directory and configuration contracts documented here.
+- `install/install.py`

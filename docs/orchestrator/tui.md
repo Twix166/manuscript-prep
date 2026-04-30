@@ -2,6 +2,17 @@
 
 The orchestrator includes a live terminal dashboard.
 
+## Dependency preflight
+
+Before a run starts, the orchestrator checks for:
+
+- the required Python modules
+- the PDF extraction binaries
+- Ollama availability
+- the required Ollama models
+
+If any item is missing, the interface shows a dependency table and offers an install action that runs the repository installer.
+
 ## Pipeline Status panel
 
 The status panel shows:
@@ -40,3 +51,7 @@ These show live model stdout and stderr so you can observe:
 - silence before output
 - malformed output patterns
 - possible stalls
+
+## Installer action
+
+When the dependency table shows missing items, press the install action in the preflight screen to run the repository installer. The installer will try to satisfy the Python, system, Ollama, and model layers in one pass.

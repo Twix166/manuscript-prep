@@ -45,7 +45,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from rich.console import Group
+from rich.console import Console, Group
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
@@ -55,6 +55,12 @@ try:
     import yaml
 except ImportError as exc:  # pragma: no cover
     raise SystemExit("PyYAML is required for config support. Install with: pip install pyyaml") from exc
+
+from manuscriptprep.dependencies import (  # noqa: E402
+    DEFAULT_OLLAMA_BASE_MODEL,
+    DependencyReport,
+    check_dependencies,
+)
 
 
 TPS_PATTERNS = [
@@ -107,6 +113,9 @@ class TUIState:
 
     current_pass_duration: Optional[float] = None
     current_chunk_duration: Optional[float] = None
+
+    dependency_status: str = "unchecked"
+    dependency_missing_count: int = 0
 
     current_idle_timeout: Optional[int] = None
     idle_timeout_failures_for_pass: int = 0
@@ -513,6 +522,162 @@ def compute_effective_idle_timeout(
 ) -> int:
     effective = int(round(base_idle_timeout * (idle_timeout_backoff ** idle_timeout_failures_for_pass)))
     return min(max_idle_timeout, max(1, effective))
+
+
+def required_ollama_models(runtime: RuntimeConfig) -> List[str]:
+    return [
+        DEFAULT_OLLAMA_BASE_MODEL,
+        runtime.structure_model,
+        runtime.dialogue_model,
+        runtime.entities_model,
+        runtime.dossiers_model,
+        "manuscriptprep-resolver",
+    ]
+
+
+def dependency_report_to_table(report: DependencyReport) -> Table:
+    table = Table(title="Dependency Preflight", expand=True)
+    table.add_column("Category", style="cyan", no_wrap=True)
+    table.add_column("Dependency", style="bold")
+    table.add_column("Status", style="white", no_wrap=True)
+    table.add_column("Details", style="white")
+    table.add_column("Remediation", style="yellow")
+
+    for item in report.items:
+        status_style = "green" if item.status == "ok" else "red"
+        table.add_row(
+            item.category,
+            item.name,
+            f"[{status_style}]{item.status}[/{status_style}]",
+            item.detail,
+            item.remediation or "-",
+        )
+    return table
+
+
+def render_dependency_preflight(report: DependencyReport) -> Group:
+    summary = (
+        "All required dependencies are installed."
+        if not report.has_missing
+        else f"{report.missing_count} dependency item(s) still need attention."
+    )
+    action_text = (
+        "Press [I] to install missing dependencies, [R] to recheck, [C] to continue, or [Q] to quit."
+        if report.has_missing
+        else "Press [Enter] to continue."
+    )
+    header = Panel(
+        Text.assemble(
+            ("Dependency status: ", "bold"),
+            (summary, "white"),
+            "\n",
+            (action_text, "yellow"),
+        ),
+        title="Orchestrator Preflight",
+        border_style="cyan",
+    )
+    return Group(header, dependency_report_to_table(report))
+
+
+def run_dependency_installer(console: Console, repo_root: Path, logger: JsonlLogger) -> int:
+    install_script = repo_root / "install" / "install.py"
+    if not install_script.is_file():
+        console.print(f"[red]Installer script not found:[/red] {install_script}")
+        logger.emit(level="ERROR", event_type="dependency_install_missing", message=str(install_script))
+        return 1
+
+    cmd = [sys.executable, str(install_script)]
+    logger.emit(
+        level="INFO",
+        event_type="dependency_install_start",
+        message="Starting dependency installation",
+        extra={"command": cmd},
+    )
+    console.print(f"[cyan]Running installer:[/cyan] {' '.join(cmd)}")
+    proc = subprocess.Popen(
+        cmd,
+        cwd=str(repo_root),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    assert proc.stdout is not None
+    for line in proc.stdout:
+        console.print(line.rstrip("\n"))
+    return_code = proc.wait()
+    logger.emit(
+        level="INFO" if return_code == 0 else "ERROR",
+        event_type="dependency_install_complete" if return_code == 0 else "dependency_install_failed",
+        message="Dependency installation finished" if return_code == 0 else "Dependency installation failed",
+        extra={"return_code": return_code},
+    )
+    return return_code
+
+
+def dependency_preflight(args: argparse.Namespace, runtime: RuntimeConfig, logger: JsonlLogger, repo_root: Path) -> bool:
+    console = Console()
+    report = check_dependencies(
+        ollama_bin=runtime.ollama_bin,
+        ollama_host=runtime.ollama_host,
+        required_models=required_ollama_models(runtime),
+    )
+
+    logger.emit(
+        level="INFO" if not report.has_missing else "WARNING",
+        event_type="dependency_check",
+        message="Dependency check completed",
+        extra={
+            "missing_count": report.missing_count,
+            "ollama_available": report.ollama_available,
+            "missing_items": [
+                {
+                    "category": item.category,
+                    "name": item.name,
+                    "detail": item.detail,
+                }
+                for item in report.missing_items
+            ],
+        },
+    )
+
+    if not report.has_missing:
+        return True
+
+    while True:
+        console.print(render_dependency_preflight(report))
+        if not sys.stdin.isatty() or args.no_tui:
+            console.print("[red]Missing dependencies found. Run the installer before continuing.[/red]")
+            return False
+
+        choice = console.input("[bold]Action[/bold] [I/C/Q/R]: ").strip().lower()
+        if choice in ("", "c", "continue"):
+            return True
+        if choice in ("q", "quit"):
+            return False
+        if choice in ("r", "recheck"):
+            report = check_dependencies(
+                ollama_bin=runtime.ollama_bin,
+                ollama_host=runtime.ollama_host,
+                required_models=required_ollama_models(runtime),
+            )
+            continue
+        if choice in ("i", "install"):
+            rc = run_dependency_installer(console, repo_root, logger)
+            if rc != 0:
+                console.print("[red]Dependency installation failed.[/red]")
+                continue
+            report = check_dependencies(
+                ollama_bin=runtime.ollama_bin,
+                ollama_host=runtime.ollama_host,
+                required_models=required_ollama_models(runtime),
+            )
+            if not report.has_missing:
+                console.print("[green]Dependency stack is now satisfied.[/green]")
+                return True
+            console.print("[yellow]Some dependencies are still missing after installation.[/yellow]")
+            continue
+
+        console.print("[yellow]Choose I, C, R, or Q.[/yellow]")
 
 
 def render_tui(state: TUIState):
@@ -1583,6 +1748,11 @@ def main() -> int:
     run_id = str(uuid.uuid4())
     log_path = resolve_log_path(args, output_dir, runtime)
     logger = JsonlLogger(log_path, run_id)
+
+    repo_root = Path(__file__).resolve().parent
+
+    if not dependency_preflight(args, runtime, logger, repo_root):
+        return 1
 
     if args.gateway_url:
         if args.no_tui:
