@@ -58,8 +58,10 @@ except ImportError as exc:  # pragma: no cover
 
 from manuscriptprep.dependencies import (  # noqa: E402
     DEFAULT_OLLAMA_BASE_MODEL,
+    BackendDiagnosticReport,
     DependencyReport,
     check_dependencies,
+    probe_inference_backends,
 )
 
 
@@ -555,7 +557,37 @@ def dependency_report_to_table(report: DependencyReport) -> Table:
     return table
 
 
-def render_dependency_preflight(report: DependencyReport) -> Group:
+def backend_report_to_table(report: BackendDiagnosticReport) -> Table:
+    table = Table(title="Inference Backend Diagnostics", expand=True)
+    table.add_column("Category", style="cyan", no_wrap=True)
+    table.add_column("Backend", style="bold")
+    table.add_column("Status", style="white", no_wrap=True)
+    table.add_column("Details", style="white")
+    table.add_column("Recommendation", style="yellow")
+
+    for item in report.items:
+        status_style = {"ok": "green", "warning": "yellow", "info": "cyan"}.get(item.status, "white")
+        table.add_row(
+            item.category,
+            item.name,
+            f"[{status_style}]{item.status}[/{status_style}]",
+            item.detail,
+            item.recommendation or "-",
+        )
+
+    summary_row = Table.grid(expand=True)
+    summary_row.add_column(ratio=1)
+    summary_row.add_column(ratio=4)
+    summary_row.add_row("Likely backend", report.preferred_backend.upper())
+    summary_row.add_row("Host", f"{report.platform_name} / {report.machine}")
+
+    wrapper = Table.grid(expand=True)
+    wrapper.add_row(table)
+    wrapper.add_row(Panel(summary_row, title="Backend Summary", border_style="magenta"))
+    return wrapper
+
+
+def render_dependency_preflight(report: DependencyReport, backend_report: BackendDiagnosticReport) -> Group:
     summary = (
         "All required dependencies are installed."
         if not report.has_missing
@@ -576,7 +608,7 @@ def render_dependency_preflight(report: DependencyReport) -> Group:
         title="Orchestrator Preflight",
         border_style="cyan",
     )
-    return Group(header, dependency_report_to_table(report))
+    return Group(header, dependency_report_to_table(report), backend_report_to_table(backend_report))
 
 
 def run_dependency_installer(console: Console, repo_root: Path, logger: JsonlLogger) -> int:
@@ -621,6 +653,7 @@ def dependency_preflight(args: argparse.Namespace, runtime: RuntimeConfig, logge
         ollama_host=runtime.ollama_host,
         required_models=required_ollama_models(runtime),
     )
+    backend_report = probe_inference_backends()
 
     logger.emit(
         level="INFO" if not report.has_missing else "WARNING",
@@ -637,6 +670,7 @@ def dependency_preflight(args: argparse.Namespace, runtime: RuntimeConfig, logge
                 }
                 for item in report.missing_items
             ],
+            "preferred_backend": backend_report.preferred_backend,
         },
     )
 
@@ -644,7 +678,7 @@ def dependency_preflight(args: argparse.Namespace, runtime: RuntimeConfig, logge
         return True
 
     while True:
-        console.print(render_dependency_preflight(report))
+        console.print(render_dependency_preflight(report, backend_report))
         if not sys.stdin.isatty() or args.no_tui:
             console.print("[red]Missing dependencies found. Run the installer before continuing.[/red]")
             return False
@@ -660,6 +694,7 @@ def dependency_preflight(args: argparse.Namespace, runtime: RuntimeConfig, logge
                 ollama_host=runtime.ollama_host,
                 required_models=required_ollama_models(runtime),
             )
+            backend_report = probe_inference_backends()
             continue
         if choice in ("i", "install"):
             rc = run_dependency_installer(console, repo_root, logger)
@@ -671,6 +706,7 @@ def dependency_preflight(args: argparse.Namespace, runtime: RuntimeConfig, logge
                 ollama_host=runtime.ollama_host,
                 required_models=required_ollama_models(runtime),
             )
+            backend_report = probe_inference_backends()
             if not report.has_missing:
                 console.print("[green]Dependency stack is now satisfied.[/green]")
                 return True

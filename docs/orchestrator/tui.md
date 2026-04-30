@@ -13,6 +13,10 @@ Before a run starts, the orchestrator checks for:
 
 If any item is missing, the interface shows a dependency table and offers an install action that runs the repository installer.
 
+The preflight also shows an inference backend diagnostics panel. That panel is
+informational only: it reports whether the host appears ready for CUDA, ROCm,
+Metal, Vulkan, or CPU fallback, but it does not block the run.
+
 ## Pipeline Status panel
 
 The status panel shows:

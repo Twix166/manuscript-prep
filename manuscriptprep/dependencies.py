@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import platform
 import re
 import shutil
 import subprocess
@@ -65,6 +66,32 @@ class DependencyReport:
     @property
     def missing_count(self) -> int:
         return len(self.missing_items)
+
+
+@dataclass
+class BackendDiagnosticItem:
+    category: str
+    name: str
+    status: str  # ok, warning, info
+    detail: str
+    recommendation: str | None = None
+
+
+@dataclass
+class BackendDiagnosticReport:
+    checked_at: str
+    platform_name: str
+    machine: str
+    preferred_backend: str
+    items: list[BackendDiagnosticItem] = field(default_factory=list)
+
+    @property
+    def available_items(self) -> list[BackendDiagnosticItem]:
+        return [item for item in self.items if item.status == "ok"]
+
+    @property
+    def warning_items(self) -> list[BackendDiagnosticItem]:
+        return [item for item in self.items if item.status == "warning"]
 
 
 def module_is_available(module_name: str) -> bool:
@@ -140,6 +167,213 @@ def probe_ollama_inventory(ollama_bin: str, ollama_host: str | None = None) -> t
         return False, [], detail
 
     return True, parse_ollama_list_output(completed.stdout), None
+
+
+def _run_probe_command(cmd: list[str], timeout: int = 10) -> tuple[bool, str]:
+    try:
+        completed = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=timeout,
+        )
+    except Exception as exc:  # pragma: no cover - runtime dependent
+        return False, str(exc)
+
+    output = (completed.stdout or completed.stderr or "").strip()
+    if completed.returncode != 0:
+        return False, output or f"{cmd[0]} returned non-zero status"
+    return True, output or "available"
+
+
+def probe_inference_backends() -> BackendDiagnosticReport:
+    system_name = platform.system().lower()
+    machine = platform.machine().lower()
+    items: list[BackendDiagnosticItem] = []
+    preferred_backend = "cpu"
+
+    items.append(
+        BackendDiagnosticItem(
+            category="platform",
+            name="host",
+            status="info",
+            detail=f"{platform.system()} / {platform.machine()}",
+        )
+    )
+
+    nvidia_bin = binary_path("nvidia-smi")
+    if nvidia_bin:
+        ok, output = _run_probe_command([
+            nvidia_bin,
+            "--query-gpu=name,driver_version",
+            "--format=csv,noheader",
+        ])
+        if ok:
+            preferred_backend = "cuda"
+            items.append(
+                BackendDiagnosticItem(
+                    category="nvidia",
+                    name="cuda",
+                    status="ok",
+                    detail=f"Detected NVIDIA GPU(s): {output}",
+                    recommendation="CUDA is the likely inference path on this host.",
+                )
+            )
+        else:
+            items.append(
+                BackendDiagnosticItem(
+                    category="nvidia",
+                    name="cuda",
+                    status="warning",
+                    detail=f"NVIDIA tooling is present but probing failed: {output}",
+                    recommendation="Verify NVIDIA drivers and retry nvidia-smi.",
+                )
+            )
+    else:
+        items.append(
+            BackendDiagnosticItem(
+                category="nvidia",
+                name="cuda",
+                status="warning",
+                detail="nvidia-smi not found",
+                recommendation="Install NVIDIA drivers if you expect CUDA acceleration.",
+            )
+        )
+
+    rocm_bin = binary_path("rocminfo") or binary_path("rocm-smi")
+    if rocm_bin:
+        ok, output = _run_probe_command([rocm_bin], timeout=15)
+        if ok:
+            if preferred_backend == "cpu":
+                preferred_backend = "rocm"
+            items.append(
+                BackendDiagnosticItem(
+                    category="amd",
+                    name="rocm",
+                    status="ok",
+                    detail=f"AMD ROCm tooling detected: {rocm_bin}",
+                    recommendation=output if output != "available" else "ROCm appears usable on this host.",
+                )
+            )
+        else:
+            items.append(
+                BackendDiagnosticItem(
+                    category="amd",
+                    name="rocm",
+                    status="warning",
+                    detail=f"AMD tooling is present but probing failed: {output}",
+                    recommendation="Verify ROCm drivers and device access.",
+                )
+            )
+    else:
+        items.append(
+            BackendDiagnosticItem(
+                category="amd",
+                name="rocm",
+                status="warning",
+                detail="rocminfo/rocm-smi not found",
+                recommendation="Install ROCm if you expect AMD acceleration.",
+            )
+        )
+
+    vulkan_bin = binary_path("vulkaninfo")
+    if vulkan_bin:
+        ok, output = _run_probe_command([vulkan_bin], timeout=15)
+        if ok:
+            if preferred_backend == "cpu":
+                preferred_backend = "vulkan"
+            items.append(
+                BackendDiagnosticItem(
+                    category="vulkan",
+                    name="gpu-api",
+                    status="ok",
+                    detail="Vulkan diagnostics tool detected",
+                    recommendation=output if output != "available" else "Vulkan-capable GPU path detected.",
+                )
+            )
+        else:
+            items.append(
+                BackendDiagnosticItem(
+                    category="vulkan",
+                    name="gpu-api",
+                    status="warning",
+                    detail=f"Vulkan tooling is present but probing failed: {output}",
+                    recommendation="Check GPU drivers and Vulkan runtime support.",
+                )
+            )
+    else:
+        items.append(
+            BackendDiagnosticItem(
+                category="vulkan",
+                name="gpu-api",
+                status="warning",
+                detail="vulkaninfo not found",
+                recommendation="Install Vulkan utilities if you want cross-vendor GPU diagnostics.",
+            )
+        )
+
+    if system_name == "darwin" and machine in {"arm64", "aarch64"}:
+        if preferred_backend == "cpu":
+            preferred_backend = "metal"
+        items.append(
+            BackendDiagnosticItem(
+                category="apple",
+                name="metal",
+                status="ok",
+                detail="Apple Silicon host detected; Metal acceleration should be available to Ollama.",
+                recommendation="Metal is the expected local inference path on Apple Silicon.",
+            )
+        )
+    elif system_name == "darwin":
+        items.append(
+            BackendDiagnosticItem(
+                category="apple",
+                name="metal",
+                status="warning",
+                detail="Intel macOS host detected; Ollama falls back to CPU on this architecture.",
+                recommendation="Use Apple Silicon for local GPU acceleration on macOS.",
+            )
+        )
+    else:
+        items.append(
+            BackendDiagnosticItem(
+                category="apple",
+                name="metal",
+                status="info",
+                detail="Metal is macOS-only; this host is not macOS.",
+            )
+        )
+
+    if preferred_backend == "cpu":
+        items.append(
+            BackendDiagnosticItem(
+                category="fallback",
+                name="cpu",
+                status="info",
+                detail="No stronger local acceleration path was confirmed; Ollama can still run on CPU.",
+                recommendation="CPU fallback is acceptable for diagnostics and lower-volume use, but slower for large books.",
+            )
+        )
+    else:
+        items.append(
+            BackendDiagnosticItem(
+                category="fallback",
+                name="cpu",
+                status="info",
+                detail="CPU fallback remains available if GPU acceleration is unavailable or disabled.",
+            )
+        )
+
+    from datetime import datetime, timezone
+
+    return BackendDiagnosticReport(
+        checked_at=datetime.now(timezone.utc).isoformat(),
+        platform_name=platform.system(),
+        machine=platform.machine(),
+        preferred_backend=preferred_backend,
+        items=items,
+    )
 
 
 def check_dependencies(
