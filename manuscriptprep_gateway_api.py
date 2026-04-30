@@ -909,6 +909,11 @@ class GatewayAPI:
             return None, None
         return Path(str(input_dir)), (log_path or (Path(str(output_dir)) / "orchestrator.log.jsonl"))
 
+    def _resolve_ingest_progress_path(self, job) -> Optional[Path]:
+        if not job.job_id:
+            return None
+        return self.runtime_root / str(job.job_id) / "ingest" / "progress.json"
+
     def _pass_order(self) -> list[str]:
         return ["structure", "dialogue", "entities", "dossiers"]
 
@@ -1138,6 +1143,47 @@ class GatewayAPI:
 
         return progress
 
+    def _build_ingest_progress(self, job) -> Dict[str, Any]:
+        progress_path = self._resolve_ingest_progress_path(job)
+        stage = next((item for item in job.stage_runs if item.name == "ingest"), None)
+        fallback_stage = {
+            "name": stage.name if stage else "ingest",
+            "status": stage.status if stage else job.status,
+            "started_at": stage.started_at if stage else None,
+            "finished_at": stage.finished_at if stage else None,
+            "error": stage.error if stage else None,
+        }
+        progress: Dict[str, Any] = {
+            "job_id": job.job_id,
+            "pipeline": job.pipeline,
+            "available": bool(progress_path and progress_path.exists()),
+            "status": stage.status if stage else job.status,
+            "message": "Waiting for ingest progress events.",
+            "current_stage": fallback_stage["name"] if fallback_stage["status"] == "running" else None,
+            "current_step": "starting" if fallback_stage["status"] == "running" else None,
+            "overall_percent": 0.0,
+            "stage_percent": 0.0,
+            "recent_events": [],
+            "stage": fallback_stage,
+            "stage_runs": [fallback_stage],
+        }
+        if not progress_path or not progress_path.exists():
+            return progress
+
+        data = self._load_json_file(progress_path)
+        if not isinstance(data, dict):
+            progress["message"] = "Ingest progress file is present but could not be parsed."
+            return progress
+        progress.update(data)
+        progress["available"] = True
+        progress["stage"] = fallback_stage
+        progress["stage_runs"] = [fallback_stage]
+        if not progress.get("status"):
+            progress["status"] = fallback_stage["status"]
+        if not progress.get("message"):
+            progress["message"] = "Ingest progress loaded."
+        return progress
+
     def _build_resolve_progress(self, job) -> Dict[str, Any]:
         stage = next((item for item in job.stage_runs if item.name == "resolve"), None)
         stdout_path = Path(stage.stdout_path) if stage and stage.stdout_path else None
@@ -1206,12 +1252,14 @@ class GatewayAPI:
             return HTTPStatus.OK, self._build_orchestrate_progress(job)
         if job.pipeline == "resolve":
             return HTTPStatus.OK, self._build_resolve_progress(job)
+        if job.pipeline == "ingest" or any(stage.name == "ingest" for stage in job.stage_runs):
+            return HTTPStatus.OK, self._build_ingest_progress(job)
 
         return HTTPStatus.OK, {
             "job_id": job.job_id,
             "pipeline": job.pipeline,
             "available": False,
-            "message": "Live chunk progress is currently available for categorisation and analysis jobs only.",
+            "message": "Live progress is currently available for ingest, categorisation, and analysis jobs.",
         }
 
     def get_job_analysis_details(self, job_id: str, actor: Optional[UserRecord] = None) -> Tuple[int, Dict[str, Any]]:

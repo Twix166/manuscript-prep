@@ -116,11 +116,16 @@ class ExecutionAdapter:
         stdout_path = runtime_dir / "stdout.txt"
         stderr_path = runtime_dir / "stderr.txt"
         command_path = runtime_dir / "command.json"
+        progress_path = runtime_dir / "progress.json"
+        env = dict(self.env)
+        env["PYTHONUNBUFFERED"] = "1"
+        env["MANUSCRIPT_PREP_PROGRESS_PATH"] = str(progress_path)
+        env["MANUSCRIPTPREP_INGEST_PROGRESS_PATH"] = str(progress_path)
         with stdout_path.open("w", encoding="utf-8") as stdout_handle, stderr_path.open("w", encoding="utf-8") as stderr_handle:
             proc = subprocess.Popen(
                 cmd,
                 cwd=str(self.repo_root),
-                env=self.env,
+                env=env,
                 stdout=stdout_handle,
                 stderr=stderr_handle,
                 text=True,

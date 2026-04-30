@@ -772,6 +772,65 @@ def test_gateway_api_exposes_resolve_progress_from_stdout(tmp_path) -> None:
     assert progress["canonical_name"] == "Jim Hawkins"
 
 
+def test_gateway_api_exposes_ingest_progress_from_runtime_file(tmp_path) -> None:
+    runtime_root = tmp_path / "runtime"
+    app = GatewayAPI(store=JobStore(root=tmp_path / "jobs"), runtime_root=runtime_root)
+
+    status, created = app.create_job(
+        {
+            "pipeline": "ingest",
+            "book_slug": "moonlight_bones",
+            "title": "Moonlight Bones",
+        }
+    )
+    assert status == 201
+
+    job = app.store.get_job(created["job_id"])
+    assert job is not None
+    job.status = "running"
+    job.stage_runs[0].status = "running"
+    job.stage_runs[0].started_at = "2026-04-10T10:00:00+00:00"
+    app.store.update_job(job)
+
+    progress_path = runtime_root / created["job_id"] / "ingest" / "progress.json"
+    progress_path.parent.mkdir(parents=True, exist_ok=True)
+    progress_path.write_text(
+        json.dumps(
+            {
+                "pipeline": "ingest",
+                "available": True,
+                "status": "running",
+                "message": "Cleaning extracted text.",
+                "current_stage": "cleaning",
+                "current_step": "remove repeats",
+                "overall_percent": 42.5,
+                "stage_percent": 50.0,
+                "recent_events": [
+                    {
+                        "timestamp": "2026-04-10T10:01:00+00:00",
+                        "event_type": "update",
+                        "current_stage": "cleaning",
+                        "current_step": "remove repeats",
+                        "message": "Cleaning extracted text.",
+                    }
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    status, progress = app.get_job_progress(created["job_id"])
+    assert status == 200
+    assert progress["available"] is True
+    assert progress["pipeline"] == "ingest"
+    assert progress["current_stage"] == "cleaning"
+    assert progress["current_step"] == "remove repeats"
+    assert progress["overall_percent"] == 42.5
+    assert progress["stage_percent"] == 50.0
+    assert progress["recent_events"]
+
+
 def test_gateway_api_ingest_artifacts_follow_manuscript_slug(tmp_path, sample_pdf, test_env) -> None:
     store = JobStore(root=tmp_path / "jobs")
     adapter = ExecutionAdapter(env=test_env)

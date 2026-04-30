@@ -333,7 +333,7 @@ function resetWorkspaceState() {
   els.jobList.innerHTML = "";
   els.jobDownloads.innerHTML = "";
   els.jobDetail.textContent = "Choose a job to inspect stage timing, command lines, and errors.";
-  els.jobProgress.textContent = "Live chunk progress appears here for categorisation and analysis jobs.";
+  els.jobProgress.innerHTML = `<div class="summary-detail">Live progress appears here for ingest, categorisation, and analysis jobs.</div>`;
   els.jobArtifacts.textContent = "Artifact index appears here, including checksums and output paths.";
   els.systemStatus.textContent = "Sign in to load workspace status.";
   els.adminSystemStatus.textContent = "Switch to admin mode from the profile menu to load system-wide status.";
@@ -743,7 +743,30 @@ function renderJobSummary(job) {
 
 function renderJobProgressSummary(progress) {
   if (!progress || progress.available === false) {
-    return progress?.message || "Live chunk progress appears here for categorisation and analysis jobs.";
+    return progress?.message || "Live progress appears here for ingest, categorisation, and analysis jobs.";
+  }
+  if (progress.pipeline === "ingest") {
+    const recentEvents = Array.isArray(progress.recent_events) && progress.recent_events.length
+      ? progress.recent_events.slice(-5).map((event) => `- ${formatDate(event.timestamp)} | ${event.current_stage || event.stage || "-"} | ${event.current_step || event.step || "-"} | ${event.message || "-"}`)
+      : ["- No ingest progress events yet"];
+    const warnings = Array.isArray(progress.warnings) && progress.warnings.length
+      ? progress.warnings.slice(-5).map((warning) => `- ${warning}`)
+      : [];
+    return [
+      "Ingest Progress",
+      `- Stage: ${progress.current_stage || progress.stage?.name || "n/a"}`,
+      `- Step: ${progress.current_step || "n/a"}`,
+      `- Message: ${progress.message || "n/a"}`,
+      `- Overall progress: ${progress.overall_percent ?? 0}%`,
+      `- Stage progress: ${progress.stage_percent ?? 0}%`,
+      `- Highlight annotations: ${progress.highlight_count ?? "n/a"}`,
+      `- Unmapped highlights: ${progress.unmapped_highlights ?? "n/a"}`,
+      progress.current_chunk ? `- Current chunk: ${progress.current_chunk} (${progress.chunk_index || "?"} of ${progress.chunks_total || "?"})` : `- Current chunk: ${progress.chunks_total ? `${progress.chunk_index || 0} of ${progress.chunks_total}` : "n/a"}`,
+      "",
+      `Recent events`,
+      ...recentEvents,
+      ...(warnings.length ? ["", "Warnings", ...warnings] : []),
+    ].join("\n");
   }
   if (progress.pipeline === "resolve") {
     const recentEvents = Array.isArray(progress.recent_events) && progress.recent_events.length
@@ -796,9 +819,53 @@ function renderJobProgressSummary(progress) {
   ].join("\n");
 }
 
+function formatProgressPercent(progress) {
+  const candidate = Number(progress?.overall_percent ?? progress?.chunk_percent ?? progress?.pass_percent ?? 0);
+  if (!Number.isFinite(candidate)) {
+    return 0;
+  }
+  return Math.max(0, Math.min(100, candidate));
+}
+
+function renderJobProgressPanel(progress) {
+  const percent = formatProgressPercent(progress);
+  const title = progress?.pipeline === "ingest"
+    ? "Ingest Progress"
+    : progress?.pipeline === "resolve"
+      ? "Resolution Progress"
+      : "Live Progress";
+  const status = progress?.message || "Waiting for progress updates.";
+  const stage = progress?.current_stage || progress?.stage?.name || "n/a";
+  const step = progress?.current_step || "n/a";
+  const summary = renderJobProgressSummary(progress);
+  return `
+    <div class="progress-meter">
+      <div class="progress-meter-head">
+        <strong>${escapeHtml(title)}</strong>
+        <span>${percent.toFixed(percent % 1 === 0 ? 0 : 1)}%</span>
+      </div>
+      <progress value="${percent}" max="100"></progress>
+      <div class="progress-meter-meta">
+        <span><strong>Stage:</strong> ${escapeHtml(stage)}</span>
+        <span><strong>Step:</strong> ${escapeHtml(step)}</span>
+      </div>
+      <p class="meta">${escapeHtml(status)}</p>
+    </div>
+    <div class="summary-detail">${escapeHtml(summary)}</div>
+  `;
+}
+
 function renderCompactStageProgress(progress) {
   if (!progress || progress.available === false) {
     return "";
+  }
+  if (progress.pipeline === "ingest") {
+    const stage = progress.current_stage || progress.stage?.name || "ingest";
+    const step = progress.current_step || "starting";
+    const current = progress.current_chunk
+      ? `${progress.current_chunk} (${progress.chunk_index || "?"} of ${progress.chunks_total || "?"})`
+      : stage;
+    return `${stage}: ${step} | ${current} | ${formatProgressPercent(progress).toFixed(0)}%`;
   }
   if (progress.pipeline === "resolve") {
     if (!progress.current_group) {
@@ -1333,7 +1400,7 @@ function renderStageBoard() {
     );
     const stageStatus = latestJob ? latestJob.status : "not-started";
     const progress = latestJob ? state.jobProgressById[latestJob.job_id] : null;
-    const compactProgress = ["orchestrate", "resolve"].includes(stage.name) ? renderCompactStageProgress(progress) : "";
+    const compactProgress = ["ingest", "orchestrate", "resolve"].includes(stage.name) ? renderCompactStageProgress(progress) : "";
     const throughput = stage.name === "orchestrate" ? (progress?.reported_tps || progress?.estimated_tps) : null;
     const models = resolveModelRefs(stage);
     const card = document.createElement("details");
@@ -1563,11 +1630,13 @@ function renderJobs() {
   if (!state.jobs.length) {
     els.jobList.innerHTML = '<li class="muted">No jobs for the selected manuscript yet</li>';
     els.jobDetail.textContent = "Run a stage to generate job details.";
-    els.jobProgress.textContent = "Live chunk progress appears here for categorisation and analysis jobs.";
+    els.jobProgress.innerHTML = `<div class="summary-detail">Live progress appears here for ingest, categorisation, and analysis jobs.</div>`;
     els.jobArtifacts.textContent = "Artifact index will appear after a stage produces output.";
     return;
   }
   for (const job of state.jobs) {
+    const progress = state.jobProgressById[job.job_id];
+    const liveProgress = progress ? renderCompactStageProgress(progress) : "";
     const li = document.createElement("li");
     li.className = job.job_id === state.selectedJobId ? "selected" : "";
     li.innerHTML = `
@@ -1578,6 +1647,7 @@ function renderJobs() {
         </div>
         <span class="meta">Job ID: ${job.job_id}</span>
         <span class="meta">Updated: ${formatDate(job.updated_at)}</span>
+        ${liveProgress ? `<span class="meta"><strong>Live:</strong> ${escapeHtml(liveProgress)}</span>` : ""}
       </div>
     `;
     li.addEventListener("click", async (event) => {
@@ -1617,7 +1687,7 @@ async function refreshSelectedJob() {
   const job = selectedJob();
   if (!job) {
     els.jobDownloads.innerHTML = "";
-    els.jobProgress.textContent = "Live chunk progress appears here for categorisation and analysis jobs.";
+    els.jobProgress.innerHTML = `<div class="summary-detail">Live progress appears here for ingest, categorisation, and analysis jobs.</div>`;
     els.cancelSelectedJob.disabled = true;
     return;
   }
@@ -1629,14 +1699,14 @@ async function refreshSelectedJob() {
     ]);
     state.jobProgressById[freshJob.job_id] = progress;
     els.jobDetail.textContent = renderJobSummary(freshJob);
-    els.jobProgress.textContent = renderJobProgressSummary(progress);
+    els.jobProgress.innerHTML = renderJobProgressPanel(progress);
     els.jobArtifacts.textContent = renderArtifactSummary(artifacts);
     renderJobDownloads(freshJob, artifacts);
     els.cancelSelectedJob.disabled = !["queued", "running", "cancel_requested"].includes(freshJob.status);
     renderStageBoard();
   } catch (error) {
     els.jobDetail.textContent = error.message;
-    els.jobProgress.textContent = error.message;
+    els.jobProgress.innerHTML = `<div class="summary-detail">${escapeHtml(error.message)}</div>`;
     els.jobArtifacts.textContent = error.message;
     els.jobDownloads.innerHTML = "";
     els.cancelSelectedJob.disabled = true;
@@ -1710,10 +1780,13 @@ async function refreshJobs() {
   }
   const payload = await fetchJson(`/v1/jobs?manuscript_id=${encodeURIComponent(manuscript.manuscript_id)}`);
   state.jobs = payload.jobs;
-  const orchestrateJob = latestStageCardJobForPipeline("orchestrate");
-  if (orchestrateJob) {
+  for (const pipeline of ["ingest", "orchestrate", "resolve"]) {
+    const progressJob = latestStageCardJobForPipeline(pipeline);
+    if (!progressJob) {
+      continue;
+    }
     try {
-      state.jobProgressById[orchestrateJob.job_id] = await fetchJson(`/v1/jobs/${orchestrateJob.job_id}/progress`);
+      state.jobProgressById[progressJob.job_id] = await fetchJson(`/v1/jobs/${progressJob.job_id}/progress`);
     } catch {
       // keep last known progress if the lightweight refresh fails
     }

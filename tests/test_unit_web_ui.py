@@ -35,6 +35,9 @@ def test_get_web_asset_serves_javascript() -> None:
     assert b"Resolved Analysis" in body
     assert b"report_pdf" in body
     assert b"Resolution Progress" in body
+    assert b"Ingest Progress" in body
+    assert b"progress-meter" in body
+    assert b"overall_percent" in body
     assert b"openStageLogs" in body
     assert b"Readable View" in body
 

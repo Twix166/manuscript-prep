@@ -319,6 +319,45 @@ h3 {
   min-height: 84px;
 }
 
+.progress-meter {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.progress-meter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.progress-meter-head strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.progress-meter progress {
+  width: 100%;
+  height: 14px;
+}
+
+.progress-meter-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.summary-detail {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
 .list {
   list-style: none;
   padding: 0;

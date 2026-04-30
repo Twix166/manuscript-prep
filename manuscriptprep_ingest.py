@@ -44,6 +44,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import os
 import re
 import shutil
 import subprocess
@@ -57,6 +59,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 from xml.etree import ElementTree
 
 from manuscriptprep.config import ConfigError, ManuscriptPrepConfig, load_config
+from manuscriptprep.ingest_progress import IngestProgressTracker
 from manuscriptprep.paths import build_paths
 from narrator_toolkit.document_model import build_cleaned_document
 from narrator_toolkit.highlight_extraction import extract_pdf_highlights
@@ -377,10 +380,21 @@ def _extract_ebook_binary_text(source_path: Path) -> str:
     raise RuntimeError("Could not extract readable text from ebook file")
 
 
-def classify_source(source_path: Path, tmp_dir: Path, logger: Logger) -> PdfClassification:
+def classify_source(
+    source_path: Path,
+    tmp_dir: Path,
+    logger: Logger,
+    progress: Optional[IngestProgressTracker] = None,
+) -> PdfClassification:
     source_format = detect_source_format(source_path)
     if source_format != "pdf":
         logger.log(f"Source classification: format={source_format}, treated_as_text_source")
+        if progress is not None:
+            progress.update(
+                current_stage="classification",
+                current_step="source format detection",
+                message=f"Detected {source_format.upper()} source; skipping PDF classification.",
+            )
         return PdfClassification(
             source_format=source_format,
             pdf_type="text",
@@ -420,6 +434,19 @@ def classify_source(source_path: Path, tmp_dir: Path, logger: Logger) -> PdfClas
         f"PDF classification: pdf_type={pdf_type}, needs_ocr={needs_ocr}, "
         f"native_sample_chars={native_chars}, page_count={page_count}"
     )
+    if progress is not None:
+        progress.update(
+            current_stage="classification",
+            current_step="pdf classification",
+            message=(
+                f"Classified PDF as {pdf_type}; {'OCR required' if needs_ocr else 'native text available'}."
+            ),
+            page_count=page_count,
+            pdf_type=pdf_type,
+            needs_ocr=needs_ocr,
+            native_sample_chars=native_chars,
+            source_format=source_format,
+        )
     return PdfClassification(
         source_format=source_format,
         pdf_type=pdf_type,
@@ -430,9 +457,20 @@ def classify_source(source_path: Path, tmp_dir: Path, logger: Logger) -> PdfClas
     )
 
 
-def run_ocr(pdf_path: Path, ocr_pdf_path: Path, logger: Logger) -> None:
+def run_ocr(
+    pdf_path: Path,
+    ocr_pdf_path: Path,
+    logger: Logger,
+    progress: Optional[IngestProgressTracker] = None,
+) -> None:
     require_tool("ocrmypdf")
     logger.log("Running OCR with ocrmypdf")
+    if progress is not None:
+        progress.update(
+            current_stage="extraction",
+            current_step="OCR",
+            message="Running OCR on the source PDF.",
+        )
     result = subprocess.run(
         ["ocrmypdf", "--skip-text", str(pdf_path), str(ocr_pdf_path)],
         capture_output=True,
@@ -451,6 +489,7 @@ def extract_raw_text(
     classification: PdfClassification,
     force_ocr: bool,
     logger: Logger,
+    progress: Optional[IngestProgressTracker] = None,
 ) -> Dict[str, Any]:
     extraction_info: Dict[str, Any] = {
         "source_format": classification.source_format,
@@ -462,28 +501,64 @@ def extract_raw_text(
     }
 
     if classification.source_format == "txt":
+        if progress is not None:
+            progress.update(
+                current_stage="extraction",
+                current_step="plain text copy",
+                message="Copying plain-text manuscript into the workspace.",
+            )
         text = read_text(source_path)
         write_text(raw_txt_path, text)
         extraction_info["extractor"] = "plain_text"
     elif classification.source_format == "docx":
+        if progress is not None:
+            progress.update(
+                current_stage="extraction",
+                current_step="DOCX XML",
+                message="Extracting text from DOCX XML.",
+            )
         text = _extract_docx_text(source_path)
         write_text(raw_txt_path, text)
         extraction_info["extractor"] = "docx_xml"
     elif classification.source_format == "epub":
+        if progress is not None:
+            progress.update(
+                current_stage="extraction",
+                current_step="EPUB HTML",
+                message="Extracting text from EPUB XHTML content.",
+            )
         text = _extract_epub_text(source_path)
         write_text(raw_txt_path, text)
         extraction_info["extractor"] = "epub_html"
     elif classification.source_format == "odt":
+        if progress is not None:
+            progress.update(
+                current_stage="extraction",
+                current_step="ODT XML",
+                message="Extracting text from ODT XML.",
+            )
         text = _extract_odt_text(source_path)
         write_text(raw_txt_path, text)
         extraction_info["extractor"] = "odt_xml"
     elif classification.source_format in {"mobi", "azw", "azw3"}:
+        if progress is not None:
+            progress.update(
+                current_stage="extraction",
+                current_step="ebook heuristic",
+                message="Extracting text from ebook container markup.",
+            )
         text = _extract_ebook_binary_text(source_path)
         write_text(raw_txt_path, text)
         extraction_info["extractor"] = "ebook_heuristic"
     elif force_ocr or classification.needs_ocr:
+        if progress is not None:
+            progress.update(
+                current_stage="extraction",
+                current_step="OCR",
+                message="Preparing OCR for the scanned PDF.",
+            )
         ocr_pdf_path = tmp_dir / "ocr_output.pdf"
-        run_ocr(source_path, ocr_pdf_path, logger)
+        run_ocr(source_path, ocr_pdf_path, logger, progress=progress)
         extraction_info["ocr_used"] = True
 
         result = try_pdftotext_extract(ocr_pdf_path, raw_ocr_txt_path)
@@ -495,6 +570,12 @@ def extract_raw_text(
         extraction_info["raw_ocr_text_path"] = str(raw_ocr_txt_path)
         logger.log(f"Wrote OCR-extracted raw text to {raw_ocr_txt_path}")
     else:
+        if progress is not None:
+            progress.update(
+                current_stage="extraction",
+                current_step="pdftotext",
+                message="Extracting PDF text with pdftotext.",
+            )
         result = try_pdftotext_extract(source_path, raw_txt_path)
         if result.returncode != 0:
             raise RuntimeError(f"pdftotext failed: {result.stderr.strip() or result.stdout.strip()}")
@@ -503,6 +584,15 @@ def extract_raw_text(
     raw = read_text(raw_txt_path)
     extraction_info["raw_char_count"] = len(raw)
     extraction_info["raw_word_count"] = count_words(raw)
+    if progress is not None:
+        progress.update(
+            current_stage="extraction",
+            current_step="raw text ready",
+            message=f"Raw text extracted ({extraction_info['raw_word_count']} words).",
+            raw_char_count=extraction_info["raw_char_count"],
+            raw_word_count=extraction_info["raw_word_count"],
+            ocr_used=extraction_info["ocr_used"],
+        )
     return extraction_info
 
 
@@ -553,9 +643,19 @@ def looks_like_running_header_or_footer(text: str) -> bool:
     return False
 
 
-def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
+def clean_text(
+    raw_text: str,
+    logger: Logger,
+    progress: Optional[IngestProgressTracker] = None,
+) -> Tuple[str, Dict[str, Any]]:
     raw_text = shared_normalize_unicode(raw_text)
     raw_text = raw_text.replace("\r\n", "\n").replace("\r", "\n")
+    if progress is not None:
+        progress.update(
+            current_stage="cleaning",
+            current_step="normalize line endings",
+            message="Normalizing Unicode and line endings.",
+        )
     page_edge_repeated_lines = detect_page_edge_repeated_lines(raw_text)
     raw_text = raw_text.replace("\f", "\n")
 
@@ -582,6 +682,14 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
 
     text = "\n".join(cleaned_lines)
     text = re.sub(r"([A-Za-z])-\n([a-z])", r"\1\2", text)
+    if progress is not None:
+        progress.update(
+            current_stage="cleaning",
+            current_step="remove repeats",
+            message="Removing repeated headers, footers, and page markers.",
+            removed_page_markers=removed_page_markers,
+            removed_repeated_headers=removed_repeated_headers,
+        )
 
     lines = text.split("\n")
     paragraphs: List[str] = []
@@ -633,6 +741,16 @@ def clean_text(raw_text: str, logger: Logger) -> Tuple[str, Dict[str, Any]]:
         f"removed_repeated_headers={removed_repeated_headers}, "
         f"clean_word_count={cleaning_stats['clean_word_count']}"
     )
+    if progress is not None:
+        progress.update(
+            current_stage="cleaning",
+            current_step="paragraph reconstruction",
+            message=f"Cleaned text prepared ({cleaning_stats['clean_word_count']} words).",
+            removed_page_markers=removed_page_markers,
+            removed_repeated_headers=removed_repeated_headers,
+            clean_char_count=cleaning_stats["clean_char_count"],
+            clean_word_count=cleaning_stats["clean_word_count"],
+        )
     return clean_text_out, cleaning_stats
 
 
@@ -675,6 +793,8 @@ def chunk_clean_text(
     max_chunk_words: int,
     logger: Logger,
     book_slug: Optional[str] = None,
+    progress: Optional[IngestProgressTracker] = None,
+    estimated_total_chunks: Optional[int] = None,
 ) -> Tuple[List[ChunkRecord], Dict[str, Any]]:
     book_slug = book_slug or slugify(book_title)
     book_chunk_dir = chunks_root / book_slug
@@ -730,6 +850,19 @@ def chunk_clean_text(
         )
         chunks.append(chunk_record)
         logger.log(f"Wrote {chunk_id} -> {chunk_path} ({wc} words)")
+        if progress is not None:
+            total = max(estimated_total_chunks or 0, index + 1, 1)
+            chunk_progress = round(min(1.0, (index + 1) / total), 3)
+            progress.update(
+                current_stage="chunking",
+                current_step="writing chunk",
+                current_chunk=chunk_id,
+                chunk_index=index + 1,
+                chunks_total=total,
+                message=f"Wrote {chunk_id} ({wc} words).",
+                stage_percent=round(chunk_progress * 100, 1),
+                overall_percent=round(70 + (chunk_progress * 20), 1),
+            )
         char_cursor += cc
         current = []
         current_words = 0
@@ -788,6 +921,16 @@ def chunk_clean_text(
         "min_chunk_words": min_chunk_words,
         "max_chunk_words": max_chunk_words,
     }
+    if progress is not None:
+        progress.update(
+            current_stage="chunking",
+            current_step="chunking complete",
+            message=f"Chunked manuscript into {len(chunks)} chunks.",
+            chunks_total=len(chunks),
+            chunk_count=len(chunks),
+            overall_percent=90.0,
+            stage_percent=100.0,
+        )
     return chunks, chunk_stats
 
 
@@ -918,6 +1061,16 @@ def main() -> int:
 
     logger = Logger(settings.logs_dir / "ingest.log")
     logger.log(f"Starting ManuscriptPrep ingest for title='{settings.title}' slug='{book_slug}'")
+    progress_path_env = os.environ.get("MANUSCRIPTPREP_INGEST_PROGRESS_PATH") or os.environ.get("MANUSCRIPT_PREP_PROGRESS_PATH")
+    progress = IngestProgressTracker(Path(progress_path_env).expanduser() if progress_path_env else None)
+    progress.update(
+        message="Preparing ingest workspace.",
+        current_stage="workspace",
+        current_step="create directories",
+        overall_percent=1.0,
+        title=settings.title,
+        book_slug=book_slug,
+    )
 
     workspace_pdf = settings.source_dir / input_pdf.name
     if workspace_pdf.resolve() != input_pdf.resolve():
@@ -925,6 +1078,13 @@ def main() -> int:
         logger.log(f"Copied source manuscript to workspace: {workspace_pdf}")
     else:
         logger.log(f"Using source manuscript in place: {workspace_pdf}")
+    progress.update(
+        current_stage="workspace",
+        current_step="source ready",
+        message=f"Workspace prepared for {settings.title}.",
+        overall_percent=5.0,
+        source_pdf=str(workspace_pdf),
+    )
 
     raw_txt_path = settings.extracted_dir / "raw.txt"
     raw_ocr_txt_path = settings.extracted_dir / "raw_ocr.txt"
@@ -932,7 +1092,13 @@ def main() -> int:
     narrator_document_path = settings.cleaned_dir / "cleaned_document.json"
     highlight_report_path = settings.cleaned_dir / "highlight_report.json"
 
-    classification = classify_source(workspace_pdf, settings.tmp_dir, logger)
+    classification = classify_source(workspace_pdf, settings.tmp_dir, logger, progress=progress)
+    progress.update(
+        current_stage="classification",
+        current_step="source classified",
+        message=f"Classification complete: {classification.pdf_type}.",
+        overall_percent=10.0,
+    )
 
     extraction_info = extract_raw_text(
         source_path=workspace_pdf,
@@ -942,20 +1108,47 @@ def main() -> int:
         classification=classification,
         force_ocr=settings.force_ocr,
         logger=logger,
+        progress=progress,
     )
 
     raw_text = read_text(raw_txt_path)
-    clean_text_value, cleaning_stats = clean_text(raw_text, logger)
+    progress.update(
+        current_stage="cleaning",
+        current_step="prepare raw text",
+        message="Cleaning extracted text.",
+        overall_percent=25.0,
+    )
+    clean_text_value, cleaning_stats = clean_text(raw_text, logger, progress=progress)
     write_text(clean_txt_path, clean_text_value)
     logger.log(f"Wrote cleaned text to {clean_txt_path}")
+    progress.update(
+        current_stage="cleaning",
+        current_step="clean text written",
+        message=f"Cleaned text written to {clean_txt_path.name}.",
+        overall_percent=45.0,
+    )
 
     extracted_highlights = []
     highlight_extraction_warnings: List[str] = []
     if classification.source_format == "pdf":
+        progress.update(
+            current_stage="highlight extraction",
+            current_step="extract annotations",
+            message="Reading highlight annotations from the source PDF.",
+            overall_percent=50.0,
+        )
         extracted_highlights, highlight_extraction_warnings = extract_pdf_highlights(workspace_pdf)
         logger.log(
             f"Extracted PDF highlights: count={len(extracted_highlights)}, "
             f"warnings={len(highlight_extraction_warnings)}"
+        )
+        progress.update(
+            current_stage="highlight extraction",
+            current_step="map highlights",
+            message=f"Mapped {len(extracted_highlights)} PDF highlight annotations.",
+            overall_percent=58.0,
+            highlight_count=len(extracted_highlights),
+            highlight_warnings=len(highlight_extraction_warnings),
         )
     narrator_document, highlight_report = build_cleaned_document(
         clean_text=clean_text_value,
@@ -966,12 +1159,35 @@ def main() -> int:
         extraction_warnings=highlight_extraction_warnings,
         document_id=book_slug,
     )
+    progress.update(
+        current_stage="highlight mapping",
+        current_step="build cleaned document",
+        message="Built structured cleaned document with preserved highlight spans.",
+        overall_percent=65.0,
+        highlight_count=highlight_report.get("total_highlights"),
+        mapped_highlights=highlight_report.get("mapped_highlights"),
+        unmapped_highlights=highlight_report.get("unmapped_highlights"),
+    )
     write_json(narrator_document_path, narrator_document)
     write_json(highlight_report_path, highlight_report)
     logger.log(f"Wrote Narrator's Toolkit cleaned document to {narrator_document_path}")
 
+    progress.update(
+        current_stage="structure",
+        current_step="detect chapters and parts",
+        message="Detecting manuscript structure hints.",
+        overall_percent=68.0,
+    )
     structure_hints = detect_structure_hints(clean_text_value)
 
+    estimated_total_chunks = max(1, math.ceil(cleaning_stats["clean_word_count"] / max(settings.chunk_words, 1)))
+    progress.update(
+        current_stage="chunking",
+        current_step="prepare chunks",
+        message=f"Chunking cleaned manuscript into roughly {estimated_total_chunks} chunks.",
+        overall_percent=70.0,
+        chunks_total=estimated_total_chunks,
+    )
     chunks, chunk_stats = chunk_clean_text(
         clean_text_value=clean_text_value,
         book_title=settings.title,
@@ -981,8 +1197,16 @@ def main() -> int:
         target_chunk_words=settings.chunk_words,
         max_chunk_words=settings.max_chunk_words,
         logger=logger,
+        progress=progress,
+        estimated_total_chunks=estimated_total_chunks,
     )
 
+    progress.update(
+        current_stage="manifests",
+        current_step="write manifests",
+        message="Writing ingest manifests and artifact index entries.",
+        overall_percent=95.0,
+    )
     chunk_manifest = {
         "source_pdf": str(workspace_pdf),
         "source_document": str(workspace_pdf),
@@ -1036,6 +1260,16 @@ def main() -> int:
     logger.log(f"Wrote chunk manifest to {settings.manifests_dir / 'chunk_manifest.json'}")
     logger.log(f"Wrote ingest manifest to {settings.manifests_dir / 'ingest_manifest.json'}")
     logger.log("Ingest complete")
+    progress.finish(
+        message="Ingest complete.",
+        current_stage="complete",
+        current_step="finished",
+        artifact_count=2,
+        chunk_count=len(chunks),
+        highlight_count=highlight_report.get("total_highlights"),
+        mapped_highlights=highlight_report.get("mapped_highlights"),
+        unmapped_highlights=highlight_report.get("unmapped_highlights"),
+    )
 
     return 0
 

@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 import manuscriptprep_ingest as ingest
+from manuscriptprep.ingest_progress import IngestProgressTracker
 
 
 pytestmark = pytest.mark.unit
@@ -275,3 +276,15 @@ def test_extract_raw_text_supports_mobi_sources(tmp_path: Path) -> None:
     text = raw.read_text(encoding="utf-8")
     assert "Moby-Dick" in text
     assert "Call me Ishmael" in text
+
+
+def test_ingest_progress_tracker_writes_updates(tmp_path: Path) -> None:
+    path = tmp_path / "progress.json"
+    tracker = IngestProgressTracker(path)
+    tracker.update(current_stage="cleaning", current_step="remove repeats", message="Cleaning text.", overall_percent=42.5)
+    tracker.event("chunk_start", chunk="chunk_001", message="Starting chunk")
+
+    data = path.read_text(encoding="utf-8")
+    assert "\"current_stage\": \"cleaning\"" in data
+    assert "\"overall_percent\": 42.5" in data
+    assert "\"event_type\": \"chunk_start\"" in data
