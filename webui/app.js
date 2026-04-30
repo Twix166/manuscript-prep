@@ -752,7 +752,9 @@ function renderJobProgressSummary(progress) {
         const counts = event.page_mapped !== undefined || event.page_unmapped !== undefined
           ? `${event.page_mapped ?? 0} mapped / ${event.page_unmapped ?? 0} unmapped`
           : "";
-        return `- ${formatDate(event.timestamp)} | ${pagePart} | ${event.current_step || event.step || "-"} | ${event.message || "-"}${counts ? ` | ${counts}` : ""}`;
+        const fallback = event.fallback_mode ? ` | ${event.fallback_mode}` : "";
+        const remaining = event.fallback_remaining !== undefined ? ` | remaining ${event.fallback_remaining}` : "";
+        return `- ${formatDate(event.timestamp)} | ${pagePart} | ${event.current_step || event.step || "-"} | ${event.message || "-"}${counts ? ` | ${counts}` : ""}${fallback}${remaining}`;
       })
       : ["- No ingest progress events yet"];
     const warnings = Array.isArray(progress.warnings) && progress.warnings.length
@@ -768,6 +770,8 @@ function renderJobProgressSummary(progress) {
       `- Page: ${progress.current_page ?? "n/a"} of ${progress.pages_total ?? "n/a"}`,
       `- Page mapped: ${progress.page_mapped ?? 0}`,
       `- Page unmapped: ${progress.page_unmapped ?? 0}`,
+      progress.fallback_mode ? `- Fallback mode: ${progress.fallback_mode}` : null,
+      progress.fallback_remaining !== undefined ? `- Fallback remaining: ${progress.fallback_remaining}` : null,
       `- Highlight annotations: ${progress.highlight_count ?? "n/a"}`,
       `- Mapped highlights: ${progress.mapped_highlights ?? "n/a"}`,
       `- Unmapped highlights: ${progress.unmapped_highlights ?? "n/a"}`,
@@ -889,7 +893,9 @@ function renderCompactStageProgress(progress) {
     const countInfo = progress.page_mapped !== undefined || progress.page_unmapped !== undefined
       ? `${progress.page_mapped ?? 0} mapped / ${progress.page_unmapped ?? 0} unmapped`
       : "";
-    return [stage, step, current, pageInfo, countInfo, `${formatProgressPercent(progress).toFixed(0)}%`].filter(Boolean).join(" | ");
+    const fallbackInfo = progress.fallback_mode ? `fallback ${progress.fallback_mode}` : "";
+    const remainingInfo = progress.fallback_remaining !== undefined ? `${progress.fallback_remaining} remaining` : "";
+    return [stage, step, current, pageInfo, countInfo, fallbackInfo, remainingInfo, `${formatProgressPercent(progress).toFixed(0)}%`].filter(Boolean).join(" | ");
   }
   if (progress.pipeline === "resolve") {
     if (!progress.current_group) {

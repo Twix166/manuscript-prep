@@ -200,6 +200,34 @@ def test_highlight_mapping_emits_page_progress_callbacks() -> None:
     assert any(event.get("page_mapped") == 1 for event in events)
 
 
+def test_highlight_mapping_emits_fallback_progress_for_global_highlights() -> None:
+    clean_text = "Hello Sarah waved again.\n"
+    highlights = [
+        ExtractedHighlight(
+            text="Sarah",
+            color="#ffd966",
+            source_page=None,
+            source_annotation_id="annot-global",
+            rect=[0, 0, 10, 10],
+            source_context="Hello Sarah waved again.",
+        )
+    ]
+    events: list[dict[str, object]] = []
+
+    document, report = build_cleaned_document(
+        clean_text=clean_text,
+        title="Fallback Test",
+        source_file="voice-test.pdf",
+        highlights=highlights,
+        progress_callback=events.append,
+    )
+
+    assert report["mapped_highlights"] == 1
+    assert document["metadata"]["has_highlights"] is True
+    assert any(event.get("event_type") == "highlight_fallback_started" for event in events)
+    assert any(event.get("event_type") == "highlight_fallback_progress" for event in events)
+
+
 def test_highlight_extraction_reads_fake_pymupdf_annotations(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     class FakeRect:
         def __init__(self, values):

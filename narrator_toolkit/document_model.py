@@ -357,28 +357,129 @@ def _find_highlight_match(
     highlight: ExtractedHighlight,
     used_ranges: list[tuple[int, int]],
     preferred_start: int = 0,
+    allow_fuzzy: bool = True,
+    scope_cache: dict[str, tuple[str, list[int]]] | None = None,
+) -> tuple[tuple[int, int] | None, str, float]:
+    cache = scope_cache or _build_scope_cache(text)
+    return _find_highlight_in_scope_cached(
+        text,
+        cache,
+        highlight,
+        used_ranges,
+        preferred_start=preferred_start,
+        allow_fuzzy=allow_fuzzy,
+    )
+
+
+def _page_window_bounds(
+    clean_text: str,
+    page_offsets: list[int | None],
+    page_index: int,
+    pad: int = 1200,
+) -> tuple[int, int] | None:
+    if page_index < 0 or page_index >= len(page_offsets):
+        return None
+    current_start = page_offsets[page_index]
+    if current_start is None:
+        return None
+
+    next_start = len(clean_text)
+    for candidate in page_offsets[page_index + 1:]:
+        if candidate is not None:
+            next_start = candidate
+            break
+
+    start = max(0, current_start - pad)
+    end = min(len(clean_text), next_start + pad)
+    if end <= start:
+        return None
+    return start, end
+
+
+def _ranges_in_window(ranges: list[tuple[int, int]], window_start: int, window_end: int) -> list[tuple[int, int]]:
+    local: list[tuple[int, int]] = []
+    for start, end in ranges:
+        if start < window_end and end > window_start:
+            local.append((max(0, start - window_start), min(end, window_end) - window_start))
+    return local
+
+
+def _build_scope_cache(text: str) -> dict[str, tuple[str, list[int]]]:
+    return {
+        "search": _normalise_search_text(text),
+        "punct": _normalise_punctuation_tolerant(text),
+    }
+
+
+def _find_highlight_in_scope_cached(
+    scope_text: str,
+    scope_cache: dict[str, tuple[str, list[int]]],
+    highlight: ExtractedHighlight,
+    used_ranges: list[tuple[int, int]],
+    preferred_start: int = 0,
+    allow_fuzzy: bool = True,
 ) -> tuple[tuple[int, int] | None, str, float]:
     context_text = getattr(highlight, "source_context", "") or ""
-    match = _find_in_context(text, highlight.text, context_text, used_ranges, preferred_start)
-    method = "contextual" if match is not None else "exact"
-    confidence = 0.98 if match is not None else 1.0
-    if match is None:
-        match = _find_exact(text, highlight.text, used_ranges, preferred_start)
-    if match is None:
-        match = _find_normalised(text, highlight.text, used_ranges, _normalise_search_text, preferred_start)
-        method = "normalised_whitespace"
-        confidence = 0.96
-    if match is None:
-        match = _find_normalised(text, highlight.text, used_ranges, _normalise_punctuation_tolerant, preferred_start)
-        method = "punctuation_tolerant"
-        confidence = 0.9
-    if match is None:
-        fuzzy = _find_fuzzy(text, highlight.text, used_ranges)
+
+    if context_text.strip():
+        context_match = _find_exact(scope_text, context_text, used_ranges, preferred_start)
+        if context_match is None:
+            context_match = _find_normalised_precomputed(
+                *scope_cache["search"],
+                context_text,
+                used_ranges,
+                _normalise_search_text,
+                preferred_start,
+            )
+        if context_match is None:
+            context_match = _find_normalised_precomputed(
+                *scope_cache["punct"],
+                context_text,
+                used_ranges,
+                _normalise_punctuation_tolerant,
+                preferred_start,
+            )
+        if context_match is not None:
+            context_start, context_end = context_match
+            segment = scope_text[context_start:context_end]
+            inner = _find_exact(segment, highlight.text, [], 0)
+            if inner is None:
+                inner = _find_normalised(segment, highlight.text, [], _normalise_search_text, 0)
+            if inner is None:
+                inner = _find_normalised(segment, highlight.text, [], _normalise_punctuation_tolerant, 0)
+            if inner is not None:
+                return (context_start + inner[0], context_start + inner[1]), "contextual", 0.98
+
+    exact = _find_exact(scope_text, highlight.text, used_ranges, preferred_start)
+    if exact is not None:
+        return exact, "exact", 1.0
+
+    match = _find_normalised_precomputed(
+        *scope_cache["search"],
+        highlight.text,
+        used_ranges,
+        _normalise_search_text,
+        preferred_start,
+    )
+    if match is not None:
+        return match, "normalised_whitespace", 0.96
+
+    match = _find_normalised_precomputed(
+        *scope_cache["punct"],
+        highlight.text,
+        used_ranges,
+        _normalise_punctuation_tolerant,
+        preferred_start,
+    )
+    if match is not None:
+        return match, "punctuation_tolerant", 0.9
+
+    if allow_fuzzy:
+        fuzzy = _find_fuzzy(scope_text, highlight.text, used_ranges)
         if fuzzy is not None:
-            match = (fuzzy[0], fuzzy[1])
-            method = "fuzzy"
-            confidence = round(fuzzy[2], 3)
-    return match, method, confidence
+            return (fuzzy[0], fuzzy[1]), "fuzzy", round(fuzzy[2], 3)
+
+    return None, "exact", 1.0
 
 
 def map_highlights_to_clean_text(
@@ -390,8 +491,6 @@ def map_highlights_to_clean_text(
     mapped: list[dict[str, Any]] = []
     used_ranges: list[tuple[int, int]] = []
     warnings: list[dict[str, Any]] = []
-    allow_fuzzy = len(highlights) <= 500
-
     page_segments: list[str] = []
     page_offsets: list[int | None] = []
     if raw_text:
@@ -399,16 +498,17 @@ def map_highlights_to_clean_text(
         page_offsets = _locate_page_segments(clean_text, page_segments)
 
     page_groups: dict[int, list[ExtractedHighlight]] = {}
-    fallback_highlights: list[ExtractedHighlight] = []
+    fallback_groups: dict[int, list[ExtractedHighlight]] = {}
+    global_fallback: list[ExtractedHighlight] = []
     for highlight in highlights:
         page_index = int(highlight.source_page or 0) - 1
         if 0 <= page_index < len(page_segments) and page_offsets[page_index] is not None:
             page_groups.setdefault(page_index, []).append(highlight)
         else:
-            fallback_highlights.append(highlight)
+            global_fallback.append(highlight)
 
     page_totals = len(page_segments)
-    mapping_total = max(len(highlights), 1)
+    clean_scope_cache = _build_scope_cache(clean_text)
 
     def emit_progress(**fields: Any) -> None:
         if progress_callback is not None:
@@ -431,12 +531,30 @@ def map_highlights_to_clean_text(
             }
         )
 
+    emit_progress(
+        event_type="highlight_fallback_started",
+        current_stage="highlight extraction",
+        current_step="map highlights",
+        pages_total=page_totals or None,
+        page_highlights=sum(len(items) for items in fallback_groups.values()),
+        global_highlights=len(global_fallback),
+        mapped_highlights=len(mapped),
+        unmapped_highlights=len(highlights) - len(mapped),
+        message=(
+            f"Entering fallback mapping for {sum(len(items) for items in fallback_groups.values())} "
+            f"page-linked highlights and {len(global_fallback)} global highlights."
+        ),
+        stage_percent=0.0,
+        overall_percent=65.0,
+    )
+
     for page_index in range(page_totals):
         page_text = page_segments[page_index]
         page_start = page_offsets[page_index] if page_index < len(page_offsets) else None
         page_highlights = page_groups.get(page_index, [])
         page_mapped = 0
         page_unmapped = 0
+        page_cache = _build_scope_cache(page_text)
 
         emit_progress(
             event_type="highlight_page_start",
@@ -453,7 +571,7 @@ def map_highlights_to_clean_text(
         )
 
         if page_start is None:
-            fallback_highlights.extend(page_highlights)
+            fallback_groups.setdefault(page_index, []).extend(page_highlights)
             page_unmapped = len(page_highlights)
             emit_progress(
                 event_type="highlight_page_complete",
@@ -475,16 +593,22 @@ def map_highlights_to_clean_text(
         page_search_cursor = 0
         page_used_ranges: list[tuple[int, int]] = []
         for highlight in page_highlights:
-            local_match, method, confidence = _find_highlight_match(page_text, highlight, page_used_ranges, page_search_cursor)
+            local_match, method, confidence = _find_highlight_match(
+                page_text,
+                highlight,
+                page_used_ranges,
+                page_search_cursor,
+                scope_cache=page_cache,
+            )
             if local_match is None:
-                fallback_highlights.append(highlight)
+                fallback_groups.setdefault(page_index, []).append(highlight)
                 page_unmapped += 1
             else:
                 local_start, local_end = local_match
                 start = page_start + local_start
                 end = page_start + local_end
                 if _overlaps_existing(start, end, used_ranges):
-                    fallback_highlights.append(highlight)
+                    fallback_groups.setdefault(page_index, []).append(highlight)
                     page_unmapped += 1
                 else:
                     page_search_cursor = local_end
@@ -511,43 +635,150 @@ def map_highlights_to_clean_text(
             ),
         )
 
-    clean_whitespace_norm, clean_whitespace_map = _normalise_search_text(clean_text)
-    clean_punctuation_norm, clean_punctuation_map = _normalise_punctuation_tolerant(clean_text)
-
-    search_cursor = 0
+    fallback_total = sum(len(items) for items in fallback_groups.values()) + len(global_fallback)
     fallback_processed = 0
-    fallback_total = len(fallback_highlights)
-    for highlight in fallback_highlights:
-        match, method, confidence = _find_highlight_match(clean_text, highlight, used_ranges, search_cursor)
-        if match is None:
-            # Try one last pass with precomputed normalisations before declaring a miss.
-            match = _find_normalised_precomputed(
-                clean_whitespace_norm,
-                clean_whitespace_map,
-                highlight.text,
-                used_ranges,
-                _normalise_search_text,
-                search_cursor,
+
+    def emit_fallback_progress(page_index: int | None, page_mapped: int, page_unmapped: int) -> None:
+        progress_fraction = fallback_processed / max(fallback_total, 1)
+        emit_progress(
+            event_type="highlight_fallback_progress",
+            current_stage="highlight extraction",
+            current_step="map highlights",
+            current_page=(page_index + 1) if page_index is not None else None,
+            pages_total=page_totals or None,
+            page_mapped=page_mapped,
+            page_unmapped=page_unmapped,
+            mapped_highlights=len(mapped),
+            unmapped_highlights=len(highlights) - len(mapped),
+            page_highlights=(page_mapped + page_unmapped) if page_index is not None else len(global_fallback),
+            message=(
+                f"Fallback mapping progress: {fallback_processed}/{fallback_total} highlights processed. "
+                f"Page {page_index + 1 if page_index is not None else 'global'}: "
+                f"{page_mapped} mapped, {page_unmapped} unmapped."
+            ),
+            stage_percent=round(progress_fraction * 100, 1),
+            overall_percent=round(65.0 + progress_fraction * 5.0, 1),
+        )
+
+    def search_without_fuzzy(
+        scope_text: str,
+        scope_cache: dict[str, tuple[str, list[int]]],
+        highlight: ExtractedHighlight,
+        scope_used_ranges: list[tuple[int, int]],
+        preferred_start: int = 0,
+        allow_fuzzy: bool = False,
+    ) -> tuple[tuple[int, int] | None, str, float]:
+        return _find_highlight_in_scope_cached(
+            scope_text,
+            scope_cache,
+            highlight,
+            scope_used_ranges,
+            preferred_start=preferred_start,
+            allow_fuzzy=allow_fuzzy,
+        )
+
+    for page_index in sorted(fallback_groups):
+        highlights_for_page = fallback_groups[page_index]
+        page_window = _page_window_bounds(clean_text, page_offsets, page_index)
+        if page_window is None:
+            window_start, window_end = 0, len(clean_text)
+        else:
+            window_start, window_end = page_window
+        window_text = clean_text[window_start:window_end]
+        window_cache = _build_scope_cache(window_text)
+        local_used_ranges = _ranges_in_window(used_ranges, window_start, window_end)
+        page_mapped = 0
+        page_unmapped = 0
+
+        emit_progress(
+            event_type="highlight_fallback_page_start",
+            current_stage="highlight extraction",
+            current_step="map highlights",
+            current_page=page_index + 1,
+            pages_total=page_totals or None,
+            page_highlights=len(highlights_for_page),
+            mapped_highlights=len(mapped),
+            unmapped_highlights=len(highlights) - len(mapped),
+            page_mapped=page_mapped,
+            page_unmapped=page_unmapped,
+            fallback_mode="page-window",
+            fallback_remaining=fallback_total - fallback_processed,
+            message=(
+                f"Fallback mapping page {page_index + 1} of {page_totals}. "
+                f"{len(highlights_for_page)} highlights queued for this page."
+            ),
+            stage_percent=round((fallback_processed / max(fallback_total, 1)) * 100, 1),
+            overall_percent=round(65.0 + (fallback_processed / max(fallback_total, 1)) * 5.0, 1),
+        )
+
+        for highlight in highlights_for_page:
+            preferred_start = max(0, (page_offsets[page_index] or window_start) - window_start)
+            match, method, confidence = search_without_fuzzy(
+                window_text,
+                window_cache,
+                highlight,
+                local_used_ranges,
+                preferred_start,
             )
-            method = "normalised_whitespace"
-            confidence = 0.96
-        if match is None:
-            match = _find_normalised_precomputed(
-                clean_punctuation_norm,
-                clean_punctuation_map,
-                highlight.text,
-                used_ranges,
-                _normalise_punctuation_tolerant,
-                search_cursor,
-            )
-            method = "punctuation_tolerant"
-            confidence = 0.9
-        if match is None and allow_fuzzy:
-            fuzzy = _find_fuzzy(clean_text, highlight.text, used_ranges)
-            if fuzzy is not None:
-                match = (fuzzy[0], fuzzy[1])
-                method = "fuzzy"
-                confidence = round(fuzzy[2], 3)
+            if match is None:
+                match, method, confidence = _find_highlight_match(
+                    clean_text,
+                    highlight,
+                    used_ranges,
+                    preferred_start=page_offsets[page_index] or 0,
+                    allow_fuzzy=False,
+                    scope_cache=clean_scope_cache,
+                )
+            if match is None:
+                page_unmapped += 1
+                warnings.append(
+                    {
+                        "source_annotation_id": highlight.source_annotation_id,
+                        "source_page": highlight.source_page,
+                        "text": highlight.text,
+                        "warning": "unmapped_highlight",
+                    }
+                )
+                fallback_processed += 1
+                if fallback_processed == fallback_total or fallback_processed % 5 == 0:
+                    emit_fallback_progress(page_index, page_mapped, page_unmapped)
+                continue
+
+            start, end = match
+            if window_start:
+                start += window_start
+                end += window_start
+            record_match(highlight, start, end, method, confidence)
+            local_used_ranges.append((max(0, start - window_start), max(0, end - window_start)))
+            page_mapped += 1
+            fallback_processed += 1
+            if fallback_processed == fallback_total or fallback_processed % 5 == 0:
+                emit_fallback_progress(page_index, page_mapped, page_unmapped)
+
+        emit_progress(
+            event_type="highlight_fallback_page_complete",
+            current_stage="highlight extraction",
+            current_step="map highlights",
+            current_page=page_index + 1,
+            pages_total=page_totals or None,
+            page_highlights=len(highlights_for_page),
+            page_mapped=page_mapped,
+            page_unmapped=page_unmapped,
+            mapped_highlights=len(mapped),
+            unmapped_highlights=len(highlights) - len(mapped),
+            message=f"Fallback page {page_index + 1} complete: {page_mapped} mapped, {page_unmapped} unmapped.",
+            stage_percent=round((fallback_processed / max(fallback_total, 1)) * 100, 1),
+            overall_percent=round(65.0 + (fallback_processed / max(fallback_total, 1)) * 5.0, 1),
+        )
+
+    for highlight in global_fallback:
+        match, method, confidence = search_without_fuzzy(
+            clean_text,
+            clean_scope_cache,
+            highlight,
+            used_ranges,
+            0,
+        )
         if match is None:
             warnings.append(
                 {
@@ -557,28 +788,16 @@ def map_highlights_to_clean_text(
                     "warning": "unmapped_highlight",
                 }
             )
+            fallback_processed += 1
+            if fallback_processed == fallback_total or fallback_processed % 5 == 0:
+                emit_fallback_progress(None, 0, len(global_fallback))
             continue
 
         start, end = match
-        search_cursor = end
         record_match(highlight, start, end, method, confidence)
         fallback_processed += 1
-        if fallback_processed == fallback_total or fallback_processed % 100 == 0:
-            emit_progress(
-                event_type="highlight_fallback_progress",
-                current_stage="highlight extraction",
-                current_step="map highlights",
-                current_page=highlight.source_page,
-                pages_total=page_totals or None,
-                mapped_highlights=len(mapped),
-                unmapped_highlights=len(highlights) - len(mapped),
-                message=(
-                    f"Fallback mapping progress: {len(mapped)} mapped, "
-                    f"{len(highlights) - len(mapped)} unmapped."
-                ),
-                stage_percent=100.0,
-                overall_percent=65.0,
-            )
+        if fallback_processed == fallback_total or fallback_processed % 5 == 0:
+            emit_fallback_progress(None, 0, 0)
 
     report = {
         "total_highlights": len(highlights),
