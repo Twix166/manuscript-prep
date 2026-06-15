@@ -1,3 +1,13 @@
+# Archived repository notice
+
+Active development has moved to the consolidated Narrator Toolbox monorepo:
+
+- https://github.com/Twix166/narrators-toolbox
+
+This repository is retained as source history/provenance for the imported module.
+
+---
+
 # ManuscriptPrep
 
 ![Alt text](orchestrator_tui.png?raw=true "Orchestrator TUI Screenshot")
